@@ -12,7 +12,7 @@ AI 코딩 에이전트(Claude Code)의 성능을 극대화하기 위해, 여러 
 ├── README.md      # 이 파일 (한글 소개)
 ├── SETUP.md       # 전체 세팅 가이드 (영문, AI 재현용)
 ├── REFACTOR.md
-└── agents/        # omo에서 Claude Code로 포팅한 커스텀 에이전트
+└── agents/        # omo 에이전트의 Claude Code standalone 적응 버전
     ├── metis.md   # 사전 의도 분석 에이전트
     └── atlas.md   # 마스터 태스크 오케스트레이터
 ```
@@ -29,11 +29,17 @@ AI 코딩 에이전트(Claude Code)의 성능을 극대화하기 위해, 여러 
 
 ---
 
-### 2. [Oh My OpenCode (omo)](https://github.com/code-yeongyu/oh-my-openagent)
+### 2. [Oh My OpenAgent (omo)](https://github.com/code-yeongyu/oh-my-openagent)
 
-**무엇인가:** OpenCode 기반 멀티모델 에이전트 오케스트레이션 플러그인
+**무엇인가:** 멀티플랫폼 에이전트 하네스 (Claude Code 에코시스템 브릿지 내장)
 
-**왜 사용하는가:** OMC가 Claude 단일 모델에 특화되어 있다면, omo는 Claude, GPT, Gemini 등 8개 프로바이더를 카테고리별로 자동 라우팅합니다. 특히 Sisyphus(오케스트레이터), Prometheus(사전계획), Metis(의도분석), Atlas(태스크관리) 등 OMC에 없는 고유 에이전트들이 있어, 이 중 핵심 2개(Metis, Atlas)를 Claude Code 형식으로 포팅하여 함께 사용합니다.
+> **이름 변경:** 프로젝트명이 oh-my-openagent로 변경되었습니다. npm 패키지명은 호환성을 위해 `oh-my-opencode`를 유지합니다.
+
+**왜 사용하는가:**
+- omo는 OpenCode 플러그인으로 동작하면서, Claude Code 에코시스템과의 **브릿지**를 내장하고 있습니다. `claude-code-agent-loader`로 `~/.claude/agents/*.md` 파일을 읽고, `claude-code-plugin-loader`로 Claude Code 플러그인을 로드합니다. 즉, OpenCode에서 omo를 실행하면 **omo 네이티브 에이전트 + Claude Code 에이전트/플러그인 모두 사용 가능**합니다.
+- OMC가 Claude 단일 모델에 특화되어 있다면, omo는 Claude, GPT, Gemini 등 8개 프로바이더를 카테고리별로 자동 라우팅합니다.
+- Sisyphus(오케스트레이터), Hephaestus(자율실행), Oracle(컨설팅), Multimodal-Looker(시각분석) 등 OMC에 없는 고유 에이전트 6개를 보유합니다.
+- 핵심 에이전트 2개(Metis, Atlas)는 Claude Code용 standalone `.md` 파일로도 제공하여, OpenCode 없이도 Claude Code에서 직접 사용할 수 있습니다.
 
 ---
 
@@ -69,6 +75,24 @@ AI 코딩 에이전트(Claude Code)의 성능을 극대화하기 위해, 여러 
 
 ---
 
+## 에이전트 겹침 가이드 (OMC 18 vs omo 11)
+
+OMC와 omo에는 기능이 겹치는 에이전트 쌍이 7개 있습니다. **모두 유지**하되, 상황에 따라 선택합니다.
+
+| 기능 | OMC | omo | 선택 기준 |
+|------|-----|-----|-----------|
+| 계획 | planner | Prometheus | 빠른 작업→OMC planner, 복잡한 프로젝트→omo Triad (Metis→Prometheus→Momus) |
+| 코드리뷰 | code-reviewer | Momus | OMC: 집중 리뷰, omo: AI-slop 감지 포함 |
+| 탐색 | explore | Explore | 현재 플랫폼의 것을 사용 |
+
+**omo 고유 에이전트 (6개):** Sisyphus, Sisyphus-Junior, Hephaestus, Oracle, Multimodal-Looker, Librarian
+
+**OMC 고유 에이전트 (14개):** analyst, architect, code-simplifier, critic, debugger, designer, document-specialist, executor, git-master, qa-tester, scientist, test-engineer, verifier, writer
+
+자세한 분석은 [SETUP.md의 Agent Overlap Analysis](./SETUP.md#11-agent-overlap-analysis-omc-vs-omo)를 참고하세요.
+
+---
+
 ## 전체 아키텍처
 
 ```
@@ -83,10 +107,12 @@ AI 코딩 에이전트(Claude Code)의 성능을 극대화하기 위해, 여러 
                       ↓
 ┌─────────────────────────────────────────────────────────┐
 │  [Metis] 의도 분석 → [Planner] 계획 수립                 │
+│  (CC: standalone .md / OpenCode: omo 네이티브)           │
 └─────────────────────┬───────────────────────────────────┘
                       ↓
 ┌─────────────────────────────────────────────────────────┐
 │  [Atlas] 태스크 오케스트레이션                             │
+│  (CC: standalone .md / OpenCode: omo 네이티브)           │
 │    ├── OMC 에이전트 (executor, debugger, test-engineer)  │
 │    ├── Agency 에이전트 (UX architect, security auditor)  │
 │    ├── ECC 커맨드 (/tdd, /code-review, /build-fix)      │
@@ -96,6 +122,13 @@ AI 코딩 에이전트(Claude Code)의 성능을 극대화하기 위해, 여러 
 ┌─────────────────────────────────────────────────────────┐
 │  [Verifier] 최종 검증                                    │
 └─────────────────────────────────────────────────────────┘
+
+    ┌─────────────────────────────────────────────────────┐
+    │ omo 브릿지 (OpenCode 사용 시)                        │
+    │  claude-code-agent-loader: ~/.claude/agents/*.md 로드│
+    │  claude-code-plugin-loader: CC 플러그인 로드          │
+    │  → OpenCode에서 OMC + omo 에이전트 모두 사용 가능     │
+    └─────────────────────────────────────────────────────┘
 ```
 
 ---

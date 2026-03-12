@@ -6,16 +6,17 @@ Give this document to an AI coding agent to reproduce the exact same environment
 
 1. [Prerequisites](#1-prerequisites)
 2. [Install OMC (Oh My Claude Code)](#2-install-omc-oh-my-claude-code)
-3. [Install omo (Oh My OpenCode)](#3-install-omo-oh-my-opencode)
+3. [Install omo (Oh My OpenAgent)](#3-install-omo-oh-my-openagent)
 4. [Fix OMC HUD Error](#4-fix-omc-hud-error)
 5. [Install omo Additional Dependencies](#5-install-omo-additional-dependencies)
-6. [Port omo Agents to Claude Code (Metis, Atlas)](#6-port-omo-agents-to-claude-code-metis-atlas)
+6. [Use omo Agents in Claude Code (Metis, Atlas)](#6-use-omo-agents-in-claude-code-metis-atlas)
 7. [Install Andrej Karpathy Skills](#7-install-andrej-karpathy-skills)
 8. [Install Everything Claude Code (ECC)](#8-install-everything-claude-code-ecc)
 9. [Install Anthropic Official Skills](#9-install-anthropic-official-skills)
 10. [Install Agency Agents](#10-install-agency-agents)
-11. [Verification](#11-verification)
-12. [Tool Reference](#12-tool-reference)
+11. [Agent Overlap Analysis (OMC vs omo)](#11-agent-overlap-analysis-omc-vs-omo)
+12. [Verification](#12-verification)
+13. [Tool Reference](#13-tool-reference)
 
 ---
 
@@ -35,10 +36,12 @@ brew install tmux   # macOS
 # Claude Code CLI
 claude --version
 
-# OpenCode (required by omo)
+# OpenCode (optional — required only if running omo natively in OpenCode)
 opencode --version
 # If not installed: npm i -g @anthropic-ai/opencode
 ```
+
+> **Note:** OpenCode is only needed if you want to run omo's full agent suite natively in OpenCode. If you only use the standalone Metis/Atlas `.md` files in Claude Code, OpenCode is not required.
 
 ---
 
@@ -67,12 +70,14 @@ omc doctor conflicts
 
 ---
 
-## 3. Install omo (Oh My OpenCode)
+## 3. Install omo (Oh My OpenAgent)
 
-Multi-model agent orchestration plugin for OpenCode.
+Multi-platform agent harness with Claude Code ecosystem bridge.
+
+> **Naming:** The project was renamed to **oh-my-openagent** (GitHub: [code-yeongyu/oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)). The npm package name remains `oh-my-opencode` for backward compatibility.
 
 ```bash
-# Global install
+# Global install (npm package is still oh-my-opencode)
 npm i -g oh-my-opencode@latest
 
 # Non-interactive install (Claude only)
@@ -89,6 +94,10 @@ oh-my-opencode doctor
 **What gets installed:**
 - `~/.config/opencode/opencode.json` — Plugin registration
 - `~/.config/opencode/oh-my-opencode.json` — Agent-to-model mapping
+
+**Claude Code bridge:** omo includes a `claude-code-agent-loader` that reads `~/.claude/agents/*.md` files and a `claude-code-plugin-loader` that loads Claude Code plugins. This means when running in OpenCode with omo, you get access to both omo's native agents AND Claude Code ecosystem agents/plugins. The bridge direction is **omo consuming Claude Code ecosystem**, not the reverse.
+
+**11 built-in agents:** Sisyphus (orchestrator), Sisyphus-Junior (lightweight orchestrator), Prometheus (planning), Metis (intent analysis), Momus (review), Oracle (consulting), Atlas (task management), Hephaestus (autonomous execution), Librarian (doc search), Explore (navigation), Multimodal-Looker (visual analysis)
 
 ---
 
@@ -159,13 +168,30 @@ oh-my-opencode doctor
 
 ---
 
-## 6. Port omo Agents to Claude Code (Metis, Atlas)
+## 6. Use omo Agents in Claude Code (Metis, Atlas)
 
-Two agents unique to omo (not present in OMC) are ported to Claude Code's agent format.
+Two key omo agents (Metis, Atlas) can be used in Claude Code. Choose your approach:
+
+### Option A: Standalone .md files (for Claude Code users)
+
+Copy adapted agent definitions to `~/.claude/agents/`. These are standalone adaptations of the original omo agents, rewritten for Claude Code's agent format. They work without OpenCode or omo installed.
+
+```bash
+# Install from this repo
+cp agents/metis.md ~/.claude/agents/
+cp agents/atlas.md ~/.claude/agents/
+```
+
+### Option B: Native omo agents (via OpenCode)
+
+If you use OpenCode with omo, Metis and Atlas are built-in — no porting needed. omo also loads any `.md` agents from `~/.claude/agents/` via its Claude Code bridge, so you get both omo-native and Claude Code agents in one session.
+
+```bash
+# Just run OpenCode — omo agents are available automatically
+opencode
+```
 
 ### Metis (Intent Analyst)
-
-Copy `agents/metis.md` from this repo to `~/.claude/agents/metis.md`.
 
 **Role:** Classifies user intent before planning, detects ambiguity, and prevents AI-slop (over-engineering, scope creep). Outputs MUST/MUST NOT directives for the planner agent.
 
@@ -177,8 +203,6 @@ Copy `agents/metis.md` from this repo to `~/.claude/agents/metis.md`.
 
 ### Atlas (Task Orchestrator)
 
-Copy `agents/atlas.md` from this repo to `~/.claude/agents/atlas.md`.
-
 **Role:** Delegates all tasks in a work plan to specialist agents, verifies each result with 4-phase QA, and tracks everything to completion. Never writes code directly.
 
 **Key capabilities:**
@@ -187,12 +211,6 @@ Copy `agents/atlas.md` from this repo to `~/.claude/agents/atlas.md`.
 - Parallel execution for independent tasks, sequential for dependent ones
 - Session resume on failure (max 3 retries)
 - Final Verification Wave (code-reviewer + verifier)
-
-```bash
-# Install from this repo
-cp agents/metis.md ~/.claude/agents/
-cp agents/atlas.md ~/.claude/agents/
-```
 
 ---
 
@@ -288,7 +306,68 @@ cp /tmp/agency-agents/product/*.md ~/.claude/agents/
 
 ---
 
-## 11. Verification
+## 11. Agent Overlap Analysis (OMC vs omo)
+
+OMC has 18 agents and omo has 11 agents. 7 pairs overlap in function — **both are kept** for situational selection.
+
+### Overlapping Agent Pairs
+
+| Function | OMC Agent | omo Agent | When to use which |
+|----------|-----------|-----------|-------------------|
+| Orchestration | — (CLAUDE.md rules) | Sisyphus | OMC: via magic keywords in Claude Code. omo: full orchestrator in OpenCode |
+| Planning | planner | Prometheus | Quick tasks: OMC planner. Complex projects: omo Planning Triad (Metis→Prometheus→Momus) |
+| Intent Analysis | — | Metis | Standalone .md in Claude Code OR native in OpenCode |
+| Code Review | code-reviewer | Momus | OMC: focused code review. omo Momus: broader review with anti-slop detection |
+| Task Management | — | Atlas | Standalone .md in Claude Code OR native in OpenCode |
+| Exploration | explore | Explore | Both serve similar roles; use whichever platform you're in |
+| Security | security-reviewer | — (via Momus) | OMC: dedicated security review. omo: security is part of Momus review |
+
+### omo-Unique Agents (not in OMC)
+
+| Agent | Role |
+|-------|------|
+| **Sisyphus** | Master orchestrator — coordinates all omo agents, manages state |
+| **Sisyphus-Junior** | Lightweight orchestrator for simpler tasks |
+| **Hephaestus** | Autonomous execution — runs code independently with tmux |
+| **Oracle** | Consulting — deep reasoning for complex technical questions |
+| **Multimodal-Looker** | Visual analysis — screenshots, diagrams, UI inspection |
+| **Librarian** | Documentation search and knowledge retrieval |
+
+### OMC-Unique Agents (not in omo)
+
+| Agent | Role |
+|-------|------|
+| **analyst** | Pre-analysis before planning |
+| **architect** | System design and architecture decisions |
+| **code-simplifier** | Code simplification and cleanup |
+| **critic** | Critical analysis and alternative perspectives |
+| **debugger** | Focused debugging agent |
+| **designer** | UI/UX design guidance |
+| **document-specialist** | Documentation creation and management |
+| **executor** | Task execution agent |
+| **git-master** | Git workflow management |
+| **qa-tester** | Quality assurance testing |
+| **scientist** | Research and experimentation |
+| **test-engineer** | Test writing and maintenance |
+| **verifier** | Final verification of completed work |
+| **writer** | Content and documentation writing |
+
+### Complementary Pairs (use together)
+
+| OMC Agent | omo Agent | How they complement |
+|-----------|-----------|-------------------|
+| analyst | Metis | analyst does broad pre-analysis; Metis does intent classification with AI-slop detection |
+| document-specialist | Librarian | document-specialist creates docs; Librarian searches and retrieves existing docs |
+
+### Planning Strategy
+
+- **Quick tasks:** Use OMC `planner` directly
+- **Complex projects:** Use omo Planning Triad: `Metis` (intent analysis) → `Prometheus` (detailed planning) → `Momus` (plan review)
+- **In Claude Code:** Use standalone Metis .md → OMC planner → standalone Atlas .md for orchestration
+
+---
+
+## 12. Verification
 
 ```bash
 # OMC
@@ -303,7 +382,7 @@ oh-my-opencode doctor            # "✓ System OK"
 node ~/.claude/hud/omc-hud.mjs   # "[OMC] run /omc-setup..." (not an error)
 
 # Agents
-ls ~/.claude/agents/ | wc -l     # 60+ (OMC 18 + Atlas/Metis 2 + Agency 40+)
+ls ~/.claude/agents/ | wc -l     # 60+ (OMC 18 + Metis + Atlas + Agency 40+)
 
 # Skills
 ls ~/.claude/skills/             # 17 directories
@@ -313,11 +392,14 @@ ls ~/.claude/rules/              # common/ + language directories
 
 # tmux
 tmux -V                          # 3.x+
+
+# OpenCode (optional)
+opencode --version               # 1.2.17+ (only if using omo natively)
 ```
 
 ---
 
-## 12. Tool Reference
+## 13. Tool Reference
 
 ### OMC (Oh My Claude Code)
 
@@ -327,36 +409,40 @@ tmux -V                          # 3.x+
 | **Core** | 18 specialized agents + HUD statusline + magic keywords |
 | **How it works** | Injects orchestration rules into CLAUDE.md, defines agents in `~/.claude/agents/` |
 | **Key features** | `autopilot:` (auto-execution), `ulw` (max parallelization), `/team N:executor "task"` (team orchestration), real-time HUD monitoring |
-| **Agents** | analyst, architect, code-reviewer, code-simplifier, critic, debugger, designer, document-specialist, executor, explore, git-master, planner, qa-tester, scientist, security-reviewer, test-engineer, verifier, writer |
+| **Agents (18)** | analyst, architect, code-reviewer, code-simplifier, critic, debugger, designer, document-specialist, executor, explore, git-master, planner, qa-tester, scientist, security-reviewer, test-engineer, verifier, writer |
 | **When to use** | Complex multi-step tasks in Claude Code sessions |
 
-### omo (Oh My OpenCode)
+### omo (Oh My OpenAgent)
 
 | | |
 |---|---|
-| **Purpose** | Multi-model agent orchestration for OpenCode |
+| **Purpose** | Multi-platform agent harness with Claude Code ecosystem bridge |
+| **GitHub** | [code-yeongyu/oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
+| **npm** | `oh-my-opencode` (legacy name retained for compatibility) |
 | **Core** | Sisyphus orchestrator + multi-model routing across 8 providers |
-| **How it works** | Runs as an OpenCode plugin, auto-selects models by task category |
+| **How it works** | Runs as an OpenCode plugin. Includes `claude-code-agent-loader` (reads `~/.claude/agents/*.md`) and `claude-code-plugin-loader` (loads CC plugins) — bridging the Claude Code ecosystem into OpenCode |
 | **Key features** | `ultrawork` (activate all agents), `/start-work` (interview mode), `/init-deep` (generate AGENTS.md) |
-| **Agents** | Sisyphus (orchestrator), Prometheus (planning), Metis (intent analysis), Momus (review), Oracle (consulting), Atlas (task mgmt), Hephaestus (autonomous execution), Librarian (doc search), Explore (navigation) |
-| **When to use** | Multi-model orchestration (Claude, GPT, Gemini) via OpenCode |
+| **Agents (11)** | Sisyphus (orchestrator), Sisyphus-Junior (lite orchestrator), Prometheus (planning), Metis (intent analysis), Momus (review), Oracle (consulting), Atlas (task mgmt), Hephaestus (autonomous execution), Librarian (doc search), Explore (navigation), Multimodal-Looker (visual analysis) |
+| **When to use** | Multi-model orchestration via OpenCode; also when you need omo-unique agents (Sisyphus, Hephaestus, Oracle, Multimodal-Looker) |
 
-### Metis (ported from omo)
+### Metis (standalone adaptation from omo)
 
 | | |
 |---|---|
 | **Purpose** | Pre-planning intent analysis agent |
 | **Core** | Intent classification + ambiguity detection + AI-slop prevention |
 | **How it works** | Classifies into 6 intent types (Refactoring, Build, Mid-sized, Collaborative, Architecture, Research), then runs intent-specific analysis |
+| **Availability** | Native in omo (OpenCode) / Standalone .md in Claude Code (`~/.claude/agents/metis.md`) |
 | **When to use** | Before handing complex requirements to the planner agent |
 
-### Atlas (ported from omo)
+### Atlas (standalone adaptation from omo)
 
 | | |
 |---|---|
 | **Purpose** | Master task orchestrator |
 | **Core** | Task-list delegation + 4-phase QA verification + completion tracking |
 | **How it works** | Never writes code; delegates to specialist agents via 6-section prompts; runs independent tasks in parallel |
+| **Availability** | Native in omo (OpenCode) / Standalone .md in Claude Code (`~/.claude/agents/atlas.md`) |
 | **When to use** | When you need to execute and verify a multi-step work plan automatically |
 
 ### Andrej Karpathy Skills
@@ -401,6 +487,49 @@ tmux -V                          # 3.x+
 
 ---
 
+## Full Agent Catalog
+
+### OMC Agents (18)
+
+| Agent | Role |
+|-------|------|
+| analyst | Pre-analysis |
+| architect | Architecture |
+| code-reviewer | Code review |
+| code-simplifier | Code simplification |
+| critic | Critical analysis |
+| debugger | Debugging |
+| designer | UI/UX design |
+| document-specialist | Documentation |
+| executor | Task execution |
+| explore | Codebase navigation |
+| git-master | Git workflows |
+| planner | Planning |
+| qa-tester | QA testing |
+| scientist | Research |
+| security-reviewer | Security review |
+| test-engineer | Test writing |
+| verifier | Final verification |
+| writer | Content writing |
+
+### omo Agents (11)
+
+| Agent | Role | Overlap with OMC? |
+|-------|------|--------------------|
+| Sisyphus | Master orchestrator | Unique |
+| Sisyphus-Junior | Lite orchestrator | Unique |
+| Prometheus | Detailed planning | Overlaps: planner |
+| Metis | Intent analysis | Unique (standalone .md available) |
+| Momus | Review + anti-slop | Overlaps: code-reviewer |
+| Oracle | Deep consulting | Unique |
+| Atlas | Task management | Unique (standalone .md available) |
+| Hephaestus | Autonomous execution | Unique |
+| Librarian | Doc search | Complementary: document-specialist |
+| Explore | Navigation | Overlaps: explore |
+| Multimodal-Looker | Visual analysis | Unique |
+
+---
+
 ## Recommended Workflow
 
 ```
@@ -439,8 +568,8 @@ Done
 ├── agents/                # Agent definitions (OMC 18 + Metis + Atlas + Agency 40+)
 │   ├── analyst.md         # (OMC) Pre-analysis
 │   ├── architect.md       # (OMC) Architecture
-│   ├── atlas.md           # (omo port) Task orchestrator
-│   ├── metis.md           # (omo port) Intent analyst
+│   ├── atlas.md           # (omo standalone) Task orchestrator
+│   ├── metis.md           # (omo standalone) Intent analyst
 │   ├── eng-*.md           # (Agency) Engineering agents
 │   ├── design-*.md        # (Agency) Design agents
 │   └── ...
