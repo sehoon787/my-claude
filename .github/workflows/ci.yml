@@ -1,0 +1,45 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate plugin manifest
+        run: |
+          # Check plugin.json is valid JSON
+          python3 -c "import json; json.load(open('.claude-plugin/plugin.json'))"
+      - name: Validate hooks
+        run: |
+          python3 -c "import json; json.load(open('hooks/hooks.json'))"
+      - name: Validate MCP config
+        run: |
+          python3 -c "import json; json.load(open('.mcp.json'))"
+      - name: Validate settings
+        run: |
+          python3 -c "import json; json.load(open('settings.json'))"
+      - name: Check agent files exist
+        run: |
+          for agent in sisyphus hephaestus metis atlas oracle momus prometheus librarian multimodal-looker; do
+            test -f "agents/${agent}.md" || (echo "Missing agent: ${agent}" && exit 1)
+          done
+      - name: Validate agent frontmatter
+        run: |
+          for f in agents/*.md; do
+            head -1 "$f" | grep -q '^---' || (echo "Missing frontmatter in $f" && exit 1)
+          done
+      - name: Lint YAML workflows
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: .github/workflows/
+          config_data: |
+            extends: default
+            rules:
+              line-length:
+                max: 200
+              truthy:
+                check-keys: false

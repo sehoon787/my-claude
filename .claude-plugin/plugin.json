@@ -1,0 +1,5 @@
+{
+  "name": "my-claude-orchestration",
+  "description": "Multi-agent orchestration plugin for Claude Code — Sisyphus orchestrator, Hephaestus autonomous worker, and 7 specialist agents with behavioral correction hooks",
+  "version": "1.0.0"
+}

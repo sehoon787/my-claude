@@ -1,0 +1,64 @@
+name: Auto Tag & Release
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  tag-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+      - name: Determine bump level
+        id: bump
+        run: |
+          LAST_TAG="${{ steps.get_tag.outputs.tag }}"
+          if [ "$LAST_TAG" = "v0.0.0" ]; then
+            COMMITS=$(git log --pretty=format:"%s" HEAD)
+          else
+            COMMITS=$(git log --pretty=format:"%s" ${LAST_TAG}..HEAD)
+          fi
+
+          if echo "$COMMITS" | grep -qiE "^.*BREAKING[ -]CHANGE"; then
+            echo "level=major" >> $GITHUB_OUTPUT
+          elif echo "$COMMITS" | grep -qiE "^feat(\(.*\))?!?:"; then
+            echo "level=minor" >> $GITHUB_OUTPUT
+          elif echo "$COMMITS" | grep -qiE "^(fix|perf|refactor)(\(.*\))?:"; then
+            echo "level=patch" >> $GITHUB_OUTPUT
+          else
+            echo "level=none" >> $GITHUB_OUTPUT
+          fi
+      - name: Calculate new version
+        id: version
+        if: steps.bump.outputs.level != 'none'
+        run: |
+          CURRENT="${{ steps.get_tag.outputs.tag }}"
+          CURRENT="${CURRENT#v}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+
+          case "${{ steps.bump.outputs.level }}" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+          esac
+
+          NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+      - name: Create tag and release
+        if: steps.bump.outputs.level != 'none'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NEW_TAG="${{ steps.version.outputs.new_tag }}"
+          git tag "$NEW_TAG"
+          git push origin "$NEW_TAG"
+          gh release create "$NEW_TAG" \
+            --title "$NEW_TAG" \
+            --generate-notes
