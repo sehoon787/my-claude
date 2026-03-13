@@ -7,6 +7,7 @@ permissions:
 jobs:
   tag-and-release:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,6 +52,24 @@ jobs:
 
           NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "version=${MAJOR}.${MINOR}.${PATCH}" >> $GITHUB_OUTPUT
+      - name: Update plugin.json version
+        if: steps.bump.outputs.level != 'none'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          cd .claude-plugin
+          node -e "
+            const fs = require('fs');
+            const p = JSON.parse(fs.readFileSync('plugin.json', 'utf8'));
+            p.version = '$VERSION';
+            fs.writeFileSync('plugin.json', JSON.stringify(p, null, 2) + '\n');
+          "
+          cd ..
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .claude-plugin/plugin.json
+          git commit -m "chore: bump plugin version to $VERSION [skip ci]"
+          git push
       - name: Create tag and release
         if: steps.bump.outputs.level != 'none'
         env:
