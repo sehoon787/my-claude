@@ -71,7 +71,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/SETUP.md | he
 
 ## my-claude 에이전트
 
-이 프로젝트에서 제공하는 9개의 전문 에이전트입니다. 설치 후 전체 에이전트 목록(70+)은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
+[oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent)의 에이전트를 Claude Code standalone `.md` 형식으로 포팅한 9개의 전문 에이전트입니다. 설치 후 전체 에이전트 목록(70+)은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
 
 | 에이전트 | 모델 | 역할 |
 |---------|------|------|
