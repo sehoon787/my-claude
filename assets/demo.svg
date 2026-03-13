@@ -42,12 +42,12 @@
 
   <!-- Box line 1 -->
   <text x="24" y="110" class="mono" font-size="13" fill="#585b70">│</text>
-  <text x="32" y="110" class="mono" font-size="13" fill="#cdd6f4">  my-claude v0.4.0 — Sisyphus Orchestrator       </text>
+  <text x="32" y="110" class="mono" font-size="13" fill="#cdd6f4">  my-claude — Boss Orchestrator</text>
   <text x="404" y="110" class="mono" font-size="13" fill="#585b70">│</text>
 
   <!-- Box line 2 -->
   <text x="24" y="127" class="mono" font-size="13" fill="#585b70">│</text>
-  <text x="32" y="127" class="mono" font-size="13" fill="#6c7086">  9 agents · 3 hooks · 3 MCP servers             </text>
+  <text x="32" y="127" class="mono" font-size="13" fill="#6c7086">  10 agents · 3 hooks · 3 MCP servers</text>
   <text x="404" y="127" class="mono" font-size="13" fill="#585b70">│</text>
 
   <!-- Box bottom border -->
@@ -59,7 +59,7 @@
 
   <!-- Analyzing line -->
   <text x="24" y="197" class="mono" font-size="13" fill="#f9e2af">⚡</text>
-  <text x="42" y="197" class="mono" font-size="13" fill="#cdd6f4">Sisyphus analyzing intent...</text>
+  <text x="42" y="197" class="mono" font-size="13" fill="#cdd6f4">Boss analyzing intent...</text>
 
   <!-- Tree line 1 -->
   <text x="24" y="214" class="mono" font-size="13" fill="#585b70">  ├─</text>

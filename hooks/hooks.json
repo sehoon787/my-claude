@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"const j=JSON.parse(require('fs').readFileSync(0,'utf8'));if(!j.agent_id){console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',additionalContext:'SISYPHUS PROTOCOL: You are the orchestrator. Delegate file modifications to specialist subagents (model=sonnet for implementation, model=haiku for trivial fixes). Direct edits are acceptable ONLY for 1-line trivial changes or plan/draft markdown files.'}}))}\"",
+            "command": "node -e \"const j=JSON.parse(require('fs').readFileSync(0,'utf8'));if(!j.agent_id){console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',additionalContext:'BOSS PROTOCOL: You are the orchestrator. Delegate file modifications to specialist subagents (model=sonnet for implementation, model=haiku for trivial fixes). Direct edits are acceptable ONLY for 1-line trivial changes or plan/draft markdown files.'}}))}\"",
             "timeout": 5000
           }
         ]
