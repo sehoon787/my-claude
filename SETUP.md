@@ -356,6 +356,16 @@ Three MCP servers replicate the tool integrations that omo agents use internally
 
 ### Install via CLI (recommended)
 
+**Pre-check (optional):** Verify MCP endpoints are reachable from your network:
+
+```bash
+# All should return HTTP 405 (expected — MCP uses SSE, not GET)
+curl -s -o /dev/null -w "%{http_code}" https://mcp.context7.com/mcp
+curl -s -o /dev/null -w "%{http_code}" https://mcp.exa.ai/mcp
+curl -s -o /dev/null -w "%{http_code}" https://mcp.grep.app
+# If you get "connection refused" or timeout, check your network/proxy settings
+```
+
 ```bash
 # Note: MCP endpoints are remote services. If connection fails, check the provider's documentation.
 claude mcp add --transport http --scope user context7 "https://mcp.context7.com/mcp"
@@ -442,6 +452,13 @@ This repo is a **Claude Code plugin** that provides 9 omo agents, behavioral cor
 /plugin install my-claude-orchestration@my-claude
 ```
 
+**Verify:**
+```bash
+# Inside a Claude Code session:
+/plugin list
+# Expected: my-claude-orchestration@my-claude — Status: ✔ enabled
+```
+
 **What gets installed:**
 - 9 agents (Sisyphus, Hephaestus, Metis, Atlas, Oracle, Momus, Prometheus, Librarian, Multimodal-Looker)
 - 3 behavioral correction hooks (delegation guard, subagent verification, completion check)
@@ -457,6 +474,13 @@ git clone https://github.com/sehoon787/my-claude.git ~/my-claude
 # Inside a Claude Code session, register as local marketplace:
 /plugin marketplace add ~/my-claude
 /plugin install my-claude-orchestration@my-claude
+```
+
+**Verify:**
+```bash
+# Inside a Claude Code session:
+/plugin list
+# Expected: my-claude-orchestration@my-claude — Status: ✔ enabled
 ```
 
 ### Option C: Manual install (copy files individually)
@@ -500,7 +524,7 @@ settings.hooks = {
   SubagentStop: [{
     hooks: [{
       type: 'command',
-      command: 'node -e \"console.log(JSON.stringify({hookSpecificOutput:{additionalContext:\\\"VERIFICATION REQUIRED: Subagent finished. Before proceeding: (1) Read the changed files yourself, (2) Run lsp_diagnostics or tests to verify, (3) Only then mark the task complete. Do NOT trust subagent claims without independent verification.\\\"}}))\"\n'
+      command: 'node -e \"console.log(JSON.stringify({hookSpecificOutput:{additionalContext:\\\"VERIFICATION REQUIRED: Subagent finished. Before proceeding: (1) Read the changed files yourself, (2) Run lsp_diagnostics or tests to verify, (3) Only then mark the task complete. Do NOT trust subagent claims without independent verification.\\\"}}))}\"'
     }]
   }],
   Stop: [{
@@ -900,6 +924,14 @@ cat ~/.claude/settings.json | grep -c "hooks"  # Should show hook entries
 
 # OpenCode (optional)
 opencode --version               # 1.2.17+ (only if using omo natively)
+```
+
+### Plugin Status
+
+```bash
+# Check all plugins are loaded
+claude plugin list
+# Expected: my-claude-orchestration@my-claude — Status: ✔ enabled
 ```
 
 ### Platform-Specific Checks
