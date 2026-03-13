@@ -1,34 +1,36 @@
 {
-  "PreToolUse": [
-    {
-      "matcher": "Edit|Write",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "node -e \"const j=JSON.parse(require('fs').readFileSync(0,'utf8'));if(!j.agent_id){console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',additionalContext:'SISYPHUS PROTOCOL: You are the orchestrator. Delegate file modifications to specialist subagents (model=sonnet for implementation, model=haiku for trivial fixes). Direct edits are acceptable ONLY for 1-line trivial changes or plan/draft markdown files.'}}))}\"",
-          "timeout": 5000
-        }
-      ]
-    }
-  ],
-  "SubagentStop": [
-    {
-      "hooks": [
-        {
-          "type": "command",
-          "command": "node -e \"console.log(JSON.stringify({hookSpecificOutput:{additionalContext:'VERIFICATION REQUIRED: Subagent finished. Before proceeding: (1) Read the changed files yourself, (2) Run lsp_diagnostics or tests to verify, (3) Only then mark the task complete. Do NOT trust subagent claims without independent verification.'}}))\""
-        }
-      ]
-    }
-  ],
-  "Stop": [
-    {
-      "hooks": [
-        {
-          "type": "prompt",
-          "prompt": "Review the assistant's last message. Check: (1) Are there incomplete tasks in the current plan? (2) Were all subagent results independently verified? (3) Did the assistant skip any verification steps? If work remains incomplete or unverified, return {\"ok\": false, \"reason\": \"Incomplete work detected. Continue with remaining tasks or verify pending results.\"}. If all tasks are complete and verified, return {\"ok\": true}."
-        }
-      ]
-    }
-  ]
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const j=JSON.parse(require('fs').readFileSync(0,'utf8'));if(!j.agent_id){console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',additionalContext:'SISYPHUS PROTOCOL: You are the orchestrator. Delegate file modifications to specialist subagents (model=sonnet for implementation, model=haiku for trivial fixes). Direct edits are acceptable ONLY for 1-line trivial changes or plan/draft markdown files.'}}))}\"",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"console.log(JSON.stringify({hookSpecificOutput:{additionalContext:'VERIFICATION REQUIRED: Subagent finished. Before proceeding: (1) Read the changed files yourself, (2) Run lsp_diagnostics or tests to verify, (3) Only then mark the task complete. Do NOT trust subagent claims without independent verification.'}}))\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Review the assistant's last message. Check: (1) Are there incomplete tasks in the current plan? (2) Were all subagent results independently verified? (3) Did the assistant skip any verification steps? If work remains incomplete or unverified, return {\"ok\": false, \"reason\": \"Incomplete work detected. Continue with remaining tasks or verify pending results.\"}. If all tasks are complete and verified, return {\"ok\": true}."
+          }
+        ]
+      }
+    ]
+  }
 }
