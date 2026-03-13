@@ -572,6 +572,23 @@ After plugin install, Sisyphus is the default agent. Usage:
 
 > **Note:** After plugin install (Options A/B) or manual setup (Option D), Sisyphus is the default agent. You can invoke any agent explicitly from the `/agents` list inside a Claude Code session, or change the default in `~/.claude/settings.json`.
 
+### Plugin Auto-Update
+
+When the my-claude repository is updated, the plugin version is automatically bumped via GitHub Actions (`auto-tag.yml`). To receive updates:
+
+```bash
+# Inside a Claude Code session:
+/plugin marketplace update my-claude        # Fetch latest from GitHub
+/plugin update my-claude-orchestration      # Update the plugin
+
+# If update doesn't apply (known cache issue):
+# Delete plugin cache and reinstall
+rm -rf ~/.claude/plugins/cache/my-claude
+/plugin install my-claude-orchestration@my-claude
+```
+
+> **How versioning works:** Commits with `feat:` prefix trigger minor version bumps, `fix:`/`perf:`/`refactor:` trigger patch bumps. The `plugin.json` version is automatically synced with git tags by GitHub Actions.
+
 ### Agent Catalog (9 Ported Agents)
 
 | Agent | Model | Role | Type |
@@ -1196,3 +1213,4 @@ Done
 | (Windows) Split-pane display not working | Split panes require running inside a tmux/psmux session. Windows Terminal and VS Code terminal do not support split panes natively. Use in-process mode instead. |
 | (Windows) `brew` command not found | Use `winget` instead of `brew` for package installation on Windows. |
 | (Windows) `/tmp` path resolution differs | Git Bash maps `/tmp` to `C:\Users\<user>\AppData\Local\Temp`. This works for all commands in this guide. |
+| Plugin not updating after `/plugin update` | Known cache issue ([#17361](https://github.com/anthropics/claude-code/issues/17361)). Delete cache and reinstall: `rm -rf ~/.claude/plugins/cache/my-claude` then `/plugin install my-claude-orchestration@my-claude` |
