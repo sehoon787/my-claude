@@ -10,13 +10,13 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-9-blue)
+![Agents](https://img.shields.io/badge/agents-10-blue)
 ![MCP Servers](https://img.shields.io/badge/MCP_servers-3-green)
 ![Open Source Tools](https://img.shields.io/badge/open_source_tools-6-orange)
 
 Claude Code 멀티에이전트 오케스트레이션 환경을 한 번에 구성하기 위한 레포지토리입니다.
 
-6개 오픈소스 도구를 조합하여 9개의 전문 에이전트, 3개의 행동 교정 훅, 3개의 MCP 서버를 하나의 환경에 통합합니다. Sisyphus 오케스트레이터가 사용자 요청의 의도를 분류하고 적합한 전문 에이전트에게 위임합니다.
+6개 오픈소스 도구를 조합하여 10개의 전문 에이전트, 3개의 행동 교정 훅, 3개의 MCP 서버를 하나의 환경에 통합합니다. **Boss** 동적 메타 오케스트레이터가 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지하고 최적의 전문가에게 작업을 라우팅합니다.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude 데모" width="700">
@@ -55,9 +55,10 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/SETUP.md | he
 ## 주요 기능
 
 ### 멀티에이전트 오케스트레이션
-- **Sisyphus 오케스트레이터**: 사용자 요청의 의도를 자동 분류하고, 최적의 전문 에이전트에게 위임
+- **Boss 동적 메타 오케스트레이터**: 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지 — 하드코딩 없이 최적의 전문가에게 작업 라우팅
+- **Sisyphus 서브 오케스트레이터**: 의도 분류와 검증 프로토콜로 복잡한 멀티스텝 워크플로우 관리
 - **Hephaestus 자율 워커**: 탐색 → 계획 → 실행 → 검증 사이클을 중단 없이 자율 수행
-- **모델 최적화 라우팅**: 작업 복잡도에 따라 Opus(고난도) / Sonnet(구현) 자동 선택
+- **모델 최적화 라우팅**: 작업 복잡도에 따라 Opus(고난도) / Sonnet(구현) / Haiku(탐색) 자동 선택
 
 ### 런타임 행동 교정
 - **Delegation Guard** (PreToolUse): 오케스트레이터가 직접 파일 수정 시도 시 서브에이전트 위임을 강제
@@ -77,11 +78,12 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/SETUP.md | he
 
 ## my-claude 에이전트
 
-[oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent)의 에이전트를 Claude Code standalone `.md` 형식으로 포팅한 9개의 전문 에이전트입니다. 설치 후 전체 에이전트 목록(70+)은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
+[oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent) 에이전트 9개 + Boss 메타 오케스트레이터를 Claude Code standalone `.md` 형식으로 제공하는 10개의 전문 에이전트입니다. 설치 후 전체 에이전트 목록(70+)은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
 
 | 에이전트 | 모델 | 역할 |
 |---------|------|------|
-| **Sisyphus** | Opus | 마스터 오케스트레이터. 사용자 요청의 의도를 분류하고 적합한 전문 에이전트에게 위임 |
+| **Boss** | Opus | 동적 메타 오케스트레이터. 런타임에 모든 에이전트/스킬/MCP를 자동 감지하고 최적의 전문가에게 라우팅 |
+| **Sisyphus** | Opus | 서브 오케스트레이터. 의도 분류와 검증 프로토콜로 복잡한 멀티스텝 워크플로우 관리 |
 | **Hephaestus** | Opus | 자율 딥 워커. 탐색 → 계획 → 실행 → 검증 사이클을 자율적으로 수행 |
 | **Metis** | Opus | 사전 의도 분석. AI-slop 방지를 위해 요청을 실행 전에 구조화 |
 | **Atlas** | Opus | 마스터 태스크 오케스트레이터. 4단계 QA 사이클로 복잡한 작업을 분해 및 조율 |
@@ -99,18 +101,19 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 
 | 구분 | 수량 | 출처 |
 |------|------|------|
-| 에이전트 | 70+ | my-claude 9 + OMC 19 + Agency 42+ |
+| 에이전트 | 70+ | my-claude 10 + OMC 19 + Agency 42+ |
 | 스킬 | 33 | Anthropic Official + ECC |
 | 룰 | 14 | ECC (common 9 + typescript 5) |
 | MCP 서버 | 3 | Context7, Exa, grep.app |
-| 훅 | 3 | my-claude (Sisyphus protocol) |
+| 훅 | 3 | my-claude (Boss protocol) |
 
 <details>
-<summary>my-claude 에이전트 (9개) — omo 에이전트의 Claude Code standalone 버전</summary>
+<summary>my-claude 에이전트 (10개) — Boss 메타 오케스트레이터 + omo 에이전트</summary>
 
 | 에이전트 | 모델 | 유형 | 역할 | Read-only |
 |---------|------|------|------|-----------|
-| Sisyphus | Opus | 오케스트레이터 | 의도 분류 → 전문 에이전트 위임 → 독립 검증. 직접 코드 작성 안 함 | No |
+| Boss | Opus | 메타 오케스트레이터 | 런타임에 모든 에이전트/스킬/MCP 동적 감지 → 능력 매칭 → 최적 라우팅 | Yes |
+| Sisyphus | Opus | 서브 오케스트레이터 | 의도 분류 → 전문 에이전트 위임 → 독립 검증. 직접 코드 작성 안 함 | No |
 | Hephaestus | Opus | 자율 실행 | 탐색→계획→실행→검증 자율 수행. 허락 없이 작업 완료 | No |
 | Metis | Opus | 분석 | 사용자 의도 분석, 모호성 감지, AI-slop 방지 | Yes |
 | Atlas | Opus | 오케스트레이터 | 태스크 위임 + 4단계 QA 검증. 직접 코드 작성 안 함 | No |
@@ -301,7 +304,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 
 | 훅 | 이벤트 | 동작 |
 |----|--------|------|
-| Delegation Guard | PreToolUse (Edit/Write) | Sisyphus가 직접 파일 수정 시 서브에이전트 위임을 상기 |
+| Delegation Guard | PreToolUse (Edit/Write) | Boss가 직접 파일 수정 시 서브에이전트 위임을 상기 |
 | Subagent Verifier | SubagentStop | 서브에이전트 완료 후 독립 검증 수행을 강제 |
 | Completion Check | Stop | 모든 태스크가 완료 및 검증되었는지 확인 후 세션 종료 허용 |
 
@@ -317,13 +320,15 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 └─────────────────────┬───────────────────────────────────┘
                       ↓
 ┌─────────────────────────────────────────────────────────┐
-│  [Sisyphus] 마스터 오케스트레이터                          │
-│  의도 분류 → 전문 에이전트 위임                            │
+│  [Boss] 동적 메타 오케스트레이터                           │
+│  런타임 감지 → 능력 매칭 → 최적 라우팅                     │
+│  (에이전트, 스킬, MCP 서버, 훅 — 모두 자동 감지)          │
 └──────┬──────────────┬──────────────┬────────────────────┘
        ↓              ↓              ↓
 ┌──────────────┐ ┌──────────────┐ ┌──────────────────────┐
-│  [Metis]     │ │  [Atlas]     │ │  [Hephaestus]        │
-│  의도 분석   │ │  태스크 조율 │ │  자율 실행           │
+│  [Sisyphus]  │ │  [Atlas]     │ │  [Hephaestus]        │
+│  서브 오케   │ │  태스크 조율 │ │  자율 실행           │
+│  + 검증      │ │              │ │                      │
 └──────┬───────┘ └──────┬───────┘ └──────────────────────┘
        ↓                ↓
 ┌─────────────────────────────────────────────────────────┐
@@ -382,6 +387,54 @@ Anthropic이 직접 제공하는 공식 에이전트 스킬 레포지토리. PDF
 ### 6. [Agency Agents](https://github.com/msitarzewski/agency-agents)
 
 164개의 비즈니스 전문 에이전트 페르소나 라이브러리. UX 아키텍트, 데이터 엔지니어, 보안 감사자, QA 매니저 등 기술 역할을 넘어 비즈니스 맥락의 전문 관점을 제공합니다.
+
+---
+
+## Boss 동작 방식
+
+### 하네스 vs 오케스트레이터 vs 에이전트
+
+| 개념 | 역할 | 비유 | 예시 |
+|------|------|------|------|
+| **하네스 (Harness)** | 에이전트를 실행하는 런타임 플랫폼 — 생명주기, 도구 접근, 권한 관리 | 운영체제 | Claude Code, omo |
+| **오케스트레이터 (Orchestrator)** | 다른 에이전트를 조율하는 특수 에이전트 — 의도 분류, 위임, 검증. 직접 구현하지 않음 | 지휘자 | Boss, Sisyphus, Atlas |
+| **에이전트 (Agent)** | 특정 도메인의 실제 작업을 수행하는 실행 단위 — 코드 작성, 분석, 리뷰 | 연주자 | debugger, executor, security-reviewer |
+
+```
+하네스 (Claude Code)
+ └─ Boss (메타 오케스트레이터)       — 전체 환경 감지, 최적 라우팅
+     ├─ 스킬 직접 호출               — pdf, docx, tdd-workflow 등
+     ├─ 에이전트 직접 위임           — debugger, security-reviewer 등
+     ├─ Sisyphus (서브 오케스트레이터) — 복잡한 워크플로우 관리
+     │   ├─ Metis → 의도 분석
+     │   ├─ Prometheus → 계획 수립
+     │   └─ Hephaestus → 자율 실행
+     └─ Atlas (서브 오케스트레이터)   — 태스크 분해 + QA 사이클
+```
+
+### 위임 메커니즘 (4단계 우선순위 라우팅)
+
+Boss는 모든 요청을 4단계 우선순위 체인으로 라우팅합니다:
+
+| 우선순위 | 매칭 유형 | 조건 | 예시 |
+|----------|----------|------|------|
+| **1** | 스킬 정확 매칭 | 자체 완결형 스킬에 매핑 | "PDF 합쳐줘" → `Skill("pdf")` |
+| **2** | 전문 에이전트 매칭 | 도메인별 전문 에이전트 존재 | "보안 감사" → `Agent("Security Engineer")` |
+| **3** | 서브 오케스트레이터 위임 | 복잡한 멀티스텝 워크플로우 | "리팩토링 + 테스트" → Sisyphus |
+| **4** | 범용 폴백 | 전문가 매칭 없음 | "이거 설명해줘" → `Agent(model="sonnet")` |
+
+모든 위임에는 **6-Section 구조화 프롬프트**가 포함됩니다: TASK, EXPECTED OUTCOME, REQUIRED TOOLS, MUST DO, MUST NOT DO, CONTEXT.
+
+### 스코프 디스커버리 (전역 + 프로젝트)
+
+Boss는 런타임에 **두 스코프**의 구성 요소를 병합하여 감지합니다:
+
+| 스코프 | 에이전트 | 스킬 | MCP 서버 |
+|--------|---------|------|----------|
+| **전역** | `~/.claude/agents/*.md` | `~/.claude/skills/` | `~/.claude/settings.json` |
+| **프로젝트** | `.claude/agents/*.md` | `.claude/skills/` | `.mcp.json` |
+
+프로젝트 디렉토리에서 `claude`를 실행하면, Boss가 전역과 프로젝트 레벨 구성 요소를 모두 감지합니다. 같은 이름의 에이전트는 프로젝트 버전이 우선됩니다 (프로젝트별 커스터마이징).
 
 ---
 

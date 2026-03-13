@@ -10,13 +10,13 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-9-blue)
+![Agents](https://img.shields.io/badge/agents-10-blue)
 ![MCP Servers](https://img.shields.io/badge/MCP_servers-3-green)
 ![Open Source Tools](https://img.shields.io/badge/open_source_tools-6-orange)
 
 A repository for setting up a Claude Code multi-agent orchestration environment in a single step.
 
-Combines 6 open-source tools to integrate 9 specialist agents, 3 behavioral correction hooks, and 3 MCP servers into one environment. The Sisyphus orchestrator classifies the intent of user requests and delegates to the appropriate specialist agent.
+Combines 6 open-source tools to integrate 10 specialist agents, 3 behavioral correction hooks, and 3 MCP servers into one environment. The **Boss** dynamic meta-orchestrator auto-discovers all installed agents, skills, and MCP servers at runtime, then routes tasks to the optimal specialist.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
@@ -55,9 +55,10 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/SETUP.md | he
 ## Key Features
 
 ### Multi-Agent Orchestration
-- **Sisyphus Orchestrator**: Automatically classifies user request intent and delegates to the optimal specialist agent
+- **Boss Dynamic Meta-Orchestrator**: Auto-discovers all installed agents, skills, and MCP servers at runtime — routes tasks to the optimal specialist without hardcoded routing tables
+- **Sisyphus Sub-Orchestrator**: Manages complex multi-step workflows with intent classification and verification protocols
 - **Hephaestus Autonomous Worker**: Continuously performs explore → plan → execute → verify cycles without interruption
-- **Model-Optimized Routing**: Automatically selects Opus (high complexity) / Sonnet (implementation) based on task complexity
+- **Model-Optimized Routing**: Automatically selects Opus (high complexity) / Sonnet (implementation) / Haiku (exploration) based on task complexity
 
 ### Runtime Behavioral Correction
 - **Delegation Guard** (PreToolUse): Forces sub-agent delegation when the orchestrator attempts to directly modify files
@@ -77,11 +78,12 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/SETUP.md | he
 
 ## my-claude Agents
 
-9 specialist agents ported from [oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent) to Claude Code standalone `.md` format. For the full agent list (70+) after setup, see [Installed Components](#installed-components) below.
+10 specialist agents (9 ported from [oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent) + Boss meta-orchestrator) in Claude Code standalone `.md` format. For the full agent list (70+) after setup, see [Installed Components](#installed-components) below.
 
 | Agent | Model | Role |
 |---------|------|------|
-| **Sisyphus** | Opus | Master orchestrator. Classifies user request intent and delegates to the appropriate specialist agent |
+| **Boss** | Opus | Dynamic meta-orchestrator. Auto-discovers all installed agents/skills/MCP at runtime and routes to optimal specialist |
+| **Sisyphus** | Opus | Sub-orchestrator. Manages complex multi-step workflows with intent classification and verification |
 | **Hephaestus** | Opus | Autonomous deep worker. Autonomously performs explore → plan → execute → verify cycles |
 | **Metis** | Opus | Pre-execution intent analysis. Structures requests before execution to prevent AI-slop |
 | **Atlas** | Opus | Master task orchestrator. Decomposes and coordinates complex tasks with a 4-stage QA cycle |
@@ -99,18 +101,19 @@ Following SETUP.md will configure the following:
 
 | Category | Count | Source |
 |------|------|------|
-| Agents | 70+ | my-claude 9 + OMC 19 + Agency 42+ |
+| Agents | 70+ | my-claude 10 + OMC 19 + Agency 42+ |
 | Skills | 33 | Anthropic Official + ECC |
 | Rules | 14 | ECC (common 9 + typescript 5) |
 | MCP Servers | 3 | Context7, Exa, grep.app |
-| Hooks | 3 | my-claude (Sisyphus protocol) |
+| Hooks | 3 | my-claude (Boss protocol) |
 
 <details>
-<summary>my-claude Agents (9) — Claude Code standalone version of omo agents</summary>
+<summary>my-claude Agents (10) — Boss meta-orchestrator + omo agents</summary>
 
 | Agent | Model | Type | Role | Read-only |
 |---------|------|------|------|-----------|
-| Sisyphus | Opus | Orchestrator | Intent classification → specialist agent delegation → independent verification. Does not write code directly | No |
+| Boss | Opus | Meta-orchestrator | Dynamic runtime discovery of all agents/skills/MCP → capability matching → optimal routing | Yes |
+| Sisyphus | Opus | Sub-orchestrator | Intent classification → specialist agent delegation → independent verification. Does not write code directly | No |
 | Hephaestus | Opus | Autonomous execution | Autonomously performs explore → plan → execute → verify. Completes tasks without asking for permission | No |
 | Metis | Opus | Analysis | User intent analysis, ambiguity detection, AI-slop prevention | Yes |
 | Atlas | Opus | Orchestrator | Task delegation + 4-stage QA verification. Does not write code directly | No |
@@ -301,7 +304,7 @@ Following SETUP.md will configure the following:
 
 | Hook | Event | Behavior |
 |----|--------|------|
-| Delegation Guard | PreToolUse (Edit/Write) | Reminds Sisyphus to delegate to a sub-agent when attempting to directly modify files |
+| Delegation Guard | PreToolUse (Edit/Write) | Reminds Boss to delegate to a sub-agent when attempting to directly modify files |
 | Subagent Verifier | SubagentStop | Forces independent verification after sub-agent completion |
 | Completion Check | Stop | Confirms all tasks are completed and verified before allowing session termination |
 
@@ -317,14 +320,15 @@ Following SETUP.md will configure the following:
 └─────────────────────┬───────────────────────────────────┘
                       ↓
 ┌─────────────────────────────────────────────────────────┐
-│  [Sisyphus] Master Orchestrator                         │
-│  Intent Classification → Specialist Agent Delegation    │
+│  [Boss] Dynamic Meta-Orchestrator                       │
+│  Runtime Discovery → Capability Matching → Routing      │
+│  (agents, skills, MCP servers, hooks — all discovered)  │
 └──────┬──────────────┬──────────────┬────────────────────┘
        ↓              ↓              ↓
 ┌──────────────┐ ┌──────────────┐ ┌──────────────────────┐
-│  [Metis]     │ │  [Atlas]     │ │  [Hephaestus]        │
-│  Intent      │ │  Task        │ │  Autonomous          │
-│  Analysis    │ │  Coordination│ │  Execution           │
+│  [Sisyphus]  │ │  [Atlas]     │ │  [Hephaestus]        │
+│  Sub-orch.   │ │  Task        │ │  Autonomous          │
+│  + Verify    │ │  Coordination│ │  Execution           │
 └──────┬───────┘ └──────┬───────┘ └──────────────────────┘
        ↓                ↓
 ┌─────────────────────────────────────────────────────────┐
@@ -383,6 +387,54 @@ The official agent skills repository provided directly by Anthropic. Enables spe
 ### 6. [Agency Agents](https://github.com/msitarzewski/agency-agents)
 
 A library of 164 business specialist agent personas. Provides specialist perspectives in business contexts beyond technical roles — UX architects, data engineers, security auditors, QA managers, and more.
+
+---
+
+## How Boss Works
+
+### Harness vs Orchestrator vs Agent
+
+| Concept | Role | Analogy | Examples |
+|---------|------|---------|---------|
+| **Harness** | Runtime platform that executes agents — manages lifecycle, tools, permissions | Operating System | Claude Code, omo |
+| **Orchestrator** | Special agent that coordinates other agents — classifies intent, delegates, verifies. Never implements directly | Conductor | Boss, Sisyphus, Atlas |
+| **Agent** | Execution unit that performs actual work in a specific domain — writes code, analyzes, reviews | Musician | debugger, executor, security-reviewer |
+
+```
+Harness (Claude Code)
+ └─ Boss (Meta-Orchestrator)         — discovers all, routes optimally
+     ├─ Skill invocation              — pdf, docx, tdd-workflow, etc.
+     ├─ Direct agent delegation       — debugger, security-reviewer, etc.
+     ├─ Sisyphus (Sub-Orchestrator)   — complex workflow management
+     │   ├─ Metis → intent analysis
+     │   ├─ Prometheus → planning
+     │   └─ Hephaestus → autonomous execution
+     └─ Atlas (Sub-Orchestrator)      — task decomposition + QA cycles
+```
+
+### Delegation Mechanism (4-Priority Routing)
+
+Boss routes every request through a 4-level priority chain:
+
+| Priority | Match Type | When | Example |
+|----------|-----------|------|---------|
+| **1** | Exact Skill match | Task maps to a self-contained skill | "merge PDFs" → `Skill("pdf")` |
+| **2** | Specialist Agent match | Domain-specific agent exists | "security audit" → `Agent("Security Engineer")` |
+| **3** | Sub-orchestrator delegation | Complex multi-step workflow | "refactor + test" → Sisyphus |
+| **4** | General-purpose fallback | No specialist matches | "explain this" → `Agent(model="sonnet")` |
+
+Every delegation includes a **6-section structured prompt**: TASK, EXPECTED OUTCOME, REQUIRED TOOLS, MUST DO, MUST NOT DO, CONTEXT.
+
+### Scope Discovery (Global + Project)
+
+Boss discovers components from **two scopes** that merge at runtime:
+
+| Scope | Agents | Skills | MCP Servers |
+|-------|--------|--------|-------------|
+| **Global** | `~/.claude/agents/*.md` | `~/.claude/skills/` | `~/.claude/settings.json` |
+| **Project** | `.claude/agents/*.md` | `.claude/skills/` | `.mcp.json` |
+
+When running `claude` in a project directory, Boss sees both global and project-level components. Project-level agents with the same name as global ones take priority (project-specific customization).
 
 ---
 
