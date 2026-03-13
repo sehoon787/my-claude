@@ -75,6 +75,222 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/SETUP.md | he
 
 ---
 
+## 설치 후 전체 구성 요소
+
+SETUP.md를 따라 설치하면 다음이 구성됩니다:
+
+| 구분 | 수량 | 출처 |
+|------|------|------|
+| 에이전트 | 70+ | my-claude 9 + OMC 19 + Agency 42+ |
+| 스킬 | 33 | Anthropic Official + ECC |
+| 룰 | 14 | ECC (common 9 + typescript 5) |
+| MCP 서버 | 3 | Context7, Exa, grep.app |
+| 훅 | 3 | my-claude (Sisyphus protocol) |
+
+<details>
+<summary>my-claude 에이전트 (9개) — omo 에이전트의 Claude Code standalone 버전</summary>
+
+| 에이전트 | 모델 | 유형 | 역할 | Read-only |
+|---------|------|------|------|-----------|
+| Sisyphus | Opus | 오케스트레이터 | 의도 분류 → 전문 에이전트 위임 → 독립 검증. 직접 코드 작성 안 함 | No |
+| Hephaestus | Opus | 자율 실행 | 탐색→계획→실행→검증 자율 수행. 허락 없이 작업 완료 | No |
+| Metis | Opus | 분석 | 사용자 의도 분석, 모호성 감지, AI-slop 방지 | Yes |
+| Atlas | Opus | 오케스트레이터 | 태스크 위임 + 4단계 QA 검증. 직접 코드 작성 안 함 | No |
+| Oracle | Opus | 자문 | 전략적 기술 자문. 아키텍처, 디버깅 컨설팅 | Yes |
+| Momus | Opus | 검토 | 작업 계획 실행 가능성 검토. 승인 편향 | Yes |
+| Prometheus | Opus | 계획 | 인터뷰 기반 상세 계획 수립. .md 파일만 작성 | Partial |
+| Librarian | Sonnet | 연구 | MCP 활용 오픈소스 문서 검색 | Yes |
+| Multimodal-Looker | Sonnet | 시각 분석 | 이미지/스크린샷/다이어그램 분석 | Yes |
+
+</details>
+
+<details>
+<summary>OMC 에이전트 (19개) — Oh My Claude Code 전문 에이전트</summary>
+
+| 에이전트 | 역할 |
+|---------|------|
+| analyst | 사전 분석 — 계획 수립 전 상황 파악 |
+| architect | 시스템 설계 및 아키텍처 결정 |
+| code-reviewer | 집중 코드 리뷰 |
+| code-simplifier | 코드 간소화 및 정리 |
+| critic | 비판적 분석, 대안 제시 |
+| debugger | 집중 디버깅 |
+| designer | UI/UX 디자인 가이드 |
+| document-specialist | 문서 작성 및 관리 |
+| executor | 태스크 실행 |
+| explore | 코드베이스 탐색 |
+| git-master | Git 워크플로우 관리 |
+| planner | 빠른 계획 수립 |
+| qa-tester | 품질 보증 테스트 |
+| scientist | 연구 및 실험 |
+| security-reviewer | 보안 리뷰 |
+| test-engineer | 테스트 작성 및 유지보수 |
+| tracer | 실행 추적 및 분석 |
+| verifier | 최종 검증 |
+| writer | 콘텐츠 및 문서 작성 |
+
+</details>
+
+<details>
+<summary>Agency 에이전트 (42+개) — 비즈니스 전문 페르소나</summary>
+
+**Engineering (22개)**
+
+| 에이전트 | 역할 |
+|---------|------|
+| ai-engineer | AI/ML 엔지니어링 |
+| autonomous-optimization-architect | 자율 최적화 아키텍처 |
+| backend-architect | 백엔드 아키텍처 |
+| code-reviewer | 코드 리뷰 |
+| data-engineer | 데이터 엔지니어링 |
+| database-optimizer | 데이터베이스 최적화 |
+| devops-automator | DevOps 자동화 |
+| embedded-firmware-engineer | 임베디드 펌웨어 |
+| feishu-integration-developer | Feishu 통합 개발 |
+| frontend-developer | 프론트엔드 개발 |
+| git-workflow-master | Git 워크플로우 |
+| incident-response-commander | 장애 대응 |
+| mobile-app-builder | 모바일 앱 빌드 |
+| rapid-prototyper | 빠른 프로토타이핑 |
+| security-engineer | 보안 엔지니어링 |
+| senior-developer | 시니어 개발 |
+| software-architect | 소프트웨어 아키텍처 |
+| solidity-smart-contract-engineer | Solidity 스마트 컨트랙트 |
+| sre | Site Reliability Engineering |
+| technical-writer | 기술 문서 작성 |
+| threat-detection-engineer | 위협 탐지 엔지니어링 |
+| wechat-mini-program-developer | WeChat 미니 프로그램 개발 |
+
+**Testing (8개)**
+
+| 에이전트 | 역할 |
+|---------|------|
+| accessibility-auditor | 접근성 감사 |
+| api-tester | API 테스트 |
+| evidence-collector | 테스트 증거 수집 |
+| performance-benchmarker | 성능 벤치마크 |
+| reality-checker | 현실성 검증 |
+| test-results-analyzer | 테스트 결과 분석 |
+| tool-evaluator | 도구 평가 |
+| workflow-optimizer | 워크플로우 최적화 |
+
+**Design (8개)**
+
+| 에이전트 | 역할 |
+|---------|------|
+| brand-guardian | 브랜드 가이드라인 수호 |
+| image-prompt-engineer | 이미지 프롬프트 엔지니어링 |
+| inclusive-visuals-specialist | 포용적 시각 디자인 |
+| ui-designer | UI 디자인 |
+| ux-architect | UX 아키텍처 |
+| ux-researcher | UX 리서치 |
+| visual-storyteller | 시각적 스토리텔링 |
+| whimsy-injector | 재미 요소 주입 |
+
+**Product (4개)**
+
+| 에이전트 | 역할 |
+|---------|------|
+| behavioral-nudge-engine | 행동 넛지 설계 |
+| feedback-synthesizer | 피드백 종합 |
+| sprint-prioritizer | 스프린트 우선순위 |
+| trend-researcher | 트렌드 리서치 |
+
+</details>
+
+<details>
+<summary>스킬 (33개) — Anthropic Official + ECC</summary>
+
+| 스킬 | 출처 | 설명 |
+|------|------|------|
+| algorithmic-art | Anthropic | p5.js 기반 생성형 아트 |
+| backend-patterns | ECC | 백엔드 아키텍처 패턴 |
+| brand-guidelines | Anthropic | Anthropic 브랜드 스타일 적용 |
+| canvas-design | Anthropic | PNG/PDF 시각 디자인 |
+| claude-api | Anthropic | Claude API/SDK 앱 빌드 |
+| clickhouse-io | ECC | ClickHouse 쿼리 최적화 |
+| coding-standards | ECC | TypeScript/React 코딩 표준 |
+| continuous-learning | ECC | 세션에서 패턴 자동 추출 |
+| continuous-learning-v2 | ECC | 본능 기반 학습 시스템 |
+| doc-coauthoring | Anthropic | 문서 공동 작성 워크플로우 |
+| docx | Anthropic | Word 문서 생성/편집 |
+| eval-harness | ECC | 평가 주도 개발 (EDD) |
+| frontend-design | Anthropic | 프론트엔드 UI 디자인 |
+| frontend-patterns | ECC | React/Next.js 패턴 |
+| internal-comms | Anthropic | 사내 커뮤니케이션 작성 |
+| iterative-retrieval | ECC | 점진적 컨텍스트 검색 |
+| karpathy-guidelines | Anthropic | Karpathy AI 코딩 가이드라인 |
+| learned | ECC | 학습된 패턴 저장소 |
+| mcp-builder | Anthropic | MCP 서버 개발 가이드 |
+| pdf | Anthropic | PDF 읽기/합치기/분할/OCR |
+| postgres-patterns | ECC | PostgreSQL 최적화 |
+| pptx | Anthropic | PowerPoint 생성/편집 |
+| project-guidelines-example | Anthropic | 프로젝트 가이드라인 예제 |
+| security-review | ECC | 보안 체크리스트 |
+| skill-creator | Anthropic | 커스텀 스킬 생성 메타스킬 |
+| slack-gif-creator | Anthropic | Slack용 GIF 생성 |
+| strategic-compact | ECC | 전략적 컨텍스트 압축 |
+| tdd-workflow | ECC | TDD 워크플로우 강제 |
+| theme-factory | Anthropic | 아티팩트 테마 적용 |
+| verification-loop | Anthropic | 검증 루프 |
+| web-artifacts-builder | Anthropic | 복합 웹 아티팩트 빌드 |
+| webapp-testing | Anthropic | Playwright 웹앱 테스트 |
+| xlsx | Anthropic | Excel 파일 생성/편집 |
+
+</details>
+
+<details>
+<summary>룰 (14개) — ECC 코딩 규칙</summary>
+
+**Common (9개)** — 모든 프로젝트에 적용
+
+| 룰 | 설명 |
+|----|------|
+| agents.md | 에이전트 행동 규칙 |
+| coding-style.md | 코딩 스타일 |
+| development-workflow.md | 개발 워크플로우 |
+| git-workflow.md | Git 워크플로우 |
+| hooks.md | 훅 사용 규칙 |
+| patterns.md | 디자인 패턴 |
+| performance.md | 성능 최적화 |
+| security.md | 보안 규칙 |
+| testing.md | 테스트 규칙 |
+
+**TypeScript (5개)** — TypeScript 프로젝트 전용
+
+| 룰 | 설명 |
+|----|------|
+| coding-style.md | TS 코딩 스타일 |
+| hooks.md | TS 훅 패턴 |
+| patterns.md | TS 디자인 패턴 |
+| security.md | TS 보안 규칙 |
+| testing.md | TS 테스트 규칙 |
+
+</details>
+
+<details>
+<summary>MCP 서버 (3개) + 행동 교정 훅 (3개)</summary>
+
+**MCP 서버**
+
+| 서버 | URL | 용도 | 비용 |
+|------|-----|------|------|
+| Context7 | mcp.context7.com | 라이브러리 문서 실시간 조회 | 무료 (키 등록 시 한도 증가) |
+| Exa | mcp.exa.ai | 의미 기반 웹 검색 | 무료 1k req/월 |
+| grep.app | mcp.grep.app | 오픈소스 GitHub 코드 검색 | 무료 |
+
+**행동 교정 훅**
+
+| 훅 | 이벤트 | 동작 |
+|----|--------|------|
+| Delegation Guard | PreToolUse (Edit/Write) | Sisyphus가 직접 파일 수정 시 서브에이전트 위임을 상기 |
+| Subagent Verifier | SubagentStop | 서브에이전트 완료 후 독립 검증 수행을 강제 |
+| Completion Check | Stop | 모든 태스크가 완료 및 검증되었는지 확인 후 세션 종료 허용 |
+
+</details>
+
+---
+
 ## 전체 아키텍처
 
 ```
