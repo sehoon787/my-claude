@@ -474,7 +474,60 @@ claude mcp add --transport http --scope user exa "https://mcp.exa.ai/mcp?tools=w
 claude mcp add --transport http --scope user grep_app "https://mcp.grep.app"
 ```
 
-> **Note:** Manual install does not include the behavioral correction hooks. For full orchestration with Sisyphus, use Option A or B.
+> **Note:** Options A and B (plugin install) automatically configure hooks and default agent. If using Option C (manual copy), add hooks and default agent manually with Option D below.
+
+### Option D: Manual hooks and default agent setup
+
+If you used Option C (manual copy), apply the behavioral correction hooks and set Sisyphus as default agent by merging into `~/.claude/settings.json`:
+
+```bash
+# Read current settings and merge hooks + default agent
+node -e "
+const fs = require('fs');
+const path = require('path');
+const settingsPath = path.join(process.env.HOME || process.env.USERPROFILE, '.claude', 'settings.json');
+const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+settings.agent = 'sisyphus';
+settings.hooks = {
+  PreToolUse: [{
+    matcher: 'Edit|Write',
+    hooks: [{
+      type: 'command',
+      command: 'node -e \"const j=JSON.parse(require(\\\"fs\\\").readFileSync(0,\\\"utf8\\\"));if(!j.agent_id){console.log(JSON.stringify({hookSpecificOutput:{hookEventName:\\\"PreToolUse\\\",additionalContext:\\\"SISYPHUS PROTOCOL: You are the orchestrator. Delegate file modifications to specialist subagents (model=sonnet for implementation, model=haiku for trivial fixes). Direct edits are acceptable ONLY for 1-line trivial changes or plan/draft markdown files.\\\"}}))}\"',
+      timeout: 5000
+    }]
+  }],
+  SubagentStop: [{
+    hooks: [{
+      type: 'command',
+      command: 'node -e \"console.log(JSON.stringify({hookSpecificOutput:{additionalContext:\\\"VERIFICATION REQUIRED: Subagent finished. Before proceeding: (1) Read the changed files yourself, (2) Run lsp_diagnostics or tests to verify, (3) Only then mark the task complete. Do NOT trust subagent claims without independent verification.\\\"}}))\"\n'
+    }]
+  }],
+  Stop: [{
+    hooks: [{
+      type: 'prompt',
+      prompt: 'Review the assistant last message. Check: (1) Are there incomplete tasks in the current plan? (2) Were all subagent results independently verified? (3) Did the assistant skip any verification steps? If work remains incomplete or unverified, return {\"ok\": false, \"reason\": \"Incomplete work detected. Continue with remaining tasks or verify pending results.\"}. If all tasks are complete and verified, return {\"ok\": true}.'
+    }]
+  }]
+};
+fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+console.log('Hooks and default agent configured.');
+"
+```
+
+**Verify:**
+```bash
+node -e "const s=JSON.parse(require('fs').readFileSync((process.env.HOME||process.env.USERPROFILE)+'/.claude/settings.json','utf8')); console.log('agent:', s.agent, '| hooks:', Object.keys(s.hooks||{}).join(', '))"
+# Expected: agent: sisyphus | hooks: PreToolUse, SubagentStop, Stop
+```
+
+> **What the hooks do:**
+> - **PreToolUse (Edit|Write):** Reminds Sisyphus to delegate file modifications to subagents
+> - **SubagentStop:** Injects verification reminder after subagent completion
+> - **Stop:** Checks all tasks are complete and verified before ending session
+>
+> **To disable hooks later:** Remove the `hooks` key from `~/.claude/settings.json`.
+> **To change default agent:** Change `"agent": "sisyphus"` to any other agent name, or remove the key to use no default.
 
 ### Option C: Native omo agents (via OpenCode)
 
@@ -493,7 +546,7 @@ After plugin install, Sisyphus is the default agent. Usage:
 # Inside a Claude Code session, select Hephaestus from /agents or mention it in your prompt
 ```
 
-> **Note:** The `settings.json` in the plugin sets Sisyphus as the default agent when the plugin is enabled. You can also invoke any agent explicitly from the `/agents` list inside a Claude Code session.
+> **Note:** After plugin install (Options A/B) or manual setup (Option D), Sisyphus is the default agent. You can invoke any agent explicitly from the `/agents` list inside a Claude Code session, or change the default in `~/.claude/settings.json`.
 
 ### Agent Catalog (9 Ported Agents)
 
