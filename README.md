@@ -18,6 +18,10 @@ A repository for setting up a Claude Code multi-agent orchestration environment 
 
 Combines 6 open-source tools to integrate 9 specialist agents, 3 behavioral correction hooks, and 3 MCP servers into one environment. The Sisyphus orchestrator classifies the intent of user requests and delegates to the appropriate specialist agent.
 
+<p align="center">
+  <img src="./assets/demo.svg" alt="my-claude demo" width="700">
+</p>
+
 ---
 
 ## Quick Start
