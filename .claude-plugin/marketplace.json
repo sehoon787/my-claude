@@ -1,0 +1,32 @@
+{
+  "name": "my-claude",
+  "owner": {
+    "name": "sehoon787"
+  },
+  "metadata": {
+    "description": "Multi-agent orchestration environment for Claude Code"
+  },
+  "plugins": [
+    {
+      "name": "my-claude-orchestration",
+      "source": "./",
+      "description": "9 specialist agents (Sisyphus orchestrator, Hephaestus autonomous worker, and 7 more) with behavioral correction hooks and MCP servers",
+      "author": {
+        "name": "sehoon787"
+      },
+      "homepage": "https://github.com/sehoon787/my-claude",
+      "repository": "https://github.com/sehoon787/my-claude",
+      "license": "MIT",
+      "keywords": [
+        "orchestration",
+        "multi-agent",
+        "sisyphus",
+        "hephaestus",
+        "agents",
+        "hooks",
+        "mcp"
+      ],
+      "category": "workflow"
+    }
+  ]
+}
