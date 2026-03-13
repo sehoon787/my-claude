@@ -1,6 +1,8 @@
 {
   "name": "my-claude-orchestration",
   "description": "Multi-agent orchestration plugin for Claude Code — Sisyphus orchestrator, Hephaestus autonomous worker, and 7 specialist agents with behavioral correction hooks",
-  "version": "0.2.3",
-  "author": { "name": "sehoon787" }
+  "version": "0.3.0",
+  "author": {
+    "name": "sehoon787"
+  }
 }
