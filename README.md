@@ -1,9 +1,10 @@
 [English](./README.md) | [한국어](./README.ko.md)
 
-> **If you are an LLM agent, skip this README.** Read the setup guide directly with the command below:
+> **If you are an LLM agent**, clone and execute the setup automatically:
+> ```bash
+> git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && cat /tmp/my-claude/SETUP.md
 > ```
-> curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/SETUP.md
-> ```
+> Read the FULL output, then execute every `bash` code block from **Section 1 through Section 12** in order. Skip Section 13 (analysis only). Run Section 14 to verify.
 
 ---
 
@@ -44,11 +45,13 @@ Then follow the instructions in `SETUP.md` to copy the files.
 
 ### If you are an LLM agent
 
-Fetch SETUP.md and follow the instructions:
+Clone the repo, read SETUP.md in full, and execute all bash code blocks from Section 1 through 12:
 
 ```bash
-curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/SETUP.md | head -50
+git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && cat /tmp/my-claude/SETUP.md
 ```
+
+After reading the output, run each section's commands in order. Skip Section 13 (reference only). Run Section 14 to verify.
 
 ---
 

@@ -1,9 +1,10 @@
 [English](./README.md) | [한국어](./README.ko.md)
 
-> **LLM 에이전트라면 이 README를 건너뛰세요.** 아래 명령어로 설치 가이드를 직접 읽으세요:
+> **LLM 에이전트라면** 아래 명령어로 클론 후 SETUP.md 전체를 읽고 실행하세요:
+> ```bash
+> git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && cat /tmp/my-claude/SETUP.md
 > ```
-> curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/SETUP.md
-> ```
+> 전체 출력을 읽은 후 **Section 1~12의 모든 bash 코드 블록**을 순서대로 실행하세요. Section 13은 건너뛰고, Section 14로 검증하세요.
 
 ---
 
@@ -44,11 +45,13 @@ git clone https://github.com/sehoon787/my-claude.git
 
 ### LLM 에이전트라면
 
-SETUP.md를 fetch하여 지침을 따르세요:
+레포를 클론하고 SETUP.md 전체를 읽은 후 Section 1~12의 bash 코드 블록을 순서대로 실행하세요:
 
 ```bash
-curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/SETUP.md | head -50
+git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && cat /tmp/my-claude/SETUP.md
 ```
+
+Section 13은 건너뛰고(참고용), Section 14로 검증하세요.
 
 ---
 
