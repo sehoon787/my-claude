@@ -1,10 +1,10 @@
 [English](./README.md) | [한국어](./README.ko.md)
 
-> **If you are an LLM agent**, clone and execute the setup automatically:
+> **If you are an LLM agent**, fetch and follow the installation guide:
 > ```bash
-> git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && cat /tmp/my-claude/SETUP.md
+> curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 > ```
-> Read the FULL output, then execute every `bash` code block from **Section 1 through Section 12** in order. Skip Section 13 (analysis only). Run Section 14 to verify.
+> Read the FULL output, then execute each bash code block in order (Steps 1-13). Step 12 requires file editing — use your Edit tool. Use `curl`, NOT `WebFetch` (summaries lose critical config values).
 
 ---
 
@@ -35,7 +35,13 @@ Combines 6 open-source tools to integrate 10 specialist agents, 3 behavioral cor
 claude /plugin add sehoon787/my-claude
 ```
 
-**Option 2: Manual installation**
+**Option 2: Automated script**
+
+```bash
+git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && bash /tmp/my-claude/install.sh
+```
+
+**Option 3: Manual installation**
 
 ```bash
 git clone https://github.com/sehoon787/my-claude.git
@@ -45,13 +51,13 @@ Then follow the instructions in `SETUP.md` to copy the files.
 
 ### If you are an LLM agent
 
-Clone the repo, read SETUP.md in full, and execute all bash code blocks from Section 1 through 12:
+Fetch the AI installation guide and execute each step:
 
 ```bash
-git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && cat /tmp/my-claude/SETUP.md
+curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 ```
 
-After reading the output, run each section's commands in order. Skip Section 13 (reference only). Run Section 14 to verify.
+Read the full output and execute each bash code block in order (Steps 1-13). Use `curl`, not `WebFetch`. For human-readable step-by-step setup, see `SETUP.md`.
 
 ---
 
