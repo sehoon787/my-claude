@@ -55,9 +55,10 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/SETUP.md | he
 ## 주요 기능
 
 ### 멀티에이전트 오케스트레이션
-- **Boss 동적 메타 오케스트레이터**: 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지 — 하드코딩 없이 최적의 전문가에게 작업 라우팅
+- **Boss 동적 메타 오케스트레이터**: 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지 — 3D 충돌 해결(Scope/Depth×2/Interactivity)로 최적 라우팅. 중간 규모 작업은 서브 오케스트레이터 없이 직접 조율(P3a)
 - **Sisyphus 서브 오케스트레이터**: 의도 분류와 검증 프로토콜로 복잡한 멀티스텝 워크플로우 관리
 - **Hephaestus 자율 워커**: 탐색 → 계획 → 실행 → 검증 사이클을 중단 없이 자율 수행
+- **Skill vs Agent 충돌 해결**: 가중 3차원 스코어링(Scope, Depth×2, Interactivity)으로 각 작업에 Skill/Agent 여부를 판단 — 하드코딩 라우팅 테이블 없음
 - **모델 최적화 라우팅**: 작업 복잡도에 따라 Opus(고난도) / Sonnet(구현) / Haiku(탐색) 자동 선택
 
 ### 런타임 행동 교정
@@ -153,7 +154,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 </details>
 
 <details>
-<summary>Agency 에이전트 (42+개) — 비즈니스 전문 페르소나</summary>
+<summary>Agency 에이전트 (42) — 비즈니스 전문 페르소나 (전체 model: claude-sonnet-4-6)</summary>
 
 **Engineering (22개)**
 

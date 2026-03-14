@@ -55,9 +55,10 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/SETUP.md | he
 ## Key Features
 
 ### Multi-Agent Orchestration
-- **Boss Dynamic Meta-Orchestrator**: Auto-discovers all installed agents, skills, and MCP servers at runtime — routes tasks to the optimal specialist without hardcoded routing tables
+- **Boss Dynamic Meta-Orchestrator**: Auto-discovers all installed agents, skills, and MCP servers at runtime — routes tasks via 3D conflict resolution (Scope/Depth×2/Interactivity). Handles mid-sized tasks directly (P3a) without sub-orchestrator overhead
 - **Sisyphus Sub-Orchestrator**: Manages complex multi-step workflows with intent classification and verification protocols
 - **Hephaestus Autonomous Worker**: Continuously performs explore → plan → execute → verify cycles without interruption
+- **Skill vs Agent Conflict Resolution**: Weighted 3-dimensional scoring (Scope, Depth×2, Interactivity) determines whether to use a Skill or Agent for each task — no hardcoded routing tables
 - **Model-Optimized Routing**: Automatically selects Opus (high complexity) / Sonnet (implementation) / Haiku (exploration) based on task complexity
 
 ### Runtime Behavioral Correction
@@ -153,7 +154,7 @@ Following SETUP.md will configure the following:
 </details>
 
 <details>
-<summary>Agency Agents (42+) — Business specialist personas</summary>
+<summary>Agency Agents (42) — Business specialist personas (all model: claude-sonnet-4-6)</summary>
 
 **Engineering (22)**
 

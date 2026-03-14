@@ -46,7 +46,7 @@ Both scopes are automatically merged — project-level components supplement (no
 
 Run in a single call:
 ```
-Bash("echo '=== GLOBAL ===' && for f in ~/.claude/agents/*.md; do head -6 \"$f\"; echo '---SEP---'; done && echo '=== PROJECT ===' && for f in .claude/agents/*.md; do [ -f \"$f\" ] && head -6 \"$f\" && echo '---SEP---'; done 2>/dev/null")
+Bash("echo '=== GLOBAL ===' && for f in ~/.claude/agents/*.md; do head -10 \"$f\"; echo '---SEP---'; done && echo '=== PROJECT ===' && for f in .claude/agents/*.md; do [ -f \"$f\" ] && head -10 \"$f\" && echo '---SEP---'; done 2>/dev/null")
 ```
 
 From the output, parse each agent's frontmatter to extract:
@@ -133,25 +133,38 @@ State in 2-3 sentences what the user is asking for:
 
 **This is the core innovation. Instead of a hardcoded routing table, match tasks against the Capability Registry.**
 
-### Priority 1: Exact Skill Match
+### Priority 1: Skill Match (Dynamic Registry Lookup)
 
-If a task maps directly to a skill, use it. Skills are self-contained and fastest.
+Match the user's request against **skill descriptions from your Capability Registry** (built in Phase 0). Do NOT rely on a static keyword→skill table — new skills are installed constantly, and Phase 0 already captured all names and descriptions.
 
-| Signal in user request | Skill to invoke |
-|----------------------|-----------------|
-| ".pdf", "PDF" | `Skill(skill: "pdf")` |
-| ".docx", "Word document" | `Skill(skill: "docx")` |
-| ".xlsx", "spreadsheet" | `Skill(skill: "xlsx")` |
-| ".pptx", "slides", "presentation" | `Skill(skill: "pptx")` |
-| "frontend design", "landing page", "UI" | `Skill(skill: "frontend-design")` |
-| "TDD", "test-driven", "test first" | `Skill(skill: "tdd-workflow")` |
-| "security review", "security check" | `Skill(skill: "security-review")` |
-| "create a skill" | `Skill(skill: "skill-creator")` |
-| "build an MCP server" | `Skill(skill: "mcp-builder")` |
-| "algorithmic art", "generative art" | `Skill(skill: "algorithmic-art")` |
-| "commit" | Use standard commit workflow |
+**Decision process:**
+1. Scan all discovered skills' `description` fields from Phase 0
+2. If a skill's description clearly covers the user's task → candidate match
+3. **Candidate existence check**: If no skill matches, skip directly to Priority 2. Do NOT force a skill match when none exists.
+4. If multiple skills match → prefer the most specific description (skills with explicit trigger/DO NOT TRIGGER guidance rank higher)
+5. If both a skill and an agent match → apply Conflict Resolution below
 
-**Also check the system-reminder skill list** — new skills from plugins appear there. If the user's request matches a skill description, invoke it.
+### Skill vs Agent Conflict Resolution
+
+When both a skill and an agent could handle the request, evaluate three dimensions:
+
+| Dimension | → Skill | → Agent |
+|-----------|---------|---------|
+| **Scope** | Narrow (single file/function/document) | Wide (multi-file, project-wide, cross-module) |
+| **Depth** (weighted 2x) | Shallow (template, format, generate, lookup) | Deep (analyze patterns, trace dependencies, investigate, reason about code) |
+| **Interactivity** | One-shot (produce output, done) | Iterative (explore → decide → act → verify) |
+
+**Scoring:** Depth counts double. Tally: Skill-points vs Agent-points (max 4). Higher score wins.
+- Scope→Skill = 1pt, Depth→Skill = 2pt, Interactivity→Skill = 1pt → Skill total
+- Scope→Agent = 1pt, Depth→Agent = 2pt, Interactivity→Agent = 1pt → Agent total
+- Tie → ask the user one clarifying question
+
+**Special cases:**
+- **File-format deliverable** (the output IS a pdf/docx/xlsx/pptx) → Skill always wins, regardless of dimensions
+- **Methodology + implementation** (e.g. "TDD로 이 기능 구현해줘") → Skill inside Agent — skill provides methodology, agent executes
+- **Chained routing** — when a task requires two distinct steps handled by different capabilities (e.g. "PDF 읽고 보안 분석해줘"), Boss orchestrates as P3a: step 1 (Skill or Agent) → step 2 (Skill or Agent), each matched independently
+- **Ambiguous scope** → ask the user one clarifying question rather than guessing
+- **No candidate exists** → skip to next Priority level, never force-match a nonexistent skill/agent
 
 ### Priority 2: Specialist Agent Match
 
@@ -170,10 +183,22 @@ Match task requirements to agent descriptions from the registry using keyword/se
 | Standard implementation, moderate tasks | sonnet |
 | Quick lookup, exploration, simple generation | haiku |
 
-### Priority 3: Sub-Orchestrator Delegation
+### Priority 3a: Boss Direct Orchestration (Mid-sized tasks)
 
-For complex multi-step tasks requiring coordination:
-- **Multi-agent workflow needing a plan** → delegate to sisyphus or atlas
+When 2-4 agents are needed and dependencies are simple:
+- Boss spawns agents directly (parallel where independent, sequential where dependent)
+- No sub-orchestrator overhead
+- Boss verifies each result directly
+
+Criteria: task can be decomposed into ≤4 clear steps, each mappable to a single agent.
+
+Example: "리팩토링하고 코드리뷰해줘"
+→ Agent("executor refactoring", model="sonnet") then Agent("code-reviewer", model="opus")
+
+### Priority 3b: Sub-Orchestrator Delegation (Complex workflows)
+
+When 5+ agents needed OR complex dependency chains OR iterative planning required:
+- **Multi-agent workflow needing a plan** → delegate to sisyphus
 - **Execution of an existing plan** → delegate to atlas
 - **Autonomous "just do it" task** → delegate to hephaestus
 
