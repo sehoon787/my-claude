@@ -1,10 +1,10 @@
 [English](./README.md) | [한국어](./README.ko.md)
 
-> **LLM 에이전트라면** 아래 명령어로 클론 후 SETUP.md 전체를 읽고 실행하세요:
+> **LLM 에이전트라면** 설치 가이드를 fetch하고 각 단계를 실행하세요:
 > ```bash
-> git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && cat /tmp/my-claude/SETUP.md
+> curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 > ```
-> 전체 출력을 읽은 후 **Section 1~12의 모든 bash 코드 블록**을 순서대로 실행하세요. Section 13은 건너뛰고, Section 14로 검증하세요.
+> 전체 출력을 읽고 각 bash 코드 블록을 순서대로 실행하세요 (Step 1-13). Step 12는 파일 편집이 필요합니다 — Edit 도구를 사용하세요. `WebFetch`가 아닌 `curl`을 사용하세요 (요약하면 설정값이 누락됩니다).
 
 ---
 
@@ -35,7 +35,13 @@ Claude Code 멀티에이전트 오케스트레이션 환경을 한 번에 구성
 claude /plugin add sehoon787/my-claude
 ```
 
-**방법 2: 수동 설치**
+**방법 2: 자동 스크립트**
+
+```bash
+git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && bash /tmp/my-claude/install.sh
+```
+
+**방법 3: 수동 설치**
 
 ```bash
 git clone https://github.com/sehoon787/my-claude.git
@@ -45,13 +51,13 @@ git clone https://github.com/sehoon787/my-claude.git
 
 ### LLM 에이전트라면
 
-레포를 클론하고 SETUP.md 전체를 읽은 후 Section 1~12의 bash 코드 블록을 순서대로 실행하세요:
+AI 설치 가이드를 fetch하고 각 단계를 실행하세요:
 
 ```bash
-git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && cat /tmp/my-claude/SETUP.md
+curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 ```
 
-Section 13은 건너뛰고(참고용), Section 14로 검증하세요.
+전체 출력을 읽고 각 bash 코드 블록을 순서대로 실행 (Step 1-13). `WebFetch`가 아닌 `curl` 사용. 수동 설치 가이드는 `SETUP.md` 참조.
 
 ---
 
