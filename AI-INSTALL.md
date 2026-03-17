@@ -29,6 +29,23 @@ npm i -g oh-my-opencode@latest
 oh-my-opencode install --no-tui --claude=yes --openai=no --gemini=no --copilot=no
 ```
 
+## 3a. Fix OpenCode TUI crash
+
+The oh-my-opencode plugin hides OpenCode's default `build` agent, causing a TUI crash (`TypeError: agents()[0].name`). Enable the fallback builder agent:
+
+```bash
+node -e "
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const cfgPath = path.join(os.homedir(), '.config', 'opencode', 'oh-my-opencode.json');
+const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+cfg.sisyphus_agent = { ...(cfg.sisyphus_agent || {}), default_builder_enabled: true };
+fs.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2));
+console.log('OpenCode TUI fix applied: default_builder_enabled = true');
+"
+```
+
 ## 4. Install omo dependencies
 
 ```bash
@@ -155,6 +172,7 @@ echo "Agents:  $(ls ~/.claude/agents/*.md | wc -l)"
 echo "Skills:  $(ls -d ~/.claude/skills/*/ | wc -l)"
 echo "Rules:   $(find ~/.claude/rules -name '*.md' | wc -l)"
 node -e "const s=JSON.parse(require('fs').readFileSync((process.env.HOME||process.env.USERPROFILE)+'/.claude/settings.json','utf8')); console.log('Agent:', s.agent, '| Hooks:', Object.keys(s.hooks||{}).join(', '))"
+timeout 5 opencode 2>/dev/null; [ $? -ne 134 ] && echo "OpenCode TUI: OK" || echo "OpenCode TUI: CRASH"
 ```
 
 Expected output:
@@ -162,5 +180,6 @@ Expected output:
 - Skills: 30+
 - Rules: 14
 - Agent: boss | Hooks: PreToolUse, SubagentStop, Stop
+- OpenCode TUI: OK
 
 Setup complete. Boss orchestrator is ready.
