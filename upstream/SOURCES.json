@@ -4,26 +4,34 @@
     "branch": "main",
     "syncedSha": "6254154899f510eb4a4de10561fecfc1f32ff17f",
     "syncedTag": null,
-    "syncedAt": "2026-03-18T06:00:00Z",
+    "syncedAt": "2026-03-18T08:18:51Z",
     "compareUrl": "https://github.com/msitarzewski/agency-agents/compare/6254154...HEAD",
-    "files": { "agents": 172 }
+    "files": {
+      "agents": 172
+    }
   },
   "everything-claude-code": {
     "repo": "https://github.com/affaan-m/everything-claude-code",
     "branch": "main",
     "syncedSha": "fce4513d58dc723177045dd7c3a3568d5c016407",
     "syncedTag": null,
-    "syncedAt": "2026-03-18T06:00:00Z",
+    "syncedAt": "2026-03-18T08:18:51Z",
     "compareUrl": "https://github.com/affaan-m/everything-claude-code/compare/fce4513...HEAD",
-    "files": { "skills": 108, "rules": 14 }
+    "files": {
+      "skills": 108,
+      "rules": 50
+    }
   },
   "oh-my-claudecode": {
     "repo": "https://github.com/Yeachan-Heo/oh-my-claudecode",
     "branch": "main",
     "syncedSha": "7d07356366606364076addb8b3e10f3ad1f5500f",
     "syncedTag": "v4.8.2",
-    "syncedAt": "2026-03-18T06:00:00Z",
+    "syncedAt": "2026-03-18T08:18:51Z",
     "compareUrl": "https://github.com/Yeachan-Heo/oh-my-claudecode/compare/7d07356...HEAD",
-    "files": { "agents": 19, "skills": 28 }
+    "files": {
+      "agents": 19,
+      "skills": 28
+    }
   }
 }
