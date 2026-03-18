@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>my-claude — All-in-one Claude Code Multi-Agent Orchestration</title>
+<meta name="description" content="201 agents, 136 skills, 49 rules, 3 MCP servers. One plugin. Boss orchestrates, never implements.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f172a;--bg2:#1e293b;--bg3:#334155;--text:#e2e8f0;--text2:#94a3b8;--primary:#6366f1;--accent:#22d3ee;--card:rgba(30,41,59,.6);--border:rgba(99,102,241,.2);--glow:rgba(99,102,241,.15)}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none;transition:opacity .2s}
+a:hover{opacity:.8}
+code,pre{font-family:'JetBrains Mono',monospace}
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
+section{padding:80px 0}
+@media(max-width:768px){section{padding:56px 0}.container{padding:0 16px}}
+
+/* Hero */
+.hero{min-height:90vh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 40%,var(--glow),transparent);pointer-events:none}
+.hero h1{font-size:clamp(2.8rem,7vw,5rem);font-weight:800;letter-spacing:-.03em;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero .tagline{font-size:clamp(1rem,2.5vw,1.25rem);color:var(--text2);margin:16px 0 28px;max-width:540px;margin-left:auto;margin-right:auto}
+.badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+.badge{display:inline-block;padding:5px 14px;border-radius:20px;font-size:.8rem;font-weight:600;border:1px solid var(--border);background:var(--card);backdrop-filter:blur(12px)}
+.badge em{font-style:normal;color:var(--accent)}
+.cta{display:inline-block;padding:14px 36px;border-radius:12px;background:linear-gradient(135deg,var(--primary),#4f46e5);color:#fff;font-weight:600;font-size:1rem;transition:transform .2s,box-shadow .2s}
+.cta:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,.35);opacity:1}
+.hero-sub{font-size:.85rem;color:var(--text2);margin-top:16px}
+
+/* Section headings */
+.section-title{font-size:clamp(1.6rem,4vw,2.2rem);font-weight:700;text-align:center;margin-bottom:12px}
+.section-sub{text-align:center;color:var(--text2);max-width:600px;margin:0 auto 48px;font-size:.95rem}
+
+/* Cards grid */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+.card{background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:16px;padding:32px 28px;transition:transform .25s,border-color .25s}
+.card:hover{transform:translateY(-4px);border-color:var(--primary)}
+.card-icon{font-size:2rem;margin-bottom:12px;display:block}
+.card h3{font-size:1.15rem;margin-bottom:8px;color:#fff}
+.card p{color:var(--text2);font-size:.9rem}
+
+/* Flow diagram */
+.flow{display:flex;flex-direction:column;align-items:center;gap:0;position:relative;max-width:700px;margin:0 auto}
+.flow-node{background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:12px;padding:16px 28px;text-align:center;width:100%;max-width:520px;position:relative;z-index:1}
+.flow-node.highlight{border-color:var(--primary);box-shadow:0 0 24px var(--glow)}
+.flow-node h4{font-size:1rem;color:#fff;margin-bottom:4px}
+.flow-node p{font-size:.82rem;color:var(--text2)}
+.flow-arrow{width:2px;height:32px;background:linear-gradient(to bottom,var(--primary),var(--accent));position:relative;z-index:0}
+.flow-label{font-size:.7rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:4px 0 0;text-align:center}
+
+/* Priority table */
+.priority-table{width:100%;border-collapse:collapse;margin-top:32px;font-size:.88rem}
+.priority-table th,.priority-table td{padding:12px 16px;text-align:left;border-bottom:1px solid rgba(255,255,255,.06)}
+.priority-table th{color:var(--accent);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+.priority-table td:first-child{font-weight:700;color:var(--primary)}
+@media(max-width:600px){.priority-table{font-size:.78rem}.priority-table th,.priority-table td{padding:8px 10px}}
+
+/* Architecture */
+.arch{display:flex;flex-direction:column;align-items:center;gap:0;max-width:800px;margin:0 auto}
+.arch-layer{width:100%;border:1px solid var(--border);border-radius:14px;padding:20px 24px;background:var(--card);backdrop-filter:blur(12px);position:relative;z-index:1}
+.arch-layer h4{font-size:.95rem;color:var(--accent);margin-bottom:6px}
+.arch-layer p{font-size:.85rem;color:var(--text2)}
+.arch-connector{width:2px;height:24px;background:linear-gradient(to bottom,var(--primary),transparent);z-index:0}
+.arch-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%}
+.arch-row .arch-layer{text-align:center}
+@media(max-width:600px){.arch-row{grid-template-columns:1fr}}
+
+/* Catalog */
+.catalog details{margin-bottom:12px}
+.catalog summary{cursor:pointer;padding:14px 20px;background:var(--card);border:1px solid var(--border);border-radius:12px;font-weight:600;font-size:.95rem;list-style:none;display:flex;align-items:center;gap:10px;transition:border-color .2s}
+.catalog summary:hover{border-color:var(--primary)}
+.catalog summary::before{content:'>';font-family:'JetBrains Mono',monospace;color:var(--primary);font-size:.85rem;transition:transform .2s}
+.catalog details[open] summary::before{transform:rotate(90deg)}
+.catalog summary::-webkit-details-marker{display:none}
+.catalog .cat-count{margin-left:auto;font-size:.78rem;color:var(--text2);font-weight:400}
+.catalog .cat-body{padding:16px 20px;font-size:.88rem;color:var(--text2);line-height:1.7}
+
+/* Install */
+.install-block{background:rgba(15,23,42,.8);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:700px;margin:0 auto;position:relative;overflow:hidden}
+.install-block::before{content:'$';position:absolute;left:24px;top:24px;color:var(--primary);font-family:'JetBrains Mono',monospace;font-weight:700}
+.install-block pre{padding-left:24px;color:var(--accent);font-size:.88rem;white-space:pre-wrap;word-break:break-all;overflow-x:auto}
+.install-label{font-size:.78rem;color:var(--text2);text-align:center;margin-top:12px}
+
+/* Credits */
+.credits-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.credit{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;transition:border-color .2s}
+.credit:hover{border-color:var(--accent)}
+.credit h4{font-size:.92rem;margin-bottom:4px}
+.credit p{font-size:.8rem;color:var(--text2)}
+
+/* Concepts */
+.concepts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:32px}
+.concept{text-align:center;padding:20px 16px}
+.concept .num{font-size:2rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;margin-bottom:6px}
+.concept h4{font-size:.88rem;color:#fff;margin-bottom:4px}
+.concept p{font-size:.78rem;color:var(--text2)}
+
+/* Footer */
+footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:center;color:var(--text2);font-size:.82rem}
+footer a{color:var(--accent)}
+
+/* Scroll animation */
+.fade-in{opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* Korean hint styling */
+.ko{font-size:.78em;color:var(--text2);font-weight:400}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<section class="hero">
+<div class="container">
+  <h1>my-claude</h1>
+  <p class="tagline">All-in-one Claude Code Multi-Agent Orchestration<br><span class="ko">하나의 플러그인으로, 모든 에이전트를</span></p>
+  <div class="badges">
+    <span class="badge"><em>201</em>&nbsp;Agents</span>
+    <span class="badge"><em>136</em>&nbsp;Skills</span>
+    <span class="badge"><em>49</em>&nbsp;Rules</span>
+    <span class="badge"><em>3</em>&nbsp;MCP Servers</span>
+  </div>
+  <a href="https://github.com/sehoon787/my-claude" class="cta">View on GitHub</a>
+  <p class="hero-sub">MIT License &middot; Install once, get everything &middot; Weekly auto-sync</p>
+</div>
+</section>
+
+<!-- Core Principles -->
+<section id="principles">
+<div class="container">
+  <h2 class="section-title">Core Principles <span class="ko">핵심 원칙</span></h2>
+  <p class="section-sub">Three ideas that make the orchestration reliable at scale.</p>
+  <div class="cards">
+    <div class="card fade-in">
+      <span class="card-icon">&#x1f451;</span>
+      <h3>Leadership</h3>
+      <p>Boss orchestrates, <strong>never implements</strong>. Leads teams with peer-to-peer communication, dynamic composition, and file ownership protocols.</p>
+    </div>
+    <div class="card fade-in">
+      <span class="card-icon">&#x1f50d;</span>
+      <h3>Discovery</h3>
+      <p>Runtime capability matching &mdash; <strong>no hardcoded routing</strong>. Every agent, skill, and MCP server is auto-discovered at session start.</p>
+    </div>
+    <div class="card fade-in">
+      <span class="card-icon">&#x2705;</span>
+      <h3>Verification</h3>
+      <p>Trust but verify. Every subagent result is <strong>independently checked</strong> before acceptance. No self-approval in the same context.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- How Boss Works -->
+<section id="boss" style="background:rgba(15,23,42,.5)">
+<div class="container">
+  <h2 class="section-title">How Boss Works <span class="ko">보스의 작동 방식</span></h2>
+  <p class="section-sub">Boss is the dynamic meta-orchestrator. It discovers all installed components at runtime and routes tasks through a 4-priority chain.</p>
+
+  <!-- Concepts row -->
+  <div class="concepts fade-in">
+    <div class="concept">
+      <span class="num">H</span>
+      <h4>Harness</h4>
+      <p>Runtime platform (OS). Claude Code, omo</p>
+    </div>
+    <div class="concept">
+      <span class="num">O</span>
+      <h4>Orchestrator</h4>
+      <p>Coordinates agents. Never writes code. Boss, Sisyphus, Atlas</p>
+    </div>
+    <div class="concept">
+      <span class="num">A</span>
+      <h4>Agent</h4>
+      <p>Performs actual work. Debugger, executor, reviewer</p>
+    </div>
+  </div>
+
+  <!-- 4-Priority Flow -->
+  <h3 style="text-align:center;margin:48px 0 24px;font-size:1.1rem;color:var(--accent)">4-Priority Routing Chain</h3>
+  <div class="flow fade-in">
+    <div class="flow-node highlight">
+      <h4>P1 &mdash; Exact Skill Match</h4>
+      <p>"merge PDFs" &rarr; Skill("pdf")</p>
+    </div>
+    <div class="flow-arrow"></div>
+    <div class="flow-label">no match &darr;</div>
+    <div class="flow-node">
+      <h4>P2 &mdash; Specialist Agent Match</h4>
+      <p>"security audit" &rarr; Agent("Security Engineer")</p>
+    </div>
+    <div class="flow-arrow"></div>
+    <div class="flow-label">no match &darr;</div>
+    <div class="flow-node">
+      <h4>P3 &mdash; Direct / Sub-orchestrator</h4>
+      <p>P3a: Boss parallel (2-4 tasks) &middot; P3b: Sisyphus (complex) &middot; P3c: Agent Teams</p>
+    </div>
+    <div class="flow-arrow"></div>
+    <div class="flow-label">no match &darr;</div>
+    <div class="flow-node">
+      <h4>P4 &mdash; General Fallback</h4>
+      <p>"explain this" &rarr; Agent(model="sonnet")</p>
+    </div>
+  </div>
+
+  <!-- Conflict resolution note -->
+  <div style="max-width:600px;margin:40px auto 0;text-align:center" class="fade-in">
+    <h4 style="color:#fff;margin-bottom:8px;font-size:.95rem">Skill vs Agent: 3D Conflict Resolution</h4>
+    <p style="font-size:.85rem;color:var(--text2)">When both a Skill and Agent match, Boss scores across three dimensions: <strong style="color:var(--accent)">Scope</strong>, <strong style="color:var(--accent)">Depth &times; 2</strong> (double-weighted), and <strong style="color:var(--accent)">Interactivity</strong>. The higher score wins &mdash; no hardcoded priority tables.</p>
+  </div>
+</div>
+</section>
+
+<!-- Architecture -->
+<section id="architecture">
+<div class="container">
+  <h2 class="section-title">Architecture <span class="ko">아키텍처</span></h2>
+  <p class="section-sub">From user request to MCP layer &mdash; every tier has a clear responsibility.</p>
+  <div class="arch fade-in">
+    <div class="arch-layer" style="border-color:var(--accent);text-align:center">
+      <h4>User Request</h4>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-layer highlight" style="border-color:var(--primary);text-align:center">
+      <h4>Boss &mdash; Dynamic Meta-Orchestrator</h4>
+      <p>Runtime Discovery &rarr; Capability Matching &rarr; Optimal Routing</p>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-row">
+      <div class="arch-layer">
+        <h4>Sisyphus</h4>
+        <p>Sub-orchestrator + Verification</p>
+      </div>
+      <div class="arch-layer">
+        <h4>Atlas</h4>
+        <p>Task Coordination + 4-stage QA</p>
+      </div>
+      <div class="arch-layer">
+        <h4>Hephaestus</h4>
+        <p>Autonomous Execution</p>
+      </div>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-layer" style="text-align:center">
+      <h4>Behavioral Layer</h4>
+      <p>Karpathy Guidelines &middot; ECC Rules &middot; Hooks (PreToolUse / SubagentStop / Stop)</p>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-layer" style="text-align:center">
+      <h4>Specialist Agent Layer</h4>
+      <p>OMC Agents &middot; Agency Agents &middot; ECC Commands &middot; Anthropic Skills</p>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-layer" style="border-color:var(--accent);text-align:center">
+      <h4>MCP Server Layer</h4>
+      <p>Context7 (library docs) &middot; Exa (web search) &middot; grep.app (code search)</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- Agent Catalog -->
+<section id="catalog" style="background:rgba(15,23,42,.5)">
+<div class="container">
+  <h2 class="section-title">Agent Catalog <span class="ko">에이전트 목록</span></h2>
+  <p class="section-sub">201 agents across 4 tiers, from meta-orchestrator to domain specialists.</p>
+  <div class="catalog fade-in">
+    <details>
+      <summary>Core <span class="cat-count">1 agent</span></summary>
+      <div class="cat-body">
+        <strong>Boss</strong> (Opus) &mdash; Dynamic meta-orchestrator. Auto-discovers all agents, skills, and MCP at runtime. Routes to the optimal specialist via 4-priority chain. Never writes code directly.
+      </div>
+    </details>
+    <details>
+      <summary>OMO Agents <span class="cat-count">9 agents</span></summary>
+      <div class="cat-body">
+        <strong>Sisyphus</strong> (Opus) &mdash; Sub-orchestrator with intent classification and verification<br>
+        <strong>Hephaestus</strong> (Opus) &mdash; Autonomous explore &rarr; plan &rarr; execute &rarr; verify cycles<br>
+        <strong>Metis</strong> (Opus) &mdash; Pre-execution intent analysis, AI-slop prevention<br>
+        <strong>Atlas</strong> (Opus) &mdash; Task decomposition with 4-stage QA cycle<br>
+        <strong>Oracle</strong> (Opus) &mdash; Strategic technical advisor, read-only<br>
+        <strong>Momus</strong> (Opus) &mdash; Task plan reviewer with approval bias<br>
+        <strong>Prometheus</strong> (Opus) &mdash; Interview-based planning consultant<br>
+        <strong>Librarian</strong> (Sonnet) &mdash; Documentation research via MCP<br>
+        <strong>Multimodal-Looker</strong> (Sonnet) &mdash; Visual analysis of images and screenshots
+      </div>
+    </details>
+    <details>
+      <summary>OMC Agents <span class="cat-count">19 agents</span></summary>
+      <div class="cat-body">
+        analyst, architect, code-reviewer, code-simplifier, critic, debugger, designer, document-specialist, executor, explore, git-master, planner, qa-tester, scientist, security-reviewer, test-engineer, tracer, verifier, writer
+      </div>
+    </details>
+    <details>
+      <summary>Agency Agents <span class="cat-count">172 agents</span></summary>
+      <div class="cat-body">
+        172 business specialist personas across 14 categories: Engineering (22), Testing (8), Design (8), Product (4), Data &amp; Analytics, Research, Operations, Marketing, Finance, Legal, HR, Education, Healthcare, and more. All use claude-sonnet-4-6.
+      </div>
+    </details>
+  </div>
+</div>
+</section>
+
+<!-- Quick Install -->
+<section id="install">
+<div class="container">
+  <h2 class="section-title">Quick Install <span class="ko">빠른 설치</span></h2>
+  <p class="section-sub">One command to install everything.</p>
+  <div class="install-block fade-in">
+    <pre>git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude &amp;&amp; bash /tmp/my-claude/install.sh &amp;&amp; rm -rf /tmp/my-claude</pre>
+  </div>
+  <p class="install-label">Or install as a Claude Code plugin:</p>
+  <div class="install-block fade-in" style="margin-top:12px">
+    <pre>/plugin marketplace add sehoon787/my-claude
+/plugin install my-claude@my-claude</pre>
+  </div>
+</div>
+</section>
+
+<!-- Open Source Credits -->
+<section id="credits" style="background:rgba(15,23,42,.5)">
+<div class="container">
+  <h2 class="section-title">Open Source Credits <span class="ko">오픈소스 크레딧</span></h2>
+  <p class="section-sub">Built on the shoulders of these projects.</p>
+  <div class="credits-grid fade-in">
+    <a class="credit" href="https://github.com/Yeachan-Heo/oh-my-claudecode">
+      <h4>oh-my-claudecode</h4>
+      <p>Yeachan Heo &mdash; Multi-agent orchestration for Claude Code</p>
+    </a>
+    <a class="credit" href="https://github.com/code-yeongyu/oh-my-openagent">
+      <h4>oh-my-openagent</h4>
+      <p>code-yeongyu &mdash; Multi-platform agent harness</p>
+    </a>
+    <a class="credit" href="https://github.com/forrestchang/andrej-karpathy-skills">
+      <h4>andrej-karpathy-skills</h4>
+      <p>forrestchang &mdash; Karpathy's AI coding guidelines</p>
+    </a>
+    <a class="credit" href="https://github.com/affaan-m/everything-claude-code">
+      <h4>everything-claude-code</h4>
+      <p>affaan-m &mdash; Skills, agents, commands, rules</p>
+    </a>
+    <a class="credit" href="https://github.com/anthropics/skills">
+      <h4>anthropic/skills</h4>
+      <p>Anthropic &mdash; Official agent skills (PDF, DOCX, MCP)</p>
+    </a>
+    <a class="credit" href="https://github.com/msitarzewski/agency-agents">
+      <h4>agency-agents</h4>
+      <p>msitarzewski &mdash; 172 business specialist personas</p>
+    </a>
+  </div>
+</div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <p>MIT License &middot; <a href="https://github.com/sehoon787/my-claude">github.com/sehoon787/my-claude</a></p>
+    <p style="margin-top:6px;font-size:.75rem">Install once, get everything. <span class="ko">한 번 설치하면 모든 것을.</span></p>
+  </div>
+</footer>
+
+<script>
+// Minimal intersection observer for fade-in
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target)}})},{threshold:.15});
+document.querySelectorAll('.fade-in').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
