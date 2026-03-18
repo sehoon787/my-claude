@@ -30,6 +30,10 @@ section{padding:80px 0}
 .nav-lang{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:4px 12px;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--text);transition:border-color .2s}
 .nav-lang:hover{border-color:var(--primary)}
 .nav-lang .active{color:var(--accent)}
+.float-lang{position:fixed;top:16px;right:16px;z-index:998;background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:16px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--text);transition:opacity .3s,border-color .2s}
+.float-lang:hover{border-color:var(--primary)}
+.float-lang .active{color:var(--accent)}
+.float-lang.hidden{opacity:0;pointer-events:none}
 @media(max-width:768px){.nav-links{display:none}}
 
 /* Hero */
@@ -173,6 +177,9 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
 </style>
 </head>
 <body>
+<button class="float-lang" id="floatLang" onclick="toggleLang()" aria-label="Toggle language">
+  <span id="flt-en" class="active">EN</span> | <span id="flt-ko">KO</span>
+</button>
 
 <!-- Sticky Nav -->
 <nav class="nav" id="navbar">
@@ -199,7 +206,7 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
   <p class="tagline">
     <span class="lang" data-en="Boss scans your system at runtime, matches capabilities, and routes every task to the perfect agent. No config files. No boilerplate." data-ko="Boss는 런타임에 시스템을 스캔하고, 능력을 매칭하여 모든 작업을 최적의 에이전트에 라우팅합니다. 설정 파일도, 보일러플레이트도 없습니다."></span>
   </p>
-  <p class="stat-tagline"><em data-count="201">0</em> agents · <em data-count="136">0</em> skills · <em data-count="49">0</em> rules · <em>3</em> MCP</p>
+  <p class="stat-tagline"><em data-count="201">0</em> <span class="lang" data-en="agents" data-ko="에이전트"></span> · <em data-count="136">0</em> <span class="lang" data-en="skills" data-ko="스킬"></span> · <em data-count="49">0</em> <span class="lang" data-en="rules" data-ko="규칙"></span> · <em>3</em> MCP</p>
   <div class="badges">
     <span class="badge"><span class="lang" data-en="Zero Configuration" data-ko="무설정"></span></span>
     <span class="badge"><span class="lang" data-en="Runtime Discovery" data-ko="런타임 탐색"></span></span>
@@ -210,7 +217,7 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
     <a href="https://github.com/sehoon787/my-claude" class="cta"><span class="lang" data-en="View on GitHub" data-ko="GitHub에서 보기"></span></a>
     <a href="#install" class="cta secondary"><span class="lang" data-en="Quick Install" data-ko="빠른 설치"></span></a>
   </div>
-  <p class="hero-sub"><span class="lang" data-en="Trusted by developers using Claude Code worldwide" data-ko="전 세계 Claude Code 사용자들이 신뢰합니다"></span> · MIT License · Weekly Auto-sync</p>
+  <p class="hero-sub"><span class="lang" data-en="Trusted by developers using Claude Code worldwide" data-ko="전 세계 Claude Code 사용자들이 신뢰합니다"></span> · MIT · <span class="lang" data-en="Weekly Auto-sync" data-ko="매주 자동 동기화"></span></p>
 </div>
 </section>
 
@@ -253,35 +260,35 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
       <div class="term-bar"><div class="term-dot" style="background:#ef4444"></div><div class="term-dot" style="background:#eab308"></div><div class="term-dot" style="background:var(--green)"></div></div>
       <div class="term-body">
         <div class="term-scene active" data-scene="0">
-          <div class="term-line t-dim">$ claude "analyze auth module for security vulnerabilities"</div>
+          <div class="term-line t-dim">$ claude "<span class="lang" data-en="analyze auth module for security vulnerabilities" data-ko="auth 모듈 보안 취약점 분석해줘"></span>"</div>
           <div class="term-line"></div>
-          <div class="term-line t-phase">── Phase 0: Discovery ──</div>
-          <div class="term-line t-boss">[Boss] Scanning... 201 agents, 136 skills, 3 MCP servers ready.</div>
-          <div class="term-line t-phase">── Phase 1: Classification ──</div>
-          <div class="term-line t-boss">[Boss] Intent: Security Analysis | Scope: Read-only | Priority: P2</div>
-          <div class="term-line t-phase">── Phase 2: Delegation ──</div>
-          <div class="term-line t-boss">[Boss] Matched: security-reviewer (sonnet) — spawning...</div>
+          <div class="term-line t-phase">── Phase 0: <span class="lang" data-en="Discovery" data-ko="탐색"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Scanning... 201 agents, 136 skills, 3 MCP servers ready." data-ko="스캔 중... 201 에이전트, 136 스킬, 3 MCP 서버 준비 완료."></span></div>
+          <div class="term-line t-phase">── Phase 1: <span class="lang" data-en="Classification" data-ko="분류"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Intent: Security Analysis | Scope: Read-only | Priority: P2" data-ko="의도: 보안 분석 | 범위: 읽기 전용 | 우선순위: P2"></span></div>
+          <div class="term-line t-phase">── Phase 2: <span class="lang" data-en="Delegation" data-ko="위임"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Matched: security-reviewer (sonnet) — spawning..." data-ko="매칭: security-reviewer (sonnet) — 생성 중..."></span></div>
           <div class="term-line t-dim">──────────────────────────────────────────────</div>
-          <div class="term-line t-exec">[security-reviewer] Scanning auth module... OWASP Top 10 check</div>
-          <div class="term-line t-exec">[security-reviewer] Found: 2 critical, 1 medium vulnerability</div>
-          <div class="term-line t-phase">── Phase 4: Verification ──</div>
-          <div class="term-line t-rev">[verifier] Cross-referencing findings... all confirmed.</div>
-          <div class="term-line t-acc">[Boss] Done. Report delivered with remediation steps.</div>
+          <div class="term-line t-exec">[security-reviewer] <span class="lang" data-en="Scanning auth module... OWASP Top 10 check" data-ko="auth 모듈 스캔 중... OWASP Top 10 체크"></span></div>
+          <div class="term-line t-exec">[security-reviewer] <span class="lang" data-en="Found: 2 critical, 1 medium vulnerability" data-ko="발견: 2 critical, 1 medium 취약점"></span></div>
+          <div class="term-line t-phase">── Phase 4: <span class="lang" data-en="Verification" data-ko="검증"></span> ──</div>
+          <div class="term-line t-rev">[verifier] <span class="lang" data-en="Cross-referencing findings... all confirmed." data-ko="결과 교차 검증 중... 모두 확인됨."></span></div>
+          <div class="term-line t-acc">[Boss] <span class="lang" data-en="Done. Report delivered with remediation steps." data-ko="완료. 수정 방안을 포함한 리포트 전달됨."></span></div>
         </div>
         <div class="term-scene" data-scene="1">
-          <div class="term-line t-dim">$ claude "리팩토링하고 코드리뷰해줘"</div>
+          <div class="term-line t-dim">$ claude "<span class="lang" data-en="refactor and code review please" data-ko="리팩토링하고 코드리뷰해줘"></span>"</div>
           <div class="term-line"></div>
-          <div class="term-line t-phase">── Phase 0: Discovery ──</div>
-          <div class="term-line t-boss">[Boss] Scanning... 201 agents, 136 skills, 3 MCP ready.</div>
-          <div class="term-line t-phase">── Phase 1: Classification ──</div>
-          <div class="term-line t-boss">[Boss] Intent: Refactor + Review | Multi-step → P3a Orchestration</div>
-          <div class="term-line t-phase">── Phase 2: Delegation ──</div>
-          <div class="term-line t-boss">[Boss] Spawning executor (sonnet) for refactoring...</div>
+          <div class="term-line t-phase">── Phase 0: <span class="lang" data-en="Discovery" data-ko="탐색"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Scanning... 201 agents, 136 skills, 3 MCP ready." data-ko="스캔 중... 201 에이전트, 136 스킬, 3 MCP 준비 완료."></span></div>
+          <div class="term-line t-phase">── Phase 1: <span class="lang" data-en="Classification" data-ko="분류"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Intent: Refactor + Review | Multi-step → P3a Orchestration" data-ko="의도: 리팩토링 + 리뷰 | 멀티스텝 → P3a 오케스트레이션"></span></div>
+          <div class="term-line t-phase">── Phase 2: <span class="lang" data-en="Delegation" data-ko="위임"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Spawning executor (sonnet) for refactoring..." data-ko="리팩토링을 위해 executor (sonnet) 생성 중..."></span></div>
           <div class="term-line t-dim">──────────────────────────────────────────────</div>
-          <div class="term-line t-exec">[executor] Refactoring auth module... 3 files changed.</div>
-          <div class="term-line t-boss">[Boss] Verifying... then spawning code-reviewer (opus)...</div>
-          <div class="term-line t-rev">[code-reviewer] LGTM. 0 critical, 1 medium issue found.</div>
-          <div class="term-line t-acc">[Boss] All tasks completed and verified.</div>
+          <div class="term-line t-exec">[executor] <span class="lang" data-en="Refactoring auth module... 3 files changed." data-ko="auth 모듈 리팩토링 중... 3개 파일 변경."></span></div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Verifying... then spawning code-reviewer (opus)..." data-ko="검증 중... code-reviewer (opus) 생성 중..."></span></div>
+          <div class="term-line t-rev">[code-reviewer] <span class="lang" data-en="LGTM. 0 critical, 1 medium issue found." data-ko="LGTM. 0 critical, 1 medium 이슈 발견."></span></div>
+          <div class="term-line t-acc">[Boss] <span class="lang" data-en="All tasks completed and verified." data-ko="모든 작업 완료 및 검증됨."></span></div>
         </div>
       </div>
     </div>
@@ -298,22 +305,22 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
     <div class="pri-card" style="border-color:var(--green);background:rgba(52,211,153,.06)">
       <h4 style="color:var(--green)">P1</h4>
       <p><span class="lang" data-en="Exact Skill Match" data-ko="정확한 스킬 매칭"></span></p>
-      <div class="ex">"merge PDFs" → pdf skill</div>
+      <div class="ex"><span class="lang" data-en='"merge PDFs" → pdf skill' data-ko='"PDF 합쳐줘" → pdf 스킬'></span></div>
     </div>
     <div class="pri-card" style="border-color:var(--primary);background:rgba(129,140,248,.06)">
       <h4 style="color:var(--primary)">P2</h4>
       <p><span class="lang" data-en="Specialist Agent" data-ko="전문 에이전트"></span></p>
-      <div class="ex">"security audit" → Security Engineer</div>
+      <div class="ex"><span class="lang" data-en='"security audit" → Security Engineer' data-ko='"보안 감사" → Security Engineer'></span></div>
     </div>
     <div class="pri-card" style="border-color:#a855f7;background:rgba(168,85,247,.06)">
       <h4 style="color:#a855f7">P3</h4>
       <p><span class="lang" data-en="Direct / Sub-orchestrator" data-ko="직접 / 서브 오케스트레이터"></span></p>
-      <div class="ex">P3a: Boss parallel · P3b: Sisyphus · P3c: Teams</div>
+      <div class="ex"><span class="lang" data-en="P3a: Boss parallel · P3b: Sisyphus · P3c: Teams" data-ko="P3a: Boss 병렬 · P3b: Sisyphus · P3c: 팀"></span></div>
     </div>
     <div class="pri-card" style="border-color:var(--bg3);background:rgba(30,41,59,.3)">
       <h4 style="color:var(--text2)">P4</h4>
       <p><span class="lang" data-en="General Fallback" data-ko="일반 폴백"></span></p>
-      <div class="ex">"explain this" → sonnet agent</div>
+      <div class="ex"><span class="lang" data-en='"explain this" → sonnet agent' data-ko='"이거 설명해줘" → sonnet 에이전트'></span></div>
     </div>
   </div>
 </div>
@@ -449,7 +456,7 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
   https://github.com/sehoon787/my-claude \
   /tmp/my-claude
 bash /tmp/my-claude/install.sh
-<em># That's it. You're done.</em></pre>
+<em># <span class="lang" data-en="That's it. You're done." data-ko="끝. 설치 완료."></span></em></pre>
     </div>
     <div class="feat-card">
       <span class="fc-icon">&#x1f6a7;</span>
@@ -533,12 +540,12 @@ bash /tmp/my-claude/install.sh
   <h2 class="st"><span class="lang" data-en="Open Source Credits" data-ko="오픈소스 크레딧"></span><span class="lang-sub"><span class="lang" data-en="오픈소스 크레딧" data-ko="Open Source Credits"></span></span></h2>
   <p class="ss"><span class="lang" data-en="Built on the shoulders of these projects." data-ko="이 프로젝트들의 기반 위에 구축되었습니다."></span></p>
   <div class="credits-grid fade-in">
-    <a class="credit" href="https://github.com/Yeachan-Heo/oh-my-claudecode"><h4>oh-my-claudecode</h4><p>Yeachan Heo — Multi-agent orchestration for Claude Code</p></a>
-    <a class="credit" href="https://github.com/code-yeongyu/oh-my-openagent"><h4>oh-my-openagent</h4><p>code-yeongyu — Multi-platform agent harness</p></a>
-    <a class="credit" href="https://github.com/forrestchang/andrej-karpathy-skills"><h4>andrej-karpathy-skills</h4><p>forrestchang — Karpathy's AI coding guidelines</p></a>
-    <a class="credit" href="https://github.com/affaan-m/everything-claude-code"><h4>everything-claude-code</h4><p>affaan-m — Skills, agents, commands, rules</p></a>
-    <a class="credit" href="https://github.com/anthropics/skills"><h4>anthropic/skills</h4><p>Anthropic — Official agent skills (PDF, DOCX, MCP)</p></a>
-    <a class="credit" href="https://github.com/msitarzewski/agency-agents"><h4>agency-agents</h4><p>msitarzewski — 172 business specialist personas</p></a>
+    <a class="credit" href="https://github.com/Yeachan-Heo/oh-my-claudecode"><h4>oh-my-claudecode</h4><p><span class="lang" data-en="Yeachan Heo — Multi-agent orchestration for Claude Code" data-ko="Yeachan Heo — Claude Code 멀티에이전트 오케스트레이션"></span></p></a>
+    <a class="credit" href="https://github.com/code-yeongyu/oh-my-openagent"><h4>oh-my-openagent</h4><p><span class="lang" data-en="code-yeongyu — Multi-platform agent harness" data-ko="code-yeongyu — 멀티플랫폼 에이전트 하네스"></span></p></a>
+    <a class="credit" href="https://github.com/forrestchang/andrej-karpathy-skills"><h4>andrej-karpathy-skills</h4><p><span class="lang" data-en="forrestchang — Karpathy's AI coding guidelines" data-ko="forrestchang — Karpathy AI 코딩 가이드라인"></span></p></a>
+    <a class="credit" href="https://github.com/affaan-m/everything-claude-code"><h4>everything-claude-code</h4><p><span class="lang" data-en="affaan-m — Skills, agents, commands, rules" data-ko="affaan-m — 스킬, 에이전트, 커맨드, 규칙"></span></p></a>
+    <a class="credit" href="https://github.com/anthropics/skills"><h4>anthropic/skills</h4><p><span class="lang" data-en="Anthropic — Official agent skills (PDF, DOCX, MCP)" data-ko="Anthropic — 공식 에이전트 스킬 (PDF, DOCX, MCP)"></span></p></a>
+    <a class="credit" href="https://github.com/msitarzewski/agency-agents"><h4>agency-agents</h4><p><span class="lang" data-en="msitarzewski — 172 business specialist personas" data-ko="msitarzewski — 172개 비즈니스 전문가 페르소나"></span></p></a>
   </div>
 </div>
 </section>
@@ -559,6 +566,8 @@ function setLang(l){
   document.querySelectorAll('.lang').forEach(el=>{el.textContent=el.dataset[l]||''});
   document.getElementById('lt-en').className=l==='en'?'active':'';
   document.getElementById('lt-ko').className=l==='ko'?'active':'';
+  document.getElementById('flt-en').className=l==='en'?'active':'';
+  document.getElementById('flt-ko').className=l==='ko'?'active':'';
 }
 function toggleLang(){setLang(lang==='en'?'ko':'en')}
 setLang(lang);
@@ -580,6 +589,7 @@ document.querySelectorAll('.fade-in').forEach(el=>io.observe(el));
 window.addEventListener('scroll',()=>{
   const y=window.scrollY;
   nav.classList.toggle('visible',y>heroH*0.6);
+  document.getElementById('floatLang').classList.toggle('hidden',y>heroH*0.6);
   let current='';
   sections.forEach(s=>{if(y>=s.offsetTop-120)current=s.id});
   navLinks.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+current)});
