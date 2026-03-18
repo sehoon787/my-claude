@@ -86,8 +86,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ### 멀티에이전트 오케스트레이션
 - **Boss 동적 메타 오케스트레이터**: 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지 — 3D 충돌 해결(Scope/Depth×2/Interactivity)로 최적 라우팅. 중간 규모 작업은 서브 오케스트레이터 없이 직접 조율(P3a)
-- **Sisyphus 서브 오케스트레이터**: 의도 분류와 검증 프로토콜로 복잡한 멀티스텝 워크플로우 관리
-- **Hephaestus 자율 워커**: 탐색 → 계획 → 실행 → 검증 사이클을 중단 없이 자율 수행
+- **서브 오케스트레이터 (P3b)**: 직접 처리하기 너무 복잡한 작업은 Boss가 Sisyphus(계획+검증), Atlas(태스크 조율), Hephaestus(자율 실행)에 위임 — 복잡한 멀티스텝 워크플로우 전용이며 모든 요청을 거치지 않음
 - **Skill vs Agent 충돌 해결**: 가중 3차원 스코어링(Scope, Depth×2, Interactivity)으로 각 작업에 Skill/Agent 여부를 판단 — 하드코딩 라우팅 테이블 없음
 - **모델 최적화 라우팅**: 작업 복잡도에 따라 Opus(고난도) / Sonnet(구현) / Haiku(탐색) 자동 선택
 
@@ -109,7 +108,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ## my-claude 에이전트
 
-1개의 Core 에이전트(Boss 메타 오케스트레이터) + [oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent)에서 포팅된 9개 omo 에이전트입니다. 플러그인에 번들된 전체 201개 에이전트 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
+1개의 Core 에이전트(Boss 메타 오케스트레이터) + [oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent)에서 포팅된 9개 omo 에이전트입니다. 플러그인에는 172개 Agency 에이전트와 19개 OMC 에이전트도 번들되어 있으며, Boss가 Priority 2 능력 매칭으로 이 풀에서 최적의 전문가를 선택합니다. 전체 201개 에이전트 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
 
 | 에이전트 | 모델 | 역할 |
 |---------|------|------|

@@ -87,8 +87,7 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 ### Multi-Agent Orchestration
 - **Boss Dynamic Meta-Orchestrator**: Auto-discovers all installed agents, skills, and MCP servers at runtime — routes tasks via 3D conflict resolution (Scope/Depth×2/Interactivity). Handles mid-sized tasks directly (P3a) without sub-orchestrator overhead
 - **Agent Teams Direct Leadership**: Boss can lead Agent Teams directly (Priority 3c-DIRECT) with peer-to-peer teammate communication, file ownership protocol, and Review Chain patterns for quality assurance
-- **Sisyphus Sub-Orchestrator**: Manages complex multi-step workflows with intent classification and verification protocols
-- **Hephaestus Autonomous Worker**: Continuously performs explore → plan → execute → verify cycles without interruption
+- **Sub-Orchestrators (P3b)**: When tasks are too complex for direct handling, Boss delegates to Sisyphus (planning+verification), Atlas (task coordination), or Hephaestus (autonomous execution) — only for complex multi-step workflows, not every request
 - **Skill vs Agent Conflict Resolution**: Weighted 3-dimensional scoring (Scope, Depth×2, Interactivity) determines whether to use a Skill or Agent for each task — no hardcoded routing tables
 - **Model-Optimized Routing**: Automatically selects Opus (high complexity) / Sonnet (implementation) / Haiku (exploration) based on task complexity
 
@@ -112,7 +111,7 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 
 ## my-claude Agents
 
-1 core agent (Boss meta-orchestrator) + 9 omo agents (ported from [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)). The plugin also bundles 172 agency agents and 19 OMC agents — see [Installed Components](#installed-components) below.
+1 core agent (Boss meta-orchestrator) + 9 omo agents (ported from [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)). The plugin also bundles 172 agency agents and 19 OMC agents — Boss selects the best-matching specialist from this pool via Priority 2 capability matching. See [Installed Components](#installed-components) below.
 
 | Agent | Model | Role |
 |---------|------|------|
