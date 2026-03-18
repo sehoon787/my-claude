@@ -129,6 +129,7 @@ State in 2-3 sentences what the user is asking for:
 | **Document** | Create/edit documents (PDF, DOCX, PPTX, XLSX) | Direct skill invocation |
 | **Design** | Visual design, UI, brand work | Design agents + design skills |
 | **Testing** | Test creation, coverage, QA | Testing agents + TDD skill |
+| **Team-work** | 5+ parallel agents, inter-agent coordination, shared files | Agent Teams via `/team` skill |
 
 ### Step 3: Validate Classification
 - Does the intent match the user's tone and urgency?
@@ -212,6 +213,30 @@ When 5+ agents needed OR complex dependency chains OR iterative planning require
 - **Execution of an existing plan** → delegate to atlas
 - **Autonomous "just do it" task** → delegate to hephaestus
 
+### Priority 3c: Agent Teams (Inter-agent communication required)
+
+When teammates need to **communicate directly** with each other, share intermediate results,
+or coordinate on overlapping files across long-running work:
+- Invoke the team skill: `Skill(skill: "team")` or with args for specific configuration
+- The team skill handles all orchestration: TeamCreate, teammate spawning, shared task list, SendMessage, shutdown, cleanup
+- Boss acts as the **team leader** automatically (via `"agent": "boss"` in settings.json)
+
+**Decision: Agent Teams vs Subagents**
+
+| Signal | → Agent Teams | → Subagents |
+|--------|--------------|-------------|
+| **Inter-agent communication** | Needed (share intermediate results, peer review) | Not needed (report only to Boss) |
+| **Task persistence** | Long-running (teammates do multiple tasks) | Short (complete and terminate) |
+| **File overlap** | Teammates may edit overlapping files | Completely separate files |
+| **Cost tolerance** | Higher (each teammate = separate Claude instance) | Lower (results summarized back) |
+| **Task count** | 5-20 parallel tasks | 1-4 focused tasks |
+
+**When NOT to use teams:**
+- Trivial tasks (< 5 min)
+- Single-agent tasks (no coordination needed)
+- Read-only analysis (subagents are cheaper)
+- When `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` env var is not set → fall back to Priority 3b
+
 ### Priority 4: General-Purpose Fallback
 
 When no specialist matches:
@@ -257,6 +282,14 @@ Agent(subagent_type="general-purpose", model="sonnet") — implementation
 Agent(description="sisyphus orchestration: [workflow]", model="opus")
 Agent(description="atlas task coordination: [plan]", model="opus")
 ```
+
+**Method E: Agent Teams via skill** (for collaborative multi-agent work)
+```
+Skill(skill: "team", args: "[N]:[agent-type] '[task description]'")
+```
+The team skill manages TeamCreate, teammate spawning, shared task list, inter-agent messaging,
+and cleanup. Boss monitors via shared task list and acts as team leader.
+Boss can message teammates directly or broadcast to all.
 
 ### 6-Section Delegation Prompt (mandatory for Method B and D)
 
