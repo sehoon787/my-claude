@@ -143,6 +143,7 @@ jobs:
             printf '| everything-claude-code | `%s` | %s | %s skills, %s rules |\n' "${ECC_SHA:0:7}" "$ECC_TAG" "$ECC_SKILLS" "$ECC_RULES" >> /tmp/pr-body.md
             printf '| oh-my-claudecode | `%s` | %s | %s agents, %s skills |\n' "${OMC_SHA:0:7}" "$OMC_TAG" "$OMC_AGENTS" "$OMC_SKILLS" >> /tmp/pr-body.md
             printf '\nReview agent/skill diffs before merging.\n' >> /tmp/pr-body.md
+            gh label create "auto-sync" --description "Automated upstream sync" --color "0E8A16" 2>/dev/null || true
             gh pr create \
               --title "chore: sync upstream ($(date +%Y-%m-%d))" \
               --body-file /tmp/pr-body.md \
