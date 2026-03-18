@@ -74,6 +74,7 @@ id: f3a8c5d2-7b91-4e2a-b6c1-9d4e8f2a1b3c
 status: stable
 level: high
 description: |
+model: claude-sonnet-4-6
   Detects PowerShell execution with encoded commands, a common technique
   used by attackers to obfuscate malicious payloads and bypass simple
   command-line logging detections.
