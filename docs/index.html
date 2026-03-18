@@ -362,12 +362,12 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
     <div class="arch-conn"></div>
     <div class="arch-layer boss-glow" style="border-color:var(--primary)"><h4 style="color:var(--primary)">Boss<span class="cnt">1</span></h4><p><span class="lang" data-en="Dynamic Meta-Orchestrator: Runtime Discovery → Capability Matching → Optimal Routing" data-ko="동적 메타 오케스트레이터: 런타임 탐색 → 능력 매칭 → 최적 라우팅"></span></p></div>
     <div class="arch-conn"></div>
+    <div style="text-align:center;font-size:0.78em;color:var(--text2);margin:4px 0"><span class="lang" data-en="↓ Boss routes to one of these paths based on task complexity" data-ko="↓ Boss가 작업 복잡도에 따라 아래 경로 중 하나로 라우팅"></span></div>
     <div class="arch-row">
-      <div class="arch-layer" style="opacity:0.7"><h4 style="color:#a78bfa">Sisyphus <span style="font-size:0.7em;color:var(--text2)"><span class="lang" data-en="P3b only" data-ko="P3b 전용"></span></span></h4><p><span class="lang" data-en="Sub-orchestrator + Verification" data-ko="서브 오케스트레이터 + 검증"></span></p></div>
-      <div class="arch-layer" style="opacity:0.7"><h4 style="color:#a78bfa">Atlas <span style="font-size:0.7em;color:var(--text2)"><span class="lang" data-en="P3b only" data-ko="P3b 전용"></span></span></h4><p><span class="lang" data-en="Task Coordination + 4-stage QA" data-ko="태스크 조정 + 4단계 QA"></span></p></div>
-      <div class="arch-layer" style="opacity:0.7"><h4 style="color:#a78bfa">Hephaestus <span style="font-size:0.7em;color:var(--text2)"><span class="lang" data-en="P3b only" data-ko="P3b 전용"></span></span></h4><p><span class="lang" data-en="Autonomous Execution" data-ko="자율 실행"></span></p></div>
+      <div class="arch-layer"><h4 style="color:var(--green)">P3a<span class="cnt"><span class="lang" data-en="Direct" data-ko="직접"></span></span></h4><p><span class="lang" data-en="Boss spawns 2-4 agents in parallel" data-ko="Boss가 2-4개 에이전트 병렬 생성"></span></p></div>
+      <div class="arch-layer"><h4 style="color:#a78bfa">P3b<span class="cnt"><span class="lang" data-en="Sub-orch" data-ko="서브오케"></span></span></h4><p><span class="lang" data-en="Sisyphus · Atlas · Hephaestus" data-ko="Sisyphus · Atlas · Hephaestus"></span></p></div>
+      <div class="arch-layer"><h4 style="color:var(--pink)">P3c<span class="cnt"><span class="lang" data-en="Teams" data-ko="팀"></span></span></h4><p><span class="lang" data-en="Agent Teams with P2P communication" data-ko="P2P 통신 기반 에이전트 팀"></span></p></div>
     </div>
-    <div style="text-align:center;font-size:0.78em;color:var(--text2);margin:-8px 0 4px"><span class="lang" data-en="↑ Complex workflows only — Boss routes here via P3b, not for every request" data-ko="↑ 복잡한 워크플로우 전용 — Boss가 P3b 경로로만 여기에 라우팅. 모든 요청을 거치지 않음"></span></div>
     <div class="arch-conn"></div>
     <div class="arch-layer"><h4><span class="lang" data-en="Behavioral Layer" data-ko="행동 규칙 레이어"></span><span class="cnt">49 rules</span></h4><p>Karpathy Guidelines · ECC Rules · Hooks</p></div>
     <div class="arch-conn"></div>
