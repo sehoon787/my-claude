@@ -14,6 +14,13 @@ Only 2-3 steps are needed.
 /plugin install my-claude@my-claude
 ```
 
+After plugin install, set Boss as default agent:
+
+```bash
+# Set Boss as default agent (one-time setup)
+node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir(),'.claude','settings.json');const s=fs.existsSync(f)?JSON.parse(fs.readFileSync(f,'utf8')):{};s.env={...s.env,CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:'1'};s.agent=s.agent||'boss';fs.writeFileSync(f,JSON.stringify(s,null,2))"
+```
+
 This installs:
 - 201 agents (10 core + 172 agency + 19 OMC)
 - 136 skills (108 ECC + 28 OMC)
@@ -40,7 +47,14 @@ claude mcp add --transport http --scope user grep_app "https://mcp.grep.app"
 rm -rf /tmp/my-claude
 ```
 
-Note: Manual install does not configure hooks or default agent. See SETUP.md Section 7 Option D for hooks setup.
+After manual install, set Boss as default agent:
+
+```bash
+# Set Boss as default agent (one-time setup)
+node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir(),'.claude','settings.json');const s=fs.existsSync(f)?JSON.parse(fs.readFileSync(f,'utf8')):{};s.env={...s.env,CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:'1'};s.agent=s.agent||'boss';fs.writeFileSync(f,JSON.stringify(s,null,2))"
+```
+
+Note: Manual install does not configure hooks. Run the node command above to set Boss as default agent. See SETUP.md Section 7 Option D for hooks setup.
 
 ## Step 2: Install companion tools
 
