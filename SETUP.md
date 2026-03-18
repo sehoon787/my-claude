@@ -455,9 +455,9 @@ Get a free key (1k requests/month) from [dashboard.exa.ai](https://dashboard.exa
 
 ---
 
-## 7. Install my-claude Plugin (Sisyphus Orchestration)
+## 7. Install my-claude Plugin (Boss Orchestration)
 
-This repo is a **Claude Code plugin** that provides 9 omo agents, behavioral correction hooks, and MCP server configuration.
+This repo is a **Claude Code plugin** that provides the Boss meta-orchestrator (core), 9 omo sub-agents, behavioral correction hooks, and MCP server configuration.
 
 ### Option A: Plugin install from GitHub (recommended)
 
@@ -477,10 +477,11 @@ This repo is a **Claude Code plugin** that provides 9 omo agents, behavioral cor
 ```
 
 **What gets installed:**
-- 9 agents (Sisyphus, Hephaestus, Metis, Atlas, Oracle, Momus, Prometheus, Librarian, Multimodal-Looker)
-- 3 behavioral correction hooks (delegation guard, subagent verification, completion check)
+- 1 core agent (Boss — dynamic meta-orchestrator)
+- 9 omo agents (Sisyphus, Hephaestus, Metis, Atlas, Oracle, Momus, Prometheus, Librarian, Multimodal-Looker)
+- 6 behavioral correction hooks (SessionStart, delegation guard, subagent verification, teammate idle, task completed, completion check)
 - 3 MCP servers (Context7, Exa, grep.app)
-- Default agent: Sisyphus (main orchestrator)
+- Default agent: Boss (main orchestrator)
 
 ### Option B: Local plugin install (for private repos or local clones)
 
