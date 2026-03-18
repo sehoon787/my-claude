@@ -1215,6 +1215,20 @@ Done
 
 ---
 
+### Agent Teams (Experimental)
+
+Boss acts as the Agent Teams leader, enabling teammate-to-teammate direct communication:
+
+1. Enabled automatically via plugin `settings.json`:
+   ```json
+   "env": { "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1" }
+   ```
+2. Boss auto-detects collaborative tasks and routes to `/team` skill
+3. Manual invocation: `/team 3:executor "task description"`
+4. Detailed setup: see `skills/omc/omc-setup/phases/03-integrations.md`
+
+---
+
 ## Troubleshooting
 
 | Problem | Solution |
