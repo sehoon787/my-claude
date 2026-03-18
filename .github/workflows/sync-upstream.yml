@@ -130,24 +130,22 @@ jobs:
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             BRANCH="auto/sync-$(date +%Y%m%d-%H%M)"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
             git checkout -b "$BRANCH"
             git add -A
             git commit -m "chore: sync upstream dependencies ($(date +%Y-%m-%d))"
             git push -u origin "$BRANCH"
+            printf '## Upstream Sync Summary\n\n' > /tmp/pr-body.md
+            printf '| Source | SHA | Tag | Files |\n' >> /tmp/pr-body.md
+            printf '|--------|-----|-----|-------|\n' >> /tmp/pr-body.md
+            printf '| agency-agents | `%s` | %s | %s agents |\n' "${AGENCY_SHA:0:7}" "$AGENCY_TAG" "$AGENCY_COUNT" >> /tmp/pr-body.md
+            printf '| everything-claude-code | `%s` | %s | %s skills, %s rules |\n' "${ECC_SHA:0:7}" "$ECC_TAG" "$ECC_SKILLS" "$ECC_RULES" >> /tmp/pr-body.md
+            printf '| oh-my-claudecode | `%s` | %s | %s agents, %s skills |\n' "${OMC_SHA:0:7}" "$OMC_TAG" "$OMC_AGENTS" "$OMC_SKILLS" >> /tmp/pr-body.md
+            printf '\nReview agent/skill diffs before merging.\n' >> /tmp/pr-body.md
             gh pr create \
               --title "chore: sync upstream ($(date +%Y-%m-%d))" \
-              --body "$(cat <<PREOF
-## Upstream Sync Summary
-
-| Source | SHA | Tag | Files |
-|--------|-----|-----|-------|
-| agency-agents | \`${AGENCY_SHA:0:7}\` | ${AGENCY_TAG} | ${AGENCY_COUNT} agents |
-| everything-claude-code | \`${ECC_SHA:0:7}\` | ${ECC_TAG} | ${ECC_SKILLS} skills, ${ECC_RULES} rules |
-| oh-my-claudecode | \`${OMC_SHA:0:7}\` | ${OMC_TAG} | ${OMC_AGENTS} agents, ${OMC_SKILLS} skills |
-
-Review agent/skill diffs before merging.
-PREOF
-              )" \
+              --body-file /tmp/pr-body.md \
               --label "auto-sync"
           else
             echo "No changes detected — all upstream repos match current bundle"
