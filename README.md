@@ -4,20 +4,21 @@
 > ```bash
 > curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 > ```
-> Read the FULL output, then execute each bash code block in order (Steps 1-13). Step 12 requires file editing — use your Edit tool. Use `curl`, NOT `WebFetch` (summaries lose critical config values).
+> Read the FULL output, then execute each step in order. Use `curl`, NOT `WebFetch` (summaries lose critical config values).
 
 ---
 
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-10-blue)
+![Agents](https://img.shields.io/badge/agents-199-blue)
+![Skills](https://img.shields.io/badge/skills-136-purple)
 ![MCP Servers](https://img.shields.io/badge/MCP_servers-3-green)
-![Open Source Tools](https://img.shields.io/badge/open_source_tools-6-orange)
+![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-A repository for setting up a Claude Code multi-agent orchestration environment in a single step.
+All-in-one Claude Code multi-agent orchestration plugin — install once, get everything.
 
-Combines 6 open-source tools to integrate 10 specialist agents, 3 behavioral correction hooks, and 3 MCP servers into one environment. The **Boss** dynamic meta-orchestrator auto-discovers all installed agents, skills, and MCP servers at runtime, then routes tasks to the optimal specialist.
+Bundles **199 agents**, **136 skills**, **14 rules**, **4 behavioral hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
@@ -33,6 +34,8 @@ Combines 6 open-source tools to integrate 10 specialist agents, 3 behavioral cor
 
 ```bash
 claude /plugin add sehoon787/my-claude
+# Then install companion tools (npm packages + Anthropic skills):
+bash install.sh
 ```
 
 **Option 2: Automated script**
@@ -57,7 +60,7 @@ Fetch the AI installation guide and execute each step:
 curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 ```
 
-Read the full output and execute each bash code block in order (Steps 1-13). Use `curl`, not `WebFetch`. For human-readable step-by-step setup, see `SETUP.md`.
+Read the full output and execute each step in order. Use `curl`, not `WebFetch`. For human-readable step-by-step setup, see `SETUP.md`.
 
 ---
 
@@ -80,15 +83,17 @@ Read the full output and execute each bash code block in order (Steps 1-13). Use
 - **Exa**: Semantic web search (1,000 free requests per month)
 - **grep.app**: GitHub open-source code search
 
-### Integrated Ecosystem
-- Following SETUP.md configures **70+ agents, 33 skills, and 14 rules** in a single environment
-- Integrates 6 open-source tools (OMC, omo, ECC, Anthropic Skills, Agency, Karpathy) into one
+### All-in-One Bundle
+- Plugin install provides **199 agents, 136 skills, and 14 rules** instantly
+- Bundles 3 MIT upstream sources (agency-agents, everything-claude-code, oh-my-claudecode)
+- Weekly CI auto-sync keeps bundled content up-to-date with upstream
+- Companion `install.sh` adds npm tools and proprietary Anthropic skills
 
 ---
 
 ## my-claude Agents
 
-10 specialist agents (9 ported from [oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent) + Boss meta-orchestrator) in Claude Code standalone `.md` format. For the full agent list (70+) after setup, see [Installed Components](#installed-components) below.
+10 core agents (9 ported from [oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent) + Boss meta-orchestrator). The plugin also bundles 172 agency agents and 19 OMC agents — see [Installed Components](#installed-components) below.
 
 | Agent | Model | Role |
 |---------|------|------|
@@ -109,13 +114,15 @@ Read the full output and execute each bash code block in order (Steps 1-13). Use
 
 Following SETUP.md will configure the following:
 
-| Category | Count | Source |
-|------|------|------|
-| Agents | 70+ | my-claude 10 + OMC 19 + Agency 42+ |
-| Skills | 33 | Anthropic Official + ECC |
-| Rules | 14 | ECC (common 9 + typescript 5) |
-| MCP Servers | 3 | Context7, Exa, grep.app |
-| Hooks | 3 | my-claude (Boss protocol) |
+| Category | Count | Source | Bundled |
+|------|------|------|------|
+| Agents | 199 | my-claude 10 + Agency 172 + OMC 19 | Plugin |
+| Skills | 136 | ECC 108 + OMC 28 | Plugin |
+| Rules | 14 | ECC (common 9 + typescript 5) | Plugin |
+| MCP Servers | 3 | Context7, Exa, grep.app | Plugin |
+| Hooks | 4 | my-claude (Boss protocol + SessionStart) | Plugin |
+| Anthropic Skills | 14+ | Anthropic Official | install.sh |
+| CLI Tools | 3 | omc, omo, ast-grep | install.sh |
 
 <details>
 <summary>my-claude Agents (10) — Boss meta-orchestrator + omo agents</summary>
@@ -163,7 +170,7 @@ Following SETUP.md will configure the following:
 </details>
 
 <details>
-<summary>Agency Agents (42) — Business specialist personas (all model: claude-sonnet-4-6)</summary>
+<summary>Agency Agents (172) — Business specialist personas across 14 categories (all model: claude-sonnet-4-6)</summary>
 
 **Engineering (22)**
 
@@ -314,6 +321,7 @@ Following SETUP.md will configure the following:
 
 | Hook | Event | Behavior |
 |----|--------|------|
+| Session Setup | SessionStart | Auto-detects and installs missing companion tools (omc, omo, ast-grep, Anthropic skills) |
 | Delegation Guard | PreToolUse (Edit/Write) | Reminds Boss to delegate to a sub-agent when attempting to directly modify files |
 | Subagent Verifier | SubagentStop | Forces independent verification after sub-agent completion |
 | Completion Check | Stop | Confirms all tasks are completed and verified before allowing session termination |
@@ -469,6 +477,18 @@ For a detailed analysis, see the [Agent Overlap Analysis in SETUP.md](./SETUP.md
 ## Contributing
 
 Issues and PRs are welcome. When adding a new agent, add a `.md` file to the `agents/` directory and update the agent list in `SETUP.md`.
+
+---
+
+## Bundled Upstream Versions
+
+Updated weekly by [CI auto-sync](.github/workflows/sync-upstream.yml). See `upstream/SOURCES.json` for exact SHAs.
+
+| Source | Synced SHA | Tag | Date | Diff |
+|--------|-----------|-----|------|------|
+| [agency-agents](https://github.com/msitarzewski/agency-agents) | `6254154` | — | 2026-03-18 | [compare](https://github.com/msitarzewski/agency-agents/compare/6254154...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `fce4513` | — | 2026-03-18 | [compare](https://github.com/affaan-m/everything-claude-code/compare/fce4513...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `7d07356` | v4.8.2 | 2026-03-18 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/7d07356...HEAD) |
 
 ---
 

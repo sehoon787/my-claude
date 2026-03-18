@@ -4,13 +4,13 @@
     "name": "sehoon787"
   },
   "metadata": {
-    "description": "Multi-agent orchestration environment for Claude Code"
+    "description": "All-in-one multi-agent orchestration for Claude Code — 186 agents, 84+ skills, 14 rules, 3 hooks, 3 MCP servers. Bundles agency-agents, everything-claude-code, and oh-my-claudecode with weekly CI auto-sync."
   },
   "plugins": [
     {
       "name": "my-claude-orchestration",
       "source": "./",
-      "description": "9 specialist agents (Sisyphus orchestrator, Hephaestus autonomous worker, and 7 more) with behavioral correction hooks and MCP servers",
+      "description": "186 agents (Boss orchestrator, Hephaestus autonomous worker, 157 agency specialists, 19 OMC agents), 84+ skills, 14 rules, behavioral correction hooks, and MCP servers (Context7, Exa, grep.app)",
       "author": {
         "name": "sehoon787"
       },
@@ -20,9 +20,15 @@
       "keywords": [
         "orchestration",
         "multi-agent",
+        "boss",
         "sisyphus",
         "hephaestus",
+        "agency-agents",
+        "everything-claude-code",
+        "oh-my-claudecode",
+        "all-in-one",
         "agents",
+        "skills",
         "hooks",
         "mcp"
       ],

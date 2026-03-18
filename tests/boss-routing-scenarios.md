@@ -312,3 +312,27 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 15. **Project overrides global** — Same-name project agent wins
 16. **Verification retry escalation** — resume→fresh→consult→report
 17. **Parallel vs sequential in P3a** — Independent=parallel, dependent=sequential
+
+---
+
+## Bundled Agent Routing Scenarios
+
+### Scenario: Route to agency engineering agent
+**Input**: "Review my Rust code for ownership issues"
+**Expected**: Boss routes to `agents/agency/engineering/rust-reviewer.md` or similar Rust specialist
+**Verify**: Agent description matches Rust expertise
+
+### Scenario: Route to OMC agent
+**Input**: "Trace the root cause of this production error"
+**Expected**: Boss routes to `agents/omc/tracer.md`
+**Verify**: Agent description mentions causal tracing
+
+### Scenario: Name collision resolution
+**Input**: "Do a code review"
+**Expected**: Boss selects based on description specificity, not filename
+**Verify**: Both `agents/omc/code-reviewer.md` and `agents/agency/engineering/code-reviewer.md` are candidates; Boss picks the most relevant one
+
+### Scenario: Plugin-scoped agent discovery
+**Input**: "Show me all available agents"
+**Expected**: Boss reports 199+ agents (10 core + 172 agency + 19 OMC) from the plugin bundle
+**Verify**: Count includes all three subdirectories

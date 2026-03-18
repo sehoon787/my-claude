@@ -61,6 +61,16 @@ Categorize agents into:
 - **Workers**: implementation-focused (e.g. executor, hephaestus)
 - **Analysts**: read-only analysis (e.g. metis, momus, oracle, analyst)
 
+### Step 1b: Discover Plugin-Scoped Agents
+
+Plugin-installed agents are automatically available through the Agent tool
+even if not listed in ~/.claude/agents/. They are namespaced by plugin name
+(e.g., "my-claude-orchestration:boss"). Check the available subagent_type
+list in your tool definitions for the complete set of plugin-scoped agents.
+
+When presenting the capability summary, include plugin agents:
+> Boss ready. [N] agents ([N] global + [N] project + [N] plugin), [N] skills, [N] MCP servers.
+
 ### Step 2: Discover Skills (Global + Project + System)
 
 Three sources of skills:
