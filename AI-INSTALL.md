@@ -30,7 +30,7 @@ git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude
 mkdir -p ~/.claude/agents ~/.claude/skills ~/.claude/rules
 cp -r /tmp/my-claude/agents/core/*.md ~/.claude/agents/
 cp -r /tmp/my-claude/agents/omc/*.md ~/.claude/agents/
-cp -r /tmp/my-claude/agents/agency/*/*.md ~/.claude/agents/
+find /tmp/my-claude/agents/agency -name '*.md' -exec cp {} ~/.claude/agents/ \;
 cp -r /tmp/my-claude/skills/ecc/* ~/.claude/skills/
 cp -r /tmp/my-claude/skills/omc/* ~/.claude/skills/
 cp -r /tmp/my-claude/rules/* ~/.claude/rules/

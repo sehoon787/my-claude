@@ -11,14 +11,14 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-199-blue)
+![Agents](https://img.shields.io/badge/agents-201-blue)
 ![Skills](https://img.shields.io/badge/skills-136-purple)
 ![MCP Servers](https://img.shields.io/badge/MCP_servers-3-green)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
 All-in-one Claude Code multi-agent orchestration plugin — install once, get everything.
 
-Bundles **199 agents**, **136 skills**, **14 rules**, **4 behavioral hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
+Bundles **201 agents**, **136 skills**, **14 rules**, **4 behavioral hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
@@ -33,15 +33,23 @@ Bundles **199 agents**, **136 skills**, **14 rules**, **4 behavioral hooks**, an
 **Option 1: Install via Claude Code plugin**
 
 ```bash
-claude /plugin add sehoon787/my-claude
-# Then install companion tools (npm packages + Anthropic skills):
-bash install.sh
+# Inside a Claude Code session:
+/plugin marketplace add sehoon787/my-claude
+/plugin install my-claude@my-claude
+```
+
+Then install companion tools (npm packages + Anthropic skills):
+
+```bash
+git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude
+bash /tmp/my-claude/install.sh
+rm -rf /tmp/my-claude
 ```
 
 **Option 2: Automated script**
 
 ```bash
-git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && bash /tmp/my-claude/install.sh
+git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && bash /tmp/my-claude/install.sh && rm -rf /tmp/my-claude
 ```
 
 **Option 3: Manual installation**
@@ -84,7 +92,7 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 - **grep.app**: GitHub open-source code search
 
 ### All-in-One Bundle
-- Plugin install provides **199 agents, 136 skills, and 14 rules** instantly
+- Plugin install provides **201 agents, 136 skills, and 14 rules** instantly
 - Bundles 3 MIT upstream sources (agency-agents, everything-claude-code, oh-my-claudecode)
 - Weekly CI auto-sync keeps bundled content up-to-date with upstream
 - Companion `install.sh` adds npm tools and proprietary Anthropic skills
@@ -116,7 +124,7 @@ Following SETUP.md will configure the following:
 
 | Category | Count | Source | Bundled |
 |------|------|------|------|
-| Agents | 199 | my-claude 10 + Agency 172 + OMC 19 | Plugin |
+| Agents | 201 | my-claude 10 + Agency 172 + OMC 19 | Plugin |
 | Skills | 136 | ECC 108 + OMC 28 | Plugin |
 | Rules | 14 | ECC (common 9 + typescript 5) | Plugin |
 | MCP Servers | 3 | Context7, Exa, grep.app | Plugin |

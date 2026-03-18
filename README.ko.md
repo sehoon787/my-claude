@@ -11,14 +11,14 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-199-blue)
+![Agents](https://img.shields.io/badge/agents-201-blue)
 ![Skills](https://img.shields.io/badge/skills-136-purple)
 ![MCP Servers](https://img.shields.io/badge/MCP_servers-3-green)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
 Claude Code 멀티에이전트 오케스트레이션 환경을 한 번에 구성하기 위한 레포지토리입니다.
 
-3개 MIT 업스트림 소스에서 **199개 에이전트**, **136개 스킬**, **14개 룰**, **4개 행동 교정 훅**, **3개 MCP 서버**를 하나의 플러그인에 번들. GitHub Actions CI가 매주 업스트림 변경사항을 자동 동기화. **Boss** 동적 메타 오케스트레이터가 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지하고 최적의 전문가에게 작업을 라우팅합니다.
+3개 MIT 업스트림 소스에서 **201개 에이전트**, **136개 스킬**, **14개 룰**, **4개 행동 교정 훅**, **3개 MCP 서버**를 하나의 플러그인에 번들. GitHub Actions CI가 매주 업스트림 변경사항을 자동 동기화. **Boss** 동적 메타 오케스트레이터가 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지하고 최적의 전문가에게 작업을 라우팅합니다.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude 데모" width="700">
@@ -33,19 +33,23 @@ Claude Code 멀티에이전트 오케스트레이션 환경을 한 번에 구성
 **방법 1: Claude Code 플러그인으로 설치**
 
 ```bash
-claude /plugin add sehoon787/my-claude
+# Claude Code 세션 내에서:
+/plugin marketplace add sehoon787/my-claude
+/plugin install my-claude@my-claude
 ```
 
 그 다음 컴패니언 도구 설치 (npm 패키지 + Anthropic 스킬):
 
 ```bash
-bash install.sh
+git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude
+bash /tmp/my-claude/install.sh
+rm -rf /tmp/my-claude
 ```
 
 **방법 2: 자동 스크립트**
 
 ```bash
-git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && bash /tmp/my-claude/install.sh
+git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && bash /tmp/my-claude/install.sh && rm -rf /tmp/my-claude
 ```
 
 **방법 3: 수동 설치**
@@ -88,14 +92,14 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 - **grep.app**: GitHub 오픈소스 코드 검색
 
 ### 통합 생태계
-- 플러그인 하나로 **199 에이전트, 136 스킬, 14 룰**을 한 환경에 구성
+- 플러그인 하나로 **201 에이전트, 136 스킬, 14 룰**을 한 환경에 구성
 - 6개 오픈소스 도구(OMC, omo, ECC, Anthropic Skills, Agency, Karpathy)를 하나로 통합
 
 ---
 
 ## my-claude 에이전트
 
-[oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent) 에이전트 9개 + Boss 메타 오케스트레이터를 Claude Code standalone `.md` 형식으로 제공하는 10개의 전문 에이전트입니다. 플러그인에 번들된 전체 199개 에이전트 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
+[oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent) 에이전트 9개 + Boss 메타 오케스트레이터를 Claude Code standalone `.md` 형식으로 제공하는 10개의 전문 에이전트입니다. 플러그인에 번들된 전체 201개 에이전트 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
 
 | 에이전트 | 모델 | 역할 |
 |---------|------|------|
@@ -118,7 +122,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 
 | 카테고리 | 개수 | 출처 | 번들 |
 |------|------|------|------|
-| 에이전트 | 199 | my-claude 10 + Agency 172 + OMC 19 | 플러그인 |
+| 에이전트 | 201 | my-claude 10 + Agency 172 + OMC 19 | 플러그인 |
 | 스킬 | 136 | ECC 108 + OMC 28 | 플러그인 |
 | 룰 | 14 | ECC (common 9 + typescript 5) | 플러그인 |
 | MCP 서버 | 3 | Context7, Exa, grep.app | 플러그인 |
