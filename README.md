@@ -18,7 +18,7 @@
 
 All-in-one Claude Code multi-agent orchestration plugin — install once, get everything.
 
-Bundles **201 agents**, **136 skills**, **49 rules**, **6 behavioral hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
+Bundles **202 agents**, **136 skills**, **50 rules**, **6 behavioral hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
@@ -103,7 +103,7 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 - **grep.app**: GitHub open-source code search
 
 ### All-in-One Bundle
-- Plugin install provides **201 agents, 136 skills, and 49 rules** instantly
+- Plugin install provides **202 agents, 136 skills, and 50 rules** instantly
 - Bundles 3 MIT upstream sources (agency-agents, everything-claude-code, oh-my-claudecode)
 - Weekly CI auto-sync keeps bundled content up-to-date with upstream
 - Companion `install.sh` adds npm tools and proprietary Anthropic skills
@@ -135,9 +135,9 @@ Following SETUP.md will configure the following:
 
 | Category | Count | Source | Bundled |
 |------|------|------|------|
-| Agents | 201 | Core 1 + OMO 9 + Agency 172 + OMC 19 | Plugin |
+| Agents | 202 | Core 2 + OMO 9 + Agency 172 + OMC 19 | Plugin |
 | Skills | 136 | ECC 108 + OMC 28 | Plugin |
-| Rules | 49 | ECC (common 9 + 8 languages × 5) | Plugin |
+| Rules | 50 | ECC (common 9 + 8 languages × 5) | Plugin |
 | MCP Servers | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 6 | my-claude (Boss protocol + SessionStart) | Plugin |
 | Anthropic Skills | 14+ | Anthropic Official | install.sh |
@@ -297,7 +297,7 @@ Following SETUP.md will configure the following:
 </details>
 
 <details>
-<summary>Rules (49) — ECC Coding Rules</summary>
+<summary>Rules (50) — ECC Coding Rules</summary>
 
 **Common (9)** — Applied to all projects
 
