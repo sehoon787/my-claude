@@ -1,7 +1,7 @@
 {
   "name": "my-claude-orchestration",
   "description": "Multi-agent orchestration plugin for Claude Code — Boss dynamic meta-orchestrator with runtime discovery, Hephaestus autonomous worker, and 8 specialist agents with behavioral correction hooks",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "author": {
     "name": "sehoon787"
   }
