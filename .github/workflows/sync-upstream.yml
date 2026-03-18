@@ -161,7 +161,9 @@ jobs:
 
           # AI-INSTALL.md
           sed -i "s/[0-9]\+ agents, [0-9]\+ skills, [0-9]\+ rules/${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills, ${TOTAL_RULES} rules/" AI-INSTALL.md
-          sed -i "s/[0-9]\+ agents ([0-9]\+ core + [0-9]\+ omo + [0-9]\+ agency + [0-9]\+ OMC)/${TOTAL_AGENTS} agents (${CORE_AGENTS} core + ${OMO_AGENTS} omo + ${AGENCY_COUNT} agency + ${OMC_AGENTS} OMC)/" AI-INSTALL.md
+          AI_PAT="[0-9]\+ agents ([0-9]\+ core + [0-9]\+ omo + [0-9]\+ agency + [0-9]\+ OMC)"
+          AI_REP="${TOTAL_AGENTS} agents (${CORE_AGENTS} core + ${OMO_AGENTS} omo + ${AGENCY_COUNT} agency + ${OMC_AGENTS} OMC)"
+          sed -i "s/${AI_PAT}/${AI_REP}/" AI-INSTALL.md
           sed -i "s/[0-9]\+ skills ([0-9]\+ ECC + [0-9]\+ OMC)/${TOTAL_SKILLS} skills (${ECC_SKILLS} ECC + ${OMC_SKILLS} OMC)/" AI-INSTALL.md
           sed -i "s/Rules: [0-9]\+/Rules: ${TOTAL_RULES}/" AI-INSTALL.md
 
