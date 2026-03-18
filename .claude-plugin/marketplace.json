@@ -8,7 +8,7 @@
   },
   "plugins": [
     {
-      "name": "my-claude-orchestration",
+      "name": "my-claude",
       "source": "./",
       "description": "186 agents (Boss orchestrator, Hephaestus autonomous worker, 157 agency specialists, 19 OMC agents), 84+ skills, 14 rules, behavioral correction hooks, and MCP servers (Context7, Exa, grep.app)",
       "author": {

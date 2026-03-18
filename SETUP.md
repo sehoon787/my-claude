@@ -466,14 +466,14 @@ This repo is a **Claude Code plugin** that provides 9 omo agents, behavioral cor
 ```bash
 # Inside a Claude Code session:
 /plugin marketplace add sehoon787/my-claude
-/plugin install my-claude-orchestration@my-claude
+/plugin install my-claude@my-claude
 ```
 
 **Verify:**
 ```bash
 # Inside a Claude Code session:
 /plugin list
-# Expected: my-claude-orchestration@my-claude — Status: ✔ enabled
+# Expected: my-claude@my-claude — Status: ✔ enabled
 ```
 
 **What gets installed:**
@@ -490,14 +490,14 @@ git clone https://github.com/sehoon787/my-claude.git ~/my-claude
 
 # Inside a Claude Code session, register as local marketplace:
 /plugin marketplace add ~/my-claude
-/plugin install my-claude-orchestration@my-claude
+/plugin install my-claude@my-claude
 ```
 
 **Verify:**
 ```bash
 # Inside a Claude Code session:
 /plugin list
-# Expected: my-claude-orchestration@my-claude — Status: ✔ enabled
+# Expected: my-claude@my-claude — Status: ✔ enabled
 ```
 
 ### Option C: Manual install (copy files individually)
@@ -596,12 +596,12 @@ When the my-claude repository is updated, the plugin version is automatically bu
 ```bash
 # Inside a Claude Code session:
 /plugin marketplace update my-claude        # Fetch latest from GitHub
-/plugin update my-claude-orchestration      # Update the plugin
+/plugin update my-claude      # Update the plugin
 
 # If update doesn't apply (known cache issue):
 # Delete plugin cache and reinstall
 rm -rf ~/.claude/plugins/cache/my-claude
-/plugin install my-claude-orchestration@my-claude
+/plugin install my-claude@my-claude
 ```
 
 > **How versioning works:** Commits with `feat:` prefix trigger minor version bumps, `fix:`/`perf:`/`refactor:` trigger patch bumps. The `plugin.json` version is automatically synced with git tags by GitHub Actions.
@@ -972,7 +972,7 @@ opencode --version               # 1.2.17+ (only if using omo natively)
 ```bash
 # Check all plugins are loaded
 claude plugin list
-# Expected: my-claude-orchestration@my-claude — Status: ✔ enabled
+# Expected: my-claude@my-claude — Status: ✔ enabled
 ```
 
 ### Platform-Specific Checks
@@ -1237,4 +1237,4 @@ Done
 | (Windows) Split-pane display not working | Split panes require running inside a tmux/psmux session. Windows Terminal and VS Code terminal do not support split panes natively. Use in-process mode instead. |
 | (Windows) `brew` command not found | Use `winget` instead of `brew` for package installation on Windows. |
 | (Windows) `/tmp` path resolution differs | Git Bash maps `/tmp` to `C:\Users\<user>\AppData\Local\Temp`. This works for all commands in this guide. |
-| Plugin not updating after `/plugin update` | Known cache issue ([#17361](https://github.com/anthropics/claude-code/issues/17361)). Delete cache and reinstall: `rm -rf ~/.claude/plugins/cache/my-claude` then `/plugin install my-claude-orchestration@my-claude` |
+| Plugin not updating after `/plugin update` | Known cache issue ([#17361](https://github.com/anthropics/claude-code/issues/17361)). Delete cache and reinstall: `rm -rf ~/.claude/plugins/cache/my-claude` then `/plugin install my-claude@my-claude` |
