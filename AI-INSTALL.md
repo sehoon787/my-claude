@@ -1,24 +1,46 @@
 # my-claude AI Installation Guide
 
 You are an AI agent setting up a Claude Code multi-agent orchestration environment.
-The plugin bundles 199 agents, 136 skills, 14 rules, 4 hooks, and 3 MCP servers.
-Only 2 steps are needed.
+The plugin bundles 201 agents, 136 skills, 14 rules, 4 hooks, and 3 MCP servers.
+Only 2-3 steps are needed.
 
 ---
 
 ## Step 1: Install the plugin
 
 ```bash
-claude /plugin add sehoon787/my-claude
+# Inside a Claude Code session:
+/plugin marketplace add sehoon787/my-claude
+/plugin install my-claude@my-claude
 ```
 
 This installs:
-- 199 agents (10 core + 172 agency + 19 OMC)
+- 201 agents (10 core + 172 agency + 19 OMC)
 - 136 skills (108 ECC + 28 OMC)
 - 14 rules (9 common + 5 TypeScript)
 - 4 behavioral hooks (SessionStart, PreToolUse, SubagentStop, Stop)
 - 3 MCP servers (Context7, Exa, grep.app)
 - Boss meta-orchestrator as default agent
+
+## Step 1b: Manual install (if plugin unavailable)
+
+```bash
+# If plugin install is not available:
+git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude
+mkdir -p ~/.claude/agents ~/.claude/skills ~/.claude/rules
+cp -r /tmp/my-claude/agents/core/*.md ~/.claude/agents/
+cp -r /tmp/my-claude/agents/omc/*.md ~/.claude/agents/
+cp -r /tmp/my-claude/agents/agency/*/*.md ~/.claude/agents/
+cp -r /tmp/my-claude/skills/ecc/* ~/.claude/skills/
+cp -r /tmp/my-claude/skills/omc/* ~/.claude/skills/
+cp -r /tmp/my-claude/rules/* ~/.claude/rules/
+claude mcp add --transport http --scope user context7 "https://mcp.context7.com/mcp"
+claude mcp add --transport http --scope user exa "https://mcp.exa.ai/mcp?tools=web_search_exa"
+claude mcp add --transport http --scope user grep_app "https://mcp.grep.app"
+rm -rf /tmp/my-claude
+```
+
+Note: Manual install does not configure hooks or default agent. See SETUP.md Section 7 Option D for hooks setup.
 
 ## Step 2: Install companion tools
 
@@ -69,7 +91,7 @@ echo "omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK'
 ```
 
 Expected:
-- Plugin agents: 199+
+- Plugin agents: 201+
 - Plugin skills: 136+
 - Rules: 14
 - Anthropic skills: 2 key skills (pdf, docx)
