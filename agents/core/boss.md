@@ -65,7 +65,7 @@ Categorize agents into:
 
 Plugin-installed agents are automatically available through the Agent tool
 even if not listed in ~/.claude/agents/. They are namespaced by plugin name
-(e.g., "my-claude-orchestration:boss"). Check the available subagent_type
+(e.g., "my-claude:boss"). Check the available subagent_type
 list in your tool definitions for the complete set of plugin-scoped agents.
 
 When presenting the capability summary, include plugin agents:
