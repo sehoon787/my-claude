@@ -326,7 +326,7 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 </details>
 
 <details>
-<summary>MCP 서버 (3개) + 행동 교정 훅 (4개)</summary>
+<summary>MCP 서버 (3개) + 행동 교정 훅 (6개)</summary>
 
 **MCP 서버**
 
@@ -360,14 +360,18 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 │  [Boss] 동적 메타 오케스트레이터                           │
 │  런타임 감지 → 능력 매칭 → 최적 라우팅                     │
 │  (에이전트, 스킬, MCP 서버, 훅 — 모두 자동 감지)          │
-└──────┬──────────────┬──────────────┬────────────────────┘
-       ↓              ↓              ↓
-┌──────────────┐ ┌──────────────┐ ┌──────────────────────┐
-│  [Sisyphus]  │ │  [Atlas]     │ │  [Hephaestus]        │
-│  서브 오케   │ │  태스크 조율 │ │  자율 실행           │
-│  + 검증      │ │              │ │                      │
-└──────┬───────┘ └──────┬───────┘ └──────────────────────┘
-       ↓                ↓
+└──┬──────────┬──────────┬──────────┬──────────┬──────────┘
+   ↓          ↓          ↓          ↓          ↓
+┌──────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
+│  P1  │ │   P2   │ │  P3a   │ │  P3b   │ │  P3c   │
+│Skill │ │Special-│ │ Direct │ │Sub-orc-│ │ Agent  │
+│Match │ │ist     │ │Parallel│ │hestrat-│ │ Teams  │
+│      │ │Agent   │ │ (2-4)  │ │ors     │ │  P2P   │
+│      │ │ (191)  │ │        │ │Sisyphus│ │        │
+└──────┘ └────────┘ └────────┘ │ Atlas  │ └────────┘
+                                │Hephaes-│
+                                │ tus    │
+                                └────────┘
 ┌─────────────────────────────────────────────────────────┐
 │  Karpathy Guidelines (행동 가이드라인, 항상 활성화)        │
 │  ECC Rules (언어별 코딩 룰, 항상 활성화)                  │

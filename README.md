@@ -329,7 +329,7 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 </details>
 
 <details>
-<summary>MCP Servers (3) + Behavioral Correction Hooks (4)</summary>
+<summary>MCP Servers (3) + Behavioral Correction Hooks (6)</summary>
 
 **MCP Servers**
 
@@ -365,14 +365,18 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 │  [Boss] Dynamic Meta-Orchestrator                       │
 │  Runtime Discovery → Capability Matching → Routing      │
 │  (agents, skills, MCP servers, hooks — all discovered)  │
-└──────┬──────────────┬──────────────┬────────────────────┘
-       ↓              ↓              ↓
-┌──────────────┐ ┌──────────────┐ ┌──────────────────────┐
-│  [Sisyphus]  │ │  [Atlas]     │ │  [Hephaestus]        │
-│  Sub-orch.   │ │  Task        │ │  Autonomous          │
-│  + Verify    │ │  Coordination│ │  Execution           │
-└──────┬───────┘ └──────┬───────┘ └──────────────────────┘
-       ↓                ↓
+└──┬──────────┬──────────┬──────────┬──────────┬──────────┘
+   ↓          ↓          ↓          ↓          ↓
+┌──────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
+│  P1  │ │   P2   │ │  P3a   │ │  P3b   │ │  P3c   │
+│Skill │ │Special-│ │ Direct │ │Sub-orc-│ │ Agent  │
+│Match │ │ist     │ │Parallel│ │hestrat-│ │ Teams  │
+│      │ │Agent   │ │ (2-4)  │ │ors     │ │  P2P   │
+│      │ │ (191)  │ │        │ │Sisyphus│ │        │
+└──────┘ └────────┘ └────────┘ │ Atlas  │ └────────┘
+                                │Hephaes-│
+                                │ tus    │
+                                └────────┘
 ┌─────────────────────────────────────────────────────────┐
 │  Karpathy Guidelines (behavioral guidelines, always on) │
 │  ECC Rules (language-specific coding rules, always on)  │
