@@ -82,16 +82,64 @@ fi
 
 #### 3.3.2: Configure Teammate Display Mode
 
-Use AskUserQuestion:
+First, detect whether tmux is available:
 
-**Question:** "How should teammates be displayed?"
+```bash
+if command -v tmux >/dev/null 2>&1; then
+  TMUX_STATUS="detected ✅ ($(tmux -V))"
+  TMUX_FOUND=1
+else
+  TMUX_STATUS="not found ❌"
+  TMUX_FOUND=0
+fi
+echo "tmux: $TMUX_STATUS"
+```
+
+Use AskUserQuestion, adjusting the recommendation based on tmux availability:
+
+**If tmux IS detected:**
+
+**Question:** "How should teammates be displayed? (tmux detected ✅)"
+
+**Options:**
+1. **Auto** - Uses split panes if in tmux, otherwise in-process.
+2. **In-process** - All teammates in your main terminal. Use Shift+Up/Down to select. Works everywhere.
+3. **Split panes (tmux) (Recommended)** - tmux detected, best visual experience. Each teammate in its own pane.
+
+**If tmux is NOT detected:**
+
+**Question:** "How should teammates be displayed? (tmux not found ❌)"
 
 **Options:**
 1. **Auto (Recommended)** - Uses split panes if in tmux, otherwise in-process. Best for most users.
 2. **In-process** - All teammates in your main terminal. Use Shift+Up/Down to select. Works everywhere.
-3. **Split panes (tmux)** - Each teammate in its own pane. Requires tmux or iTerm2.
+3. **Split panes (tmux)** - ⚠️ tmux not installed. Will attempt install if selected.
 
-If user chooses anything other than "Auto", add `teammateMode` to settings.json:
+If user chooses "Split panes (tmux)" and tmux is not installed, attempt installation:
+
+```bash
+if [ "$TMUX_FOUND" = "0" ]; then
+  echo "Attempting to install tmux..."
+  if [[ "$OSTYPE" == "darwin"* ]] && command -v brew >/dev/null 2>&1; then
+    brew install tmux 2>/dev/null && TMUX_FOUND=1 || true
+  elif command -v apt-get >/dev/null 2>&1; then
+    sudo apt-get install -y tmux 2>/dev/null && TMUX_FOUND=1 || true
+  elif command -v dnf >/dev/null 2>&1; then
+    sudo dnf install -y tmux 2>/dev/null && TMUX_FOUND=1 || true
+  elif command -v pacman >/dev/null 2>&1; then
+    sudo pacman -S --noconfirm tmux 2>/dev/null && TMUX_FOUND=1 || true
+  fi
+
+  if [ "$TMUX_FOUND" = "1" ]; then
+    echo "tmux installed successfully: $(tmux -V)"
+  else
+    echo "tmux install failed — falling back to Auto mode"
+    # Override user choice to Auto since tmux is unavailable
+  fi
+fi
+```
+
+If user chooses anything other than "Auto" (and tmux is available for "tmux" mode), add `teammateMode` to settings.json:
 
 ```bash
 SETTINGS_FILE="$HOME/.claude/settings.json"

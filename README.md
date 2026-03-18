@@ -18,13 +18,21 @@
 
 All-in-one Claude Code multi-agent orchestration plugin — install once, get everything.
 
-Bundles **201 agents**, **136 skills**, **49 rules**, **4 behavioral hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
+Bundles **201 agents**, **136 skills**, **49 rules**, **6 behavioral hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
 </p>
 
 ---
+
+## Core Principles
+
+| Principle | Description |
+|-----------|-------------|
+| **Leadership** | Boss orchestrates, never implements. Leads teams with peer-to-peer communication, dynamic composition, and file ownership protocols |
+| **Discovery** | Runtime capability matching — no hardcoded routing tables. Every agent, skill, and MCP server is auto-discovered at session start |
+| **Verification** | Trust but verify. Every subagent result is independently checked before acceptance |
 
 ## Quick Start
 
@@ -78,6 +86,7 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 
 ### Multi-Agent Orchestration
 - **Boss Dynamic Meta-Orchestrator**: Auto-discovers all installed agents, skills, and MCP servers at runtime — routes tasks via 3D conflict resolution (Scope/Depth×2/Interactivity). Handles mid-sized tasks directly (P3a) without sub-orchestrator overhead
+- **Agent Teams Direct Leadership**: Boss can lead Agent Teams directly (Priority 3c-DIRECT) with peer-to-peer teammate communication, file ownership protocol, and Review Chain patterns for quality assurance
 - **Sisyphus Sub-Orchestrator**: Manages complex multi-step workflows with intent classification and verification protocols
 - **Hephaestus Autonomous Worker**: Continuously performs explore → plan → execute → verify cycles without interruption
 - **Skill vs Agent Conflict Resolution**: Weighted 3-dimensional scoring (Scope, Depth×2, Interactivity) determines whether to use a Skill or Agent for each task — no hardcoded routing tables
@@ -103,7 +112,7 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 
 ## my-claude Agents
 
-10 core agents (9 ported from [oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent) + Boss meta-orchestrator). The plugin also bundles 172 agency agents and 19 OMC agents — see [Installed Components](#installed-components) below.
+1 core agent (Boss meta-orchestrator) + 9 omo agents (ported from [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)). The plugin also bundles 172 agency agents and 19 OMC agents — see [Installed Components](#installed-components) below.
 
 | Agent | Model | Role |
 |---------|------|------|
@@ -126,16 +135,16 @@ Following SETUP.md will configure the following:
 
 | Category | Count | Source | Bundled |
 |------|------|------|------|
-| Agents | 201 | my-claude 10 + Agency 172 + OMC 19 | Plugin |
+| Agents | 201 | Core 1 + OMO 9 + Agency 172 + OMC 19 | Plugin |
 | Skills | 136 | ECC 108 + OMC 28 | Plugin |
 | Rules | 49 | ECC (common 9 + 8 languages × 5) | Plugin |
 | MCP Servers | 3 | Context7, Exa, grep.app | Plugin |
-| Hooks | 4 | my-claude (Boss protocol + SessionStart) | Plugin |
+| Hooks | 6 | my-claude (Boss protocol + SessionStart) | Plugin |
 | Anthropic Skills | 14+ | Anthropic Official | install.sh |
 | CLI Tools | 3 | omc, omo, ast-grep | install.sh |
 
 <details>
-<summary>my-claude Agents (10) — Boss meta-orchestrator + omo agents</summary>
+<summary>Core + OMO Agents (10) — Boss meta-orchestrator + omo agents</summary>
 
 | Agent | Model | Type | Role | Read-only |
 |---------|------|------|------|-----------|
@@ -339,6 +348,8 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 | Delegation Guard | PreToolUse (Edit/Write) | Reminds Boss to delegate to a sub-agent when attempting to directly modify files |
 | Subagent Verifier | SubagentStop | Forces independent verification after sub-agent completion |
 | Completion Check | Stop | Confirms all tasks are completed and verified before allowing session termination |
+| Teammate Idle Guide | TeammateIdle | Reminds leader to check TaskList and send shutdown or next instructions when a teammate goes idle |
+| Task Quality Gate | TaskCompleted | Reminds leader to verify deliverable exists and check quality before accepting completed tasks |
 
 </details>
 
@@ -452,10 +463,14 @@ Boss routes every request through a 4-level priority chain:
 |----------|-----------|------|---------|
 | **1** | Exact Skill match | Task maps to a self-contained skill | "merge PDFs" → `Skill("pdf")` |
 | **2** | Specialist Agent match | Domain-specific agent exists | "security audit" → `Agent("Security Engineer")` |
-| **3** | Sub-orchestrator delegation | Complex multi-step workflow | "refactor + test" → Sisyphus |
+| **3a** | Direct orchestration | 2-4 independent agents | "fix 3 bugs" → Boss parallel |
+| **3b** | Sub-orchestrator delegation | Complex multi-step workflow | "refactor + test" → Sisyphus |
+| **3c** | Agent Teams (direct leadership) | Peer-to-peer communication needed | "implement + review" → Review Chain |
 | **4** | General-purpose fallback | No specialist matches | "explain this" → `Agent(model="sonnet")` |
 
 Every delegation includes a **6-section structured prompt**: TASK, EXPECTED OUTCOME, REQUIRED TOOLS, MUST DO, MUST NOT DO, CONTEXT.
+
+For detailed agent compatibility matrix and team communication patterns, see [Agent Teams Reference](agents/core/agent-teams-reference.md).
 
 ### Scope Discovery (Global + Project)
 

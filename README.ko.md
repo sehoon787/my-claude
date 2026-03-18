@@ -26,6 +26,14 @@ Claude Code 멀티에이전트 오케스트레이션 환경을 한 번에 구성
 
 ---
 
+## 핵심 원칙
+
+| 원칙 | 설명 |
+|------|------|
+| **Leadership** | Boss는 오케스트레이터이지 구현자가 아니다. peer-to-peer 통신, 유동적 팀 구성, 파일 소유권 프로토콜로 팀을 이끈다 |
+| **Discovery** | 런타임 능력 매칭 — 하드코딩된 라우팅 테이블 없음. 모든 에이전트, 스킬, MCP 서버를 세션 시작 시 자동 발견 |
+| **Verification** | 신뢰하되 검증한다. 모든 서브에이전트 결과를 수락 전 독립적으로 확인 |
+
 ## 빠른 시작
 
 ### 사람이라면
@@ -101,7 +109,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ## my-claude 에이전트
 
-[oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent) 에이전트 9개 + Boss 메타 오케스트레이터를 Claude Code standalone `.md` 형식으로 제공하는 10개의 전문 에이전트입니다. 플러그인에 번들된 전체 201개 에이전트 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
+1개의 Core 에이전트(Boss 메타 오케스트레이터) + [oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent)에서 포팅된 9개 omo 에이전트입니다. 플러그인에 번들된 전체 201개 에이전트 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
 
 | 에이전트 | 모델 | 역할 |
 |---------|------|------|
@@ -124,7 +132,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 
 | 카테고리 | 개수 | 출처 | 번들 |
 |------|------|------|------|
-| 에이전트 | 201 | my-claude 10 + Agency 172 + OMC 19 | 플러그인 |
+| 에이전트 | 201 | Core 1 + OMO 9 + Agency 172 + OMC 19 | 플러그인 |
 | 스킬 | 136 | ECC 108 + OMC 28 | 플러그인 |
 | 룰 | 49 | ECC (common 9 + 8 languages × 5) | 플러그인 |
 | MCP 서버 | 3 | Context7, Exa, grep.app | 플러그인 |
@@ -133,7 +141,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 | CLI 도구 | 3 | omc, omo, ast-grep | install.sh |
 
 <details>
-<summary>my-claude 에이전트 (10개) — Boss 메타 오케스트레이터 + omo 에이전트</summary>
+<summary>Core + OMO 에이전트 (10개) — Boss 메타 오케스트레이터 + omo 에이전트</summary>
 
 | 에이전트 | 모델 | 유형 | 역할 | Read-only |
 |---------|------|------|------|-----------|

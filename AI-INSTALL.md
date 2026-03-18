@@ -22,7 +22,7 @@ node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir
 ```
 
 This installs:
-- 201 agents (10 core + 172 agency + 19 OMC)
+- 201 agents (1 core + 9 omo + 172 agency + 19 OMC)
 - 136 skills (108 ECC + 28 OMC)
 - 49 rules (9 common + 8 languages × 5)
 - 4 behavioral hooks (SessionStart, PreToolUse, SubagentStop, Stop)
@@ -35,7 +35,7 @@ This installs:
 # If plugin install is not available:
 git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude
 mkdir -p ~/.claude/agents ~/.claude/skills ~/.claude/rules
-cp -r /tmp/my-claude/agents/core/*.md ~/.claude/agents/
+cp -r /tmp/my-claude/agents/core/*.md /tmp/my-claude/agents/omo/*.md ~/.claude/agents/
 cp -r /tmp/my-claude/agents/omc/*.md ~/.claude/agents/
 find /tmp/my-claude/agents/agency -name '*.md' -exec cp {} ~/.claude/agents/ \;
 cp -r /tmp/my-claude/skills/ecc/* ~/.claude/skills/

@@ -194,6 +194,24 @@ Match task requirements to agent descriptions from the registry using keyword/se
 | Standard implementation, moderate tasks | sonnet |
 | Quick lookup, exploration, simple generation | haiku |
 
+### Multi-Agent Decision Flowchart
+
+When a task requires multiple agents, use this 2-step decision tree:
+
+```
+Q1. Are the subtasks fully independent? (no file overlap)
+    │
+    ├─ YES → Priority 3a (Boss direct parallel) or 3b (delegate to sisyphus)
+    │
+    └─ NO (shared files, common types/utilities, etc.)
+        │
+        Q2. Is inter-agent communication needed? (feedback, review, cross-referencing)
+            │
+            ├─ YES → Priority 3c-DIRECT (Agent Teams, peer-to-peer SendMessage)
+            │
+            └─ NO  → Priority 3b (delegate to one sisyphus, handled sequentially internally)
+```
+
 ### Priority 3a: Boss Direct Orchestration (Mid-sized tasks)
 
 When 2-4 agents are needed and dependencies are simple:
@@ -203,7 +221,7 @@ When 2-4 agents are needed and dependencies are simple:
 
 Criteria: task can be decomposed into ≤4 clear steps, each mappable to a single agent.
 
-Example: "리팩토링하고 코드리뷰해줘"
+Example: "refactor and code review"
 → Agent("executor refactoring", model="sonnet") then Agent("code-reviewer", model="opus")
 
 ### Priority 3b: Sub-Orchestrator Delegation (Complex workflows)
@@ -254,6 +272,81 @@ or coordinate on overlapping files across long-running work:
 - No session resume with in-process teammates
 - Leader is fixed for team lifetime
 - All teammates start with leader's permission mode
+
+### Priority 3c-DIRECT: Boss as Direct Team Leader
+
+When Boss leads an Agent Team directly (instead of delegating to `/team` skill),
+these rules govern teammate selection, communication, and lifecycle.
+
+**A. Teammate Compatibility — Hard Blockers**
+
+```
+❌ NEVER as teammate: Explore (built-in), Plan (built-in), multimodal-looker
+   — No access to SendMessage/TaskUpdate, causes shutdown blocking
+
+⚠️ Orchestrators (sisyphus, atlas, boss) must not be used as teammates
+   — Core capabilities neutralized by "Subagents cannot spawn other subagents" constraint
+   — Consumes Opus cost while behaving like executor
+
+✅ All other agents can be teammates
+   — However, agents with disallowedTools (e.g. code-reviewer) should only be assigned review/analysis roles
+```
+
+**B. Dynamic Team Composition (runtime decisions)**
+
+Boss does not follow fixed team presets. For each request:
+1. Decompose the task and identify independence/dependencies
+2. Match the optimal agent type for each subtask (same logic as Phase 2 capability matching)
+3. Decide team size: start with 2–3, scale up to 5 if needed
+4. Decide model: Sonnet by default, Opus only when deep reasoning is truly required
+
+Criteria for dynamic decisions:
+- Implementation tasks → general-purpose or executor (sonnet)
+- Review tasks → code-reviewer or security-reviewer (sonnet) — write not needed
+- Debugging → debugger (sonnet)
+- Research → general-purpose (haiku also viable)
+- Architecture review → architect (opus) — only when genuinely needed
+
+**C. File Ownership**
+
+- Specify file scope in spawn prompt: "Your scope: src/auth/**"
+- If two teammates modify the same file, overwrites can occur (confirmed in official docs)
+- Shared files should be handled sequentially via blockedBy, or assigned to a read-only teammate
+
+**D. Direct Communication Between Teammates (peer-to-peer)**
+
+Boss is not the hub for all communication. Direct messages between teammates are encouraged:
+- Implementer → Reviewer: "Done modifying this file, please review"
+- Reviewer → Implementer: "Security issue found at L45, needs fixing"
+- DebuggerA → DebuggerB: "If my hypothesis is correct, please verify this on your end"
+
+Boss intervenes only when:
+- Strategic course correction is needed
+- Conflict mediation between teammates is required
+- Progress monitoring and final verification
+
+**E. Required Elements in Spawn Prompt**
+
+Include all 5 of the following when spawning any teammate:
+1. Team name and the teammate's role
+2. File scope
+3. "Check TaskList → mark complete with TaskUpdate → check next task" cycle
+4. "Communicate with leader or other teammates via SendMessage"
+5. "Must respond with acknowledgment upon receiving shutdown_request"
+
+**F. Lifecycle**
+
+1. Check for existing team → if found, `TeamDelete` → `TeamCreate` → `TaskCreate` (set blockedBy) → spawn teammates
+2. Monitor: Track progress via TaskList + incoming SendMessage
+3. Steer: Issue course correction instructions when needed
+4. Verify: Boss directly — read files + run tests
+5. Shutdown: SendMessage(shutdown_request) → wait 5–10s → TeamDelete
+   - TeamDelete must wait until active member count reaches 0
+   - If first attempt fails, wait briefly then retry
+6. Fallback: If no shutdown response, wait 10s then clean up manually
+
+> 📎 For detailed per-agent characteristics (Write/Edit capability, teammate suitability, recommended roles),
+> see `agent-teams-reference.md`.
 
 ### Priority 4: General-Purpose Fallback
 
@@ -309,6 +402,19 @@ The team skill manages TeamCreate, teammate spawning, shared task list, inter-ag
 and cleanup. Boss monitors via shared task list and acts as team leader.
 Boss can also message teammates directly or broadcast to all.
 
+**Method F: Boss Direct Team Leadership** (for Priority 3c-DIRECT)
+```
+1. TeamCreate(team_name="[name]")
+2. TaskCreate(subject="[task]") × N → TaskUpdate(addBlockedBy) for dependencies
+3. Agent(name="[teammate]", model="sonnet", run_in_background=true, prompt="...")
+4. Monitor: receive SendMessage from teammates, check TaskList
+5. Verify: Read changed files + run tests directly
+6. SendMessage(to="[teammate]", message={type:"shutdown_request"}) × N
+7. TeamDelete()
+```
+Boss manages the full lifecycle directly — no skill intermediary.
+See Priority 3c-DIRECT for teammate selection rules and spawn prompt requirements.
+
 ### 6-Section Delegation Prompt (mandatory for Method B and D)
 
 Every delegation MUST include all 6 sections. Minimum 30 lines.
@@ -332,7 +438,13 @@ Every delegation MUST include all 6 sections. Minimum 30 lines.
 
 **CONTEXT**:
 [Relevant code snippets, file paths, patterns to follow]
+Recommended skills: [skills matched in Phase 2, e.g. /tdd-workflow, /security-review]
+Recommended agents: [agents matched in Phase 2, e.g. test-engineer (sonnet)]
 ```
+
+**Capability Handoff Rule**: When delegating to sub-orchestrators (sisyphus, atlas, hephaestus)
+or any agent that may further delegate work, include recommended skills and agents in CONTEXT.
+Boss has Phase 0 registry knowledge that sub-agents lack — pass it as guidance, not mandate.
 
 ### Parallel Execution Rules
 

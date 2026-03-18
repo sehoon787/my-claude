@@ -28,7 +28,30 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"console.log(JSON.stringify({hookSpecificOutput:{additionalContext:'VERIFICATION REQUIRED: Subagent finished. Before proceeding: (1) Read the changed files yourself, (2) Run lsp_diagnostics or tests to verify, (3) Only then mark the task complete. Do NOT trust subagent claims without independent verification.'}}))\""
+            "command": "node -e \"console.log(JSON.stringify({hookSpecificOutput:{additionalContext:'VERIFICATION REQUIRED: Subagent finished. Before proceeding: (1) Read the changed files yourself, (2) Run lsp_diagnostics or tests to verify, (3) Only then mark the task complete. Do NOT trust subagent claims without independent verification.'}})\"",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "TeammateIdle": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"console.log(JSON.stringify({hookSpecificOutput:{additionalContext:'Teammate idle. Check TaskList — if all tasks done, send shutdown_request. If tasks remain, send next instructions.'}})\"",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"console.log(JSON.stringify({hookSpecificOutput:{additionalContext:'Task completed. Verify deliverable exists and check quality before accepting.'}})\"",
+            "timeout": 5000
           }
         ]
       }
