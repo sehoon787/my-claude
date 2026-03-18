@@ -52,6 +52,8 @@ rm -rf /tmp/my-claude
 git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && bash /tmp/my-claude/install.sh && rm -rf /tmp/my-claude
 ```
 
+> **참고**: `install.sh`는 Boss를 기본 에이전트로 자동 설정합니다. 플러그인 설치(방법 1) 시에는 [AI-INSTALL.md](AI-INSTALL.md)의 설정 명령어를 실행하세요.
+
 **방법 3: 수동 설치**
 
 ```bash

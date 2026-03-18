@@ -52,6 +52,8 @@ rm -rf /tmp/my-claude
 git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && bash /tmp/my-claude/install.sh && rm -rf /tmp/my-claude
 ```
 
+> **Note**: `install.sh` automatically sets Boss as the default agent. For plugin install (Option 1), run the setup command in [AI-INSTALL.md](AI-INSTALL.md).
+
 **Option 3: Manual installation**
 
 ```bash
