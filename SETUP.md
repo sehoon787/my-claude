@@ -507,7 +507,7 @@ git clone https://github.com/sehoon787/my-claude.git ~/my-claude
 mkdir -p ~/.claude/agents
 
 # Agents
-cp agents/core/*.md ~/.claude/agents/
+cp agents/core/*.md agents/omo/*.md ~/.claude/agents/
 cp agents/omc/*.md ~/.claude/agents/
 find agents/agency -name '*.md' -exec cp {} ~/.claude/agents/ \;
 

@@ -11,11 +11,20 @@ echo "=== Sync Integrity Validation ==="
 
 # 1. Core agents exist
 CORE_COUNT=$(find agents/core -name '*.md' 2>/dev/null | wc -l)
-if [ "$CORE_COUNT" -lt 10 ]; then
-  echo "FAIL: agents/core has $CORE_COUNT files (expected >= 10)"
+if [ "$CORE_COUNT" -lt 2 ]; then
+  echo "FAIL: agents/core has $CORE_COUNT files (expected >= 2)"
   ERRORS=$((ERRORS + 1))
 else
-  echo "OK: agents/core — $CORE_COUNT agents"
+  echo "OK: agents/core — $CORE_COUNT files"
+fi
+
+# 1b. OMO agents exist
+OMO_COUNT=$(find agents/omo -name '*.md' 2>/dev/null | wc -l)
+if [ "$OMO_COUNT" -lt 9 ]; then
+  echo "FAIL: agents/omo has $OMO_COUNT files (expected >= 9)"
+  ERRORS=$((ERRORS + 1))
+else
+  echo "OK: agents/omo — $OMO_COUNT agents"
 fi
 
 # 2. Agency agents exist
@@ -87,7 +96,7 @@ done
 
 # Summary
 echo ""
-TOTAL_AGENTS=$((CORE_COUNT + AGENCY_COUNT + OMC_AGENT_COUNT))
+TOTAL_AGENTS=$((CORE_COUNT + OMO_COUNT + AGENCY_COUNT + OMC_AGENT_COUNT))
 TOTAL_SKILLS=$((ECC_SKILL_COUNT + OMC_SKILL_COUNT))
 echo "=== Summary ==="
 echo "Total agents: $TOTAL_AGENTS"
