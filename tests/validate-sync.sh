@@ -55,7 +55,7 @@ else
 fi
 
 # 6. Rules exist
-RULE_COUNT=$(find rules -name '*.md' 2>/dev/null | wc -l)
+RULE_COUNT=$(find rules -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l)
 if [ "$RULE_COUNT" -lt 10 ]; then
   echo "FAIL: rules has $RULE_COUNT files (expected >= 10)"
   ERRORS=$((ERRORS + 1))
