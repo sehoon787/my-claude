@@ -106,22 +106,22 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ---
 
-## my-claude 에이전트
+## Core + OMO 에이전트
 
-1개의 Core 에이전트(Boss 메타 오케스트레이터) + [oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent)에서 포팅된 9개 omo 에이전트입니다. 플러그인에는 172개 Agency 에이전트와 19개 OMC 에이전트도 번들되어 있으며, Boss가 Priority 2 능력 매칭으로 이 풀에서 최적의 전문가를 선택합니다. 전체 201개 에이전트 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
+**Boss**만 my-claude 고유 에이전트입니다. 나머지 9개는 Boss가 서브 오케스트레이터 및 전문가로 사용하는 [OMO 에이전트](https://github.com/code-yeongyu/oh-my-openagent)입니다. 플러그인에는 172개 Agency 에이전트와 19개 OMC 에이전트도 번들되어 있으며, Boss가 Priority 2 능력 매칭으로 전체 풀에서 최적의 전문가를 선택합니다. 전체 201개 에이전트 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
 
-| 에이전트 | 모델 | 역할 |
-|---------|------|------|
-| **Boss** | Opus | 동적 메타 오케스트레이터. 런타임에 모든 에이전트/스킬/MCP를 자동 감지하고 최적의 전문가에게 라우팅 |
-| **Sisyphus** | Opus | 서브 오케스트레이터. 의도 분류와 검증 프로토콜로 복잡한 멀티스텝 워크플로우 관리 |
-| **Hephaestus** | Opus | 자율 딥 워커. 탐색 → 계획 → 실행 → 검증 사이클을 자율적으로 수행 |
-| **Metis** | Opus | 사전 의도 분석. AI-slop 방지를 위해 요청을 실행 전에 구조화 |
-| **Atlas** | Opus | 마스터 태스크 오케스트레이터. 4단계 QA 사이클로 복잡한 작업을 분해 및 조율 |
-| **Oracle** | Opus | 전략적 기술 자문가. 코드를 변경하지 않고 read-only로 분석하여 방향 제시 |
-| **Momus** | Opus | 작업 계획 검토자. 승인 편향적 관점에서 계획을 검토. read-only |
-| **Prometheus** | Opus | 인터뷰 기반 계획 수립 컨설턴트. 대화를 통해 요구사항을 명확화 |
-| **Librarian** | Sonnet | MCP를 활용한 오픈소스 문서 연구 에이전트 |
-| **Multimodal-Looker** | Sonnet | 시각 분석 에이전트. 이미지/스크린샷을 분석. read-only |
+| 에이전트 | 출처 | 모델 | 역할 |
+|---------|------|------|------|
+| **Boss** | my-claude | Opus | 동적 메타 오케스트레이터. 런타임에 모든 에이전트/스킬/MCP를 자동 감지하고 최적의 전문가에게 라우팅 |
+| **Sisyphus** | OMO | Opus | 서브 오케스트레이터. 의도 분류와 검증 프로토콜로 복잡한 멀티스텝 워크플로우 관리 |
+| **Hephaestus** | OMO | Opus | 자율 딥 워커. 탐색 → 계획 → 실행 → 검증 사이클을 자율적으로 수행 |
+| **Metis** | OMO | Opus | 사전 의도 분석. AI-slop 방지를 위해 요청을 실행 전에 구조화 |
+| **Atlas** | OMO | Opus | 마스터 태스크 오케스트레이터. 4단계 QA 사이클로 복잡한 작업을 분해 및 조율 |
+| **Oracle** | OMO | Opus | 전략적 기술 자문가. 코드를 변경하지 않고 read-only로 분석하여 방향 제시 |
+| **Momus** | OMO | Opus | 작업 계획 검토자. 승인 편향적 관점에서 계획을 검토. read-only |
+| **Prometheus** | OMO | Opus | 인터뷰 기반 계획 수립 컨설턴트. 대화를 통해 요구사항을 명확화 |
+| **Librarian** | OMO | Sonnet | MCP를 활용한 오픈소스 문서 연구 에이전트 |
+| **Multimodal-Looker** | OMO | Sonnet | 시각 분석 에이전트. 이미지/스크린샷을 분석. read-only |
 
 ---
 

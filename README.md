@@ -109,22 +109,22 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 
 ---
 
-## my-claude Agents
+## Core + OMO Agents
 
-1 core agent (Boss meta-orchestrator) + 9 omo agents (ported from [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)). The plugin also bundles 172 agency agents and 19 OMC agents — Boss selects the best-matching specialist from this pool via Priority 2 capability matching. See [Installed Components](#installed-components) below.
+**Boss** is the only my-claude original agent. The remaining 9 are [OMO agents](https://github.com/code-yeongyu/oh-my-openagent) that Boss uses as sub-orchestrators and specialists. The plugin also bundles 172 agency agents and 19 OMC agents — Boss selects the best-matching specialist from this entire pool via Priority 2 capability matching. See [Installed Components](#installed-components) below.
 
-| Agent | Model | Role |
-|---------|------|------|
-| **Boss** | Opus | Dynamic meta-orchestrator. Auto-discovers all installed agents/skills/MCP at runtime and routes to optimal specialist |
-| **Sisyphus** | Opus | Sub-orchestrator. Manages complex multi-step workflows with intent classification and verification |
-| **Hephaestus** | Opus | Autonomous deep worker. Autonomously performs explore → plan → execute → verify cycles |
-| **Metis** | Opus | Pre-execution intent analysis. Structures requests before execution to prevent AI-slop |
-| **Atlas** | Opus | Master task orchestrator. Decomposes and coordinates complex tasks with a 4-stage QA cycle |
-| **Oracle** | Opus | Strategic technical advisor. Analyzes in read-only mode without modifying code and provides direction |
-| **Momus** | Opus | Task plan reviewer. Reviews plans from an approval-biased perspective. Read-only |
-| **Prometheus** | Opus | Interview-based planning consultant. Clarifies requirements through conversation |
-| **Librarian** | Sonnet | Open-source documentation research agent using MCP |
-| **Multimodal-Looker** | Sonnet | Visual analysis agent. Analyzes images/screenshots. Read-only |
+| Agent | Source | Model | Role |
+|---------|--------|------|------|
+| **Boss** | my-claude | Opus | Dynamic meta-orchestrator. Auto-discovers all installed agents/skills/MCP at runtime and routes to optimal specialist |
+| **Sisyphus** | OMO | Opus | Sub-orchestrator. Manages complex multi-step workflows with intent classification and verification |
+| **Hephaestus** | OMO | Opus | Autonomous deep worker. Autonomously performs explore → plan → execute → verify cycles |
+| **Metis** | OMO | Opus | Pre-execution intent analysis. Structures requests before execution to prevent AI-slop |
+| **Atlas** | OMO | Opus | Master task orchestrator. Decomposes and coordinates complex tasks with a 4-stage QA cycle |
+| **Oracle** | OMO | Opus | Strategic technical advisor. Analyzes in read-only mode without modifying code and provides direction |
+| **Momus** | OMO | Opus | Task plan reviewer. Reviews plans from an approval-biased perspective. Read-only |
+| **Prometheus** | OMO | Opus | Interview-based planning consultant. Clarifies requirements through conversation |
+| **Librarian** | OMO | Sonnet | Open-source documentation research agent using MCP |
+| **Multimodal-Looker** | OMO | Sonnet | Visual analysis agent. Analyzes images/screenshots. Read-only |
 
 ---
 
