@@ -251,6 +251,23 @@ oh-my-opencode doctor
 
 **11 built-in agents:** Sisyphus (orchestrator), Sisyphus-Junior (lightweight orchestrator), Prometheus (planning), Metis (intent analysis), Momus (review), Oracle (consulting), Atlas (task management), Hephaestus (autonomous execution), Librarian (doc search), Explore (navigation), Multimodal-Looker (visual analysis)
 
+### 4a. Fix OpenCode TUI crash
+
+oh-my-opencode hides OpenCode's default `build` agent when Sisyphus is enabled, causing the TUI to crash with `TypeError: agents()[0].name`. To fix this, enable the fallback builder agent:
+
+```bash
+node -e "
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const cfgPath = path.join(os.homedir(), '.config', 'opencode', 'oh-my-opencode.json');
+const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+cfg.sisyphus_agent = { ...(cfg.sisyphus_agent || {}), default_builder_enabled: true };
+fs.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2));
+console.log('OpenCode TUI fix applied: default_builder_enabled = true');
+"
+```
+
 ---
 
 ## 5. Fix OMC HUD Error

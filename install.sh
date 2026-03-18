@@ -51,6 +51,23 @@ else
   echo "  omo installed"
 fi
 
+# ── 2a. Fix OpenCode TUI crash ──
+echo "[2a] Fixing OpenCode TUI crash..."
+node -e "
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const cfgPath = path.join(os.homedir(), '.config', 'opencode', 'oh-my-opencode.json');
+try {
+  const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+  cfg.sisyphus_agent = { ...(cfg.sisyphus_agent || {}), default_builder_enabled: true };
+  fs.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2));
+  console.log('  OpenCode TUI fix applied: default_builder_enabled = true');
+} catch (e) {
+  console.log('  Skipped (oh-my-opencode.json not found yet)');
+}
+"
+
 # ── 3. Fix OMC HUD Error ──
 echo "[3/10] Fixing OMC HUD..."
 HUD_FILE="${CLAUDE_DIR}/hud/omc-hud.mjs"
