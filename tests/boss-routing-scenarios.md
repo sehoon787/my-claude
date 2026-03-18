@@ -334,5 +334,5 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 
 ### Scenario: Plugin-scoped agent discovery
 **Input**: "Show me all available agents"
-**Expected**: Boss reports 199+ agents (10 core + 172 agency + 19 OMC) from the plugin bundle
+**Expected**: Boss reports 201 agents (10 core + 172 agency + 19 OMC) from the plugin bundle
 **Verify**: Count includes all three subdirectories

@@ -237,6 +237,24 @@ or coordinate on overlapping files across long-running work:
 - Read-only analysis (subagents are cheaper)
 - When `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` env var is not set → fall back to Priority 3b
 
+**Advanced Team Controls (from official docs):**
+- **Plan approval**: Require teammates to plan before implementing:
+  `"Spawn an architect teammate. Require plan approval before changes."`
+  Leader reviews and approves/rejects plans. Rejected → teammate revises in plan mode.
+- **Model specification**: Specify model per teammate:
+  `"Create a team with 4 teammates. Use Sonnet for each teammate."`
+- **Display modes**: `teammateMode` in settings.json — "auto" (default), "in-process", "tmux"
+- **Direct interaction**: Shift+Down to cycle teammates (in-process), click window (split-pane)
+- **TeammateIdle hook**: Runs when teammate goes idle — return exit code 2 to send feedback
+- **TaskCompleted hook**: Runs when task marked complete — return exit code 2 to prevent completion
+
+**Limitations (Boss must be aware):**
+- One team per session (clean up before creating new)
+- No nested teams (teammates cannot create sub-teams)
+- No session resume with in-process teammates
+- Leader is fixed for team lifetime
+- All teammates start with leader's permission mode
+
 ### Priority 4: General-Purpose Fallback
 
 When no specialist matches:
@@ -284,12 +302,12 @@ Agent(description="atlas task coordination: [plan]", model="opus")
 ```
 
 **Method E: Agent Teams via skill** (for collaborative multi-agent work)
-```
-Skill(skill: "team", args: "[N]:[agent-type] '[task description]'")
-```
+- Basic: `Skill(skill: "team", args: "3:executor 'refactor auth module'")`
+- With plan approval: Include "Require plan approval" in the task description
+- With model spec: Include "Use Sonnet for each teammate" in the description
 The team skill manages TeamCreate, teammate spawning, shared task list, inter-agent messaging,
 and cleanup. Boss monitors via shared task list and acts as team leader.
-Boss can message teammates directly or broadcast to all.
+Boss can also message teammates directly or broadcast to all.
 
 ### 6-Section Delegation Prompt (mandatory for Method B and D)
 

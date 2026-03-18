@@ -18,7 +18,7 @@
 
 All-in-one Claude Code multi-agent orchestration plugin — install once, get everything.
 
-Bundles **201 agents**, **136 skills**, **14 rules**, **4 behavioral hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
+Bundles **201 agents**, **136 skills**, **49 rules**, **4 behavioral hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
@@ -92,7 +92,7 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 - **grep.app**: GitHub open-source code search
 
 ### All-in-One Bundle
-- Plugin install provides **201 agents, 136 skills, and 14 rules** instantly
+- Plugin install provides **201 agents, 136 skills, and 49 rules** instantly
 - Bundles 3 MIT upstream sources (agency-agents, everything-claude-code, oh-my-claudecode)
 - Weekly CI auto-sync keeps bundled content up-to-date with upstream
 - Companion `install.sh` adds npm tools and proprietary Anthropic skills
@@ -126,7 +126,7 @@ Following SETUP.md will configure the following:
 |------|------|------|------|
 | Agents | 201 | my-claude 10 + Agency 172 + OMC 19 | Plugin |
 | Skills | 136 | ECC 108 + OMC 28 | Plugin |
-| Rules | 14 | ECC (common 9 + typescript 5) | Plugin |
+| Rules | 49 | ECC (common 9 + 8 languages × 5) | Plugin |
 | MCP Servers | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 4 | my-claude (Boss protocol + SessionStart) | Plugin |
 | Anthropic Skills | 14+ | Anthropic Official | install.sh |
@@ -286,7 +286,7 @@ Following SETUP.md will configure the following:
 </details>
 
 <details>
-<summary>Rules (14) — ECC Coding Rules</summary>
+<summary>Rules (49) — ECC Coding Rules</summary>
 
 **Common (9)** — Applied to all projects
 
@@ -312,10 +312,14 @@ Following SETUP.md will configure the following:
 | security.md | TS security rules |
 | testing.md | TS testing rules |
 
+**Other Languages (5 rules each)** — C++, Go, Kotlin, Perl, PHP, Python, Swift
+
+Each language directory contains: coding-style.md, hooks.md, patterns.md, security.md, testing.md
+
 </details>
 
 <details>
-<summary>MCP Servers (3) + Behavioral Correction Hooks (3)</summary>
+<summary>MCP Servers (3) + Behavioral Correction Hooks (4)</summary>
 
 **MCP Servers**
 

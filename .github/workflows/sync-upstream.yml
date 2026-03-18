@@ -125,7 +125,58 @@ jobs:
             fs.writeFileSync('upstream/SOURCES.json', JSON.stringify(sources, null, 2));
           "
 
-      # ── 5. Create PR if changes exist ──
+      # ── 5. Update documentation counts ──
+      - name: Update documentation counts
+        run: |
+          CORE_AGENTS=$(find agents/core -name '*.md' | wc -l)
+          TOTAL_AGENTS=$((CORE_AGENTS + AGENCY_COUNT + OMC_AGENTS))
+          TOTAL_SKILLS=$((ECC_SKILLS + OMC_SKILLS))
+          TOTAL_RULES=$((ECC_RULES))
+          HOOKS=4
+
+          # README.md
+          sed -i "s/\*\*[0-9]\+ agents\*\*/\*\*${TOTAL_AGENTS} agents\*\*/g" README.md
+          sed -i "s/\*\*[0-9]\+ skills\*\*/\*\*${TOTAL_SKILLS} skills\*\*/g" README.md
+          sed -i "s/\*\*[0-9]\+ rules\*\*/\*\*${TOTAL_RULES} rules\*\*/g" README.md
+          sed -i "s/[0-9]\+ agents, [0-9]\+ skills, and [0-9]\+ rules/${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills, and ${TOTAL_RULES} rules/" README.md
+          sed -i "s/my-claude [0-9]\+ + Agency [0-9]\+ + OMC [0-9]\+/my-claude ${CORE_AGENTS} + Agency ${AGENCY_COUNT} + OMC ${OMC_AGENTS}/" README.md
+          sed -i "s/ECC [0-9]\+ + OMC [0-9]\+/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS}/" README.md
+          sed -i "s/| Rules | [0-9]\+ |/| Rules | ${TOTAL_RULES} |/" README.md
+          sed -i "s/Rules ([0-9]\+)/Rules (${TOTAL_RULES})/" README.md
+          sed -i "s/| Agents | [0-9]\+ |/| Agents | ${TOTAL_AGENTS} |/" README.md
+          sed -i "s/| Skills | [0-9]\+ |/| Skills | ${TOTAL_SKILLS} |/" README.md
+
+          # README.ko.md
+          sed -i "s/\*\*[0-9]\+개 에이전트\*\*/\*\*${TOTAL_AGENTS}개 에이전트\*\*/g" README.ko.md
+          sed -i "s/\*\*[0-9]\+개 스킬\*\*/\*\*${TOTAL_SKILLS}개 스킬\*\*/g" README.ko.md
+          sed -i "s/\*\*[0-9]\+개 룰\*\*/\*\*${TOTAL_RULES}개 룰\*\*/g" README.ko.md
+          sed -i "s/[0-9]\+ 에이전트, [0-9]\+ 스킬, [0-9]\+ 룰/${TOTAL_AGENTS} 에이전트, ${TOTAL_SKILLS} 스킬, ${TOTAL_RULES} 룰/" README.ko.md
+          sed -i "s/my-claude [0-9]\+ + Agency [0-9]\+ + OMC [0-9]\+/my-claude ${CORE_AGENTS} + Agency ${AGENCY_COUNT} + OMC ${OMC_AGENTS}/" README.ko.md
+          sed -i "s/ECC [0-9]\+ + OMC [0-9]\+/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS}/" README.ko.md
+          sed -i "s/룰 ([0-9]\+개)/룰 (${TOTAL_RULES}개)/" README.ko.md
+          sed -i "s/| 에이전트 | [0-9]\+ |/| 에이전트 | ${TOTAL_AGENTS} |/" README.ko.md
+          sed -i "s/| 스킬 | [0-9]\+ |/| 스킬 | ${TOTAL_SKILLS} |/" README.ko.md
+          sed -i "s/| 룰 | [0-9]\+ |/| 룰 | ${TOTAL_RULES} |/" README.ko.md
+
+          # AI-INSTALL.md
+          sed -i "s/[0-9]\+ agents, [0-9]\+ skills, [0-9]\+ rules/${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills, ${TOTAL_RULES} rules/" AI-INSTALL.md
+          sed -i "s/[0-9]\+ agents ([0-9]\+ core + [0-9]\+ agency + [0-9]\+ OMC)/${TOTAL_AGENTS} agents (${CORE_AGENTS} core + ${AGENCY_COUNT} agency + ${OMC_AGENTS} OMC)/" AI-INSTALL.md
+          sed -i "s/[0-9]\+ skills ([0-9]\+ ECC + [0-9]\+ OMC)/${TOTAL_SKILLS} skills (${ECC_SKILLS} ECC + ${OMC_SKILLS} OMC)/" AI-INSTALL.md
+          sed -i "s/Rules: [0-9]\+/Rules: ${TOTAL_RULES}/" AI-INSTALL.md
+
+          # .claude-plugin/marketplace.json
+          sed -i "s/[0-9]\+ agents/${TOTAL_AGENTS} agents/g" .claude-plugin/marketplace.json
+          sed -i "s/[0-9]\+ skills/${TOTAL_SKILLS} skills/g" .claude-plugin/marketplace.json
+          sed -i "s/[0-9]\+ rules/${TOTAL_RULES} rules/g" .claude-plugin/marketplace.json
+          sed -i "s/[0-9]\+ agency/${AGENCY_COUNT} agency/g" .claude-plugin/marketplace.json
+
+          # tests/boss-routing-scenarios.md
+          sed -i "s/Boss reports [0-9]\+ agents/Boss reports ${TOTAL_AGENTS} agents/" tests/boss-routing-scenarios.md
+          sed -i "s/[0-9]\+ core + [0-9]\+ agency + [0-9]\+ OMC/${CORE_AGENTS} core + ${AGENCY_COUNT} agency + ${OMC_AGENTS} OMC/" tests/boss-routing-scenarios.md
+
+          echo "Updated doc counts: ${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills, ${TOTAL_RULES} rules"
+
+      # ── 6. Create PR if changes exist ──
       - name: Create sync PR
         run: |
           if [ -n "$(git status --porcelain)" ]; then

@@ -2,5 +2,6 @@
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
-  "agent": "boss"
+  "agent": "boss",
+  "teammateMode": "auto"
 }

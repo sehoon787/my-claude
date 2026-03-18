@@ -24,7 +24,7 @@ jobs:
           python3 -c "import json; json.load(open('settings.json'))"
       - name: Check agent files exist
         run: |
-          for agent in sisyphus hephaestus metis atlas oracle momus prometheus librarian multimodal-looker; do
+          for agent in boss sisyphus hephaestus metis atlas oracle momus prometheus librarian multimodal-looker; do
             test -f "agents/core/${agent}.md" || (echo "Missing agent: ${agent}" && exit 1)
           done
       - name: Validate agent frontmatter
