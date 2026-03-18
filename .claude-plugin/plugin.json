@@ -1,7 +1,7 @@
 {
   "name": "my-claude",
   "description": "All-in-one multi-agent orchestration plugin — 201 agents, 136 skills, behavioral hooks, and MCP servers bundled from 3 MIT upstream sources with weekly CI auto-sync",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "author": {
     "name": "sehoon787"
   }
