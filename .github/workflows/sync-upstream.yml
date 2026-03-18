@@ -1,0 +1,156 @@
+name: Sync Upstream Dependencies
+on:
+  schedule:
+    - cron: '0 6 * * 1'    # Every Monday 06:00 UTC
+  workflow_dispatch:         # Manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── 1. Agency Agents ──
+      - name: Sync agency-agents
+        run: |
+          git clone --depth 1 https://github.com/msitarzewski/agency-agents.git /tmp/agency
+          AGENCY_SHA=$(cd /tmp/agency && git rev-parse HEAD)
+          AGENCY_TAG=$(cd /tmp/agency && git describe --tags --exact-match 2>/dev/null || echo "null")
+          echo "AGENCY_SHA=$AGENCY_SHA" >> $GITHUB_ENV
+          echo "AGENCY_TAG=$AGENCY_TAG" >> $GITHUB_ENV
+
+          for cat in engineering design testing product game-development marketing \
+                     sales academic project-management specialized spatial-computing \
+                     support strategy; do
+            if [ -d "/tmp/agency/$cat" ]; then
+              mkdir -p "agents/agency/$cat"
+              cp /tmp/agency/$cat/*.md "agents/agency/$cat/" 2>/dev/null || true
+            fi
+          done
+          # Add model field to agents missing it
+          find agents/agency -name '*.md' | while read f; do
+            if ! grep -q '^model:' "$f"; then
+              sed -i '/^description:/a model: claude-sonnet-4-6' "$f"
+            fi
+          done
+          AGENCY_COUNT=$(find agents/agency -name '*.md' | wc -l)
+          echo "AGENCY_COUNT=$AGENCY_COUNT" >> $GITHUB_ENV
+
+      # ── 2. ECC Skills + Rules ──
+      - name: Sync everything-claude-code
+        run: |
+          git clone --depth 1 https://github.com/affaan-m/everything-claude-code.git /tmp/ecc
+          ECC_SHA=$(cd /tmp/ecc && git rev-parse HEAD)
+          ECC_TAG=$(cd /tmp/ecc && git describe --tags --exact-match 2>/dev/null || echo "null")
+          echo "ECC_SHA=$ECC_SHA" >> $GITHUB_ENV
+          echo "ECC_TAG=$ECC_TAG" >> $GITHUB_ENV
+
+          if [ -d /tmp/ecc/skills ]; then
+            rm -rf skills/ecc && mkdir -p skills/ecc
+            cp -r /tmp/ecc/skills/* skills/ecc/
+          fi
+          if [ -d /tmp/ecc/rules ]; then
+            rm -rf rules && mkdir -p rules
+            cp -r /tmp/ecc/rules/* rules/
+          fi
+          ECC_SKILLS=$(find skills/ecc -name 'SKILL.md' | wc -l)
+          ECC_RULES=$(find rules -name '*.md' | wc -l)
+          echo "ECC_SKILLS=$ECC_SKILLS" >> $GITHUB_ENV
+          echo "ECC_RULES=$ECC_RULES" >> $GITHUB_ENV
+
+      # ── 3. OMC Agents + Skills ──
+      - name: Sync oh-my-claudecode
+        run: |
+          git clone --depth 1 https://github.com/Yeachan-Heo/oh-my-claudecode.git /tmp/omc
+          OMC_SHA=$(cd /tmp/omc && git rev-parse HEAD)
+          OMC_TAG=$(cd /tmp/omc && git describe --tags --exact-match 2>/dev/null || echo "null")
+          echo "OMC_SHA=$OMC_SHA" >> $GITHUB_ENV
+          echo "OMC_TAG=$OMC_TAG" >> $GITHUB_ENV
+
+          if [ -d /tmp/omc/agents ]; then
+            rm -rf agents/omc && mkdir -p agents/omc
+            cp /tmp/omc/agents/*.md agents/omc/
+          fi
+          if [ -d /tmp/omc/skills ]; then
+            rm -rf skills/omc && mkdir -p skills/omc
+            cp -r /tmp/omc/skills/* skills/omc/
+          fi
+          OMC_AGENTS=$(find agents/omc -name '*.md' | wc -l)
+          OMC_SKILLS=$(find skills/omc -name 'SKILL.md' | wc -l)
+          echo "OMC_AGENTS=$OMC_AGENTS" >> $GITHUB_ENV
+          echo "OMC_SKILLS=$OMC_SKILLS" >> $GITHUB_ENV
+
+      # ── 4. Update SOURCES.json ──
+      - name: Update SOURCES.json with SHA tracking
+        run: |
+          NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          node -e "
+            const fs = require('fs');
+            const q = v => v === 'null' ? null : v;
+            const short = sha => sha.substring(0, 7);
+            const sources = {
+              'agency-agents': {
+                repo: 'https://github.com/msitarzewski/agency-agents',
+                branch: 'main',
+                syncedSha: '$AGENCY_SHA',
+                syncedTag: q('$AGENCY_TAG'),
+                syncedAt: '$NOW',
+                compareUrl: 'https://github.com/msitarzewski/agency-agents/compare/' + short('$AGENCY_SHA') + '...HEAD',
+                files: { agents: parseInt('$AGENCY_COUNT') }
+              },
+              'everything-claude-code': {
+                repo: 'https://github.com/affaan-m/everything-claude-code',
+                branch: 'main',
+                syncedSha: '$ECC_SHA',
+                syncedTag: q('$ECC_TAG'),
+                syncedAt: '$NOW',
+                compareUrl: 'https://github.com/affaan-m/everything-claude-code/compare/' + short('$ECC_SHA') + '...HEAD',
+                files: { skills: parseInt('$ECC_SKILLS'), rules: parseInt('$ECC_RULES') }
+              },
+              'oh-my-claudecode': {
+                repo: 'https://github.com/Yeachan-Heo/oh-my-claudecode',
+                branch: 'main',
+                syncedSha: '$OMC_SHA',
+                syncedTag: q('$OMC_TAG'),
+                syncedAt: '$NOW',
+                compareUrl: 'https://github.com/Yeachan-Heo/oh-my-claudecode/compare/' + short('$OMC_SHA') + '...HEAD',
+                files: { agents: parseInt('$OMC_AGENTS'), skills: parseInt('$OMC_SKILLS') }
+              }
+            };
+            fs.mkdirSync('upstream', { recursive: true });
+            fs.writeFileSync('upstream/SOURCES.json', JSON.stringify(sources, null, 2));
+          "
+
+      # ── 5. Create PR if changes exist ──
+      - name: Create sync PR
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            BRANCH="auto/sync-$(date +%Y%m%d-%H%M)"
+            git checkout -b "$BRANCH"
+            git add -A
+            git commit -m "chore: sync upstream dependencies ($(date +%Y-%m-%d))"
+            git push -u origin "$BRANCH"
+            gh pr create \
+              --title "chore: sync upstream ($(date +%Y-%m-%d))" \
+              --body "$(cat <<PREOF
+## Upstream Sync Summary
+
+| Source | SHA | Tag | Files |
+|--------|-----|-----|-------|
+| agency-agents | \`${AGENCY_SHA:0:7}\` | ${AGENCY_TAG} | ${AGENCY_COUNT} agents |
+| everything-claude-code | \`${ECC_SHA:0:7}\` | ${ECC_TAG} | ${ECC_SKILLS} skills, ${ECC_RULES} rules |
+| oh-my-claudecode | \`${OMC_SHA:0:7}\` | ${OMC_TAG} | ${OMC_AGENTS} agents, ${OMC_SKILLS} skills |
+
+Review agent/skill diffs before merging.
+PREOF
+              )" \
+              --label "auto-sync"
+          else
+            echo "No changes detected — all upstream repos match current bundle"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
