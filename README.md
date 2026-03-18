@@ -473,6 +473,74 @@ Boss routes every request through a 4-level priority chain:
 
 Every delegation includes a **6-section structured prompt**: TASK, EXPECTED OUTCOME, REQUIRED TOOLS, MUST DO, MUST NOT DO, CONTEXT.
 
+### Delegation Examples
+
+#### Subagent vs Agent Teams
+
+| | Subagent (P2/P3a/P3b) | Agent Teams (P3c) |
+|---|---|---|
+| **Command** | `Agent(prompt="...")` | `SendMessage(to: "agent", ...)` |
+| **Communication** | Boss → Agent → Boss | Boss ↔ Agent ↔ Agent |
+| **Lifetime** | Ends on completion | Persists until TeamDelete |
+| **Visibility** | Boss log only | tmux pane or Shift+↓ |
+| **Cost** | Low | High (separate Claude session per teammate) |
+
+**P2 — Single Specialist Agent:**
+```
+$ claude "analyze auth module for security vulnerabilities"
+
+[Boss] Phase 0: Scanning... 201 agents, 136 skills ready.
+[Boss] Phase 1: Intent → Security Analysis | Priority: P2
+[Boss] Phase 2: Matched → security-reviewer (sonnet)
+[Boss] Agent(description="security review", model="sonnet", prompt="
+  TASK: Analyze src/auth/ for OWASP Top 10 vulnerabilities.
+  MUST DO: Check SQL injection, XSS, CSRF.
+  MUST NOT: Modify any files.
+")
+       ↓ result returned
+[Boss] Phase 4: Reading report... 2 critical, 1 medium confirmed. ✓
+```
+
+**P3a — Boss Direct Parallel:**
+```
+$ claude "refactor auth and write tests"
+
+[Boss] Phase 1: Multi-step → P3a Direct Orchestration
+[Boss] Spawning 2 agents in parallel:
+  Agent(description="executor refactoring", model="sonnet", run_in_background=true)
+  Agent(description="test-engineer tests", model="sonnet", run_in_background=true)
+       ↓ both results returned
+[Boss] Phase 4: Verifying refactored files... ✓
+[Boss] Phase 4: Running tests... 12/12 passed. ✓
+```
+
+**P3c — Agent Teams:**
+```
+$ claude "implement payment module with review"
+
+[Boss] Phase 1: Needs inter-agent communication → P3c Agent Teams
+[Boss] TeamCreate → 2 teammates spawned (tmux split-pane)
+[Boss] TaskCreate("Implement payment", assignee="executor")
+[Boss] TaskCreate("Review payment", assignee="code-reviewer")
+[Boss] SendMessage(to: "executor", "Implement src/payment/ using Stripe SDK")
+
+  ┌─ executor (tmux pane 1) ──────────────────┐
+  │ Working on src/payment/...                  │
+  │ SendMessage(to: "code-reviewer",            │
+  │   "Implementation done, review src/payment/")│
+  └─────────────────────────────────────────────┘
+  ┌─ code-reviewer (tmux pane 2) ─────────────┐
+  │ Reviewing src/payment/checkout.ts...        │
+  │ SendMessage(to: "executor",                 │
+  │   "Line 42: missing error handling")        │
+  └─────────────────────────────────────────────┘
+  ┌─ executor ──────────────────────────────────┐
+  │ Fixed. TaskUpdate(status: "completed")      │
+  └─────────────────────────────────────────────┘
+
+[Boss] All tasks completed → TeamDelete
+```
+
 For detailed agent compatibility matrix and team communication patterns, see [Agent Teams Reference](agents/core/agent-teams-reference.md).
 
 ### Scope Discovery (Global + Project)

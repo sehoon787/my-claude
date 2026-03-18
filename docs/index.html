@@ -255,6 +255,7 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
     <div class="term-tabs">
       <button class="term-tab active" onclick="switchTab(0)"><span class="lang" data-en="Security Analysis" data-ko="보안 분석"></span></button>
       <button class="term-tab" onclick="switchTab(1)"><span class="lang" data-en="Refactor + Review" data-ko="리팩토링 + 코드리뷰"></span></button>
+      <button class="term-tab" onclick="switchTab(2)"><span class="lang" data-en="Agent Teams" data-ko="에이전트 팀"></span></button>
     </div>
     <div class="term" id="terminal">
       <div class="term-bar"><div class="term-dot" style="background:#ef4444"></div><div class="term-dot" style="background:#eab308"></div><div class="term-dot" style="background:var(--green)"></div></div>
@@ -289,6 +290,23 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
           <div class="term-line t-boss">[Boss] <span class="lang" data-en="Verifying... then spawning code-reviewer (opus)..." data-ko="검증 중... code-reviewer (opus) 생성 중..."></span></div>
           <div class="term-line t-rev">[code-reviewer] <span class="lang" data-en="LGTM. 0 critical, 1 medium issue found." data-ko="LGTM. 0 critical, 1 medium 이슈 발견."></span></div>
           <div class="term-line t-acc">[Boss] <span class="lang" data-en="All tasks completed and verified." data-ko="모든 작업 완료 및 검증됨."></span></div>
+        </div>
+        <div class="term-scene" data-scene="2">
+          <div class="term-line t-dim">$ claude "<span class="lang" data-en="implement payment module with code review" data-ko="결제 모듈 구현하고 코드리뷰해줘"></span>"</div>
+          <div class="term-line"></div>
+          <div class="term-line t-phase">── Phase 0: <span class="lang" data-en="Discovery" data-ko="탐색"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Scanning... 201 agents, 136 skills, 3 MCP ready." data-ko="스캔 중... 201 에이전트, 136 스킬, 3 MCP 준비 완료."></span></div>
+          <div class="term-line t-phase">── Phase 1: <span class="lang" data-en="Classification" data-ko="분류"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Intent: Implement + Review | Inter-agent comm needed → P3c Teams" data-ko="의도: 구현 + 리뷰 | 에이전트 간 통신 필요 → P3c 팀"></span></div>
+          <div class="term-line t-phase">── Phase 2: <span class="lang" data-en="Team Setup" data-ko="팀 구성"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="TeamCreate → executor + code-reviewer (tmux split-pane)" data-ko="TeamCreate → executor + code-reviewer (tmux 분할 창)"></span></div>
+          <div class="term-line t-dim">──────────────────────────────────────────────</div>
+          <div class="term-line t-exec">[executor] <span class="lang" data-en="Implementing payment module... 4 files created." data-ko="결제 모듈 구현 중... 4개 파일 생성."></span></div>
+          <div class="term-line" style="color:var(--accent)">  → SendMessage(to: code-reviewer) <span class="lang" data-en='"Done. Review src/payment/"' data-ko='"완료. src/payment/ 리뷰해줘"'></span></div>
+          <div class="term-line t-rev">[code-reviewer] <span class="lang" data-en="Reviewing... found 1 issue at checkout.ts:42" data-ko="리뷰 중... checkout.ts:42에서 1건 발견"></span></div>
+          <div class="term-line" style="color:var(--accent)">  → SendMessage(to: executor) <span class="lang" data-en='"Missing error handling at line 42"' data-ko='"42번 줄에 에러 핸들링 누락"'></span></div>
+          <div class="term-line t-exec">[executor] <span class="lang" data-en="Fixed. TaskUpdate → completed." data-ko="수정 완료. TaskUpdate → completed."></span></div>
+          <div class="term-line t-acc">[Boss] <span class="lang" data-en="All tasks verified → TeamDelete. Done." data-ko="모든 태스크 검증 완료 → TeamDelete. 완료."></span></div>
         </div>
       </div>
     </div>

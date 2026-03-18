@@ -466,6 +466,74 @@ Boss는 모든 요청을 4단계 우선순위 체인으로 라우팅합니다:
 
 모든 위임에는 **6-Section 구조화 프롬프트**가 포함됩니다: TASK, EXPECTED OUTCOME, REQUIRED TOOLS, MUST DO, MUST NOT DO, CONTEXT.
 
+### 위임 예시
+
+#### Subagent vs Agent Teams
+
+| | Subagent (P2/P3a/P3b) | Agent Teams (P3c) |
+|---|---|---|
+| **명령 전달** | `Agent(prompt="...")` | `SendMessage(to: "agent", ...)` |
+| **통신 방향** | Boss → Agent → Boss | Boss ↔ Agent ↔ Agent |
+| **수명** | 완료 시 종료 | TeamDelete까지 유지 |
+| **확인 방법** | Boss 로그에서만 | tmux pane 또는 Shift+↓ |
+| **비용** | 낮음 | 높음 (teammate별 별도 Claude 세션) |
+
+**P2 — 단일 전문 에이전트:**
+```
+$ claude "analyze auth module for security vulnerabilities"
+
+[Boss] Phase 0: Scanning... 201 agents, 136 skills ready.
+[Boss] Phase 1: Intent → Security Analysis | Priority: P2
+[Boss] Phase 2: Matched → security-reviewer (sonnet)
+[Boss] Agent(description="security review", model="sonnet", prompt="
+  TASK: Analyze src/auth/ for OWASP Top 10 vulnerabilities.
+  MUST DO: Check SQL injection, XSS, CSRF.
+  MUST NOT: Modify any files.
+")
+       ↓ result returned
+[Boss] Phase 4: Reading report... 2 critical, 1 medium confirmed. ✓
+```
+
+**P3a — Boss 직접 병렬 실행:**
+```
+$ claude "refactor auth and write tests"
+
+[Boss] Phase 1: Multi-step → P3a Direct Orchestration
+[Boss] Spawning 2 agents in parallel:
+  Agent(description="executor refactoring", model="sonnet", run_in_background=true)
+  Agent(description="test-engineer tests", model="sonnet", run_in_background=true)
+       ↓ both results returned
+[Boss] Phase 4: Verifying refactored files... ✓
+[Boss] Phase 4: Running tests... 12/12 passed. ✓
+```
+
+**P3c — Agent Teams:**
+```
+$ claude "implement payment module with review"
+
+[Boss] Phase 1: Needs inter-agent communication → P3c Agent Teams
+[Boss] TeamCreate → 2 teammates spawned (tmux split-pane)
+[Boss] TaskCreate("Implement payment", assignee="executor")
+[Boss] TaskCreate("Review payment", assignee="code-reviewer")
+[Boss] SendMessage(to: "executor", "Implement src/payment/ using Stripe SDK")
+
+  ┌─ executor (tmux pane 1) ──────────────────┐
+  │ Working on src/payment/...                  │
+  │ SendMessage(to: "code-reviewer",            │
+  │   "Implementation done, review src/payment/")│
+  └─────────────────────────────────────────────┘
+  ┌─ code-reviewer (tmux pane 2) ─────────────┐
+  │ Reviewing src/payment/checkout.ts...        │
+  │ SendMessage(to: "executor",                 │
+  │   "Line 42: missing error handling")        │
+  └─────────────────────────────────────────────┘
+  ┌─ executor ──────────────────────────────────┐
+  │ Fixed. TaskUpdate(status: "completed")      │
+  └─────────────────────────────────────────────┘
+
+[Boss] All tasks completed → TeamDelete
+```
+
 ### 스코프 디스커버리 (전역 + 프로젝트)
 
 Boss는 런타임에 **두 스코프**의 구성 요소를 병합하여 감지합니다:
