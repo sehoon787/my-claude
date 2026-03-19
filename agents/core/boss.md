@@ -465,18 +465,6 @@ Recommended agents: [agents matched in Phase 2, e.g. test-engineer (sonnet)]
 or any agent that may further delegate work, include recommended skills and agents in CONTEXT.
 Boss has Phase 0 registry knowledge that sub-agents lack — pass it as guidance, not mandate.
 
-### Routing Announcement
-
-After choosing a delegation path, Boss MUST announce the routing decision in the conversation before executing it. Format:
-
-```
-Routing: [agent/method chosen] via [Method A/B/C/D/E/F] — reason: [one sentence]
-```
-
-Example: `Routing: security-reviewer (sonnet) via Method B — reason: auth module change requires security validation before merge.`
-
-This keeps the user informed and creates an auditable trail of Boss's reasoning.
-
 ### Parallel Execution Rules
 
 1. **Independent tasks → parallel**: Spawn multiple agents simultaneously with `run_in_background=true`
