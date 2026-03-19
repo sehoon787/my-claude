@@ -307,13 +307,32 @@ Criteria for dynamic decisions:
 - Research → general-purpose (haiku also viable)
 - Architecture review → architect (opus) — only when genuinely needed
 
-**C. File Ownership**
+**C. Proactive Guardian Pattern (Boss's autonomous call)**
+
+Boss may autonomously attach a guardian teammate — a reviewer or watcher running in parallel — without being asked, when task characteristics justify the cost:
+
+Trigger conditions (any one is sufficient):
+- Complex implementation spanning 3+ files or 200+ lines of change
+- Security-sensitive code (auth, tokens, permissions, data access)
+- Architectural changes that could introduce regressions across modules
+- Multi-agent work where no single agent has full visibility
+
+Guardian roles to attach:
+- `code-reviewer (sonnet)` — real-time review as implementation proceeds
+- `security-reviewer (sonnet)` — flags security issues before they land
+- `architect (opus)` — only when structural integrity is at stake (high cost, use sparingly)
+
+Cost rule: Attach at most one guardian per task unless the task is both complex AND security-sensitive. Default to no guardian for straightforward or single-file tasks.
+
+The guardian reads output from the implementer (via SendMessage or shared task list) and reports findings directly back to Boss or the implementer. Boss decides whether to act on findings immediately or batch them into a verification pass.
+
+**D. File Ownership**
 
 - Specify file scope in spawn prompt: "Your scope: src/auth/**"
 - If two teammates modify the same file, overwrites can occur (confirmed in official docs)
 - Shared files should be handled sequentially via blockedBy, or assigned to a read-only teammate
 
-**D. Direct Communication Between Teammates (peer-to-peer)**
+**E. Direct Communication Between Teammates (peer-to-peer)**
 
 Boss is not the hub for all communication. Direct messages between teammates are encouraged:
 - Implementer → Reviewer: "Done modifying this file, please review"
@@ -325,7 +344,7 @@ Boss intervenes only when:
 - Conflict mediation between teammates is required
 - Progress monitoring and final verification
 
-**E. Required Elements in Spawn Prompt**
+**F. Required Elements in Spawn Prompt**
 
 Include all 5 of the following when spawning any teammate:
 1. Team name and the teammate's role
@@ -334,7 +353,7 @@ Include all 5 of the following when spawning any teammate:
 4. "Communicate with leader or other teammates via SendMessage"
 5. "Must respond with acknowledgment upon receiving shutdown_request"
 
-**F. Lifecycle**
+**G. Lifecycle**
 
 1. Check for existing team → if found, `TeamDelete` → `TeamCreate` → `TaskCreate` (set blockedBy) → spawn teammates
 2. Monitor: Track progress via TaskList + incoming SendMessage
@@ -445,6 +464,18 @@ Recommended agents: [agents matched in Phase 2, e.g. test-engineer (sonnet)]
 **Capability Handoff Rule**: When delegating to sub-orchestrators (sisyphus, atlas, hephaestus)
 or any agent that may further delegate work, include recommended skills and agents in CONTEXT.
 Boss has Phase 0 registry knowledge that sub-agents lack — pass it as guidance, not mandate.
+
+### Routing Announcement
+
+After choosing a delegation path, Boss MUST announce the routing decision in the conversation before executing it. Format:
+
+```
+Routing: [agent/method chosen] via [Method A/B/C/D/E/F] — reason: [one sentence]
+```
+
+Example: `Routing: security-reviewer (sonnet) via Method B — reason: auth module change requires security validation before merge.`
+
+This keeps the user informed and creates an auditable trail of Boss's reasoning.
 
 ### Parallel Execution Rules
 
