@@ -1,7 +1,7 @@
 # my-claude AI Installation Guide
 
 You are an AI agent setting up a Claude Code multi-agent orchestration environment.
-The plugin bundles 202 agents, 136 skills, 50 rules, 6 hooks, and 3 MCP servers.
+The plugin bundles 202 agents (52 core + 150 domain agent-packs), 136 skills, 50 rules, 6 hooks, and 3 MCP servers.
 Only 2-3 steps are needed.
 
 ---
@@ -22,7 +22,8 @@ node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir
 ```
 
 This installs:
-- 202 agents (2 core + 9 omo + 172 agency + 19 OMC)
+- 52 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 23 engineering
+- 150 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
 - 136 skills (108 ECC + 28 OMC)
 - 49 rules (9 common + 8 languages × 5)
 - 6 behavioral hooks (SessionStart, PreToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop)
@@ -34,10 +35,24 @@ This installs:
 ```bash
 # If plugin install is not available:
 git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude
-mkdir -p ~/.claude/agents ~/.claude/skills ~/.claude/rules
-cp -r /tmp/my-claude/agents/core/*.md /tmp/my-claude/agents/omo/*.md ~/.claude/agents/
-cp -r /tmp/my-claude/agents/omc/*.md ~/.claude/agents/
-find /tmp/my-claude/agents/agency -name '*.md' -exec cp {} ~/.claude/agents/ \;
+mkdir -p ~/.claude/agents ~/.claude/agent-packs ~/.claude/skills ~/.claude/rules
+# Clean up old flat installs
+for prefix in marketing- sales- paid- academic- design- support- testing- specialized- product- project-management- game- godot- unity- unreal- roblox- xr- phase- scenario-; do
+  rm -f ~/.claude/agents/${prefix}*.md
+done
+# Core agents (always loaded)
+cp /tmp/my-claude/agents/core/boss.md /tmp/my-claude/agents/omo/*.md ~/.claude/agents/
+cp /tmp/my-claude/agents/omc/*.md ~/.claude/agents/
+cp /tmp/my-claude/agents/agency/engineering/*.md ~/.claude/agents/
+# Domain agent-packs (on-demand)
+for dir in academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing; do
+  mkdir -p ~/.claude/agent-packs/$dir
+  find /tmp/my-claude/agents/agency/$dir -name '*.md' -exec cp {} ~/.claude/agent-packs/$dir/ \;
+done
+# Strategy docs
+mkdir -p ~/.claude/docs/nexus
+cp /tmp/my-claude/agents/core/agent-teams-reference.md ~/.claude/docs/nexus/
+find /tmp/my-claude/agents/agency/strategy -name '*.md' -exec cp {} ~/.claude/docs/nexus/ \;
 cp -r /tmp/my-claude/skills/ecc/* ~/.claude/skills/
 cp -r /tmp/my-claude/skills/omc/* ~/.claude/skills/
 cp -r /tmp/my-claude/rules/* ~/.claude/rules/
@@ -96,7 +111,8 @@ try {
 ## Verify
 
 ```bash
-echo "Plugin agents:    $(find ~/.claude/agents -name '*.md' 2>/dev/null | wc -l)"
+echo "Core agents:      $(find ~/.claude/agents -name '*.md' 2>/dev/null | wc -l)"
+echo "Agent packs:      $(find ~/.claude/agent-packs -name '*.md' 2>/dev/null | wc -l)"
 echo "Plugin skills:    $(find ~/.claude/skills -name 'SKILL.md' 2>/dev/null | wc -l)"
 echo "Rules:            $(find ~/.claude/rules -name '*.md' 2>/dev/null | wc -l)"
 echo "Anthropic skills: $(ls -d ~/.claude/skills/pdf ~/.claude/skills/docx 2>/dev/null | wc -l) key skills"
@@ -105,7 +121,8 @@ echo "omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK'
 ```
 
 Expected:
-- Plugin agents: 201+
+- Core agents: 52+
+- Agent packs: 150+
 - Plugin skills: 136+
 - Rules: 50
 - Anthropic skills: 2 key skills (pdf, docx)
