@@ -1,11 +1,12 @@
 ---
 name: deep-interview
 description: Socratic deep interview with mathematical ambiguity gating before autonomous execution
-argument-hint: "<idea or vague description>"
+argument-hint: "[--quick|--standard|--deep] [--autoresearch] <idea or vague description>"
 pipeline: [deep-interview, omc-plan, autopilot]
 next-skill: omc-plan
 next-skill-args: --consensus --direct
 handoff: .omc/specs/deep-interview-{slug}.md
+level: 3
 ---
 
 <Purpose>
@@ -45,6 +46,17 @@ Inspired by the [Ouroboros project](https://github.com/Q00/ouroboros) which demo
 - Persist interview state for resume across session interruptions
 - Challenge agents activate at specific round thresholds to shift perspective
 </Execution_Policy>
+
+<Autoresearch_Mode>
+When arguments include `--autoresearch`, Deep Interview becomes the zero-learning-curve setup lane for `omc autoresearch`.
+
+- If no usable mission brief is present yet, start by asking: **"What should autoresearch improve or prove for this repo?"**
+- After the mission is clear, collect an evaluator command. If the user leaves it blank, infer one only when repo evidence is strong; otherwise keep interviewing until an evaluator is explicit enough to launch safely.
+- Keep the usual one-question-per-round rule, but treat **mission clarity** and **evaluator clarity** as hard readiness gates in addition to the normal ambiguity threshold.
+- Once ready, do **not** bridge into `omc-plan`, `autopilot`, `ralph`, or `team`. Instead run:
+  - `omc autoresearch --mission "<mission>" --eval "<evaluator>" [--keep-policy <policy>] [--slug <slug>]`
+- This direct handoff is expected to detach into the real autoresearch runtime tmux session. After a successful handoff, announce the launched session and end the interview lane.
+</Autoresearch_Mode>
 
 <Steps>
 
@@ -319,6 +331,8 @@ Spec structure:
 ```
 
 ## Phase 5: Execution Bridge
+
+**Autoresearch override:** if `--autoresearch` is active, skip the standard execution options below. The only valid bridge is the direct `omc autoresearch --mission ... --eval ...` handoff described above.
 
 After the spec is written, present execution options via `AskUserQuestion`:
 
