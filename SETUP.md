@@ -477,8 +477,9 @@ This repo is a **Claude Code plugin** that provides the Boss meta-orchestrator (
 ```
 
 **What gets installed:**
-- 1 core agent (Boss — dynamic meta-orchestrator)
-- 9 omo agents (Sisyphus, Hephaestus, Metis, Atlas, Oracle, Momus, Prometheus, Librarian, Multimodal-Looker)
+- Core tier agents in `~/.claude/agents/` (always loaded): Boss, 9 omo agents, omc agents, engineering agents
+- Domain agent packs in `~/.claude/agent-packs/` (on-demand, not auto-loaded): academic, design, game-development, marketing, paid-media, product, project-management, sales, spatial-computing, specialized, support, testing
+- Strategy docs in `~/.claude/docs/nexus/` (reference material, never parsed as agents)
 - 6 behavioral correction hooks (SessionStart, delegation guard, subagent verification, teammate idle, task completed, completion check)
 - 3 MCP servers (Context7, Exa, grep.app)
 - Default agent: Boss (main orchestrator)
@@ -505,12 +506,21 @@ git clone https://github.com/sehoon787/my-claude.git ~/my-claude
 
 ```bash
 # Ensure directories exist
-mkdir -p ~/.claude/agents
+mkdir -p ~/.claude/agents ~/.claude/agent-packs ~/.claude/docs/nexus
 
-# Agents
-cp agents/core/*.md agents/omo/*.md ~/.claude/agents/
-cp agents/omc/*.md ~/.claude/agents/
-find agents/agency -name '*.md' -exec cp {} ~/.claude/agents/ \;
+# Core agents (always loaded)
+cp agents/core/boss.md agents/omo/*.md agents/omc/*.md ~/.claude/agents/
+cp agents/agency/engineering/*.md ~/.claude/agents/
+
+# Domain agents (on-demand, not auto-loaded)
+for dir in academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing; do
+  mkdir -p ~/.claude/agent-packs/$dir
+  find agents/agency/$dir -name '*.md' -exec cp {} ~/.claude/agent-packs/$dir/ \;
+done
+
+# Strategy docs (reference material)
+cp agents/core/agent-teams-reference.md ~/.claude/docs/nexus/
+find agents/agency/strategy -name '*.md' -exec cp {} ~/.claude/docs/nexus/ \;
 
 # MCP servers (if not already installed via Section 6b)
 claude mcp add --transport http --scope user context7 "https://mcp.context7.com/mcp"

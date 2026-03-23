@@ -11,14 +11,14 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-201-blue)
+![Agents](https://img.shields.io/badge/agents-201_(46_core)-blue)
 ![Skills](https://img.shields.io/badge/skills-136-purple)
 ![MCP Servers](https://img.shields.io/badge/MCP_servers-3-green)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
 All-in-one Claude Code multi-agent orchestration plugin — install once, get everything.
 
-Bundles **202 agents**, **136 skills**, **50 rules**, **6 behavioral hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
+Bundles **202 agents** (46 core + 156 domain agent-packs), **136 skills**, **50 rules**, **6 behavioral hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
@@ -61,6 +61,8 @@ git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude &&
 ```
 
 > **Note**: `install.sh` automatically sets Boss as the default agent. For plugin install (Option 1), run the setup command in [AI-INSTALL.md](AI-INSTALL.md).
+>
+> **Agent Packs**: Domain specialist agents (marketing, sales, gamedev, etc.) are installed to `~/.claude/agent-packs/` and can be activated by symlinking to `~/.claude/agents/` when needed.
 
 **Option 3: Manual installation**
 
@@ -111,7 +113,7 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 
 ## Core + OMO Agents
 
-**Boss** is the only my-claude original agent. The remaining 9 are [OMO agents](https://github.com/code-yeongyu/oh-my-openagent) that Boss uses as sub-orchestrators and specialists. The plugin also bundles 172 agency agents and 19 OMC agents — Boss selects the best-matching specialist from this entire pool via Priority 2 capability matching. See [Installed Components](#installed-components) below.
+**Boss** is the only my-claude original agent. The remaining 9 are [OMO agents](https://github.com/code-yeongyu/oh-my-openagent) that Boss uses as sub-orchestrators and specialists. The plugin bundles **46 core agents** (Core 1 + OMO 9 + Engineering 16 + OMC 19 + OMO specialists) always loaded into `~/.claude/agents/`, plus **155 domain agent-packs** in `~/.claude/agent-packs/` that can be activated on demand. Boss selects the best-matching specialist from all active agents via Priority 2 capability matching. See [Installed Components](#installed-components) below.
 
 | Agent | Source | Model | Role |
 |---------|--------|------|------|
@@ -128,13 +130,44 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 
 ---
 
+## Agent Packs (Domain Specialists)
+
+Domain specialist agents are installed to `~/.claude/agent-packs/` and are **not** loaded by default. Activate a pack by symlinking it into `~/.claude/agents/`:
+
+```bash
+# Activate a single pack
+ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
+
+# Deactivate
+rm ~/.claude/agents/<agent-name>.md
+```
+
+| Pack | Count | Examples |
+|------|-------|---------|
+| marketing | 27 | Douyin, Xiaohongshu, WeChat OA, TikTok |
+| gamedev | 19 | Unity, Unreal, Godot, Roblox |
+| engineering-domain | 8 | Mobile, Solidity, Embedded, Feishu |
+| sales | 9 | SDR, Account Executive, Revenue Ops |
+| specialized | 10+ | Legal, Finance, Healthcare, Education |
+| design | 8 | Brand, UI, UX, Visual Storytelling |
+| testing | 8 | API, Accessibility, Performance, E2E |
+| product | 5 | Sprint, Feedback, Trend Research |
+| paid-media | 7 | Google Ads, Meta Ads, Programmatic |
+| project-mgmt | 5 | Scrum, Kanban, Risk Management |
+| academic | 5 | Research, Literature Review, Citation |
+| support | 6 | Customer Success, Escalation, Triage |
+| spatial-computing | 3 | ARKit, visionOS, Spatial Audio |
+
+---
+
 ## Installed Components
 
 Following SETUP.md will configure the following:
 
 | Category | Count | Source | Bundled |
 |------|------|------|------|
-| Agents | 202 | Core 2 + OMO 9 + Agency 172 + OMC 19 | Plugin |
+| Core Agents | 46 | Core 1 + OMO 9 + Engineering 16 + OMC 19 | Plugin |
+| Agent Packs | 156 | 12 domain categories (marketing, gamedev, sales, etc.) | Plugin |
 | Skills | 136 | ECC 108 + OMC 28 | Plugin |
 | Rules | 50 | ECC (common 9 + 8 languages × 5) | Plugin |
 | MCP Servers | 3 | Context7, Exa, grep.app | Plugin |

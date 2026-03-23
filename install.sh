@@ -47,13 +47,48 @@ fi
 
 # ── 1. Plugin files (agents, skills, rules) ──
 echo "[1/6] Installing plugin files..."
+# Tiered agent structure:
+#   ~/.claude/agents/      → core only (always loaded): core + omc + omo + engineering
+#   ~/.claude/agent-packs/ → domain agents (not auto-loaded, available on demand)
+#   ~/.claude/docs/nexus/  → strategy docs (reference material, never parsed as agents)
 mkdir -p "$HOME/.claude/agents" "$HOME/.claude/skills" "$HOME/.claude/rules"
+mkdir -p "$HOME/.claude/agent-packs/academic" "$HOME/.claude/agent-packs/design" \
+         "$HOME/.claude/agent-packs/gamedev" "$HOME/.claude/agent-packs/marketing" \
+         "$HOME/.claude/agent-packs/paid-media" "$HOME/.claude/agent-packs/product" \
+         "$HOME/.claude/agent-packs/project-mgmt" "$HOME/.claude/agent-packs/sales" \
+         "$HOME/.claude/agent-packs/spatial-computing" "$HOME/.claude/agent-packs/specialized" \
+         "$HOME/.claude/agent-packs/support" "$HOME/.claude/agent-packs/testing"
+mkdir -p "$HOME/.claude/docs/nexus"
 
-# agents
-cp "$SCRIPT_DIR"/agents/core/*.md "$HOME/.claude/agents/"
+# Clean up old flattened agents from previous installs
+echo "  Cleaning up old flattened agents..."
+for prefix in marketing- sales- paid- academic- design- support- testing- specialized- product- project-management- game- godot- unity- unreal- roblox- xr- phase- scenario- nexus-strategy EXECUTIVE-BRIEF QUICKSTART handoff-templates agent-activation-prompts; do
+  rm -f "$HOME/.claude/agents/${prefix}"*.md
+done
+
+# agents — core tier (always loaded)
+find "$SCRIPT_DIR/agents/core" -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec cp {} "$HOME/.claude/agents/" \;
 cp "$SCRIPT_DIR"/agents/omo/*.md  "$HOME/.claude/agents/"
 cp "$SCRIPT_DIR"/agents/omc/*.md  "$HOME/.claude/agents/"
-find "$SCRIPT_DIR/agents/agency" -name '*.md' -exec cp {} "$HOME/.claude/agents/" \;
+cp -r "$SCRIPT_DIR"/agents/agency/engineering/*.md "$HOME/.claude/agents/"
+
+# agent-packs — domain agents (not auto-loaded)
+cp -r "$SCRIPT_DIR"/agents/agency/academic/*.md            "$HOME/.claude/agent-packs/academic/"
+cp -r "$SCRIPT_DIR"/agents/agency/design/*.md              "$HOME/.claude/agent-packs/design/"
+find "$SCRIPT_DIR/agents/agency/game-development" -name '*.md' -exec cp {} "$HOME/.claude/agent-packs/gamedev/" \;
+cp -r "$SCRIPT_DIR"/agents/agency/marketing/*.md           "$HOME/.claude/agent-packs/marketing/"
+cp -r "$SCRIPT_DIR"/agents/agency/paid-media/*.md          "$HOME/.claude/agent-packs/paid-media/"
+cp -r "$SCRIPT_DIR"/agents/agency/product/*.md             "$HOME/.claude/agent-packs/product/"
+cp -r "$SCRIPT_DIR"/agents/agency/project-management/*.md  "$HOME/.claude/agent-packs/project-mgmt/"
+cp -r "$SCRIPT_DIR"/agents/agency/sales/*.md               "$HOME/.claude/agent-packs/sales/"
+cp -r "$SCRIPT_DIR"/agents/agency/spatial-computing/*.md   "$HOME/.claude/agent-packs/spatial-computing/"
+cp -r "$SCRIPT_DIR"/agents/agency/specialized/*.md         "$HOME/.claude/agent-packs/specialized/"
+cp -r "$SCRIPT_DIR"/agents/agency/support/*.md             "$HOME/.claude/agent-packs/support/"
+cp -r "$SCRIPT_DIR"/agents/agency/testing/*.md             "$HOME/.claude/agent-packs/testing/"
+
+# docs/nexus — strategy docs + reference material (never parsed as agents)
+cp "$SCRIPT_DIR/agents/core/agent-teams-reference.md"      "$HOME/.claude/docs/nexus/"
+find "$SCRIPT_DIR/agents/agency/strategy" -name '*.md' -exec cp {} "$HOME/.claude/docs/nexus/" \;
 
 # skills
 cp -r "$SCRIPT_DIR"/skills/ecc/* "$HOME/.claude/skills/"
@@ -96,6 +131,24 @@ if ('${TMUX_AVAILABLE}' === '1' && !existing.teammateMode) {
 }
 fs.writeFileSync(dest, JSON.stringify(existing, null, 2) + '\n');
 console.log('  settings.json merged');
+"
+
+# ── 4b. Merge hooks from hooks.json into settings.json ──
+echo "[4b] Merging hooks into settings.json..."
+node -e "
+const fs   = require('fs');
+const path = require('path');
+const dest = path.join(process.env.HOME, '.claude', 'settings.json');
+const src  = path.join('${SCRIPT_DIR}', 'hooks', 'hooks.json');
+const existing  = fs.existsSync(dest) ? JSON.parse(fs.readFileSync(dest, 'utf8')) : {};
+const srcHooks  = JSON.parse(fs.readFileSync(src, 'utf8')).hooks || {};
+existing.hooks  = existing.hooks || {};
+// Add/replace each hook event from hooks.json into settings.json
+for (const [event, entries] of Object.entries(srcHooks)) {
+  existing.hooks[event] = entries;
+}
+fs.writeFileSync(dest, JSON.stringify(existing, null, 2) + '\n');
+console.log('  hooks merged into settings.json');
 "
 
 # ── 5. Companion tools ──
@@ -168,7 +221,8 @@ fi
 # ── 6. Verification ──
 echo ""
 echo "[6/6] Verification"
-echo "  agents:           $(find "$HOME/.claude/agents" -name '*.md' 2>/dev/null | wc -l | tr -d ' ') files"
+echo "  agents (core):    $(find "$HOME/.claude/agents" -name '*.md' 2>/dev/null | wc -l | tr -d ' ') files"
+echo "  agent-packs:      $(find "$HOME/.claude/agent-packs" -name '*.md' 2>/dev/null | wc -l | tr -d ' ') files"
 echo "  skills:           $(find "$HOME/.claude/skills" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ') installed"
 echo "  rules:            $(find "$HOME/.claude/rules"  -name '*.md' 2>/dev/null | wc -l | tr -d ' ') files"
 echo "  hooks:            $(find "$HOME/.claude/hooks"  -type f      2>/dev/null | wc -l | tr -d ' ') files"
