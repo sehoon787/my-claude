@@ -185,9 +185,9 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
 .boss-glow{animation:pulseGlow 3s ease-in-out infinite}
 .project-switch{display:flex;gap:4px;justify-content:center;margin-bottom:20px;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:4px;width:fit-content;margin-left:auto;margin-right:auto}
 .ps-item{padding:8px 20px;border-radius:20px;font-size:.85rem;font-weight:600;color:var(--text2);transition:all .2s;text-decoration:none}
-.ps-item:hover{color:var(--text);opacity:1}
+.ps-item:hover{color:#10b981;opacity:1}
 .ps-item.active{background:var(--primary);color:#fff}
-.ps-item.active:hover{opacity:1}
+.ps-item.active:hover{opacity:1;color:#fff}
 </style>
 </head>
 <body>
@@ -217,8 +217,8 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
 <div class="hero-dots"></div>
 <div class="container" style="position:relative;z-index:1">
 <div class="project-switch">
-  <span class="ps-item active">Claude Code</span>
-  <a href="https://sehoon787.github.io/my-codex/" class="ps-item">Codex CLI</a>
+  <span class="ps-item active" data-ko="Claude Code">Claude Code</span>
+  <a href="https://sehoon787.github.io/my-codex/" class="ps-item" style="border:1px solid rgba(16,185,129,.25)" data-ko="Codex CLI">Codex CLI</a>
 </div>
   <h1><span class="lang" data-en="The orchestrator that discovers everything." data-ko="모든 것을 발견하는 오케스트레이터."></span></h1>
   <p class="tagline">
