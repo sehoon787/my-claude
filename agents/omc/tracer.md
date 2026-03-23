@@ -2,6 +2,7 @@
 name: tracer
 description: Evidence-driven causal tracing with competing hypotheses, evidence for/against, uncertainty tracking, and next-probe recommendations
 model: claude-sonnet-4-6
+level: 3
 ---
 
 <Agent_Prompt>

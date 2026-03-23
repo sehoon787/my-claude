@@ -1,6 +1,7 @@
 ---
 name: ralph
 description: Self-referential loop until task completion with configurable verification reviewer
+level: 4
 ---
 
 [RALPH + ULTRAWORK - ITERATION {{ITERATION}}/{{MAX}}]
@@ -37,6 +38,8 @@ Complex tasks often fail silently: partial implementations get declared "done", 
 By default, ralph operates in PRD mode. A scaffold `prd.json` is auto-generated when ralph starts if none exists.
 
 **Opt-out:** If `{{PROMPT}}` contains `--no-prd`, skip PRD generation and work in legacy mode (no story tracking, generic verification). Use this for trivial quick fixes.
+
+**Deslop opt-out:** If `{{PROMPT}}` contains `--no-deslop`, skip the mandatory post-review deslop pass entirely. Use this only when the cleanup pass is intentionally out of scope for the run.
 
 **Reviewer selection:** Pass `--critic=architect`, `--critic=critic`, or `--critic=codex` in the Ralph prompt to choose the completion reviewer for that run. `architect` remains the default.
 </PRD_Mode>
@@ -95,7 +98,18 @@ By default, ralph operates in PRD mode. A scaffold `prd.json` is auto-generated 
    - Ralph floor: always at least STANDARD, even for small changes
    - The selected reviewer verifies against the SPECIFIC acceptance criteria from prd.json, not vague "is it done?"
 
-8. **On approval**: Run `/oh-my-claudecode:cancel` to cleanly exit and clean up all state files
+7.5 **Mandatory Deslop Pass**:
+   - Unless `{{PROMPT}}` contains `--no-deslop`, run `oh-my-claudecode:ai-slop-cleaner` in standard mode (not `--review`) on the files changed during the current Ralph session only.
+   - Keep the scope bounded to the Ralph changed-file set; do not broaden the cleanup pass to unrelated files.
+   - If the reviewer approved the implementation but the deslop pass introduces follow-up edits, keep those edits inside the same changed-file scope before proceeding.
+
+7.6 **Regression Re-verification**:
+   - After the deslop pass, re-run all relevant tests, build, and lint checks for the Ralph session.
+   - Read the output and confirm the post-deslop regression run actually passes.
+   - If regression fails, roll back the cleaner changes or fix the regression, then rerun the verification loop until it passes.
+   - Only proceed to completion after the post-deslop regression run passes (or `--no-deslop` was explicitly specified).
+
+8. **On approval**: After Step 7.6 passes (with Step 7.5 completed, or skipped via `--no-deslop`), run `/oh-my-claudecode:cancel` to cleanly exit and clean up all state files
 
 9. **On rejection**: Fix the issues raised, re-verify with the same reviewer, then loop back to check if the story needs to be marked incomplete
 </Steps>
@@ -191,6 +205,8 @@ Why bad: Did not refine scaffold criteria into task-specific ones. This is PRD t
 - [ ] lsp_diagnostics shows 0 errors on affected files
 - [ ] progress.txt records implementation details and learnings
 - [ ] Selected reviewer verification passed against specific acceptance criteria
+- [ ] ai-slop-cleaner pass completed on changed files (or `--no-deslop` specified)
+- [ ] Post-deslop regression tests pass
 - [ ] `/oh-my-claudecode:cancel` run for clean state cleanup
 </Final_Checklist>
 

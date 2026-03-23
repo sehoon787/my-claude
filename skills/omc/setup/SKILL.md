@@ -1,6 +1,7 @@
 ---
 name: setup
 description: Unified setup entrypoint for install, diagnostics, and MCP configuration
+level: 2
 ---
 
 # Setup
