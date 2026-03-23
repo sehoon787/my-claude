@@ -1,6 +1,6 @@
 [English](./README.md) | [한국어](./README.ko.md)
 
-> 🟢 **Codex CLI users** → [**my-codex**](https://github.com/sehoon787/my-codex) — same agents in native TOML format for OpenAI Codex CLI
+> [![Codex CLI](https://img.shields.io/badge/Codex_CLI-my--codex-10b981?style=flat-square&logo=openai&logoColor=white)](https://github.com/sehoon787/my-codex) Looking for Codex CLI? → **my-codex** — same agents in native TOML format for OpenAI Codex CLI
 
 > **If you are an LLM agent**, fetch and follow the installation guide:
 > ```bash
