@@ -183,6 +183,11 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
 .fade-in{opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s}.fade-in.visible{opacity:1;transform:translateY(0)}
 @keyframes pulseGlow{0%,100%{box-shadow:0 0 20px rgba(129,140,248,.08),0 0 40px rgba(129,140,248,.04)}50%{box-shadow:0 0 35px rgba(129,140,248,.16),0 0 70px rgba(129,140,248,.08)}}
 .boss-glow{animation:pulseGlow 3s ease-in-out infinite}
+.project-switch{display:flex;gap:4px;justify-content:center;margin-bottom:20px;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:4px;width:fit-content;margin-left:auto;margin-right:auto}
+.ps-item{padding:8px 20px;border-radius:20px;font-size:.85rem;font-weight:600;color:var(--text2);transition:all .2s;text-decoration:none}
+.ps-item:hover{color:var(--text);opacity:1}
+.ps-item.active{background:var(--primary);color:#fff}
+.ps-item.active:hover{opacity:1}
 </style>
 </head>
 <body>
@@ -211,6 +216,10 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
 <section class="hero" id="hero">
 <div class="hero-dots"></div>
 <div class="container" style="position:relative;z-index:1">
+<div class="project-switch">
+  <span class="ps-item active">Claude Code</span>
+  <a href="https://sehoon787.github.io/my-codex/" class="ps-item">Codex CLI</a>
+</div>
   <h1><span class="lang" data-en="The orchestrator that discovers everything." data-ko="모든 것을 발견하는 오케스트레이터."></span></h1>
   <p class="tagline">
     <span class="lang" data-en="Boss scans your system at runtime, matches capabilities, and routes every task to the perfect agent. No config files. No boilerplate." data-ko="Boss는 런타임에 시스템을 스캔하고, 능력을 매칭하여 모든 작업을 최적의 에이전트에 라우팅합니다. 설정 파일도, 보일러플레이트도 없습니다."></span>
