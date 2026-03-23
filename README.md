@@ -638,6 +638,12 @@ This repository builds on the work of the following open-source projects:
 
 ---
 
+## Codex CLI Users
+
+Looking for Codex CLI support? See [my-codex](https://github.com/sehoon787/my-codex) — the same multi-agent system adapted for OpenAI Codex CLI with native TOML agents.
+
+---
+
 ## License
 
 MIT License. See the [LICENSE](./LICENSE) file for details.
