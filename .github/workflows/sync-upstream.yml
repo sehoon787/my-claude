@@ -181,6 +181,12 @@ jobs:
           sed -i "s/[0-9]\+ core agents/${CORE_TOTAL} core agents/g" .claude-plugin/marketplace.json
           sed -i "s/[0-9]\+ agent packs/${PACK_COUNT} agent packs/g" .claude-plugin/marketplace.json
 
+          # docs/index.html
+          sed -i "s/[0-9]\+ agents/${TOTAL_AGENTS} agents/g" docs/index.html
+          sed -i "s/[0-9]\+ skills/${TOTAL_SKILLS} skills/g" docs/index.html
+          sed -i "s/[0-9]\+ core agents/${CORE_TOTAL} core agents/g" docs/index.html
+          sed -i "s/[0-9]\+ packs/${PACK_COUNT} packs/g" docs/index.html
+
           # tests/boss-routing-scenarios.md
           sed -i "s/Boss reports [0-9]\+ agents/Boss reports ${TOTAL_AGENTS} agents/" tests/boss-routing-scenarios.md
           sed -i "s/[0-9]\+ core + [0-9]\+ omo + [0-9]\+ agency + [0-9]\+ OMC/${CORE_AGENTS} core + ${OMO_AGENTS} omo + ${AGENCY_COUNT} agency + ${OMC_AGENTS} OMC/" tests/boss-routing-scenarios.md
