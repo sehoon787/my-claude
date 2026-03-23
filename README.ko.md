@@ -86,8 +86,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ### 멀티에이전트 오케스트레이션
 - **Boss 동적 메타 오케스트레이터**: 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지 — 3D 충돌 해결(Scope/Depth×2/Interactivity)로 최적 라우팅. 중간 규모 작업은 서브 오케스트레이터 없이 직접 조율(P3a)
-- **Sisyphus 서브 오케스트레이터**: 의도 분류와 검증 프로토콜로 복잡한 멀티스텝 워크플로우 관리
-- **Hephaestus 자율 워커**: 탐색 → 계획 → 실행 → 검증 사이클을 중단 없이 자율 수행
+- **서브 오케스트레이터 (P3b)**: 직접 처리하기 너무 복잡한 작업은 Boss가 Sisyphus(계획+검증), Atlas(태스크 조율), Hephaestus(자율 실행)에 위임 — 복잡한 멀티스텝 워크플로우 전용이며 모든 요청을 거치지 않음
 - **Skill vs Agent 충돌 해결**: 가중 3차원 스코어링(Scope, Depth×2, Interactivity)으로 각 작업에 Skill/Agent 여부를 판단 — 하드코딩 라우팅 테이블 없음
 - **모델 최적화 라우팅**: 작업 복잡도에 따라 Opus(고난도) / Sonnet(구현) / Haiku(탐색) 자동 선택
 
@@ -107,22 +106,22 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ---
 
-## my-claude 에이전트
+## Core + OMO 에이전트
 
-1개의 Core 에이전트(Boss 메타 오케스트레이터) + [oh-my-openagent (omo)](https://github.com/code-yeongyu/oh-my-openagent)에서 포팅된 9개 omo 에이전트입니다. 플러그인에 번들된 전체 201개 에이전트 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
+**Boss**만 my-claude 고유 에이전트입니다. 나머지 9개는 Boss가 서브 오케스트레이터 및 전문가로 사용하는 [OMO 에이전트](https://github.com/code-yeongyu/oh-my-openagent)입니다. 플러그인에는 172개 Agency 에이전트와 19개 OMC 에이전트도 번들되어 있으며, Boss가 Priority 2 능력 매칭으로 전체 풀에서 최적의 전문가를 선택합니다. 전체 201개 에이전트 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
 
-| 에이전트 | 모델 | 역할 |
-|---------|------|------|
-| **Boss** | Opus | 동적 메타 오케스트레이터. 런타임에 모든 에이전트/스킬/MCP를 자동 감지하고 최적의 전문가에게 라우팅 |
-| **Sisyphus** | Opus | 서브 오케스트레이터. 의도 분류와 검증 프로토콜로 복잡한 멀티스텝 워크플로우 관리 |
-| **Hephaestus** | Opus | 자율 딥 워커. 탐색 → 계획 → 실행 → 검증 사이클을 자율적으로 수행 |
-| **Metis** | Opus | 사전 의도 분석. AI-slop 방지를 위해 요청을 실행 전에 구조화 |
-| **Atlas** | Opus | 마스터 태스크 오케스트레이터. 4단계 QA 사이클로 복잡한 작업을 분해 및 조율 |
-| **Oracle** | Opus | 전략적 기술 자문가. 코드를 변경하지 않고 read-only로 분석하여 방향 제시 |
-| **Momus** | Opus | 작업 계획 검토자. 승인 편향적 관점에서 계획을 검토. read-only |
-| **Prometheus** | Opus | 인터뷰 기반 계획 수립 컨설턴트. 대화를 통해 요구사항을 명확화 |
-| **Librarian** | Sonnet | MCP를 활용한 오픈소스 문서 연구 에이전트 |
-| **Multimodal-Looker** | Sonnet | 시각 분석 에이전트. 이미지/스크린샷을 분석. read-only |
+| 에이전트 | 출처 | 모델 | 역할 |
+|---------|------|------|------|
+| **Boss** | my-claude | Opus | 동적 메타 오케스트레이터. 런타임에 모든 에이전트/스킬/MCP를 자동 감지하고 최적의 전문가에게 라우팅 |
+| **Sisyphus** | OMO | Opus | 서브 오케스트레이터. 의도 분류와 검증 프로토콜로 복잡한 멀티스텝 워크플로우 관리 |
+| **Hephaestus** | OMO | Opus | 자율 딥 워커. 탐색 → 계획 → 실행 → 검증 사이클을 자율적으로 수행 |
+| **Metis** | OMO | Opus | 사전 의도 분석. AI-slop 방지를 위해 요청을 실행 전에 구조화 |
+| **Atlas** | OMO | Opus | 마스터 태스크 오케스트레이터. 4단계 QA 사이클로 복잡한 작업을 분해 및 조율 |
+| **Oracle** | OMO | Opus | 전략적 기술 자문가. 코드를 변경하지 않고 read-only로 분석하여 방향 제시 |
+| **Momus** | OMO | Opus | 작업 계획 검토자. 승인 편향적 관점에서 계획을 검토. read-only |
+| **Prometheus** | OMO | Opus | 인터뷰 기반 계획 수립 컨설턴트. 대화를 통해 요구사항을 명확화 |
+| **Librarian** | OMO | Sonnet | MCP를 활용한 오픈소스 문서 연구 에이전트 |
+| **Multimodal-Looker** | OMO | Sonnet | 시각 분석 에이전트. 이미지/스크린샷을 분석. read-only |
 
 ---
 
@@ -327,7 +326,7 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 </details>
 
 <details>
-<summary>MCP 서버 (3개) + 행동 교정 훅 (4개)</summary>
+<summary>MCP 서버 (3개) + 행동 교정 훅 (6개)</summary>
 
 **MCP 서버**
 
@@ -361,14 +360,18 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 │  [Boss] 동적 메타 오케스트레이터                           │
 │  런타임 감지 → 능력 매칭 → 최적 라우팅                     │
 │  (에이전트, 스킬, MCP 서버, 훅 — 모두 자동 감지)          │
-└──────┬──────────────┬──────────────┬────────────────────┘
-       ↓              ↓              ↓
-┌──────────────┐ ┌──────────────┐ ┌──────────────────────┐
-│  [Sisyphus]  │ │  [Atlas]     │ │  [Hephaestus]        │
-│  서브 오케   │ │  태스크 조율 │ │  자율 실행           │
-│  + 검증      │ │              │ │                      │
-└──────┬───────┘ └──────┬───────┘ └──────────────────────┘
-       ↓                ↓
+└──┬──────────┬──────────┬──────────┬──────────┬──────────┘
+   ↓          ↓          ↓          ↓          ↓
+┌──────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
+│  P1  │ │   P2   │ │  P3a   │ │  P3b   │ │  P3c   │
+│Skill │ │Special-│ │ Direct │ │Sub-orc-│ │ Agent  │
+│Match │ │ist     │ │Parallel│ │hestrat-│ │ Teams  │
+│      │ │Agent   │ │ (2-4)  │ │ors     │ │  P2P   │
+│      │ │ (191)  │ │        │ │Sisyphus│ │        │
+└──────┘ └────────┘ └────────┘ │ Atlas  │ └────────┘
+                                │Hephaes-│
+                                │ tus    │
+                                └────────┘
 ┌─────────────────────────────────────────────────────────┐
 │  Karpathy Guidelines (행동 가이드라인, 항상 활성화)        │
 │  ECC Rules (언어별 코딩 룰, 항상 활성화)                  │
@@ -462,6 +465,74 @@ Boss는 모든 요청을 4단계 우선순위 체인으로 라우팅합니다:
 | **4** | 범용 폴백 | 전문가 매칭 없음 | "이거 설명해줘" → `Agent(model="sonnet")` |
 
 모든 위임에는 **6-Section 구조화 프롬프트**가 포함됩니다: TASK, EXPECTED OUTCOME, REQUIRED TOOLS, MUST DO, MUST NOT DO, CONTEXT.
+
+### 위임 예시
+
+#### Subagent vs Agent Teams
+
+| | Subagent (P2/P3a/P3b) | Agent Teams (P3c) |
+|---|---|---|
+| **명령 전달** | `Agent(prompt="...")` | `SendMessage(to: "agent", ...)` |
+| **통신 방향** | Boss → Agent → Boss | Boss ↔ Agent ↔ Agent |
+| **수명** | 완료 시 종료 | TeamDelete까지 유지 |
+| **확인 방법** | Boss 로그에서만 | tmux pane 또는 Shift+↓ |
+| **비용** | 낮음 | 높음 (teammate별 별도 Claude 세션) |
+
+**P2 — 단일 전문 에이전트:**
+```
+$ claude "analyze auth module for security vulnerabilities"
+
+[Boss] Phase 0: Scanning... 201 agents, 136 skills ready.
+[Boss] Phase 1: Intent → Security Analysis | Priority: P2
+[Boss] Phase 2: Matched → security-reviewer (sonnet)
+[Boss] Agent(description="security review", model="sonnet", prompt="
+  TASK: Analyze src/auth/ for OWASP Top 10 vulnerabilities.
+  MUST DO: Check SQL injection, XSS, CSRF.
+  MUST NOT: Modify any files.
+")
+       ↓ result returned
+[Boss] Phase 4: Reading report... 2 critical, 1 medium confirmed. ✓
+```
+
+**P3a — Boss 직접 병렬 실행:**
+```
+$ claude "refactor auth and write tests"
+
+[Boss] Phase 1: Multi-step → P3a Direct Orchestration
+[Boss] Spawning 2 agents in parallel:
+  Agent(description="executor refactoring", model="sonnet", run_in_background=true)
+  Agent(description="test-engineer tests", model="sonnet", run_in_background=true)
+       ↓ both results returned
+[Boss] Phase 4: Verifying refactored files... ✓
+[Boss] Phase 4: Running tests... 12/12 passed. ✓
+```
+
+**P3c — Agent Teams:**
+```
+$ claude "implement payment module with review"
+
+[Boss] Phase 1: Needs inter-agent communication → P3c Agent Teams
+[Boss] TeamCreate → 2 teammates spawned (tmux split-pane)
+[Boss] TaskCreate("Implement payment", assignee="executor")
+[Boss] TaskCreate("Review payment", assignee="code-reviewer")
+[Boss] SendMessage(to: "executor", "Implement src/payment/ using Stripe SDK")
+
+  ┌─ executor (tmux pane 1) ──────────────────┐
+  │ Working on src/payment/...                  │
+  │ SendMessage(to: "code-reviewer",            │
+  │   "Implementation done, review src/payment/")│
+  └─────────────────────────────────────────────┘
+  ┌─ code-reviewer (tmux pane 2) ─────────────┐
+  │ Reviewing src/payment/checkout.ts...        │
+  │ SendMessage(to: "executor",                 │
+  │   "Line 42: missing error handling")        │
+  └─────────────────────────────────────────────┘
+  ┌─ executor ──────────────────────────────────┐
+  │ Fixed. TaskUpdate(status: "completed")      │
+  └─────────────────────────────────────────────┘
+
+[Boss] All tasks completed → TeamDelete
+```
 
 ### 스코프 디스커버리 (전역 + 프로젝트)
 

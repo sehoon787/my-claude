@@ -176,6 +176,7 @@ echo "  omc:              $(command -v omc            >/dev/null 2>&1 && echo 'O
 echo "  omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  ast-grep:         $(command -v ast-grep       >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  tmux:             $(command -v tmux >/dev/null 2>&1 && echo "OK ($(tmux -V))" || echo 'NOT INSTALLED (in-process mode)')"
-echo "  teammateMode:     $(node -e "try{console.log(JSON.parse(require('fs').readFileSync(process.env.HOME+'/.claude/settings.json','utf8')).teammateMode||'auto')}catch(e){console.log('auto')}")"
+TEAMMATE_MODE=$(node -e 'try{console.log(JSON.parse(require("fs").readFileSync(process.env.HOME+"/.claude/settings.json","utf8")).teammateMode||"auto")}catch(e){console.log("auto")}')
+echo "  teammateMode:     $TEAMMATE_MODE"
 echo ""
 echo "=== Install complete ==="

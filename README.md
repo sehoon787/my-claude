@@ -87,8 +87,7 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 ### Multi-Agent Orchestration
 - **Boss Dynamic Meta-Orchestrator**: Auto-discovers all installed agents, skills, and MCP servers at runtime — routes tasks via 3D conflict resolution (Scope/Depth×2/Interactivity). Handles mid-sized tasks directly (P3a) without sub-orchestrator overhead
 - **Agent Teams Direct Leadership**: Boss can lead Agent Teams directly (Priority 3c-DIRECT) with peer-to-peer teammate communication, file ownership protocol, and Review Chain patterns for quality assurance
-- **Sisyphus Sub-Orchestrator**: Manages complex multi-step workflows with intent classification and verification protocols
-- **Hephaestus Autonomous Worker**: Continuously performs explore → plan → execute → verify cycles without interruption
+- **Sub-Orchestrators (P3b)**: When tasks are too complex for direct handling, Boss delegates to Sisyphus (planning+verification), Atlas (task coordination), or Hephaestus (autonomous execution) — only for complex multi-step workflows, not every request
 - **Skill vs Agent Conflict Resolution**: Weighted 3-dimensional scoring (Scope, Depth×2, Interactivity) determines whether to use a Skill or Agent for each task — no hardcoded routing tables
 - **Model-Optimized Routing**: Automatically selects Opus (high complexity) / Sonnet (implementation) / Haiku (exploration) based on task complexity
 
@@ -110,22 +109,22 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 
 ---
 
-## my-claude Agents
+## Core + OMO Agents
 
-1 core agent (Boss meta-orchestrator) + 9 omo agents (ported from [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)). The plugin also bundles 172 agency agents and 19 OMC agents — see [Installed Components](#installed-components) below.
+**Boss** is the only my-claude original agent. The remaining 9 are [OMO agents](https://github.com/code-yeongyu/oh-my-openagent) that Boss uses as sub-orchestrators and specialists. The plugin also bundles 172 agency agents and 19 OMC agents — Boss selects the best-matching specialist from this entire pool via Priority 2 capability matching. See [Installed Components](#installed-components) below.
 
-| Agent | Model | Role |
-|---------|------|------|
-| **Boss** | Opus | Dynamic meta-orchestrator. Auto-discovers all installed agents/skills/MCP at runtime and routes to optimal specialist |
-| **Sisyphus** | Opus | Sub-orchestrator. Manages complex multi-step workflows with intent classification and verification |
-| **Hephaestus** | Opus | Autonomous deep worker. Autonomously performs explore → plan → execute → verify cycles |
-| **Metis** | Opus | Pre-execution intent analysis. Structures requests before execution to prevent AI-slop |
-| **Atlas** | Opus | Master task orchestrator. Decomposes and coordinates complex tasks with a 4-stage QA cycle |
-| **Oracle** | Opus | Strategic technical advisor. Analyzes in read-only mode without modifying code and provides direction |
-| **Momus** | Opus | Task plan reviewer. Reviews plans from an approval-biased perspective. Read-only |
-| **Prometheus** | Opus | Interview-based planning consultant. Clarifies requirements through conversation |
-| **Librarian** | Sonnet | Open-source documentation research agent using MCP |
-| **Multimodal-Looker** | Sonnet | Visual analysis agent. Analyzes images/screenshots. Read-only |
+| Agent | Source | Model | Role |
+|---------|--------|------|------|
+| **Boss** | my-claude | Opus | Dynamic meta-orchestrator. Auto-discovers all installed agents/skills/MCP at runtime and routes to optimal specialist |
+| **Sisyphus** | OMO | Opus | Sub-orchestrator. Manages complex multi-step workflows with intent classification and verification |
+| **Hephaestus** | OMO | Opus | Autonomous deep worker. Autonomously performs explore → plan → execute → verify cycles |
+| **Metis** | OMO | Opus | Pre-execution intent analysis. Structures requests before execution to prevent AI-slop |
+| **Atlas** | OMO | Opus | Master task orchestrator. Decomposes and coordinates complex tasks with a 4-stage QA cycle |
+| **Oracle** | OMO | Opus | Strategic technical advisor. Analyzes in read-only mode without modifying code and provides direction |
+| **Momus** | OMO | Opus | Task plan reviewer. Reviews plans from an approval-biased perspective. Read-only |
+| **Prometheus** | OMO | Opus | Interview-based planning consultant. Clarifies requirements through conversation |
+| **Librarian** | OMO | Sonnet | Open-source documentation research agent using MCP |
+| **Multimodal-Looker** | OMO | Sonnet | Visual analysis agent. Analyzes images/screenshots. Read-only |
 
 ---
 
@@ -330,7 +329,7 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 </details>
 
 <details>
-<summary>MCP Servers (3) + Behavioral Correction Hooks (4)</summary>
+<summary>MCP Servers (3) + Behavioral Correction Hooks (6)</summary>
 
 **MCP Servers**
 
@@ -366,14 +365,18 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 │  [Boss] Dynamic Meta-Orchestrator                       │
 │  Runtime Discovery → Capability Matching → Routing      │
 │  (agents, skills, MCP servers, hooks — all discovered)  │
-└──────┬──────────────┬──────────────┬────────────────────┘
-       ↓              ↓              ↓
-┌──────────────┐ ┌──────────────┐ ┌──────────────────────┐
-│  [Sisyphus]  │ │  [Atlas]     │ │  [Hephaestus]        │
-│  Sub-orch.   │ │  Task        │ │  Autonomous          │
-│  + Verify    │ │  Coordination│ │  Execution           │
-└──────┬───────┘ └──────┬───────┘ └──────────────────────┘
-       ↓                ↓
+└──┬──────────┬──────────┬──────────┬──────────┬──────────┘
+   ↓          ↓          ↓          ↓          ↓
+┌──────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
+│  P1  │ │   P2   │ │  P3a   │ │  P3b   │ │  P3c   │
+│Skill │ │Special-│ │ Direct │ │Sub-orc-│ │ Agent  │
+│Match │ │ist     │ │Parallel│ │hestrat-│ │ Teams  │
+│      │ │Agent   │ │ (2-4)  │ │ors     │ │  P2P   │
+│      │ │ (191)  │ │        │ │Sisyphus│ │        │
+└──────┘ └────────┘ └────────┘ │ Atlas  │ └────────┘
+                                │Hephaes-│
+                                │ tus    │
+                                └────────┘
 ┌─────────────────────────────────────────────────────────┐
 │  Karpathy Guidelines (behavioral guidelines, always on) │
 │  ECC Rules (language-specific coding rules, always on)  │
@@ -469,6 +472,74 @@ Boss routes every request through a 4-level priority chain:
 | **4** | General-purpose fallback | No specialist matches | "explain this" → `Agent(model="sonnet")` |
 
 Every delegation includes a **6-section structured prompt**: TASK, EXPECTED OUTCOME, REQUIRED TOOLS, MUST DO, MUST NOT DO, CONTEXT.
+
+### Delegation Examples
+
+#### Subagent vs Agent Teams
+
+| | Subagent (P2/P3a/P3b) | Agent Teams (P3c) |
+|---|---|---|
+| **Command** | `Agent(prompt="...")` | `SendMessage(to: "agent", ...)` |
+| **Communication** | Boss → Agent → Boss | Boss ↔ Agent ↔ Agent |
+| **Lifetime** | Ends on completion | Persists until TeamDelete |
+| **Visibility** | Boss log only | tmux pane or Shift+↓ |
+| **Cost** | Low | High (separate Claude session per teammate) |
+
+**P2 — Single Specialist Agent:**
+```
+$ claude "analyze auth module for security vulnerabilities"
+
+[Boss] Phase 0: Scanning... 201 agents, 136 skills ready.
+[Boss] Phase 1: Intent → Security Analysis | Priority: P2
+[Boss] Phase 2: Matched → security-reviewer (sonnet)
+[Boss] Agent(description="security review", model="sonnet", prompt="
+  TASK: Analyze src/auth/ for OWASP Top 10 vulnerabilities.
+  MUST DO: Check SQL injection, XSS, CSRF.
+  MUST NOT: Modify any files.
+")
+       ↓ result returned
+[Boss] Phase 4: Reading report... 2 critical, 1 medium confirmed. ✓
+```
+
+**P3a — Boss Direct Parallel:**
+```
+$ claude "refactor auth and write tests"
+
+[Boss] Phase 1: Multi-step → P3a Direct Orchestration
+[Boss] Spawning 2 agents in parallel:
+  Agent(description="executor refactoring", model="sonnet", run_in_background=true)
+  Agent(description="test-engineer tests", model="sonnet", run_in_background=true)
+       ↓ both results returned
+[Boss] Phase 4: Verifying refactored files... ✓
+[Boss] Phase 4: Running tests... 12/12 passed. ✓
+```
+
+**P3c — Agent Teams:**
+```
+$ claude "implement payment module with review"
+
+[Boss] Phase 1: Needs inter-agent communication → P3c Agent Teams
+[Boss] TeamCreate → 2 teammates spawned (tmux split-pane)
+[Boss] TaskCreate("Implement payment", assignee="executor")
+[Boss] TaskCreate("Review payment", assignee="code-reviewer")
+[Boss] SendMessage(to: "executor", "Implement src/payment/ using Stripe SDK")
+
+  ┌─ executor (tmux pane 1) ──────────────────┐
+  │ Working on src/payment/...                  │
+  │ SendMessage(to: "code-reviewer",            │
+  │   "Implementation done, review src/payment/")│
+  └─────────────────────────────────────────────┘
+  ┌─ code-reviewer (tmux pane 2) ─────────────┐
+  │ Reviewing src/payment/checkout.ts...        │
+  │ SendMessage(to: "executor",                 │
+  │   "Line 42: missing error handling")        │
+  └─────────────────────────────────────────────┘
+  ┌─ executor ──────────────────────────────────┐
+  │ Fixed. TaskUpdate(status: "completed")      │
+  └─────────────────────────────────────────────┘
+
+[Boss] All tasks completed → TeamDelete
+```
 
 For detailed agent compatibility matrix and team communication patterns, see [Agent Teams Reference](agents/core/agent-teams-reference.md).
 

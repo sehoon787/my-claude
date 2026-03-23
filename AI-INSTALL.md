@@ -1,7 +1,7 @@
 # my-claude AI Installation Guide
 
 You are an AI agent setting up a Claude Code multi-agent orchestration environment.
-The plugin bundles 202 agents, 136 skills, 50 rules, 4 hooks, and 3 MCP servers.
+The plugin bundles 202 agents, 136 skills, 50 rules, 6 hooks, and 3 MCP servers.
 Only 2-3 steps are needed.
 
 ---
@@ -25,7 +25,7 @@ This installs:
 - 202 agents (2 core + 9 omo + 172 agency + 19 OMC)
 - 136 skills (108 ECC + 28 OMC)
 - 49 rules (9 common + 8 languages × 5)
-- 4 behavioral hooks (SessionStart, PreToolUse, SubagentStop, Stop)
+- 6 behavioral hooks (SessionStart, PreToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop)
 - 3 MCP servers (Context7, Exa, grep.app)
 - Boss meta-orchestrator as default agent
 
