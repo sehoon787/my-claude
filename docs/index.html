@@ -19,7 +19,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#030712;--bg2:#111827;--bg3:#1e293b;--text:#e2e8f0;--text2:#94a3b8;--primary:#818cf8;--accent:#22d3ee;--green:#34d399;--pink:#f472b6;--card:rgba(17,24,39,.7);--border:rgba(129,140,248,.15);--glow:rgba(129,140,248,.12)}
+:root{--bg:#030712;--bg2:#111827;--bg3:#1e293b;--text:#e2e8f0;--text2:#94a3b8;--primary:#d97757;--accent:#22d3ee;--green:#34d399;--pink:#f472b6;--card:rgba(17,24,39,.7);--border:rgba(217,119,87,.15);--glow:rgba(217,119,87,.12)}
 html{scroll-behavior:smooth;font-size:16px}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
 a{color:var(--accent);text-decoration:none;transition:opacity .2s}a:hover{opacity:.8}
@@ -48,7 +48,7 @@ section{padding:80px 0}
 /* Hero */
 .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 35%,var(--glow),transparent);pointer-events:none}
-.hero-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(129,140,248,.15) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;opacity:.5}
+.hero-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(217,119,87,.15) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;opacity:.5}
 .hero h1{font-size:clamp(2.6rem,7vw,4.5rem);font-weight:800;letter-spacing:-.04em;background:linear-gradient(135deg,#fff 20%,var(--accent) 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1;margin-bottom:8px}
 .hero .tagline{font-size:clamp(.95rem,2.2vw,1.15rem);color:var(--text2);margin:12px auto 24px;max-width:560px}
 .hero .stat-tagline{font-size:clamp(.82rem,1.8vw,.95rem);color:var(--text2);font-family:'JetBrains Mono',monospace;margin-bottom:28px;letter-spacing:-.01em}
@@ -57,8 +57,8 @@ section{padding:80px 0}
 .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:20px;font-size:.8rem;font-weight:600;border:1px solid var(--border);background:var(--card);backdrop-filter:blur(12px)}
 .badge em{font-style:normal;color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:.9rem}
 .cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.cta{display:inline-block;padding:14px 36px;border-radius:12px;background:linear-gradient(135deg,var(--primary),#6366f1);color:#fff;font-weight:600;font-size:1rem;transition:transform .2s,box-shadow .2s}
-.cta:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(129,140,248,.3);opacity:1}
+.cta{display:inline-block;padding:14px 36px;border-radius:12px;background:linear-gradient(135deg,var(--primary),#c4623e);color:#fff;font-weight:600;font-size:1rem;transition:transform .2s,box-shadow .2s}
+.cta:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(217,119,87,.3);opacity:1}
 .cta.secondary{background:transparent;border:1px solid var(--border);color:var(--text)}
 .cta.secondary:hover{border-color:var(--primary)}
 .hero-sub{font-size:.82rem;color:var(--text2);margin-top:20px}
@@ -111,7 +111,7 @@ section{padding:80px 0}
 /* Architecture */
 .arch{display:flex;flex-direction:column;align-items:center;gap:0;max-width:800px;margin:0 auto}
 .arch-layer{width:100%;border:1px solid var(--border);border-radius:14px;padding:18px 22px;background:var(--card);backdrop-filter:blur(12px);text-align:center;position:relative;transition:box-shadow .4s}
-.arch-layer.boss-glow{box-shadow:0 0 30px rgba(129,140,248,.12),0 0 60px rgba(129,140,248,.06)}
+.arch-layer.boss-glow{box-shadow:0 0 30px rgba(217,119,87,.12),0 0 60px rgba(217,119,87,.06)}
 .arch-layer h4{font-size:.92rem;margin-bottom:4px}
 .arch-layer h4 .cnt{font-size:.75rem;color:var(--text2);font-weight:400;margin-left:6px}
 .arch-layer p{font-size:.82rem;color:var(--text2)}
@@ -181,7 +181,7 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
 
 /* Animations */
 .fade-in{opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s}.fade-in.visible{opacity:1;transform:translateY(0)}
-@keyframes pulseGlow{0%,100%{box-shadow:0 0 20px rgba(129,140,248,.08),0 0 40px rgba(129,140,248,.04)}50%{box-shadow:0 0 35px rgba(129,140,248,.16),0 0 70px rgba(129,140,248,.08)}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 20px rgba(217,119,87,.08),0 0 40px rgba(217,119,87,.04)}50%{box-shadow:0 0 35px rgba(217,119,87,.16),0 0 70px rgba(217,119,87,.08)}}
 .boss-glow{animation:pulseGlow 3s ease-in-out infinite}
 .project-switch{display:flex;gap:4px;justify-content:center;margin-bottom:20px;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:4px;width:fit-content;margin-left:auto;margin-right:auto}
 .ps-item{padding:8px 20px;border-radius:20px;font-size:.85rem;font-weight:600;color:var(--text2);transition:all .2s;text-decoration:none}
@@ -343,7 +343,7 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
       <p><span class="lang" data-en="Exact Skill Match" data-ko="정확한 스킬 매칭"></span></p>
       <div class="ex"><span class="lang" data-en='"merge PDFs" → pdf skill' data-ko='"PDF 합쳐줘" → pdf 스킬'></span></div>
     </div>
-    <div class="pri-card" style="border-color:var(--primary);background:rgba(129,140,248,.06)">
+    <div class="pri-card" style="border-color:var(--primary);background:rgba(217,119,87,.06)">
       <h4 style="color:var(--primary)">P2</h4>
       <p><span class="lang" data-en="Specialist Agent" data-ko="전문 에이전트"></span></p>
       <div class="ex"><span class="lang" data-en='"security audit" → Security Engineer' data-ko='"보안 감사" → Security Engineer'></span></div>
