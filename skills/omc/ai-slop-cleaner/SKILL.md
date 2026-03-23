@@ -1,6 +1,7 @@
 ---
 name: ai-slop-cleaner
 description: Clean AI-generated code slop with a regression-safe, deletion-first workflow and optional reviewer-only mode
+level: 3
 ---
 
 # AI Slop Cleaner
@@ -35,6 +36,24 @@ Do not use this skill when:
 - Keep diffs small, reversible, and smell-focused.
 - Stay concise and evidence-dense: inspect, edit, verify, and report.
 - Treat new user instructions as local scope updates without dropping earlier non-conflicting constraints.
+
+## Scoped File-List Usage
+
+This skill can be bounded to an explicit file list or changed-file scope when the caller already knows the safe cleanup surface.
+
+- Good fit: `oh-my-claudecode:ai-slop-cleaner skills/ralph/SKILL.md skills/ai-slop-cleaner/SKILL.md`
+- Good fit: a Ralph session handing off only the files changed in that session
+- Preserve the same regression-safe workflow even when the scope is a short file list
+- Do not silently expand a changed-file scope into broader cleanup work unless the user explicitly asks for it
+
+## Ralph Integration
+
+Ralph can invoke this skill as a bounded post-review cleanup pass.
+
+- In that workflow, the cleaner runs in standard mode (not `--review`)
+- The cleanup scope is the Ralph session's changed files only
+- After the cleanup pass, Ralph re-runs regression verification before completion
+- `--review` remains the reviewer-only follow-up mode, not the default Ralph integration path
 
 ## Review Mode (`--review`)
 
@@ -100,6 +119,8 @@ In review mode:
 
 - `/oh-my-claudecode:ai-slop-cleaner <target>`
 - `/oh-my-claudecode:ai-slop-cleaner <target> --review`
+- `/oh-my-claudecode:ai-slop-cleaner <file-a> <file-b> <file-c>`
+- From Ralph: run the cleaner on the Ralph session's changed files only, then return to Ralph for post-cleanup regression verification
 
 ## Good Fits
 
