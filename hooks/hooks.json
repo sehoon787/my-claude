@@ -61,7 +61,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Review the assistant's last message. Check: (1) Are there incomplete tasks in the current plan? (2) Were all subagent results independently verified? (3) Did the assistant skip any verification steps? If work remains incomplete or unverified, return {\"ok\": false, \"reason\": \"Incomplete work detected. Continue with remaining tasks or verify pending results.\"}. If all tasks are complete and verified, return {\"ok\": true}."
+            "prompt": "Review the assistant's last response ONLY. Return {\"ok\":false,\"reason\":\"...\"} ONLY if: (1) the assistant launched agents THIS TURN and never checked results, or (2) the user asked for a commit and the assistant made changes but didn't commit. Do NOT flag incomplete just because a plan file exists. Return {\"ok\":true} if the assistant answered a question, confirmed work done, or completed all requested changes."
           }
         ]
       }

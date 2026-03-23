@@ -4,7 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>my-claude — All-in-one Claude Code Multi-Agent Orchestration</title>
-<meta name="description" content="201 agents, 136 skills, 49 rules, 3 MCP servers. One plugin. Boss orchestrates, never implements.">
+<meta name="description" content="All-in-one Claude Code multi-agent orchestration plugin. 201 agents, 136 skills, 3 MCP servers. Boss discovers and orchestrates everything at runtime.">
+<meta property="og:title" content="my-claude — All-in-one Claude Code Multi-Agent Orchestration">
+<meta property="og:description" content="201 agents, 136 skills, 3 MCP servers orchestrated by Boss — a dynamic meta-orchestrator that discovers capabilities at runtime. One plugin installs everything.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://sehoon787.github.io/my-claude/">
+<meta property="og:image" content="https://sehoon787.github.io/my-claude/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="my-claude — Claude Code Multi-Agent Orchestration Plugin">
+<meta name="twitter:description" content="Boss orchestrates 201 agents, 136 skills, 3 MCP servers. Dynamic runtime discovery. One plugin.">
+<link rel="canonical" href="https://sehoon787.github.io/my-claude/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -17,7 +26,7 @@ a{color:var(--accent);text-decoration:none;transition:opacity .2s}a:hover{opacit
 code,pre,.mono{font-family:'JetBrains Mono',monospace}
 .container{max-width:1100px;margin:0 auto;padding:0 24px}
 section{padding:80px 0}
-.lang-sub{font-size:.72em;color:var(--text2);font-weight:400;display:block;margin-top:2px}
+
 @media(max-width:768px){section{padding:56px 0}.container{padding:0 16px}}
 
 /* Sticky Nav */
@@ -30,6 +39,10 @@ section{padding:80px 0}
 .nav-lang{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:4px 12px;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--text);transition:border-color .2s}
 .nav-lang:hover{border-color:var(--primary)}
 .nav-lang .active{color:var(--accent)}
+.float-lang{position:fixed;top:16px;right:16px;z-index:998;background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:16px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--text);transition:opacity .3s,border-color .2s}
+.float-lang:hover{border-color:var(--primary)}
+.float-lang .active{color:var(--accent)}
+.float-lang.hidden{opacity:0;pointer-events:none}
 @media(max-width:768px){.nav-links{display:none}}
 
 /* Hero */
@@ -173,6 +186,9 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
 </style>
 </head>
 <body>
+<button class="float-lang" id="floatLang" onclick="toggleLang()" aria-label="Toggle language">
+  <span id="flt-en" class="active">EN</span> | <span id="flt-ko">KO</span>
+</button>
 
 <!-- Sticky Nav -->
 <nav class="nav" id="navbar">
@@ -199,7 +215,7 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
   <p class="tagline">
     <span class="lang" data-en="Boss scans your system at runtime, matches capabilities, and routes every task to the perfect agent. No config files. No boilerplate." data-ko="Boss는 런타임에 시스템을 스캔하고, 능력을 매칭하여 모든 작업을 최적의 에이전트에 라우팅합니다. 설정 파일도, 보일러플레이트도 없습니다."></span>
   </p>
-  <p class="stat-tagline"><em data-count="201">0</em> agents · <em data-count="136">0</em> skills · <em data-count="49">0</em> rules · <em>3</em> MCP</p>
+  <p class="stat-tagline"><em data-count="201">0</em> <span class="lang" data-en="agents" data-ko="에이전트"></span> · <em data-count="136">0</em> <span class="lang" data-en="skills" data-ko="스킬"></span> · <em data-count="49">0</em> <span class="lang" data-en="rules" data-ko="규칙"></span> · <em>3</em> MCP</p>
   <div class="badges">
     <span class="badge"><span class="lang" data-en="Zero Configuration" data-ko="무설정"></span></span>
     <span class="badge"><span class="lang" data-en="Runtime Discovery" data-ko="런타임 탐색"></span></span>
@@ -210,14 +226,14 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
     <a href="https://github.com/sehoon787/my-claude" class="cta"><span class="lang" data-en="View on GitHub" data-ko="GitHub에서 보기"></span></a>
     <a href="#install" class="cta secondary"><span class="lang" data-en="Quick Install" data-ko="빠른 설치"></span></a>
   </div>
-  <p class="hero-sub"><span class="lang" data-en="Trusted by developers using Claude Code worldwide" data-ko="전 세계 Claude Code 사용자들이 신뢰합니다"></span> · MIT License · Weekly Auto-sync</p>
+  <p class="hero-sub"><span class="lang" data-en="Trusted by developers using Claude Code worldwide" data-ko="전 세계 Claude Code 사용자들이 신뢰합니다"></span> · MIT · <span class="lang" data-en="Weekly Auto-sync" data-ko="매주 자동 동기화"></span></p>
 </div>
 </section>
 
 <!-- Core Principles -->
 <section id="principles">
 <div class="container">
-  <h2 class="st"><span class="lang" data-en="Core Principles" data-ko="핵심 원칙"></span><span class="lang-sub"><span class="lang" data-en="핵심 원칙" data-ko="Core Principles"></span></span></h2>
+  <h2 class="st"><span class="lang" data-en="Core Principles" data-ko="핵심 원칙"></span></h2>
   <p class="ss"><span class="lang" data-en="Three ideas that make orchestration reliable at scale." data-ko="대규모 오케스트레이션을 안정적으로 만드는 세 가지 원칙."></span></p>
   <div class="cards">
     <div class="card fade-in">
@@ -242,46 +258,64 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
 <!-- How It Works — Terminal with Tabs -->
 <section id="how" style="background:var(--bg2)">
 <div class="container">
-  <h2 class="st"><span class="lang" data-en="How It Works" data-ko="작동 방식"></span><span class="lang-sub"><span class="lang" data-en="작동 방식" data-ko="How It Works"></span></span></h2>
+  <h2 class="st"><span class="lang" data-en="How It Works" data-ko="작동 방식"></span></h2>
   <p class="ss"><span class="lang" data-en="Watch Boss execute real tasks — from system scan to verified result." data-ko="Boss가 실제 작업을 수행하는 과정을 따라가 보세요."></span></p>
   <div class="term-wrap fade-in">
     <div class="term-tabs">
       <button class="term-tab active" onclick="switchTab(0)"><span class="lang" data-en="Security Analysis" data-ko="보안 분석"></span></button>
       <button class="term-tab" onclick="switchTab(1)"><span class="lang" data-en="Refactor + Review" data-ko="리팩토링 + 코드리뷰"></span></button>
+      <button class="term-tab" onclick="switchTab(2)"><span class="lang" data-en="Agent Teams" data-ko="에이전트 팀"></span></button>
     </div>
     <div class="term" id="terminal">
       <div class="term-bar"><div class="term-dot" style="background:#ef4444"></div><div class="term-dot" style="background:#eab308"></div><div class="term-dot" style="background:var(--green)"></div></div>
       <div class="term-body">
         <div class="term-scene active" data-scene="0">
-          <div class="term-line t-dim">$ claude "analyze auth module for security vulnerabilities"</div>
+          <div class="term-line t-dim">$ claude "<span class="lang" data-en="analyze auth module for security vulnerabilities" data-ko="auth 모듈 보안 취약점 분석해줘"></span>"</div>
           <div class="term-line"></div>
-          <div class="term-line t-phase">── Phase 0: Discovery ──</div>
-          <div class="term-line t-boss">[Boss] Scanning... 201 agents, 136 skills, 3 MCP servers ready.</div>
-          <div class="term-line t-phase">── Phase 1: Classification ──</div>
-          <div class="term-line t-boss">[Boss] Intent: Security Analysis | Scope: Read-only | Priority: P2</div>
-          <div class="term-line t-phase">── Phase 2: Delegation ──</div>
-          <div class="term-line t-boss">[Boss] Matched: security-reviewer (sonnet) — spawning...</div>
+          <div class="term-line t-phase">── Phase 0: <span class="lang" data-en="Discovery" data-ko="탐색"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Scanning... 201 agents, 136 skills, 3 MCP servers ready." data-ko="스캔 중... 201 에이전트, 136 스킬, 3 MCP 서버 준비 완료."></span></div>
+          <div class="term-line t-phase">── Phase 1: <span class="lang" data-en="Classification" data-ko="분류"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Intent: Security Analysis | Scope: Read-only | Priority: P2" data-ko="의도: 보안 분석 | 범위: 읽기 전용 | 우선순위: P2"></span></div>
+          <div class="term-line t-phase">── Phase 2: <span class="lang" data-en="Delegation" data-ko="위임"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Matched: security-reviewer (sonnet) — spawning..." data-ko="매칭: security-reviewer (sonnet) — 생성 중..."></span></div>
           <div class="term-line t-dim">──────────────────────────────────────────────</div>
-          <div class="term-line t-exec">[security-reviewer] Scanning auth module... OWASP Top 10 check</div>
-          <div class="term-line t-exec">[security-reviewer] Found: 2 critical, 1 medium vulnerability</div>
-          <div class="term-line t-phase">── Phase 4: Verification ──</div>
-          <div class="term-line t-rev">[verifier] Cross-referencing findings... all confirmed.</div>
-          <div class="term-line t-acc">[Boss] Done. Report delivered with remediation steps.</div>
+          <div class="term-line t-exec">[security-reviewer] <span class="lang" data-en="Scanning auth module... OWASP Top 10 check" data-ko="auth 모듈 스캔 중... OWASP Top 10 체크"></span></div>
+          <div class="term-line t-exec">[security-reviewer] <span class="lang" data-en="Found: 2 critical, 1 medium vulnerability" data-ko="발견: 2 critical, 1 medium 취약점"></span></div>
+          <div class="term-line t-phase">── Phase 4: <span class="lang" data-en="Verification" data-ko="검증"></span> ──</div>
+          <div class="term-line t-rev">[verifier] <span class="lang" data-en="Cross-referencing findings... all confirmed." data-ko="결과 교차 검증 중... 모두 확인됨."></span></div>
+          <div class="term-line t-acc">[Boss] <span class="lang" data-en="Done. Report delivered with remediation steps." data-ko="완료. 수정 방안을 포함한 리포트 전달됨."></span></div>
         </div>
         <div class="term-scene" data-scene="1">
-          <div class="term-line t-dim">$ claude "리팩토링하고 코드리뷰해줘"</div>
+          <div class="term-line t-dim">$ claude "<span class="lang" data-en="refactor and code review please" data-ko="리팩토링하고 코드리뷰해줘"></span>"</div>
           <div class="term-line"></div>
-          <div class="term-line t-phase">── Phase 0: Discovery ──</div>
-          <div class="term-line t-boss">[Boss] Scanning... 201 agents, 136 skills, 3 MCP ready.</div>
-          <div class="term-line t-phase">── Phase 1: Classification ──</div>
-          <div class="term-line t-boss">[Boss] Intent: Refactor + Review | Multi-step → P3a Orchestration</div>
-          <div class="term-line t-phase">── Phase 2: Delegation ──</div>
-          <div class="term-line t-boss">[Boss] Spawning executor (sonnet) for refactoring...</div>
+          <div class="term-line t-phase">── Phase 0: <span class="lang" data-en="Discovery" data-ko="탐색"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Scanning... 201 agents, 136 skills, 3 MCP ready." data-ko="스캔 중... 201 에이전트, 136 스킬, 3 MCP 준비 완료."></span></div>
+          <div class="term-line t-phase">── Phase 1: <span class="lang" data-en="Classification" data-ko="분류"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Intent: Refactor + Review | Multi-step → P3a Orchestration" data-ko="의도: 리팩토링 + 리뷰 | 멀티스텝 → P3a 오케스트레이션"></span></div>
+          <div class="term-line t-phase">── Phase 2: <span class="lang" data-en="Delegation" data-ko="위임"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Spawning executor (sonnet) for refactoring..." data-ko="리팩토링을 위해 executor (sonnet) 생성 중..."></span></div>
           <div class="term-line t-dim">──────────────────────────────────────────────</div>
-          <div class="term-line t-exec">[executor] Refactoring auth module... 3 files changed.</div>
-          <div class="term-line t-boss">[Boss] Verifying... then spawning code-reviewer (opus)...</div>
-          <div class="term-line t-rev">[code-reviewer] LGTM. 0 critical, 1 medium issue found.</div>
-          <div class="term-line t-acc">[Boss] All tasks completed and verified.</div>
+          <div class="term-line t-exec">[executor] <span class="lang" data-en="Refactoring auth module... 3 files changed." data-ko="auth 모듈 리팩토링 중... 3개 파일 변경."></span></div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Verifying... then spawning code-reviewer (opus)..." data-ko="검증 중... code-reviewer (opus) 생성 중..."></span></div>
+          <div class="term-line t-rev">[code-reviewer] <span class="lang" data-en="LGTM. 0 critical, 1 medium issue found." data-ko="LGTM. 0 critical, 1 medium 이슈 발견."></span></div>
+          <div class="term-line t-acc">[Boss] <span class="lang" data-en="All tasks completed and verified." data-ko="모든 작업 완료 및 검증됨."></span></div>
+        </div>
+        <div class="term-scene" data-scene="2">
+          <div class="term-line t-dim">$ claude "<span class="lang" data-en="implement payment module with code review" data-ko="결제 모듈 구현하고 코드리뷰해줘"></span>"</div>
+          <div class="term-line"></div>
+          <div class="term-line t-phase">── Phase 0: <span class="lang" data-en="Discovery" data-ko="탐색"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Scanning... 201 agents, 136 skills, 3 MCP ready." data-ko="스캔 중... 201 에이전트, 136 스킬, 3 MCP 준비 완료."></span></div>
+          <div class="term-line t-phase">── Phase 1: <span class="lang" data-en="Classification" data-ko="분류"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="Intent: Implement + Review | Inter-agent comm needed → P3c Teams" data-ko="의도: 구현 + 리뷰 | 에이전트 간 통신 필요 → P3c 팀"></span></div>
+          <div class="term-line t-phase">── Phase 2: <span class="lang" data-en="Team Setup" data-ko="팀 구성"></span> ──</div>
+          <div class="term-line t-boss">[Boss] <span class="lang" data-en="TeamCreate → executor + code-reviewer (tmux split-pane)" data-ko="TeamCreate → executor + code-reviewer (tmux 분할 창)"></span></div>
+          <div class="term-line t-dim">──────────────────────────────────────────────</div>
+          <div class="term-line t-exec">[executor] <span class="lang" data-en="Implementing payment module... 4 files created." data-ko="결제 모듈 구현 중... 4개 파일 생성."></span></div>
+          <div class="term-line" style="color:var(--accent)">  → SendMessage(to: code-reviewer) <span class="lang" data-en='"Done. Review src/payment/"' data-ko='"완료. src/payment/ 리뷰해줘"'></span></div>
+          <div class="term-line t-rev">[code-reviewer] <span class="lang" data-en="Reviewing... found 1 issue at checkout.ts:42" data-ko="리뷰 중... checkout.ts:42에서 1건 발견"></span></div>
+          <div class="term-line" style="color:var(--accent)">  → SendMessage(to: executor) <span class="lang" data-en='"Missing error handling at line 42"' data-ko='"42번 줄에 에러 핸들링 누락"'></span></div>
+          <div class="term-line t-exec">[executor] <span class="lang" data-en="Fixed. TaskUpdate → completed." data-ko="수정 완료. TaskUpdate → completed."></span></div>
+          <div class="term-line t-acc">[Boss] <span class="lang" data-en="All tasks verified → TeamDelete. Done." data-ko="모든 태스크 검증 완료 → TeamDelete. 완료."></span></div>
         </div>
       </div>
     </div>
@@ -292,28 +326,28 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
 <!-- 4-Priority Routing -->
 <section id="routing">
 <div class="container">
-  <h2 class="st"><span class="lang" data-en="4-Priority Routing" data-ko="4단계 우선순위 라우팅"></span><span class="lang-sub"><span class="lang" data-en="4단계 우선순위 라우팅" data-ko="4-Priority Routing"></span></span></h2>
+  <h2 class="st"><span class="lang" data-en="4-Priority Routing" data-ko="4단계 우선순위 라우팅"></span></h2>
   <p class="ss"><span class="lang" data-en="Each request cascades through 4 priorities until the best match is found." data-ko="각 요청은 최적의 매칭을 찾을 때까지 4개의 우선순위를 순차적으로 통과합니다."></span></p>
   <div class="pri-flow fade-in">
     <div class="pri-card" style="border-color:var(--green);background:rgba(52,211,153,.06)">
       <h4 style="color:var(--green)">P1</h4>
       <p><span class="lang" data-en="Exact Skill Match" data-ko="정확한 스킬 매칭"></span></p>
-      <div class="ex">"merge PDFs" → pdf skill</div>
+      <div class="ex"><span class="lang" data-en='"merge PDFs" → pdf skill' data-ko='"PDF 합쳐줘" → pdf 스킬'></span></div>
     </div>
     <div class="pri-card" style="border-color:var(--primary);background:rgba(129,140,248,.06)">
       <h4 style="color:var(--primary)">P2</h4>
       <p><span class="lang" data-en="Specialist Agent" data-ko="전문 에이전트"></span></p>
-      <div class="ex">"security audit" → Security Engineer</div>
+      <div class="ex"><span class="lang" data-en='"security audit" → Security Engineer' data-ko='"보안 감사" → Security Engineer'></span></div>
     </div>
     <div class="pri-card" style="border-color:#a855f7;background:rgba(168,85,247,.06)">
       <h4 style="color:#a855f7">P3</h4>
       <p><span class="lang" data-en="Direct / Sub-orchestrator" data-ko="직접 / 서브 오케스트레이터"></span></p>
-      <div class="ex">P3a: Boss parallel · P3b: Sisyphus · P3c: Teams</div>
+      <div class="ex"><span class="lang" data-en="P3a: Boss parallel · P3b: Sisyphus · P3c: Teams" data-ko="P3a: Boss 병렬 · P3b: Sisyphus · P3c: 팀"></span></div>
     </div>
     <div class="pri-card" style="border-color:var(--bg3);background:rgba(30,41,59,.3)">
       <h4 style="color:var(--text2)">P4</h4>
       <p><span class="lang" data-en="General Fallback" data-ko="일반 폴백"></span></p>
-      <div class="ex">"explain this" → sonnet agent</div>
+      <div class="ex"><span class="lang" data-en='"explain this" → sonnet agent' data-ko='"이거 설명해줘" → sonnet 에이전트'></span></div>
     </div>
   </div>
 </div>
@@ -322,7 +356,7 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
 <!-- Skill vs Agent -->
 <section id="conflict" style="background:var(--bg2)">
 <div class="container">
-  <h2 class="st"><span class="lang" data-en="Skill vs Agent Resolution" data-ko="스킬 vs 에이전트 해결"></span><span class="lang-sub"><span class="lang" data-en="스킬 vs 에이전트 해결" data-ko="Skill vs Agent Resolution"></span></span></h2>
+  <h2 class="st"><span class="lang" data-en="Skill vs Agent Resolution" data-ko="스킬 vs 에이전트 해결"></span></h2>
   <p class="ss"><span class="lang" data-en="When both match, Boss scores across 3 dimensions. Depth is double-weighted." data-ko="둘 다 매칭되면 Boss가 3개 차원으로 점수를 매깁니다. Depth는 2배 가중치."></span></p>
   <div style="max-width:600px;margin:0 auto" class="fade-in">
     <table class="score-tbl">
@@ -348,22 +382,23 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
 <!-- Architecture -->
 <section id="architecture">
 <div class="container">
-  <h2 class="st"><span class="lang" data-en="Architecture" data-ko="아키텍처"></span><span class="lang-sub"><span class="lang" data-en="아키텍처" data-ko="Architecture"></span></span></h2>
+  <h2 class="st"><span class="lang" data-en="Architecture" data-ko="아키텍처"></span></h2>
   <p class="ss"><span class="lang" data-en="From user request to MCP layer — every tier has a clear responsibility." data-ko="사용자 요청부터 MCP 레이어까지 — 모든 계층에 명확한 역할이 있습니다."></span></p>
   <div class="arch fade-in">
     <div class="arch-layer" style="border-color:var(--accent)"><h4 style="color:var(--accent)"><span class="lang" data-en="User Request" data-ko="사용자 요청"></span></h4></div>
     <div class="arch-conn"></div>
     <div class="arch-layer boss-glow" style="border-color:var(--primary)"><h4 style="color:var(--primary)">Boss<span class="cnt">1</span></h4><p><span class="lang" data-en="Dynamic Meta-Orchestrator: Runtime Discovery → Capability Matching → Optimal Routing" data-ko="동적 메타 오케스트레이터: 런타임 탐색 → 능력 매칭 → 최적 라우팅"></span></p></div>
     <div class="arch-conn"></div>
+    <div style="text-align:center;font-size:0.78em;color:var(--text2);margin:4px 0"><span class="lang" data-en="↓ Boss routes to one of these paths based on task complexity" data-ko="↓ Boss가 작업 복잡도에 따라 아래 경로 중 하나로 라우팅"></span></div>
     <div class="arch-row">
-      <div class="arch-layer"><h4 style="color:#a78bfa">Sisyphus</h4><p><span class="lang" data-en="Sub-orchestrator + Verification" data-ko="서브 오케스트레이터 + 검증"></span></p></div>
-      <div class="arch-layer"><h4 style="color:#a78bfa">Atlas</h4><p><span class="lang" data-en="Task Coordination + 4-stage QA" data-ko="태스크 조정 + 4단계 QA"></span></p></div>
-      <div class="arch-layer"><h4 style="color:#a78bfa">Hephaestus</h4><p><span class="lang" data-en="Autonomous Execution" data-ko="자율 실행"></span></p></div>
+      <div class="arch-layer"><h4 style="color:var(--green)">P3a<span class="cnt"><span class="lang" data-en="Direct" data-ko="직접"></span></span></h4><p><span class="lang" data-en="Boss spawns 2-4 agents in parallel" data-ko="Boss가 2-4개 에이전트 병렬 생성"></span></p></div>
+      <div class="arch-layer"><h4 style="color:#a78bfa">P3b<span class="cnt"><span class="lang" data-en="Sub-orch" data-ko="서브오케"></span></span></h4><p><span class="lang" data-en="Sisyphus · Atlas · Hephaestus" data-ko="Sisyphus · Atlas · Hephaestus"></span></p></div>
+      <div class="arch-layer"><h4 style="color:var(--pink)">P3c<span class="cnt"><span class="lang" data-en="Teams" data-ko="팀"></span></span></h4><p><span class="lang" data-en="Agent Teams with P2P communication" data-ko="P2P 통신 기반 에이전트 팀"></span></p></div>
     </div>
     <div class="arch-conn"></div>
     <div class="arch-layer"><h4><span class="lang" data-en="Behavioral Layer" data-ko="행동 규칙 레이어"></span><span class="cnt">49 rules</span></h4><p>Karpathy Guidelines · ECC Rules · Hooks</p></div>
     <div class="arch-conn"></div>
-    <div class="arch-layer"><h4><span class="lang" data-en="Specialist Agent Layer" data-ko="전문 에이전트 레이어"></span><span class="cnt">191</span></h4><p>OMC 19 · Agency 172 · ECC Commands · Anthropic Skills</p></div>
+    <div class="arch-layer"><h4><span class="lang" data-en="Specialist Agent Layer" data-ko="전문 에이전트 레이어"></span><span class="cnt">191</span></h4><p><span class="lang" data-en="OMC 19 + Agency 172 — Boss directly spawns any via P2 capability matching" data-ko="OMC 19 + Agency 172 — Boss가 P2 능력 매칭으로 직접 생성"></span> · ECC Commands · Anthropic Skills</p></div>
     <div class="arch-conn"></div>
     <div class="arch-layer" style="border-color:var(--accent)"><h4 style="color:var(--accent)"><span class="lang" data-en="MCP Server Layer" data-ko="MCP 서버 레이어"></span><span class="cnt">3</span></h4><p>Context7 · Exa · grep.app</p></div>
   </div>
@@ -373,7 +408,7 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
 <!-- Agent Catalog -->
 <section id="catalog" style="background:var(--bg2)">
 <div class="container">
-  <h2 class="st"><span class="lang" data-en="Agent Catalog" data-ko="에이전트 목록"></span><span class="lang-sub"><span class="lang" data-en="에이전트 목록" data-ko="Agent Catalog"></span></span></h2>
+  <h2 class="st"><span class="lang" data-en="Agent Catalog" data-ko="에이전트 목록"></span></h2>
   <p class="ss"><span class="lang" data-en="201 agents across 4 tiers, from meta-orchestrator to domain specialists." data-ko="메타 오케스트레이터부터 도메인 전문가까지, 4개 계층에 걸친 201개 에이전트."></span></p>
   <div class="catalog fade-in">
     <details>
@@ -429,7 +464,7 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
 <!-- Why my-claude -->
 <section id="why">
 <div class="container">
-  <h2 class="st"><span class="lang" data-en="Why my-claude?" data-ko="왜 my-claude인가?"></span><span class="lang-sub"><span class="lang" data-en="왜 my-claude인가?" data-ko="Why my-claude?"></span></span></h2>
+  <h2 class="st"><span class="lang" data-en="Why my-claude?" data-ko="왜 my-claude인가?"></span></h2>
   <p class="ss"><span class="lang" data-en="Three capabilities that no other framework offers." data-ko="다른 프레임워크에서는 제공하지 않는 세 가지 핵심 기능."></span></p>
   <div class="feat-cards fade-in">
     <div class="feat-card">
@@ -449,7 +484,7 @@ footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);text-align:cent
   https://github.com/sehoon787/my-claude \
   /tmp/my-claude
 bash /tmp/my-claude/install.sh
-<em># That's it. You're done.</em></pre>
+<em># <span class="lang" data-en="That's it. You're done." data-ko="끝. 설치 완료."></span></em></pre>
     </div>
     <div class="feat-card">
       <span class="fc-icon">&#x1f6a7;</span>
@@ -476,7 +511,7 @@ bash /tmp/my-claude/install.sh
 <!-- FAQ -->
 <section id="faq" style="background:var(--bg2)">
 <div class="container">
-  <h2 class="st"><span class="lang" data-en="FAQ" data-ko="자주 묻는 질문"></span><span class="lang-sub"><span class="lang" data-en="자주 묻는 질문" data-ko="Frequently Asked Questions"></span></span></h2>
+  <h2 class="st"><span class="lang" data-en="FAQ" data-ko="자주 묻는 질문"></span></h2>
   <div class="faq fade-in">
     <div class="faq-item">
       <button class="faq-q" onclick="toggleFaq(this)"><span class="lang" data-en="What is Boss?" data-ko="Boss란?"></span><span></span></button>
@@ -509,7 +544,7 @@ bash /tmp/my-claude/install.sh
 <!-- Quick Install -->
 <section id="install">
 <div class="container">
-  <h2 class="st"><span class="lang" data-en="Quick Install" data-ko="빠른 설치"></span><span class="lang-sub"><span class="lang" data-en="빠른 설치" data-ko="Quick Install"></span></span></h2>
+  <h2 class="st"><span class="lang" data-en="Quick Install" data-ko="빠른 설치"></span></h2>
   <p class="ss"><span class="lang" data-en="One command to install everything." data-ko="명령어 하나로 모든 것을 설치하세요."></span></p>
   <div class="inst-row fade-in">
     <div class="inst">
@@ -530,15 +565,15 @@ bash /tmp/my-claude/install.sh
 <!-- Credits -->
 <section id="credits" style="background:var(--bg2)">
 <div class="container">
-  <h2 class="st"><span class="lang" data-en="Open Source Credits" data-ko="오픈소스 크레딧"></span><span class="lang-sub"><span class="lang" data-en="오픈소스 크레딧" data-ko="Open Source Credits"></span></span></h2>
+  <h2 class="st"><span class="lang" data-en="Open Source Credits" data-ko="오픈소스 크레딧"></span></h2>
   <p class="ss"><span class="lang" data-en="Built on the shoulders of these projects." data-ko="이 프로젝트들의 기반 위에 구축되었습니다."></span></p>
   <div class="credits-grid fade-in">
-    <a class="credit" href="https://github.com/Yeachan-Heo/oh-my-claudecode"><h4>oh-my-claudecode</h4><p>Yeachan Heo — Multi-agent orchestration for Claude Code</p></a>
-    <a class="credit" href="https://github.com/code-yeongyu/oh-my-openagent"><h4>oh-my-openagent</h4><p>code-yeongyu — Multi-platform agent harness</p></a>
-    <a class="credit" href="https://github.com/forrestchang/andrej-karpathy-skills"><h4>andrej-karpathy-skills</h4><p>forrestchang — Karpathy's AI coding guidelines</p></a>
-    <a class="credit" href="https://github.com/affaan-m/everything-claude-code"><h4>everything-claude-code</h4><p>affaan-m — Skills, agents, commands, rules</p></a>
-    <a class="credit" href="https://github.com/anthropics/skills"><h4>anthropic/skills</h4><p>Anthropic — Official agent skills (PDF, DOCX, MCP)</p></a>
-    <a class="credit" href="https://github.com/msitarzewski/agency-agents"><h4>agency-agents</h4><p>msitarzewski — 172 business specialist personas</p></a>
+    <a class="credit" href="https://github.com/Yeachan-Heo/oh-my-claudecode"><h4>oh-my-claudecode</h4><p><span class="lang" data-en="Yeachan Heo — Multi-agent orchestration for Claude Code" data-ko="Yeachan Heo — Claude Code 멀티에이전트 오케스트레이션"></span></p></a>
+    <a class="credit" href="https://github.com/code-yeongyu/oh-my-openagent"><h4>oh-my-openagent</h4><p><span class="lang" data-en="code-yeongyu — Multi-platform agent harness" data-ko="code-yeongyu — 멀티플랫폼 에이전트 하네스"></span></p></a>
+    <a class="credit" href="https://github.com/forrestchang/andrej-karpathy-skills"><h4>andrej-karpathy-skills</h4><p><span class="lang" data-en="forrestchang — Karpathy's AI coding guidelines" data-ko="forrestchang — Karpathy AI 코딩 가이드라인"></span></p></a>
+    <a class="credit" href="https://github.com/affaan-m/everything-claude-code"><h4>everything-claude-code</h4><p><span class="lang" data-en="affaan-m — Skills, agents, commands, rules" data-ko="affaan-m — 스킬, 에이전트, 커맨드, 규칙"></span></p></a>
+    <a class="credit" href="https://github.com/anthropics/skills"><h4>anthropic/skills</h4><p><span class="lang" data-en="Anthropic — Official agent skills (PDF, DOCX, MCP)" data-ko="Anthropic — 공식 에이전트 스킬 (PDF, DOCX, MCP)"></span></p></a>
+    <a class="credit" href="https://github.com/msitarzewski/agency-agents"><h4>agency-agents</h4><p><span class="lang" data-en="msitarzewski — 172 business specialist personas" data-ko="msitarzewski — 172개 비즈니스 전문가 페르소나"></span></p></a>
   </div>
 </div>
 </section>
@@ -559,6 +594,8 @@ function setLang(l){
   document.querySelectorAll('.lang').forEach(el=>{el.textContent=el.dataset[l]||''});
   document.getElementById('lt-en').className=l==='en'?'active':'';
   document.getElementById('lt-ko').className=l==='ko'?'active':'';
+  document.getElementById('flt-en').className=l==='en'?'active':'';
+  document.getElementById('flt-ko').className=l==='ko'?'active':'';
 }
 function toggleLang(){setLang(lang==='en'?'ko':'en')}
 setLang(lang);
@@ -580,6 +617,7 @@ document.querySelectorAll('.fade-in').forEach(el=>io.observe(el));
 window.addEventListener('scroll',()=>{
   const y=window.scrollY;
   nav.classList.toggle('visible',y>heroH*0.6);
+  document.getElementById('floatLang').classList.toggle('hidden',y>heroH*0.6);
   let current='';
   sections.forEach(s=>{if(y>=s.offsetTop-120)current=s.id});
   navLinks.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+current)});
