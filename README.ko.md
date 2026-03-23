@@ -11,14 +11,14 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-201-blue)
+![Agents](https://img.shields.io/badge/agents-201_(46_core)-blue)
 ![Skills](https://img.shields.io/badge/skills-136-purple)
 ![MCP Servers](https://img.shields.io/badge/MCP_servers-3-green)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
 Claude Code 멀티에이전트 오케스트레이션 환경을 한 번에 구성하기 위한 레포지토리입니다.
 
-3개 MIT 업스트림 소스에서 **202개 에이전트**, **136개 스킬**, **50개 룰**, **4개 행동 교정 훅**, **3개 MCP 서버**를 하나의 플러그인에 번들. GitHub Actions CI가 매주 업스트림 변경사항을 자동 동기화. **Boss** 동적 메타 오케스트레이터가 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지하고 최적의 전문가에게 작업을 라우팅합니다.
+3개 MIT 업스트림 소스에서 **202개 에이전트** (46개 코어 + 156개 도메인 에이전트 팩), **136개 스킬**, **50개 룰**, **4개 행동 교정 훅**, **3개 MCP 서버**를 하나의 플러그인에 번들. GitHub Actions CI가 매주 업스트림 변경사항을 자동 동기화. **Boss** 동적 메타 오케스트레이터가 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지하고 최적의 전문가에게 작업을 라우팅합니다.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude 데모" width="700">
@@ -61,6 +61,8 @@ git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude &&
 ```
 
 > **참고**: `install.sh`는 Boss를 기본 에이전트로 자동 설정합니다. 플러그인 설치(방법 1) 시에는 [AI-INSTALL.md](AI-INSTALL.md)의 설정 명령어를 실행하세요.
+>
+> **에이전트 팩**: 도메인 전문 에이전트(마케팅, 영업, 게임 개발 등)는 `~/.claude/agent-packs/`에 설치됩니다. 필요 시 `~/.claude/agents/`에 심링크를 생성하여 활성화할 수 있습니다.
 
 **방법 3: 수동 설치**
 
@@ -108,7 +110,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ## Core + OMO 에이전트
 
-**Boss**만 my-claude 고유 에이전트입니다. 나머지 9개는 Boss가 서브 오케스트레이터 및 전문가로 사용하는 [OMO 에이전트](https://github.com/code-yeongyu/oh-my-openagent)입니다. 플러그인에는 172개 Agency 에이전트와 19개 OMC 에이전트도 번들되어 있으며, Boss가 Priority 2 능력 매칭으로 전체 풀에서 최적의 전문가를 선택합니다. 전체 201개 에이전트 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
+**Boss**만 my-claude 고유 에이전트입니다. 나머지 9개는 Boss가 서브 오케스트레이터 및 전문가로 사용하는 [OMO 에이전트](https://github.com/code-yeongyu/oh-my-openagent)입니다. 플러그인은 **46개 코어 에이전트** (Core 1 + OMO 9 + Engineering 16 + OMC 19 + OMO 전문가)를 `~/.claude/agents/`에 항상 로드하며, **155개 도메인 에이전트 팩**은 `~/.claude/agent-packs/`에 설치되어 필요 시 활성화할 수 있습니다. Boss는 Priority 2 능력 매칭으로 활성화된 전체 에이전트 풀에서 최적의 전문가를 선택합니다. 전체 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
 
 | 에이전트 | 출처 | 모델 | 역할 |
 |---------|------|------|------|
@@ -125,13 +127,44 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ---
 
+## 에이전트 팩 (도메인 전문가)
+
+도메인 전문 에이전트는 `~/.claude/agent-packs/`에 설치되며 기본적으로 로드되지 **않습니다**. 심링크로 활성화하세요:
+
+```bash
+# 팩 활성화
+ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
+
+# 비활성화
+rm ~/.claude/agents/<agent-name>.md
+```
+
+| 팩 | 개수 | 예시 |
+|----|------|------|
+| marketing | 27 | 더우인, 샤오홍슈, WeChat OA, TikTok |
+| gamedev | 19 | Unity, Unreal, Godot, Roblox |
+| engineering-domain | 8 | 모바일, Solidity, 임베디드, Feishu |
+| sales | 9 | SDR, 어카운트 이그제큐티브, 리버뉴 옵스 |
+| specialized | 10+ | 법률, 금융, 헬스케어, 교육 |
+| design | 8 | 브랜드, UI, UX, 시각적 스토리텔링 |
+| testing | 8 | API, 접근성, 성능, E2E |
+| product | 5 | 스프린트, 피드백, 트렌드 리서치 |
+| paid-media | 7 | Google Ads, Meta Ads, 프로그래매틱 |
+| project-mgmt | 5 | 스크럼, 칸반, 리스크 관리 |
+| academic | 5 | 연구, 문헌 검토, 인용 |
+| support | 6 | 고객 성공, 에스컬레이션, 트리아지 |
+| spatial-computing | 3 | ARKit, visionOS, 공간 오디오 |
+
+---
+
 ## 설치 후 전체 구성 요소
 
 SETUP.md를 따라 설치하면 다음이 구성됩니다:
 
 | 카테고리 | 개수 | 출처 | 번들 |
 |------|------|------|------|
-| 에이전트 | 202 | Core 2 + OMO 9 + Agency 172 + OMC 19 | 플러그인 |
+| 코어 에이전트 | 46 | Core 1 + OMO 9 + Engineering 16 + OMC 19 | 플러그인 |
+| 에이전트 팩 | 156 | 12개 도메인 카테고리 (마케팅, 게임 개발, 영업 등) | 플러그인 |
 | 스킬 | 136 | ECC 108 + OMC 28 | 플러그인 |
 | 룰 | 50 | ECC (common 9 + 8 languages × 5) | 플러그인 |
 | MCP 서버 | 3 | Context7, Exa, grep.app | 플러그인 |

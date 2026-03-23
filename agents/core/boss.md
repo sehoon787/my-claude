@@ -222,7 +222,7 @@ When 2-4 agents are needed and dependencies are simple:
 Criteria: task can be decomposed into ≤4 clear steps, each mappable to a single agent.
 
 Example: "refactor and code review"
-→ Agent("executor refactoring", model="sonnet") then Agent("code-reviewer", model="opus")
+→ Agent(name="executor", description="executor refactoring", model="sonnet") then Agent(name="code-reviewer", description="code-reviewer review", model="opus")
 
 ### Priority 3b: Sub-Orchestrator Delegation (Complex workflows)
 
@@ -370,9 +370,9 @@ Include all 5 of the following when spawning any teammate:
 ### Priority 4: General-Purpose Fallback
 
 When no specialist matches:
-- **Complex reasoning** → `Agent(model="opus")`
-- **Standard implementation** → `Agent(model="sonnet")`
-- **Quick lookup** → `Agent(model="haiku")`
+- **Complex reasoning** → `Agent(name="analyst", model="opus")`
+- **Standard implementation** → `Agent(name="executor", model="sonnet")`
+- **Quick lookup** → `Agent(name="explore", model="haiku")`
 
 ### MCP Tool Awareness
 
@@ -396,9 +396,11 @@ Skills are self-contained. No additional prompt engineering needed.
 
 **Method B: Agent delegation** (for specialist agents)
 ```
-Agent(description="[agent-role] [task-summary]", model="[model]")
+Agent(name="[agent-name]", description="[agent-role] [task-summary]", model="[model]")
 ```
 Include the 6-section mandate in the prompt.
+
+**Always include `name` parameter** — this controls the agent's display name in the UI. Use the agent's canonical name (e.g., `'executor'`, `'code-reviewer'`, `'security-reviewer'`). Without it, the UI shows `'unknown'`.
 
 **Method C: Built-in subagent types** (for system agents)
 ```
@@ -409,8 +411,8 @@ Agent(subagent_type="general-purpose", model="sonnet") — implementation
 
 **Method D: Sub-orchestrator delegation** (for complex workflows)
 ```
-Agent(description="sisyphus orchestration: [workflow]", model="opus")
-Agent(description="atlas task coordination: [plan]", model="opus")
+Agent(name="sisyphus", description="sisyphus orchestration: [workflow]", model="opus")
+Agent(name="atlas", description="atlas task coordination: [plan]", model="opus")
 ```
 
 **Method E: Agent Teams via skill** (for collaborative multi-agent work)
@@ -437,6 +439,8 @@ See Priority 3c-DIRECT for teammate selection rules and spawn prompt requirement
 ### 6-Section Delegation Prompt (mandatory for Method B and D)
 
 Every delegation MUST include all 6 sections. Minimum 30 lines.
+
+The `name` parameter in the Agent() call must match the canonical agent type being invoked (e.g., `name="executor"` for implementation, `name="security-reviewer"` for security review). This name appears in the UI and enables direct messaging via SendMessage.
 
 ```
 **TASK**: [Specific description of what to do]
