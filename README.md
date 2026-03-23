@@ -1,5 +1,7 @@
 [English](./README.md) | [한국어](./README.ko.md)
 
+> 🟢 **Codex CLI users** → [**my-codex**](https://github.com/sehoon787/my-codex) — same agents in native TOML format for OpenAI Codex CLI
+
 > **If you are an LLM agent**, fetch and follow the installation guide:
 > ```bash
 > curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
@@ -635,12 +637,6 @@ This repository builds on the work of the following open-source projects:
 - [everything-claude-code](https://github.com/affaan-m/everything-claude-code) — affaan-m
 - [anthropic/skills](https://github.com/anthropics/skills) — Anthropic
 - [agency-agents](https://github.com/msitarzewski/agency-agents) — msitarzewski
-
----
-
-## Codex CLI Users
-
-Looking for Codex CLI support? See [my-codex](https://github.com/sehoon787/my-codex) — the same multi-agent system adapted for OpenAI Codex CLI with native TOML agents.
 
 ---
 
