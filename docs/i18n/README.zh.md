@@ -25,7 +25,7 @@
 捆绑了来自 3 个 MIT 上游来源的 **201 个代理**、**148 个技能**、**65 个规则**、**6 个钩子**和 **3 个 MCP 服务器**到单一插件中。**Boss** 动态元编排器在运行时自动发现所有已安装的组件，并将任务路由到最优专家。GitHub Actions CI 每周同步上游变更。
 
 <p align="center">
-  <img src="./assets/demo.svg" alt="my-claude demo" width="700">
+  <img src="../../assets/demo.svg" alt="my-claude demo" width="700">
 </p>
 
 ---

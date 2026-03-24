@@ -25,7 +25,7 @@ All-in-One Claude Code Multi-Agent-Orchestrierungs-Plugin — einmal installiere
 Bündelt **201 Agenten**, **148 Skills**, **65 Regeln**, **6 Hooks** und **3 MCP-Server** aus 3 MIT-Upstream-Quellen in ein einzelnes Plugin. Der **Boss** dynamische Meta-Orchestrator entdeckt alle installierten Komponenten zur Laufzeit automatisch und leitet Aufgaben an den optimalen Spezialisten weiter. GitHub Actions CI synchronisiert Upstream-Änderungen wöchentlich.
 
 <p align="center">
-  <img src="./assets/demo.svg" alt="my-claude demo" width="700">
+  <img src="../../assets/demo.svg" alt="my-claude demo" width="700">
 </p>
 
 ---
