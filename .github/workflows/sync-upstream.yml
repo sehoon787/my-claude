@@ -138,7 +138,7 @@ jobs:
           TOTAL_AGENTS=$((CORE_TOTAL + PACK_COUNT))
           TOTAL_SKILLS=$((ECC_SKILLS + OMC_SKILLS))
           TOTAL_RULES=$((ECC_RULES))
-          HOOKS=$(python3 -c "import json; print(len(json.load(open('hooks/hooks.json'))))" 2>/dev/null || echo 6)
+          HOOKS=$(python3 -c "import json; d=json.load(open('hooks/hooks.json')); print(len(d.get('hooks',d)))" 2>/dev/null || echo 6)
 
           # README.md
           sed -i "s/agents-[0-9]\+/agents-${TOTAL_AGENTS}/" README.md
