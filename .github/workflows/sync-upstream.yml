@@ -156,20 +156,22 @@ jobs:
           sed -i "s/| Skills | [0-9]\+ |/| Skills | ${TOTAL_SKILLS} |/" README.md
 
           # docs/i18n/README.ko.md
-          sed -i "s/agents-[0-9]\+/agents-${TOTAL_AGENTS}/" docs/i18n/README.ko.md
-          sed -i "s/skills-[0-9]\+/skills-${TOTAL_SKILLS}/" docs/i18n/README.ko.md
-          sed -i -E "s/Scanning\.\.\. [0-9]+ agents, [0-9]+ skills ready/Scanning... ${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills ready/" docs/i18n/README.ko.md
-          sed -i "s/\*\*[0-9]\+개 에이전트\*\* ([0-9]\+개 코어 + [0-9]\+개 도메인 에이전트 팩)/\*\*${TOTAL_AGENTS}개 에이전트\*\* (${CORE_TOTAL}개 코어 + ${PACK_COUNT}개 도메인 에이전트 팩)/" docs/i18n/README.ko.md
-          sed -i "s/| 코어 에이전트 | [0-9]\+ |/| 코어 에이전트 | ${CORE_TOTAL} |/" docs/i18n/README.ko.md
-          sed -i "s/| 에이전트 팩 | [0-9]\+ |/| 에이전트 팩 | ${PACK_COUNT} |/" docs/i18n/README.ko.md
-          sed -i "s/\*\*[0-9]\+개 스킬\*\*/\*\*${TOTAL_SKILLS}개 스킬\*\*/g" docs/i18n/README.ko.md
-          sed -i "s/\*\*[0-9]\+개 룰\*\*/\*\*${TOTAL_RULES}개 룰\*\*/g" docs/i18n/README.ko.md
-          sed -i "s/[0-9]\+ 에이전트, [0-9]\+ 스킬, [0-9]\+ 룰/${TOTAL_AGENTS} 에이전트, ${TOTAL_SKILLS} 스킬, ${TOTAL_RULES} 룰/" docs/i18n/README.ko.md
-          sed -i "s/ECC [0-9]\+ + OMC [0-9]\+/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS}/" docs/i18n/README.ko.md
-          sed -i "s/룰 ([0-9]\+개)/룰 (${TOTAL_RULES}개)/" docs/i18n/README.ko.md
-          sed -i "s/| 스킬 | [0-9]\+ |/| 스킬 | ${TOTAL_SKILLS} |/" docs/i18n/README.ko.md
-          sed -i "s/| 룰 | [0-9]\+ |/| 룰 | ${TOTAL_RULES} |/" docs/i18n/README.ko.md
-          sed -i "s/스캐닝\.\.\. [0-9]\+개 에이전트, [0-9]\+개 스킬/스캐닝... ${TOTAL_AGENTS}개 에이전트, ${TOTAL_SKILLS}개 스킬/" docs/i18n/README.ko.md
+          KO=docs/i18n/README.ko.md
+          sed -i "s/agents-[0-9]\+/agents-${TOTAL_AGENTS}/" "$KO"
+          sed -i "s/skills-[0-9]\+/skills-${TOTAL_SKILLS}/" "$KO"
+          sed -i -E "s/Scanning\.\.\. [0-9]+ agents, [0-9]+ skills ready/Scanning... ${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills ready/" "$KO"
+          sed -i "s/\*\*[0-9]\+개 에이전트\*\* (/\*\*${TOTAL_AGENTS}개 에이전트\*\* (/" "$KO"
+          sed -i "s/([0-9]\+개 코어 + [0-9]\+개 도메인 에이전트 팩)/(${CORE_TOTAL}개 코어 + ${PACK_COUNT}개 도메인 에이전트 팩)/" "$KO"
+          sed -i "s/| 코어 에이전트 | [0-9]\+ |/| 코어 에이전트 | ${CORE_TOTAL} |/" "$KO"
+          sed -i "s/| 에이전트 팩 | [0-9]\+ |/| 에이전트 팩 | ${PACK_COUNT} |/" "$KO"
+          sed -i "s/\*\*[0-9]\+개 스킬\*\*/\*\*${TOTAL_SKILLS}개 스킬\*\*/g" "$KO"
+          sed -i "s/\*\*[0-9]\+개 룰\*\*/\*\*${TOTAL_RULES}개 룰\*\*/g" "$KO"
+          sed -i "s/[0-9]\+ 에이전트, [0-9]\+ 스킬, [0-9]\+ 룰/${TOTAL_AGENTS} 에이전트, ${TOTAL_SKILLS} 스킬, ${TOTAL_RULES} 룰/" "$KO"
+          sed -i "s/ECC [0-9]\+ + OMC [0-9]\+/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS}/" "$KO"
+          sed -i "s/룰 ([0-9]\+개)/룰 (${TOTAL_RULES}개)/" "$KO"
+          sed -i "s/| 스킬 | [0-9]\+ |/| 스킬 | ${TOTAL_SKILLS} |/" "$KO"
+          sed -i "s/| 룰 | [0-9]\+ |/| 룰 | ${TOTAL_RULES} |/" "$KO"
+          sed -i "s/스캐닝\.\.\. [0-9]\+개 에이전트, [0-9]\+개 스킬/스캐닝... ${TOTAL_AGENTS}개 에이전트, ${TOTAL_SKILLS}개 스킬/" "$KO"
 
           # docs/i18n/README.fr.md
           sed -i "s/agents-[0-9]\+/agents-${TOTAL_AGENTS}/" docs/i18n/README.fr.md
@@ -212,17 +214,19 @@ jobs:
           sed -i -E "s/Scanning\.\.\. [0-9]+ agents, [0-9]+ skills ready/Scanning... ${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills ready/" docs/i18n/README.de.md
 
           # docs/i18n/README.ja.md
-          sed -i "s/agents-[0-9]\+/agents-${TOTAL_AGENTS}/" docs/i18n/README.ja.md
-          sed -i "s/skills-[0-9]\+/skills-${TOTAL_SKILLS}/" docs/i18n/README.ja.md
-          sed -i -E "s/\*\*[0-9]+ エージェント\*\*、\*\*[0-9]+ スキル\*\*/**${TOTAL_AGENTS} エージェント**、**${TOTAL_SKILLS} スキル**/" docs/i18n/README.ja.md
-          sed -i -E "s/[0-9]+ エージェント、[0-9]+ スキル、[0-9]+ ルール/${TOTAL_AGENTS} エージェント、${TOTAL_SKILLS} スキル、${TOTAL_RULES} ルール/" docs/i18n/README.ja.md
-          sed -i -E "s/\*\*[0-9]+ のコアエージェント\*\*/**${CORE_TOTAL} のコアエージェント**/g" docs/i18n/README.ja.md
-          sed -i -E "s/\*\*[0-9]+ のドメイン エージェント パック\*\*/**${PACK_COUNT} のドメイン エージェント パック**/g" docs/i18n/README.ja.md
-          sed -i -E "s/\| コア エージェント \| [0-9]+ \|/| コア エージェント | ${CORE_TOTAL} |/" docs/i18n/README.ja.md
-          sed -i -E "s/\| エージェント パック \| [0-9]+ \|/| エージェント パック | ${PACK_COUNT} |/" docs/i18n/README.ja.md
-          sed -i -E "s/\| スキル \| [0-9]+ \|/| スキル | ${TOTAL_SKILLS} |/" docs/i18n/README.ja.md
-          sed -i -E "s/ECC [0-9]+ \+ OMC [0-9]+/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS}/" docs/i18n/README.ja.md
-          sed -i -E "s/スキャン中\.\.\. [0-9]+ エージェント、[0-9]+ スキル準備完了/スキャン中... ${TOTAL_AGENTS} エージェント、${TOTAL_SKILLS} スキル準備完了/" docs/i18n/README.ja.md
+          JA=docs/i18n/README.ja.md
+          sed -i "s/agents-[0-9]\+/agents-${TOTAL_AGENTS}/" "$JA"
+          sed -i "s/skills-[0-9]\+/skills-${TOTAL_SKILLS}/" "$JA"
+          sed -i -E "s/\*\*[0-9]+ エージェント\*\*、\*\*[0-9]+ スキル\*\*/**${TOTAL_AGENTS} エージェント**、**${TOTAL_SKILLS} スキル**/" "$JA"
+          sed -i -E "s/[0-9]+ エージェント、[0-9]+ スキル、[0-9]+ ルール/${TOTAL_AGENTS} エージェント、${TOTAL_SKILLS} スキル、${TOTAL_RULES} ルール/" "$JA"
+          sed -i -E "s/\*\*[0-9]+ のコアエージェント\*\*/**${CORE_TOTAL} のコアエージェント**/g" "$JA"
+          sed -i -E "s/\*\*[0-9]+ のドメイン エージェント パック\*\*/**${PACK_COUNT} のドメイン エージェント パック**/g" "$JA"
+          sed -i -E "s/\| コア エージェント \| [0-9]+ \|/| コア エージェント | ${CORE_TOTAL} |/" "$JA"
+          sed -i -E "s/\| エージェント パック \| [0-9]+ \|/| エージェント パック | ${PACK_COUNT} |/" "$JA"
+          sed -i -E "s/\| スキル \| [0-9]+ \|/| スキル | ${TOTAL_SKILLS} |/" "$JA"
+          sed -i -E "s/ECC [0-9]+ \+ OMC [0-9]+/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS}/" "$JA"
+          sed -i -E "s/スキャン中\.\.\./スキャン中.../" "$JA"
+          sed -i -E "s/[0-9]+ エージェント、[0-9]+ スキル準備完了/${TOTAL_AGENTS} エージェント、${TOTAL_SKILLS} スキル準備完了/" "$JA"
 
           # AI-INSTALL.md
           if [ -f AI-INSTALL.md ]; then
@@ -241,9 +245,10 @@ jobs:
           sed -i -E "s/[0-9]+ core agents \+ [0-9]+ domain agent-packs, [0-9]+ skills/${CORE_TOTAL} core agents + ${PACK_COUNT} domain agent-packs, ${TOTAL_SKILLS} skills/" .claude-plugin/plugin.json
 
           # .claude-plugin/marketplace.json
-          sed -i -E "s/[0-9]+ core agents always loaded \+ [0-9]+ domain agent-packs on demand/${CORE_TOTAL} core agents always loaded + ${PACK_COUNT} domain agent-packs on demand/g" .claude-plugin/marketplace.json
-          sed -i -E "s/[0-9]+ skills, [0-9]+ rules, [0-9]+ hooks/${TOTAL_SKILLS} skills, ${TOTAL_RULES} rules, ${HOOKS} hooks/" .claude-plugin/marketplace.json
-          sed -i -E "s/[0-9]+ skills, [0-9]+ rules/${TOTAL_SKILLS} skills, ${TOTAL_RULES} rules/g" .claude-plugin/marketplace.json
+          MKT=.claude-plugin/marketplace.json
+          sed -i -E "s/[0-9]+ core agents always loaded \+ [0-9]+ domain agent-packs on demand/${CORE_TOTAL} core agents always loaded + ${PACK_COUNT} domain agent-packs on demand/g" "$MKT"
+          sed -i -E "s/[0-9]+ skills, [0-9]+ rules, [0-9]+ hooks/${TOTAL_SKILLS} skills, ${TOTAL_RULES} rules, ${HOOKS} hooks/" "$MKT"
+          sed -i -E "s/[0-9]+ skills, [0-9]+ rules/${TOTAL_SKILLS} skills, ${TOTAL_RULES} rules/g" "$MKT"
 
           # docs/index.html — targeted updates only
           if [ -f docs/index.html ]; then
