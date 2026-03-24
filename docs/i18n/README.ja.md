@@ -13,8 +13,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-201-blue)
-![Skills](https://img.shields.io/badge/skills-148-purple)
+![Agents](https://img.shields.io/badge/agents-186-blue)
+![Skills](https://img.shields.io/badge/skills-156-purple)
 ![Rules](https://img.shields.io/badge/rules-65-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
@@ -22,7 +22,7 @@
 
 Claude Code 用の完全な複数エージェント オーケストレーション プラグイン — 1 回インストールするだけで、すべてが揃います。
 
-3 つの MIT アップストリーム ソースから **201 エージェント**、**148 スキル**、**65 ルール**、**6 つのフック**、**3 つの MCP サーバー** をバンドルして、1 つのプラグインにまとめています。**Boss** 動的メタ オーケストレータは、実行時にインストール済みのすべてのコンポーネントを自動検出し、最適な専門家にタスクをルーティングします。GitHub Actions CI は、アップストリームの変更を毎週同期します。
+3 つの MIT アップストリーム ソースから **186 エージェント**、**156 スキル**、**65 ルール**、**6 つのフック**、**3 つの MCP サーバー** をバンドルして、1 つのプラグインにまとめています。**Boss** 動的メタ オーケストレータは、実行時にインストール済みのすべてのコンポーネントを自動検出し、最適な専門家にタスクをルーティングします。GitHub Actions CI は、アップストリームの変更を毎週同期します。
 
 <p align="center">
   <img src="../../assets/demo.svg" alt="my-claude demo" width="700">
@@ -108,7 +108,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 - **grep.app**: GitHub オープンソース コード検索
 
 ### ワンパッケージ バンドル
-- プラグイン インストールは **201 エージェント、148 スキル、65 ルール** を即座に提供
+- プラグイン インストールは **186 エージェント、156 スキル、65 ルール** を即座に提供
 - 3 つの MIT アップストリーム ソース（agency-agents、everything-claude-code、oh-my-claudecode）をバンドル
 - 毎週 CI オート同期によるアップストリーム コンテンツ最新化
 - コンパニオン `install.sh` は npm ツールと独自 Anthropic スキルを追加
@@ -117,7 +117,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ## コア + OMO エージェント
 
-**Boss** は my-claude の唯一のオリジナル エージェントです。残りの 9 つは [OMO エージェント](https://github.com/code-yeongyu/oh-my-openagent)で、Boss がサブ オーケストレータおよび専門家として使用します。プラグインは **52 のコア エージェント**（Core 1 + OMO 9 + Engineering 23 + OMC 19 + OMO 専門家）を `~/.claude/agents/` に常時ロードし、さらに **150 のドメイン エージェント パック**を `~/.claude/agent-packs/` に置いており、必要に応じて有効化できます。Boss は、すべてのアクティブなエージェントから優先度 2 の機能マッチングを通じて最適マッチ専門家を選択します。以下の[インストール済みコンポーネント](#installed-components)を参照してください。
+**Boss** は my-claude の唯一のオリジナル エージェントです。残りの 9 つは [OMO エージェント](https://github.com/code-yeongyu/oh-my-openagent)で、Boss がサブ オーケストレータおよび専門家として使用します。プラグインは **53 のコア エージェント**（Core 1 + OMO 9 + Engineering 23 + OMC 19 + OMO 専門家）を `~/.claude/agents/` に常時ロードし、さらに **133 のドメイン エージェント パック**を `~/.claude/agent-packs/` に置いており、必要に応じて有効化できます。Boss は、すべてのアクティブなエージェントから優先度 2 の機能マッチングを通じて最適マッチ専門家を選択します。以下の[インストール済みコンポーネント](#installed-components)を参照してください。
 
 | エージェント | ソース | モデル | 役割 |
 |---------|--------|------|------|
@@ -172,7 +172,7 @@ SETUP.md に従うと、以下が設定されます:
 |------|------|------|------|
 | コア エージェント | 53 | Core 1 + OMO 9 + Engineering 23 + OMC 19 | プラグイン |
 | エージェント パック | 133 | 12 ドメイン カテゴリ（マーケティング、ゲーム開発、セールスなど） | プラグイン |
-| スキル | 148 | ECC 119 + OMC 29 | プラグイン |
+| スキル | 156 | ECC 125 + OMC 31 | プラグイン |
 | ルール | 65 | ECC（共通 9 + 8 言語 × 5） | プラグイン |
 | MCP サーバー | 3 | Context7、Exa、grep.app | プラグイン |
 | フック | 6 | my-claude（Boss プロトコル + SessionStart） | プラグイン |
@@ -526,7 +526,7 @@ Boss はすべてのリクエストを 4 レベル優先度チェーンを通じ
 ```
 $ claude "セキュリティ脆弱性について認証モジュール分析"
 
-[Boss] Phase 0: スキャン中... 201 エージェント、148 スキル準備完了.
+[Boss] Phase 0: スキャン中... 186 エージェント、156 スキル準備完了.
 [Boss] Phase 1: 意図 → セキュリティ分析 | 優先度: P2
 [Boss] Phase 2: マッチ → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="

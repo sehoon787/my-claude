@@ -13,8 +13,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-201-blue)
-![Skills](https://img.shields.io/badge/skills-148-purple)
+![Agents](https://img.shields.io/badge/agents-186-blue)
+![Skills](https://img.shields.io/badge/skills-156-purple)
 ![Rules](https://img.shields.io/badge/rules-65-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
@@ -22,7 +22,7 @@
 
 All-in-one Claude Code multi-agent orchestration plugin — install once, get everything.
 
-Bundles **201 agents**, **156 skills**, **65 rules**, **6 hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
+Bundles **186 agents**, **156 skills**, **65 rules**, **6 hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
@@ -125,7 +125,7 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 
 ## Core + OMO Agents
 
-**Boss** is the only my-claude original agent. The remaining 9 are [OMO agents](https://github.com/code-yeongyu/oh-my-openagent) that Boss uses as sub-orchestrators and specialists. The plugin bundles **52 core agents** (Core 1 + OMO 9 + Engineering 23 + OMC 19 + OMO specialists) always loaded into `~/.claude/agents/`, plus **150 domain agent-packs** in `~/.claude/agent-packs/` that can be activated on demand. Boss selects the best-matching specialist from all active agents via Priority 2 capability matching. See [Installed Components](#installed-components) below.
+**Boss** is the only my-claude original agent. The remaining 9 are [OMO agents](https://github.com/code-yeongyu/oh-my-openagent) that Boss uses as sub-orchestrators and specialists. The plugin bundles **53 core agents** (Core 1 + OMO 9 + Engineering 23 + OMC 19 + OMO specialists) always loaded into `~/.claude/agents/`, plus **133 domain agent-packs** in `~/.claude/agent-packs/` that can be activated on demand. Boss selects the best-matching specialist from all active agents via Priority 2 capability matching. See [Installed Components](#installed-components) below.
 
 | Agent | Source | Model | Role |
 |---------|--------|------|------|
@@ -534,7 +534,7 @@ Every delegation includes a **6-section structured prompt**: TASK, EXPECTED OUTC
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 201 agents, 148 skills ready.
+[Boss] Phase 0: Scanning... 186 agents, 156 skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="
