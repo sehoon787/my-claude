@@ -22,7 +22,7 @@
 
 Plugin d'orchestration multi-agents Claude Code tout-en-un — installez une fois, obtenez tout.
 
-Regroupe **201 agents**, **148 skills**, **65 règles**, **6 hooks** et **3 serveurs MCP** issus de 3 sources upstream MIT dans un seul plugin. Le **Boss** méta-orchestrateur dynamique découvre automatiquement tous les composants installés au démarrage et route les tâches vers le spécialiste optimal. Une CI GitHub Actions synchronise les modifications upstream chaque semaine.
+Regroupe **186 agents**, **156 skills**, **65 règles**, **6 hooks** et **3 serveurs MCP** issus de 3 sources upstream MIT dans un seul plugin. Le **Boss** méta-orchestrateur dynamique découvre automatiquement tous les composants installés au démarrage et route les tâches vers le spécialiste optimal. Une CI GitHub Actions synchronise les modifications upstream chaque semaine.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
@@ -108,7 +108,7 @@ Lisez la sortie complète et exécutez chaque étape dans l'ordre. Utilisez `cur
 - **grep.app** : Recherche de code open source sur GitHub
 
 ### Bundle tout-en-un
-- L'installation via plugin fournit immédiatement **201 agents, 148 skills et 65 règles**
+- L'installation via plugin fournit immédiatement **186 agents, 156 skills et 65 règles**
 - Regroupe 3 sources upstream MIT (agency-agents, everything-claude-code, oh-my-claudecode)
 - La CI auto-sync hebdomadaire maintient le contenu groupé à jour avec l'upstream
 - Le `install.sh` d'accompagnement ajoute les outils npm et les Anthropic Skills propriétaires
@@ -172,7 +172,7 @@ Suivre SETUP.md configure les éléments suivants :
 |------|------|------|------|
 | Agents cœur | 53 | Cœur 1 + OMO 9 + Engineering 23 + OMC 19 | Plugin |
 | Agent Packs | 133 | 12 catégories de domaine (Marketing, Développement de jeux, Vente, etc.) | Plugin |
-| Skills | 148 | ECC 119 + OMC 29 | Plugin |
+| Skills | 156 | ECC 125 + OMC 31 | Plugin |
 | Règles | 65 | ECC (Common 9 + 8 langages × 5) | Plugin |
 | Serveurs MCP | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 6 | my-claude (protocole Boss + SessionStart) | Plugin |
@@ -526,7 +526,7 @@ Chaque délégation inclut un **prompt structuré en 6 sections** : TÂCHE, RÉS
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 201 agents, 148 skills ready.
+[Boss] Phase 0: Scanning... 186 agents, 156 skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="
