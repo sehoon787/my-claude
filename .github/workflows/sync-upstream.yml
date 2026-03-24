@@ -219,9 +219,12 @@ jobs:
             sed -i -E "s/[0-9]+ agents across 4 tiers/${TOTAL_AGENTS} agents across 4 tiers/" docs/index.html
             # Comparison table "N Pre-built Agents"
             sed -i -E "s/[0-9]+ Pre-built Agents/${TOTAL_AGENTS} Pre-built Agents/" docs/index.html
-            # KO totals (safe global — these only appear as totals)
-            sed -i -E "s/[0-9]+개 에이전트/${TOTAL_AGENTS}개 에이전트/g" docs/index.html
-            sed -i -E "s/[0-9]+개 스킬/${TOTAL_SKILLS}개 스킬/g" docs/index.html
+            # KO totals (targeted — avoid "2-4개 에이전트" on line 403)
+            sed -i -E "s/[0-9]+개 에이전트\./${TOTAL_AGENTS}개 에이전트./g" docs/index.html
+            sed -i -E "s/걸친 [0-9]+개 에이전트/걸친 ${TOTAL_AGENTS}개 에이전트/" docs/index.html
+            sed -i -E "s/[0-9]+개 에이전트를 얻/${TOTAL_AGENTS}개 에이전트를 얻/" docs/index.html
+            sed -i -E "s/[0-9]+개 에이전트, [0-9]+개 스킬, [0-9]+개 규칙/${TOTAL_AGENTS}개 에이전트, ${TOTAL_SKILLS}개 스킬, ${TOTAL_RULES}개 규칙/" docs/index.html
+            sed -i -E "s/[0-9]+개 사전 구축/${TOTAL_AGENTS}개 사전 구축/" docs/index.html
             # KO terminal demo "N 에이전트, N 스킬"
             sed -i -E "s/[0-9]+ 에이전트, [0-9]+ 스킬/${TOTAL_AGENTS} 에이전트, ${TOTAL_SKILLS} 스킬/g" docs/index.html
           fi
