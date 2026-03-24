@@ -165,6 +165,19 @@ jobs:
           sed -i "s/| 스킬 | [0-9]\+ |/| 스킬 | ${TOTAL_SKILLS} |/" docs/i18n/README.ko.md
           sed -i "s/| 룰 | [0-9]\+ |/| 룰 | ${TOTAL_RULES} |/" docs/i18n/README.ko.md
 
+          # docs/i18n/README.fr.md
+          sed -i "s/agents-[0-9]*_([0-9]*_core)/agents-${TOTAL_AGENTS}_(${CORE_TOTAL}_core)/" docs/i18n/README.fr.md
+          sed -i "s/\*\*[0-9]\+ agents\*\*/\*\*${TOTAL_AGENTS} agents\*\*/g" docs/i18n/README.fr.md
+          sed -i "s/\*\*[0-9]\+ skills\*\*/\*\*${TOTAL_SKILLS} skills\*\*/g" docs/i18n/README.fr.md
+          sed -i "s/\*\*[0-9]\+ règles\*\*/\*\*${TOTAL_RULES} règles\*\*/g" docs/i18n/README.fr.md
+          sed -i "s/[0-9]\+ agents, [0-9]\+ skills et [0-9]\+ règles/${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills et ${TOTAL_RULES} règles/g" docs/i18n/README.fr.md
+          sed -i "s/ECC [0-9]\+ + OMC [0-9]\+/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS}/" docs/i18n/README.fr.md
+          sed -i "s/| Agents cœur | [0-9]\+ |/| Agents cœur | ${CORE_TOTAL} |/" docs/i18n/README.fr.md
+          sed -i "s/| Agent Packs | [0-9]\+ |/| Agent Packs | ${PACK_COUNT} |/" docs/i18n/README.fr.md
+          sed -i "s/| Skills | [0-9]\+ |/| Skills | ${TOTAL_SKILLS} |/" docs/i18n/README.fr.md
+          sed -i "s/| Règles | [0-9]\+ |/| Règles | ${TOTAL_RULES} |/" docs/i18n/README.fr.md
+          sed -i "s/[0-9]\+ agents, [0-9]\+ skills ready/${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills ready/" docs/i18n/README.fr.md
+
           # AI-INSTALL.md
           sed -i "s/[0-9]\+ agents, [0-9]\+ skills, [0-9]\+ rules/${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills, ${TOTAL_RULES} rules/" AI-INSTALL.md
           AI_PAT="[0-9]\+ agents ([0-9]\+ core + [0-9]\+ omo + [0-9]\+ agency + [0-9]\+ OMC)"
