@@ -25,7 +25,7 @@ jobs:
 
           for cat in engineering design testing product game-development marketing \
                      sales academic project-management specialized spatial-computing \
-                     support strategy; do
+                     support strategy paid-media; do
             if [ -d "/tmp/agency/$cat" ]; then
               mkdir -p "agents/agency/$cat"
               cp /tmp/agency/$cat/*.md "agents/agency/$cat/" 2>/dev/null || true
@@ -152,18 +152,18 @@ jobs:
           sed -i "s/Rules ([0-9]\+)/Rules (${TOTAL_RULES})/" README.md
           sed -i "s/| Skills | [0-9]\+ |/| Skills | ${TOTAL_SKILLS} |/" README.md
 
-          # README.ko.md
-          sed -i "s/agents-[0-9]*_([0-9]*_core)/agents-${TOTAL_AGENTS}_(${CORE_TOTAL}_core)/" README.ko.md
-          sed -i "s/\*\*[0-9]\+개 에이전트\*\* ([0-9]\+개 코어 + [0-9]\+개 도메인 에이전트 팩)/\*\*${TOTAL_AGENTS}개 에이전트\*\* (${CORE_TOTAL}개 코어 + ${PACK_COUNT}개 도메인 에이전트 팩)/" README.ko.md
-          sed -i "s/| 코어 에이전트 | [0-9]\+ |/| 코어 에이전트 | ${CORE_TOTAL} |/" README.ko.md
-          sed -i "s/| 에이전트 팩 | [0-9]\+ |/| 에이전트 팩 | ${PACK_COUNT} |/" README.ko.md
-          sed -i "s/\*\*[0-9]\+개 스킬\*\*/\*\*${TOTAL_SKILLS}개 스킬\*\*/g" README.ko.md
-          sed -i "s/\*\*[0-9]\+개 룰\*\*/\*\*${TOTAL_RULES}개 룰\*\*/g" README.ko.md
-          sed -i "s/[0-9]\+ 에이전트, [0-9]\+ 스킬, [0-9]\+ 룰/${TOTAL_AGENTS} 에이전트, ${TOTAL_SKILLS} 스킬, ${TOTAL_RULES} 룰/" README.ko.md
-          sed -i "s/ECC [0-9]\+ + OMC [0-9]\+/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS}/" README.ko.md
-          sed -i "s/룰 ([0-9]\+개)/룰 (${TOTAL_RULES}개)/" README.ko.md
-          sed -i "s/| 스킬 | [0-9]\+ |/| 스킬 | ${TOTAL_SKILLS} |/" README.ko.md
-          sed -i "s/| 룰 | [0-9]\+ |/| 룰 | ${TOTAL_RULES} |/" README.ko.md
+          # docs/i18n/README.ko.md
+          sed -i "s/agents-[0-9]*_([0-9]*_core)/agents-${TOTAL_AGENTS}_(${CORE_TOTAL}_core)/" docs/i18n/README.ko.md
+          sed -i "s/\*\*[0-9]\+개 에이전트\*\* ([0-9]\+개 코어 + [0-9]\+개 도메인 에이전트 팩)/\*\*${TOTAL_AGENTS}개 에이전트\*\* (${CORE_TOTAL}개 코어 + ${PACK_COUNT}개 도메인 에이전트 팩)/" docs/i18n/README.ko.md
+          sed -i "s/| 코어 에이전트 | [0-9]\+ |/| 코어 에이전트 | ${CORE_TOTAL} |/" docs/i18n/README.ko.md
+          sed -i "s/| 에이전트 팩 | [0-9]\+ |/| 에이전트 팩 | ${PACK_COUNT} |/" docs/i18n/README.ko.md
+          sed -i "s/\*\*[0-9]\+개 스킬\*\*/\*\*${TOTAL_SKILLS}개 스킬\*\*/g" docs/i18n/README.ko.md
+          sed -i "s/\*\*[0-9]\+개 룰\*\*/\*\*${TOTAL_RULES}개 룰\*\*/g" docs/i18n/README.ko.md
+          sed -i "s/[0-9]\+ 에이전트, [0-9]\+ 스킬, [0-9]\+ 룰/${TOTAL_AGENTS} 에이전트, ${TOTAL_SKILLS} 스킬, ${TOTAL_RULES} 룰/" docs/i18n/README.ko.md
+          sed -i "s/ECC [0-9]\+ + OMC [0-9]\+/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS}/" docs/i18n/README.ko.md
+          sed -i "s/룰 ([0-9]\+개)/룰 (${TOTAL_RULES}개)/" docs/i18n/README.ko.md
+          sed -i "s/| 스킬 | [0-9]\+ |/| 스킬 | ${TOTAL_SKILLS} |/" docs/i18n/README.ko.md
+          sed -i "s/| 룰 | [0-9]\+ |/| 룰 | ${TOTAL_RULES} |/" docs/i18n/README.ko.md
 
           # AI-INSTALL.md
           sed -i "s/[0-9]\+ agents, [0-9]\+ skills, [0-9]\+ rules/${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills, ${TOTAL_RULES} rules/" AI-INSTALL.md
