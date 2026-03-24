@@ -281,6 +281,14 @@ jobs:
           sed -i "s/Boss reports [0-9]\+ agents/Boss reports ${TOTAL_AGENTS} agents/" tests/boss-routing-scenarios.md
           sed -i "s/[0-9]\+ core + [0-9]\+ packs/${CORE_TOTAL} core + ${PACK_COUNT} packs/" tests/boss-routing-scenarios.md
 
+          # SETUP.md — upstream project counts
+          if [ -f SETUP.md ]; then
+            sed -i -E "s/installs [0-9]+ agents \+ HUD/installs ${OMC_AGENTS} agents + HUD/" SETUP.md
+            sed -i -E "s/# Full install \(all [0-9]+ agents\)/# Full install (all ${AGENCY_COUNT} agents)/" SETUP.md
+            sed -i -E "s/OMC has [0-9]+ agents and omo has [0-9]+ agents/OMC has ${OMC_AGENTS} agents and omo has ${OMO_AGENTS} agents/" SETUP.md
+            sed -i -E "s/\| \*\*Core\*\* \| [0-9]+ agents organized by department/| **Core** | ${AGENCY_COUNT} agents organized by department/" SETUP.md
+          fi
+
           echo "Updated doc counts: ${TOTAL_AGENTS} agents (${CORE_TOTAL} core + ${PACK_COUNT} packs), ${TOTAL_SKILLS} skills, ${TOTAL_RULES} rules"
 
       # ── 6. Create PR if changes exist ──
