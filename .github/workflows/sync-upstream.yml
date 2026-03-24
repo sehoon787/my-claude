@@ -200,11 +200,31 @@ jobs:
           sed -i "s/[0-9]\+ core agents/${CORE_TOTAL} core agents/g" .claude-plugin/marketplace.json
           sed -i "s/[0-9]\+ agent packs/${PACK_COUNT} agent packs/g" .claude-plugin/marketplace.json
 
-          # docs/index.html
-          sed -i "s/[0-9]\+ agents/${TOTAL_AGENTS} agents/g" docs/index.html
-          sed -i "s/[0-9]\+ skills/${TOTAL_SKILLS} skills/g" docs/index.html
-          sed -i "s/[0-9]\+ core agents/${CORE_TOTAL} core agents/g" docs/index.html
-          sed -i "s/[0-9]\+ packs/${PACK_COUNT} packs/g" docs/index.html
+          # docs/index.html — targeted updates only
+          if [ -f docs/index.html ]; then
+            # Meta tags (match full "N agents, N skills" context)
+            sed -i -E "s/[0-9]+ agents, [0-9]+ skills, [0-9]+ rules/${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills, ${TOTAL_RULES} rules/g" docs/index.html
+            sed -i -E "s/[0-9]+ agents, [0-9]+ skills, 3 MCP/${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills, 3 MCP/g" docs/index.html
+            # Hero data-count attributes
+            sed -i -E 's/data-count="[0-9]+"(>0<\/em> <span class="lang" data-en="agents")/data-count="'"${TOTAL_AGENTS}"'"\1/' docs/index.html
+            sed -i -E 's/data-count="[0-9]+"(>0<\/em> <span class="lang" data-en="skills")/data-count="'"${TOTAL_SKILLS}"'"\1/' docs/index.html
+            # Terminal demo lines "Scanning... N agents, N skills"
+            sed -i -E "s/Scanning\.\.\. [0-9]+ agents, [0-9]+ skills/Scanning... ${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills/g" docs/index.html
+            # "get N agents" in feature description
+            sed -i -E "s/get [0-9]+ agents/get ${TOTAL_AGENTS} agents/" docs/index.html
+            # Scan counts in pre block
+            sed -i -E "s/(agents\/    → )[0-9]+( found)/\1${TOTAL_AGENTS}\2/" docs/index.html
+            sed -i -E "s/(skills\/    → )[0-9]+( found)/\1${TOTAL_SKILLS}\2/" docs/index.html
+            # Catalog subtitle "N agents across 4 tiers"
+            sed -i -E "s/[0-9]+ agents across 4 tiers/${TOTAL_AGENTS} agents across 4 tiers/" docs/index.html
+            # Comparison table "N Pre-built Agents"
+            sed -i -E "s/[0-9]+ Pre-built Agents/${TOTAL_AGENTS} Pre-built Agents/" docs/index.html
+            # KO totals (safe global — these only appear as totals)
+            sed -i -E "s/[0-9]+개 에이전트/${TOTAL_AGENTS}개 에이전트/g" docs/index.html
+            sed -i -E "s/[0-9]+개 스킬/${TOTAL_SKILLS}개 스킬/g" docs/index.html
+            # KO terminal demo "N 에이전트, N 스킬"
+            sed -i -E "s/[0-9]+ 에이전트, [0-9]+ 스킬/${TOTAL_AGENTS} 에이전트, ${TOTAL_SKILLS} 스킬/g" docs/index.html
+          fi
 
           # tests/boss-routing-scenarios.md
           sed -i "s/Boss reports [0-9]\+ agents/Boss reports ${TOTAL_AGENTS} agents/" tests/boss-routing-scenarios.md
