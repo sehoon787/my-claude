@@ -13,8 +13,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-201-blue)
-![Skills](https://img.shields.io/badge/skills-148-purple)
+![Agents](https://img.shields.io/badge/agents-186-blue)
+![Skills](https://img.shields.io/badge/skills-156-purple)
 ![Rules](https://img.shields.io/badge/rules-65-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
@@ -117,7 +117,7 @@ Lisez la sortie complète et exécutez chaque étape dans l'ordre. Utilisez `cur
 
 ## Agents Cœur + OMO
 
-**Boss** est le seul agent original de my-claude. Les 9 restants sont des [agents OMO](https://github.com/code-yeongyu/oh-my-openagent) que Boss utilise comme sous-orchestrateurs et spécialistes. Le plugin regroupe **52 agents cœur** (Cœur 1 + OMO 9 + Engineering 23 + OMC 19 + spécialistes OMO) qui se chargent toujours dans `~/.claude/agents/`, plus **150 packs d'agents de domaine** dans `~/.claude/agent-packs/` pouvant être activés à la demande. Boss sélectionne le meilleur spécialiste parmi tous les agents actifs via la correspondance de capacités Priority 2. Voir [Composants installés](#composants-installés) ci-dessous.
+**Boss** est le seul agent original de my-claude. Les 9 restants sont des [agents OMO](https://github.com/code-yeongyu/oh-my-openagent) que Boss utilise comme sous-orchestrateurs et spécialistes. Le plugin regroupe **53 agents cœur** (Cœur 2 + OMO 9 + Engineering 23 + OMC 19) qui se chargent toujours dans `~/.claude/agents/`, plus **133 packs d'agents de domaine** dans `~/.claude/agent-packs/` pouvant être activés à la demande. Boss sélectionne le meilleur spécialiste parmi tous les agents actifs via la correspondance de capacités Priority 2. Voir [Composants installés](#composants-installés) ci-dessous.
 
 | Agent | Source | Modèle | Rôle |
 |---------|--------|------|------|
