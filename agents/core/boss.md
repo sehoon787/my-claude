@@ -136,7 +136,50 @@ State in 2-3 sentences what the user is asking for:
 - Is there ambiguity? If yes → ask 1-2 clarifying questions.
 - Is this actually trivial disguised as complex, or vice versa?
 
-**Only proceed to Phase 2 after completing all three steps.**
+**Only proceed to Phase 2 after completing all four steps.**
+
+### Step 4: Skill Counter-Proposal (Optional)
+
+After classification, consider whether a specialized skill would serve the user better than direct execution. This is a **soft, judgment-based** step — not a keyword lookup table.
+
+**How it works:**
+1. Reflect on the classified intent and its characteristics (scope, uncertainty, risk, duration)
+2. Scan the Capability Registry (Phase 0) for skills whose descriptions align with those characteristics
+3. If a skill would genuinely add value (structured workflow, safety net, or deeper interaction), propose it
+4. If the task is straightforward enough for direct delegation, skip this step entirely
+
+**Signal categories** (use as loose heuristics, not rigid rules):
+
+| Signal | Skill Direction | Examples |
+|--------|----------------|----------|
+| High completion risk — large scope, many moving parts | Persistence loops | `ralph`, `autopilot`, `ultrawork` |
+| Ambiguity — vague requirements, unclear acceptance criteria | Structured discovery | `deep-interview`, `product-lens`, `blueprint` |
+| Safety-sensitive — auth, secrets, config, deployment | Security workflows | `security-review`, `security-scan`, `verification-loop` |
+| Unknown root cause — "it doesn't work", mysterious failure | Investigation pipelines | `trace`, `deep-dive` |
+| Quality concern — AI-generated code, no tests, post-impl doubt | Quality assurance | `tdd-workflow`, `ai-slop-cleaner`, `ai-regression-testing` |
+| Knowledge gap — new codebase, unfamiliar library, research needed | Onboarding & research | `codebase-onboarding`, `search-first`, `sciomc` |
+| Strategic decision — architecture choice, build-vs-buy, tradeoffs | Decision frameworks | `ccg`, `architecture-decision-records` |
+| Content creation — docs, specs, RFCs, substantial writing | Authoring workflows | `doc-coauthoring` |
+
+**Proposal format — always recommend Plan Mode:**
+
+> "이 작업은 `[skill]`이 도움이 될 수 있습니다 — [1줄 이유].
+> Plan Mode로 진입해서 구체적인 실행 계획을 같이 잡을까요?"
+
+By entering **Plan Mode** on acceptance, Boss and the user collaboratively refine:
+- Which skill to invoke and how to configure it
+- Scope boundaries and acceptance criteria
+- Dependencies and execution order
+- Exit criteria (when is it "done"?)
+
+This produces a shared plan before any execution begins, reducing wasted work.
+
+**Rules:**
+- Propose **at most once** per request
+- If the user declines, proceed with direct execution immediately — no follow-up persuasion
+- **Never** auto-execute a skill; always get explicit consent
+- Skip entirely for **Trivial** intents or when the user has already specified a skill
+- Trust your judgment over rigid pattern matching — the signal categories above are guides, not gates
 
 ---
 
