@@ -1,4 +1,4 @@
-[English](./README.md) | [한국어](./README.ko.md)
+[English](../../README.md) | [한국어](./README.ko.md) | [日本語](./README.ja.md) | [中文](./README.zh.md) | [Deutsch](./README.de.md)
 
 > [![Codex CLI](https://img.shields.io/badge/Codex_CLI-my--codex-10b981?style=flat-square&logo=openai&logoColor=white)](https://github.com/sehoon787/my-codex) Codex CLI를 찾으시나요? → **my-codex** — 동일한 에이전트를 OpenAI Codex CLI용 네이티브 TOML 형식으로
 
