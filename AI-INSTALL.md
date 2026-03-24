@@ -1,7 +1,7 @@
 # my-claude AI Installation Guide
 
 You are an AI agent setting up a Claude Code multi-agent orchestration environment.
-The plugin bundles 185 agents (52 core + 133 domain agent-packs), 156 skills, 65 rules, 6 hooks, and 3 MCP servers.
+The plugin bundles 186 agents (53 core + 133 domain agent-packs), 156 skills, 65 rules, 6 hooks, and 3 MCP servers.
 Only 2-3 steps are needed.
 
 ---
@@ -22,7 +22,7 @@ node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir
 ```
 
 This installs:
-- 52 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 23 engineering
+- 53 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 23 engineering
 - 133 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
 - 156 skills (125 ECC + 31 OMC)
 - 49 rules (9 common + 8 languages × 5)
@@ -121,7 +121,7 @@ echo "omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK'
 ```
 
 Expected:
-- Core agents: 52+
+- Core agents: 53+
 - Agent packs: 133+
 - Plugin skills: 156+
 - Rules: 65
