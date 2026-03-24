@@ -13,14 +13,16 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-186_(53_core)-blue)
-![Skills](https://img.shields.io/badge/skills-136-purple)
-![MCP Servers](https://img.shields.io/badge/MCP_servers-3-green)
+![Agents](https://img.shields.io/badge/agents-201-blue)
+![Skills](https://img.shields.io/badge/skills-148-purple)
+![Rules](https://img.shields.io/badge/rules-65-orange)
+![MCP](https://img.shields.io/badge/MCP-3-green)
+![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
 All-in-One Claude Code Multi-Agent-Orchestrierungs-Plugin — einmal installieren, alles bekommen.
 
-Bündelt **186 Agenten** (53 Kern + 133 Domain-Agent-Packs), **148 Skills**, **65 Regeln**, **6 Verhaltensmodi** und **3 MCP-Server** aus 3 MIT-Upstream-Quellen in ein einzelnes Plugin. Der **Boss** dynamische Meta-Orchestrator entdeckt alle installierten Komponenten zur Laufzeit automatisch und leitet Aufgaben an den optimalen Spezialisten weiter. GitHub Actions CI synchronisiert Upstream-Änderungen wöchentlich.
+Bündelt **201 Agenten**, **148 Skills**, **65 Regeln**, **6 Hooks** und **3 MCP-Server** aus 3 MIT-Upstream-Quellen in ein einzelnes Plugin. Der **Boss** dynamische Meta-Orchestrator entdeckt alle installierten Komponenten zur Laufzeit automatisch und leitet Aufgaben an den optimalen Spezialisten weiter. GitHub Actions CI synchronisiert Upstream-Änderungen wöchentlich.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
@@ -106,7 +108,7 @@ Lese die vollständige Ausgabe und führe jeden Schritt der Reihe nach aus. Verw
 - **grep.app**: GitHub Open-Source-Code-Suche
 
 ### All-in-One Bundle
-- Plugin-Installation bietet sofort **186 Agenten, 148 Skills und 65 Regeln**
+- Plugin-Installation bietet sofort **201 Agenten, 148 Skills und 65 Regeln**
 - Bündelt 3 MIT-Upstream-Quellen (agency-agents, everything-claude-code, oh-my-claudecode)
 - Wöchentliche CI-Auto-Sync hält gebündelte Inhalte mit Upstream auf dem neuesten Stand
 - Begleitendes `install.sh` fügt npm-Tools und proprietäre Anthropic Skills hinzu
@@ -524,7 +526,7 @@ Jede Delegation beinhaltet einen **6-Abschnitt strukturierten Prompt**: AUFGABE,
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 201 agents, 136 skills ready.
+[Boss] Phase 0: Scanning... 201 agents, 148 skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="

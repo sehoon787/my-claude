@@ -13,14 +13,16 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-186_(53_core)-blue)
-![Skills](https://img.shields.io/badge/skills-136-purple)
-![MCP Servers](https://img.shields.io/badge/MCP_servers-3-green)
+![Agents](https://img.shields.io/badge/agents-201-blue)
+![Skills](https://img.shields.io/badge/skills-148-purple)
+![Rules](https://img.shields.io/badge/rules-65-orange)
+![MCP](https://img.shields.io/badge/MCP-3-green)
+![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
 Claude Code 用の完全な複数エージェント オーケストレーション プラグイン — 1 回インストールするだけで、すべてが揃います。
 
-3 つの MIT アップストリーム ソースから **186 エージェント**（53 コア + 133 ドメイン エージェント パック）、**148 スキル**、**65 ルール**、**6 つの動作フック**、**3 つの MCP サーバー** をバンドルして、1 つのプラグインにまとめています。**Boss** 動的メタ オーケストレータは、実行時にインストール済みのすべてのコンポーネントを自動検出し、最適な専門家にタスクをルーティングします。GitHub Actions CI は、アップストリームの変更を毎週同期します。
+3 つの MIT アップストリーム ソースから **201 エージェント**、**148 スキル**、**65 ルール**、**6 つのフック**、**3 つの MCP サーバー** をバンドルして、1 つのプラグインにまとめています。**Boss** 動的メタ オーケストレータは、実行時にインストール済みのすべてのコンポーネントを自動検出し、最適な専門家にタスクをルーティングします。GitHub Actions CI は、アップストリームの変更を毎週同期します。
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
@@ -106,7 +108,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 - **grep.app**: GitHub オープンソース コード検索
 
 ### ワンパッケージ バンドル
-- プラグイン インストールは **186 エージェント、148 スキル、65 ルール** を即座に提供
+- プラグイン インストールは **201 エージェント、148 スキル、65 ルール** を即座に提供
 - 3 つの MIT アップストリーム ソース（agency-agents、everything-claude-code、oh-my-claudecode）をバンドル
 - 毎週 CI オート同期によるアップストリーム コンテンツ最新化
 - コンパニオン `install.sh` は npm ツールと独自 Anthropic スキルを追加
@@ -524,7 +526,7 @@ Boss はすべてのリクエストを 4 レベル優先度チェーンを通じ
 ```
 $ claude "セキュリティ脆弱性について認証モジュール分析"
 
-[Boss] Phase 0: スキャン中... 201 エージェント、136 スキル準備完了.
+[Boss] Phase 0: スキャン中... 201 エージェント、148 スキル準備完了.
 [Boss] Phase 1: 意図 → セキュリティ分析 | 優先度: P2
 [Boss] Phase 2: マッチ → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="
