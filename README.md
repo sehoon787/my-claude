@@ -76,6 +76,14 @@ git clone https://github.com/sehoon787/my-claude.git
 
 Then follow the instructions in `SETUP.md` to copy the files.
 
+**Option 4: Skills only (via skills.sh)**
+
+```bash
+npx skills add sehoon787/my-claude -y -g
+```
+
+Installs skills to `~/.agents/skills/` and auto-symlinks to `~/.claude/skills/`. Works with Claude Code, Codex, Cursor, and other tools that support the skills.sh standard. Does **not** install agents, rules, hooks, or MCP configs — use Option 1 or 2 for the full experience.
+
 ### If you are an LLM agent
 
 Fetch the AI installation guide and execute each step:

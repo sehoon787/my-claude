@@ -108,6 +108,16 @@ try {
 "
 ```
 
+## Alternative: Skills only (via skills.sh)
+
+If you only need the skills (not agents, rules, hooks, or MCP configs), use:
+
+```bash
+npx skills add sehoon787/my-claude -y -g
+```
+
+This installs skills to `~/.agents/skills/` and auto-symlinks to `~/.claude/skills/`. Cross-platform: works with Claude Code, Codex, Cursor, and other tools that support the skills.sh standard. For the full experience (agents, hooks, rules, MCP), complete Steps 1–2 above instead.
+
 ## Verify
 
 ```bash
