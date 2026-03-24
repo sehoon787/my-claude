@@ -4,7 +4,7 @@
     "branch": "main",
     "syncedSha": "6254154899f510eb4a4de10561fecfc1f32ff17f",
     "syncedTag": null,
-    "syncedAt": "2026-03-23T07:02:16Z",
+    "syncedAt": "2026-03-24T04:35:55Z",
     "compareUrl": "https://github.com/msitarzewski/agency-agents/compare/6254154...HEAD",
     "files": {
       "agents": 172
@@ -13,25 +13,25 @@
   "everything-claude-code": {
     "repo": "https://github.com/affaan-m/everything-claude-code",
     "branch": "main",
-    "syncedSha": "bacc585b877b4426627d1cc478e1f1e5eb0c4f94",
+    "syncedSha": "df4f2df297847687bd8835c440803de36966b2c9",
     "syncedTag": null,
-    "syncedAt": "2026-03-23T07:02:16Z",
-    "compareUrl": "https://github.com/affaan-m/everything-claude-code/compare/bacc585...HEAD",
+    "syncedAt": "2026-03-24T04:35:55Z",
+    "compareUrl": "https://github.com/affaan-m/everything-claude-code/compare/df4f2df...HEAD",
     "files": {
-      "skills": 119,
+      "skills": 125,
       "rules": 65
     }
   },
   "oh-my-claudecode": {
     "repo": "https://github.com/Yeachan-Heo/oh-my-claudecode",
     "branch": "main",
-    "syncedSha": "48ffaac2ea1373f4c60a62ee548f22a48a5be499",
-    "syncedTag": "v4.9.0",
-    "syncedAt": "2026-03-23T07:02:16Z",
-    "compareUrl": "https://github.com/Yeachan-Heo/oh-my-claudecode/compare/48ffaac...HEAD",
+    "syncedSha": "275272679a878809686cb7977c7e2f9a22db4037",
+    "syncedTag": null,
+    "syncedAt": "2026-03-24T04:35:55Z",
+    "compareUrl": "https://github.com/Yeachan-Heo/oh-my-claudecode/compare/2752726...HEAD",
     "files": {
       "agents": 19,
-      "skills": 29
+      "skills": 31
     }
   }
 }

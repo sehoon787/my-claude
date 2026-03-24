@@ -74,6 +74,14 @@ Jumping into code without understanding requirements leads to rework, scope cree
 - `--critic codex` — replace the Claude Critic pass with `omc ask codex --agent-prompt critic "..."` for an external review pass before execution
 - If the requested provider is unavailable, briefly note that and continue with the default Claude Architect/Critic step for that stage
 
+**State lifecycle**: The persistent-mode stop hook uses `ralplan-state.json` to enforce continuation during the consensus loop. The skill **MUST** manage this state:
+- **On entry**: Call `state_write(mode="ralplan", active=true, session_id=<current_session_id>)` before step 1
+- **On handoff to execution** (approval → ralph/team): Call `state_write(mode="ralplan", active=false, session_id=<current_session_id>)`. Do NOT use `state_clear` here — `state_clear` writes a 30-second cancel signal that disables stop-hook enforcement for ALL modes, leaving the newly launched execution mode unprotected.
+- **On true terminal exit** (rejection, non-interactive plan output, error/abort): Call `state_clear(mode="ralplan", session_id=<current_session_id>)` — no execution mode follows, so the cancel signal window is harmless.
+- Do NOT clear during intermediate steps like Critic approval or max-iteration presentation, as the user may still select "Request changes".
+
+Without cleanup, the stop hook blocks all subsequent stops with `[RALPLAN - CONSENSUS PLANNING]` reinforcement messages even after the consensus workflow has finished. Always pass `session_id` to avoid clearing other concurrent sessions' state.
+
 1. **Planner** creates initial plan and a compact **RALPLAN-DR summary** before any Architect review. The summary **MUST** include:
    - **Principles** (3-5)
    - **Decision Drivers** (top 3)
@@ -105,9 +113,9 @@ Jumping into code without understanding requirements leads to rework, scope cree
    - **Clear context and implement** — compact the context window first (recommended when context is large after planning), then start fresh implementation via ralph with the saved plan file
    - **Request changes** — return to step 1 with user feedback
    - **Reject** — discard the plan entirely
-   If NOT running with `--interactive`, output the final approved plan and stop. Do NOT auto-execute.
-8. *(--interactive only)* User chooses via the structured `AskUserQuestion` UI (never ask for approval in plain text)
-9. On user approval (--interactive only):
+   If NOT running with `--interactive`, output the final approved plan, call `state_clear(mode="ralplan", session_id=<current_session_id>)`, and stop. Do NOT auto-execute.
+8. *(--interactive only)* User chooses via the structured `AskUserQuestion` UI (never ask for approval in plain text). If user selects **Reject**, call `state_clear(mode="ralplan", session_id=<current_session_id>)` and stop.
+9. On user approval (--interactive only): Call `state_write(mode="ralplan", active=false, session_id=<current_session_id>)` **before** invoking the execution skill (ralph/team), so the stop hook does not interfere with the execution mode's own enforcement. Do NOT use `state_clear` here — it writes a cancel signal that disables enforcement for the newly launched mode.
    - **Approve and implement via team**: **MUST** invoke `Skill("oh-my-claudecode:team")` with the approved plan path from `.omc/plans/` as context. Do NOT implement directly. The team skill coordinates parallel agents across the staged pipeline for faster execution on large tasks. This is the recommended default execution path.
    - **Approve and execute via ralph**: **MUST** invoke `Skill("oh-my-claudecode:ralph")` with the approved plan path from `.omc/plans/` as context. Do NOT implement directly. Do NOT edit source code files in the planning agent. The ralph skill handles execution via ultrawork parallel agents.
    - **Clear context and implement**: First invoke `Skill("compact")` to compress the context window (reduces token usage accumulated during planning), then invoke `Skill("oh-my-claudecode:ralph")` with the approved plan path from `.omc/plans/`. This path is recommended when the context window is 50%+ full after the planning session.
@@ -144,7 +152,8 @@ Plans are saved to `.omc/plans/`. Drafts go to `.omc/drafts/`.
 - In consensus mode, default to RALPLAN-DR short mode; enable deliberate mode on `--deliberate` or explicit high-risk signals (auth/security, migrations, destructive changes, production incidents, compliance/PII, public API breakage)
 - In consensus mode with `--interactive`: use `AskUserQuestion` for the user feedback step (step 2) and the final approval step (step 7) -- never ask for approval in plain text. Without `--interactive`, skip both prompts and output the final plan.
 - In consensus mode with `--interactive`, on user approval **MUST** invoke `Skill("oh-my-claudecode:ralph")` for execution (step 9) -- never implement directly in the planning agent
-- When user selects "Clear context and implement" in step 7 (--interactive only): invoke `Skill("compact")` first to compress the accumulated planning context, then immediately invoke `Skill("oh-my-claudecode:ralph")` with the plan path -- the compact step is critical to free up context before the implementation loop begins
+- When user selects "Clear context and implement" in step 7 (--interactive only): call `state_write(mode="ralplan", active=false, session_id=<current_session_id>)` first, then invoke `Skill("compact")` to compress the accumulated planning context, then immediately invoke `Skill("oh-my-claudecode:ralph")` with the plan path -- the compact step is critical to free up context before the implementation loop begins
+- **CRITICAL — Consensus mode state lifecycle**: Always deactivate ralplan state before stopping or handing off to execution. Use `state_write(active=false)` for handoff paths (approval → ralph/team) and `state_clear` for true terminal exits (rejection, error). Never use `state_clear` before launching an execution mode — its cancel signal disables stop-hook enforcement for 30 seconds.
 </Tool_Usage>
 
 <Examples>
@@ -199,9 +208,9 @@ Why bad: Decision fatigue. Present one option with trade-offs, get reaction, the
 
 <Escalation_And_Stop_Conditions>
 - Stop interviewing when requirements are clear enough to plan -- do not over-interview
-- In consensus mode, stop after 5 Planner/Architect/Critic iterations and present the best version
-- Consensus mode without `--interactive` outputs the final plan and stops; with `--interactive`, requires explicit user approval before any implementation begins
-- If the user says "just do it" or "skip planning", **MUST** invoke `Skill("oh-my-claudecode:ralph")` to transition to execution mode. Do NOT implement directly in the planning agent.
+- In consensus mode, stop after 5 Planner/Architect/Critic iterations and present the best version. Do NOT clear ralplan state here — the user may still select "Request changes" in the subsequent step. State is cleared only on the user's final choice (approval/rejection) or when outputting the plan in non-interactive mode.
+- Consensus mode without `--interactive` outputs the final plan and stops; with `--interactive`, requires explicit user approval before any implementation begins. **Always** call `state_clear(mode="ralplan", session_id=<current_session_id>)` before stopping.
+- If the user says "just do it" or "skip planning", call `state_write(mode="ralplan", active=false, session_id=<current_session_id>)` then **MUST** invoke `Skill("oh-my-claudecode:ralph")` to transition to execution mode. Do NOT implement directly in the planning agent.
 - Escalate to the user when there are irreconcilable trade-offs that require a business decision
 </Escalation_And_Stop_Conditions>
 
@@ -215,6 +224,7 @@ Why bad: Decision fatigue. Present one option with trade-offs, get reaction, the
 - [ ] In consensus mode final output: ADR section included (Decision / Drivers / Alternatives considered / Why chosen / Consequences / Follow-ups)
 - [ ] In deliberate consensus mode: pre-mortem (3 scenarios) + expanded test plan (unit/integration/e2e/observability) included
 - [ ] In consensus mode with `--interactive`: user explicitly approved before any execution; without `--interactive`: plan output only, no auto-execution
+- [ ] In consensus mode: ralplan state deactivated on every exit path — `state_write(active=false)` for handoff to execution, `state_clear` for terminal exits (rejection, error, non-interactive stop)
 </Final_Checklist>
 
 <Advanced>
