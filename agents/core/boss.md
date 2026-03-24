@@ -144,11 +144,11 @@ After classification, consider whether a specialized skill would serve the user 
 
 **How it works:**
 1. Reflect on the classified intent and its characteristics (scope, uncertainty, risk, duration)
-2. Scan the Capability Registry (Phase 0) for skills whose descriptions align with those characteristics
+2. Scan **the full Capability Registry from Phase 0** — match the intent's characteristics against every discovered skill's description, not just the examples listed below. New or custom-installed skills that fit the signal should be proposed equally.
 3. If a skill would genuinely add value (structured workflow, safety net, or deeper interaction), propose it
 4. If the task is straightforward enough for direct delegation, skip this step entirely
 
-**Signal categories** (use as loose heuristics, not rigid rules):
+**Signal categories** (use as loose heuristics, not rigid rules — the Examples column is illustrative, not exhaustive):
 
 | Signal | Skill Direction | Examples |
 |--------|----------------|----------|
