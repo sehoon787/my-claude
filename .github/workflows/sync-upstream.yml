@@ -180,12 +180,17 @@ jobs:
           sed -i "s/[0-9]\+ agents, [0-9]\+ skills ready/${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills ready/" docs/i18n/README.fr.md
 
           # AI-INSTALL.md
-          sed -i "s/[0-9]\+ agents, [0-9]\+ skills, [0-9]\+ rules/${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills, ${TOTAL_RULES} rules/" AI-INSTALL.md
-          AI_PAT="[0-9]\+ agents ([0-9]\+ core + [0-9]\+ omo + [0-9]\+ agency + [0-9]\+ OMC)"
-          AI_REP="${TOTAL_AGENTS} agents (${CORE_AGENTS} core + ${OMO_AGENTS} omo + ${AGENCY_COUNT} agency + ${OMC_AGENTS} OMC)"
-          sed -i "s/${AI_PAT}/${AI_REP}/" AI-INSTALL.md
-          sed -i "s/[0-9]\+ skills ([0-9]\+ ECC + [0-9]\+ OMC)/${TOTAL_SKILLS} skills (${ECC_SKILLS} ECC + ${OMC_SKILLS} OMC)/" AI-INSTALL.md
-          sed -i "s/Rules: [0-9]\+/Rules: ${TOTAL_RULES}/" AI-INSTALL.md
+          if [ -f AI-INSTALL.md ]; then
+            sed -i -E "s/[0-9]+ agents \([0-9]+ core \+ [0-9]+ domain agent-packs\)/${TOTAL_AGENTS} agents (${CORE_TOTAL} core + ${PACK_COUNT} domain agent-packs)/" AI-INSTALL.md
+            sed -i -E "s/[0-9]+ skills, [0-9]+ rules/${TOTAL_SKILLS} skills, ${TOTAL_RULES} rules/" AI-INSTALL.md
+            sed -i -E "s/[0-9]+ core agents in/${CORE_TOTAL} core agents in/" AI-INSTALL.md
+            sed -i -E "s/[0-9]+ domain agent-packs in/${PACK_COUNT} domain agent-packs in/" AI-INSTALL.md
+            sed -i -E "s/[0-9]+ skills \([0-9]+ ECC \+ [0-9]+ OMC\)/${TOTAL_SKILLS} skills (${ECC_SKILLS} ECC + ${OMC_SKILLS} OMC)/" AI-INSTALL.md
+            sed -i -E "s/Core agents: [0-9]+\+/Core agents: ${CORE_TOTAL}+/" AI-INSTALL.md
+            sed -i -E "s/Agent packs: [0-9]+\+/Agent packs: ${PACK_COUNT}+/" AI-INSTALL.md
+            sed -i -E "s/Plugin skills: [0-9]+\+/Plugin skills: ${TOTAL_SKILLS}+/" AI-INSTALL.md
+            sed -i -E "s/Rules: [0-9]+$/Rules: ${TOTAL_RULES}/" AI-INSTALL.md
+          fi
 
           # .claude-plugin/marketplace.json
           sed -i "s/[0-9]\+ agents (${CORE_TOTAL} core + [0-9]\+ packs)/${TOTAL_AGENTS} agents (${CORE_TOTAL} core + ${PACK_COUNT} packs)/g" .claude-plugin/marketplace.json
