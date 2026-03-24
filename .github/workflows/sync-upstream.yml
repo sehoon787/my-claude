@@ -141,6 +141,8 @@ jobs:
           HOOKS=4
 
           # README.md
+          sed -i "s/agents-[0-9]\+/agents-${TOTAL_AGENTS}/" README.md
+          sed -i "s/skills-[0-9]\+/skills-${TOTAL_SKILLS}/" README.md
           sed -i "s/agents-[0-9]*_([0-9]*_core)/agents-${TOTAL_AGENTS}_(${CORE_TOTAL}_core)/" README.md
           sed -i "s/\*\*[0-9]\+ agents\*\* ([0-9]\+ core + [0-9]\+ domain agent-packs)/\*\*${TOTAL_AGENTS} agents\*\* (${CORE_TOTAL} core + ${PACK_COUNT} domain agent-packs)/" README.md
           sed -i "s/| Core Agents | [0-9]\+ |/| Core Agents | ${CORE_TOTAL} |/" README.md
@@ -154,6 +156,8 @@ jobs:
           sed -i "s/| Skills | [0-9]\+ |/| Skills | ${TOTAL_SKILLS} |/" README.md
 
           # docs/i18n/README.ko.md
+          sed -i "s/agents-[0-9]\+/agents-${TOTAL_AGENTS}/" docs/i18n/README.ko.md
+          sed -i "s/skills-[0-9]\+/skills-${TOTAL_SKILLS}/" docs/i18n/README.ko.md
           sed -i "s/agents-[0-9]*_([0-9]*_core)/agents-${TOTAL_AGENTS}_(${CORE_TOTAL}_core)/" docs/i18n/README.ko.md
           sed -i "s/\*\*[0-9]\+개 에이전트\*\* ([0-9]\+개 코어 + [0-9]\+개 도메인 에이전트 팩)/\*\*${TOTAL_AGENTS}개 에이전트\*\* (${CORE_TOTAL}개 코어 + ${PACK_COUNT}개 도메인 에이전트 팩)/" docs/i18n/README.ko.md
           sed -i "s/| 코어 에이전트 | [0-9]\+ |/| 코어 에이전트 | ${CORE_TOTAL} |/" docs/i18n/README.ko.md
@@ -167,6 +171,8 @@ jobs:
           sed -i "s/| 룰 | [0-9]\+ |/| 룰 | ${TOTAL_RULES} |/" docs/i18n/README.ko.md
 
           # docs/i18n/README.fr.md
+          sed -i "s/agents-[0-9]\+/agents-${TOTAL_AGENTS}/" docs/i18n/README.fr.md
+          sed -i "s/skills-[0-9]\+/skills-${TOTAL_SKILLS}/" docs/i18n/README.fr.md
           sed -i "s/agents-[0-9]*_([0-9]*_core)/agents-${TOTAL_AGENTS}_(${CORE_TOTAL}_core)/" docs/i18n/README.fr.md
           sed -i "s/\*\*[0-9]\+ agents\*\*/\*\*${TOTAL_AGENTS} agents\*\*/g" docs/i18n/README.fr.md
           sed -i "s/\*\*[0-9]\+ skills\*\*/\*\*${TOTAL_SKILLS} skills\*\*/g" docs/i18n/README.fr.md
@@ -178,6 +184,18 @@ jobs:
           sed -i "s/| Skills | [0-9]\+ |/| Skills | ${TOTAL_SKILLS} |/" docs/i18n/README.fr.md
           sed -i "s/| Règles | [0-9]\+ |/| Règles | ${TOTAL_RULES} |/" docs/i18n/README.fr.md
           sed -i "s/[0-9]\+ agents, [0-9]\+ skills ready/${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills ready/" docs/i18n/README.fr.md
+
+          # docs/i18n/README.zh.md
+          sed -i "s/agents-[0-9]\+/agents-${TOTAL_AGENTS}/" docs/i18n/README.zh.md
+          sed -i "s/skills-[0-9]\+/skills-${TOTAL_SKILLS}/" docs/i18n/README.zh.md
+
+          # docs/i18n/README.de.md
+          sed -i "s/agents-[0-9]\+/agents-${TOTAL_AGENTS}/" docs/i18n/README.de.md
+          sed -i "s/skills-[0-9]\+/skills-${TOTAL_SKILLS}/" docs/i18n/README.de.md
+
+          # docs/i18n/README.ja.md
+          sed -i "s/agents-[0-9]\+/agents-${TOTAL_AGENTS}/" docs/i18n/README.ja.md
+          sed -i "s/skills-[0-9]\+/skills-${TOTAL_SKILLS}/" docs/i18n/README.ja.md
 
           # AI-INSTALL.md
           if [ -f AI-INSTALL.md ]; then

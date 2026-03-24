@@ -13,8 +13,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-201-blue)
-![Skills](https://img.shields.io/badge/skills-148-purple)
+![Agents](https://img.shields.io/badge/agents-186-blue)
+![Skills](https://img.shields.io/badge/skills-156-purple)
 ![Rules](https://img.shields.io/badge/rules-65-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
@@ -22,7 +22,7 @@
 
 一体化 Claude Code 多代理编排插件 — 安装一次，获得所有功能。
 
-捆绑了来自 3 个 MIT 上游来源的 **201 个代理**、**148 个技能**、**65 个规则**、**6 个钩子**和 **3 个 MCP 服务器**到单一插件中。**Boss** 动态元编排器在运行时自动发现所有已安装的组件，并将任务路由到最优专家。GitHub Actions CI 每周同步上游变更。
+捆绑了来自 3 个 MIT 上游来源的 **186 个代理**、**156 个技能**、**65 个规则**、**6 个钩子**和 **3 个 MCP 服务器**到单一插件中。**Boss** 动态元编排器在运行时自动发现所有已安装的组件，并将任务路由到最优专家。GitHub Actions CI 每周同步上游变更。
 
 <p align="center">
   <img src="../../assets/demo.svg" alt="my-claude demo" width="700">
@@ -108,7 +108,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 - **grep.app**：GitHub 开源代码搜索
 
 ### 一体化包
-- 插件安装提供 **201 个代理、148 个技能和 65 个规则**，即时可用
+- 插件安装提供 **186 个代理、156 个技能和 65 个规则**，即时可用
 - 捆绑 3 个 MIT 上游来源（agency-agents、everything-claude-code、oh-my-claudecode）
 - 每周 CI 自动同步保持捆绑内容与上游最新
 - 伴随 `install.sh` 添加 npm 工具和专有 Anthropic 技能
@@ -117,7 +117,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ## 核心 + OMO 代理
 
-**Boss** 是唯一的 my-claude 原创代理。其余 9 个是 [OMO 代理](https://github.com/code-yeongyu/oh-my-openagent)，Boss 用作子编排器和专家。该插件捆绑了 **52 个核心代理**（核心 1 + OMO 9 + 工程 23 + OMC 19 + OMO 专家）始终加载到 `~/.claude/agents/`，加上 **150 个领域代理包**在 `~/.claude/agent-packs/` 中，可以按需激活。Boss 通过优先级 2 能力匹配从所有活跃代理中选择最佳匹配的专家。请参见下面的 [已安装组件](#已安装组件)。
+**Boss** 是唯一的 my-claude 原创代理。其余 9 个是 [OMO 代理](https://github.com/code-yeongyu/oh-my-openagent)，Boss 用作子编排器和专家。该插件捆绑了 **53 个核心代理**（核心 1 + OMO 9 + 工程 23 + OMC 19 + OMO 专家）始终加载到 `~/.claude/agents/`，加上 **133 个领域代理包**在 `~/.claude/agent-packs/` 中，可以按需激活。Boss 通过优先级 2 能力匹配从所有活跃代理中选择最佳匹配的专家。请参见下面的 [已安装组件](#已安装组件)。
 
 | 代理 | 来源 | 模型 | 角色 |
 |---------|--------|------|------|
@@ -172,7 +172,7 @@ rm ~/.claude/agents/<agent-name>.md
 |------|------|------|------|
 | 核心代理 | 53 | Core 1 + OMO 9 + 工程 23 + OMC 19 | 插件 |
 | 代理包 | 133 | 12 个领域类别（营销、游戏开发、销售等） | 插件 |
-| 技能 | 148 | ECC 119 + OMC 29 | 插件 |
+| 技能 | 156 | ECC 125 + OMC 31 | 插件 |
 | 规则 | 65 | ECC（通用 9 + 8 种语言 × 5） | 插件 |
 | MCP 服务器 | 3 | Context7、Exa、grep.app | 插件 |
 | 钩子 | 6 | my-claude（Boss 协议 + SessionStart） | 插件 |
@@ -525,7 +525,7 @@ Boss 通过 4 级优先级链路由每个请求：
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: 扫描中... 201 个代理，148 个技能就绪。
+[Boss] Phase 0: 扫描中... 186 个代理，156 个技能就绪。
 [Boss] Phase 1: 意图 → 安全分析 | 优先级：P2
 [Boss] Phase 2: 匹配 → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="
