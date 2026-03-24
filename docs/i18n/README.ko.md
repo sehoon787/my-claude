@@ -22,7 +22,7 @@
 
 Claude Code 멀티에이전트 오케스트레이션 환경을 한 번에 구성하기 위한 레포지토리입니다.
 
-3개 MIT 업스트림 소스에서 **201개 에이전트**, **148개 스킬**, **65개 룰**, **6개 훅**, **3개 MCP 서버**를 하나의 플러그인에 번들. GitHub Actions CI가 매주 업스트림 변경사항을 자동 동기화. **Boss** 동적 메타 오케스트레이터가 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지하고 최적의 전문가에게 작업을 라우팅합니다.
+3개 MIT 업스트림 소스에서 **201개 에이전트**, **156개 스킬**, **65개 룰**, **6개 훅**, **3개 MCP 서버**를 하나의 플러그인에 번들. GitHub Actions CI가 매주 업스트림 변경사항을 자동 동기화. **Boss** 동적 메타 오케스트레이터가 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지하고 최적의 전문가에게 작업을 라우팅합니다.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude 데모" width="700">
@@ -107,7 +107,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 - **grep.app**: GitHub 오픈소스 코드 검색
 
 ### 통합 생태계
-- 플러그인 하나로 **201 에이전트, 148 스킬, 65 룰**을 한 환경에 구성
+- 플러그인 하나로 **186 에이전트, 156 스킬, 65 룰**을 한 환경에 구성
 - 6개 오픈소스 도구(OMC, omo, ECC, Anthropic Skills, Agency, Karpathy)를 하나로 통합
 
 ---
@@ -169,7 +169,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 |------|------|------|------|
 | 코어 에이전트 | 53 | Core 1 + OMO 9 + Engineering 23 + OMC 19 | 플러그인 |
 | 에이전트 팩 | 133 | 12개 도메인 카테고리 (마케팅, 게임 개발, 영업 등) | 플러그인 |
-| 스킬 | 148 | ECC 119 + OMC 29 | 플러그인 |
+| 스킬 | 156 | ECC 125 + OMC 31 | 플러그인 |
 | 룰 | 65 | ECC (common 9 + 8 languages × 5) | 플러그인 |
 | MCP 서버 | 3 | Context7, Exa, grep.app | 플러그인 |
 | 훅 | 4 | my-claude (Boss 프로토콜 + SessionStart) | 플러그인 |

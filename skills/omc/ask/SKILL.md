@@ -23,11 +23,13 @@ Examples:
 
 ## Routing
 
-Preferred path:
+**Required execution path — always use this command:**
 
 ```bash
 omc ask {{ARGUMENTS}}
 ```
+
+**Do NOT manually construct raw provider CLI commands.** Never run `codex`, `claude`, or `gemini` directly to fulfill this skill. The `omc ask` wrapper handles correct flag selection, artifact persistence, and provider-version compatibility automatically. Manually assembling provider CLI flags will produce incorrect or outdated invocations.
 
 ## Requirements
 
