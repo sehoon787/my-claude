@@ -3,7 +3,7 @@
 
 # skills
 
-33 skill directories for workflow automation and specialized behaviors.
+30 skill directories for workflow automation and specialized behaviors.
 
 ## Purpose
 
@@ -39,6 +39,12 @@ Skills are reusable workflow templates that can be invoked via `/oh-my-claudecod
 |-----------|-------|---------|
 | `deepinit/SKILL.md` | deepinit | Generate hierarchical AGENTS.md |
 | `sciomc/SKILL.md` | sciomc | Parallel scientist orchestration |
+
+### Visual Skills
+
+| File | Skill | Purpose |
+|-----------|-------|---------|
+| `visual-verdict/SKILL.md` | visual-verdict | Structured visual QA verdict for screenshot/reference comparisons |
 
 ### Utility Skills
 

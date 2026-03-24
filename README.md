@@ -22,7 +22,7 @@
 
 All-in-one Claude Code multi-agent orchestration plugin — install once, get everything.
 
-Bundles **201 agents**, **148 skills**, **65 rules**, **6 hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
+Bundles **201 agents**, **156 skills**, **65 rules**, **6 hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
@@ -108,7 +108,7 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 - **grep.app**: GitHub open-source code search
 
 ### All-in-One Bundle
-- Plugin install provides **201 agents, 148 skills, and 65 rules** instantly
+- Plugin install provides **186 agents, 156 skills, and 65 rules** instantly
 - Bundles 3 MIT upstream sources (agency-agents, everything-claude-code, oh-my-claudecode)
 - Weekly CI auto-sync keeps bundled content up-to-date with upstream
 - Companion `install.sh` adds npm tools and proprietary Anthropic skills
@@ -172,7 +172,7 @@ Following SETUP.md will configure the following:
 |------|------|------|------|
 | Core Agents | 53 | Core 1 + OMO 9 + Engineering 23 + OMC 19 | Plugin |
 | Agent Packs | 133 | 12 domain categories (marketing, gamedev, sales, etc.) | Plugin |
-| Skills | 148 | ECC 119 + OMC 29 | Plugin |
+| Skills | 156 | ECC 125 + OMC 31 | Plugin |
 | Rules | 65 | ECC (common 9 + 8 languages × 5) | Plugin |
 | MCP Servers | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 6 | my-claude (Boss protocol + SessionStart) | Plugin |
