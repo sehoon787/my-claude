@@ -13,14 +13,16 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-186_(53_core)-blue)
-![Skills](https://img.shields.io/badge/skills-136-purple)
-![MCP Servers](https://img.shields.io/badge/MCP_servers-3-green)
+![Agents](https://img.shields.io/badge/agents-201-blue)
+![Skills](https://img.shields.io/badge/skills-148-purple)
+![Rules](https://img.shields.io/badge/rules-65-orange)
+![MCP](https://img.shields.io/badge/MCP-3-green)
+![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
 一体化 Claude Code 多代理编排插件 — 安装一次，获得所有功能。
 
-捆绑了来自 3 个 MIT 上游来源的 **186 个代理**（53 个核心 + 133 个领域代理包）、**148 个技能**、**65 个规则**、**6 个行为钩子**和 **3 个 MCP 服务器**到单一插件中。**Boss** 动态元编排器在运行时自动发现所有已安装的组件，并将任务路由到最优专家。GitHub Actions CI 每周同步上游变更。
+捆绑了来自 3 个 MIT 上游来源的 **201 个代理**、**148 个技能**、**65 个规则**、**6 个钩子**和 **3 个 MCP 服务器**到单一插件中。**Boss** 动态元编排器在运行时自动发现所有已安装的组件，并将任务路由到最优专家。GitHub Actions CI 每周同步上游变更。
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
@@ -106,7 +108,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 - **grep.app**：GitHub 开源代码搜索
 
 ### 一体化包
-- 插件安装提供 **186 个代理、148 个技能和 65 个规则**，即时可用
+- 插件安装提供 **201 个代理、148 个技能和 65 个规则**，即时可用
 - 捆绑 3 个 MIT 上游来源（agency-agents、everything-claude-code、oh-my-claudecode）
 - 每周 CI 自动同步保持捆绑内容与上游最新
 - 伴随 `install.sh` 添加 npm 工具和专有 Anthropic 技能
@@ -523,7 +525,7 @@ Boss 通过 4 级优先级链路由每个请求：
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: 扫描中... 201 个代理，136 个技能就绪。
+[Boss] Phase 0: 扫描中... 201 个代理，148 个技能就绪。
 [Boss] Phase 1: 意图 → 安全分析 | 优先级：P2
 [Boss] Phase 2: 匹配 → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="

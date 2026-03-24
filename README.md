@@ -13,14 +13,16 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-186_(53_core)-blue)
-![Skills](https://img.shields.io/badge/skills-136-purple)
-![MCP Servers](https://img.shields.io/badge/MCP_servers-3-green)
+![Agents](https://img.shields.io/badge/agents-201-blue)
+![Skills](https://img.shields.io/badge/skills-148-purple)
+![Rules](https://img.shields.io/badge/rules-65-orange)
+![MCP Servers](https://img.shields.io/badge/MCP-3-green)
+![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
 All-in-one Claude Code multi-agent orchestration plugin — install once, get everything.
 
-Bundles **186 agents** (53 core + 133 domain agent-packs), **148 skills**, **65 rules**, **6 behavioral hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
+Bundles **201 agents**, **148 skills**, **65 rules**, **6 hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
@@ -106,7 +108,7 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 - **grep.app**: GitHub open-source code search
 
 ### All-in-One Bundle
-- Plugin install provides **186 agents, 148 skills, and 65 rules** instantly
+- Plugin install provides **201 agents, 148 skills, and 65 rules** instantly
 - Bundles 3 MIT upstream sources (agency-agents, everything-claude-code, oh-my-claudecode)
 - Weekly CI auto-sync keeps bundled content up-to-date with upstream
 - Companion `install.sh` adds npm tools and proprietary Anthropic skills
@@ -524,7 +526,7 @@ Every delegation includes a **6-section structured prompt**: TASK, EXPECTED OUTC
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 201 agents, 136 skills ready.
+[Boss] Phase 0: Scanning... 201 agents, 148 skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="
