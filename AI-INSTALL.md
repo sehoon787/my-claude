@@ -24,7 +24,7 @@ node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir
 This installs:
 - 52 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 23 engineering
 - 150 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
-- 148 skills (119 ECC + 29 OMC)
+- 156 skills (125 ECC + 31 OMC)
 - 49 rules (9 common + 8 languages × 5)
 - 6 behavioral hooks (SessionStart, PreToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop)
 - 3 MCP servers (Context7, Exa, grep.app)
