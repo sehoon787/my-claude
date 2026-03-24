@@ -14,20 +14,20 @@ Only 2-3 steps are needed.
 /plugin install my-claude@my-claude
 ```
 
-After plugin install, set Boss as default agent:
+After plugin install, configure Boss and MCP servers globally:
 
 ```bash
-# Set Boss as default agent (one-time setup)
-node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir(),'.claude','settings.json');const s=fs.existsSync(f)?JSON.parse(fs.readFileSync(f,'utf8')):{};s.env={...s.env,CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:'1'};s.agent=s.agent||'boss';fs.writeFileSync(f,JSON.stringify(s,null,2))"
+# Set Boss as default agent + register MCP servers globally (one-time setup)
+node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir(),'.claude','settings.json');const s=fs.existsSync(f)?JSON.parse(fs.readFileSync(f,'utf8')):{};s.env={...s.env,CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:'1'};s.agent=s.agent||'boss';s.mcpServers={...s.mcpServers,context7:{type:'url',url:'https://mcp.context7.com/mcp'},exa:{type:'url',url:'https://mcp.exa.ai/mcp?tools=web_search_exa'},grep_app:{type:'url',url:'https://mcp.grep.app'}};fs.writeFileSync(f,JSON.stringify(s,null,2))"
 ```
 
 This installs:
 - 53 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 23 engineering
 - 133 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
 - 156 skills (125 ECC + 31 OMC)
-- 49 rules (9 common + 8 languages × 5)
+- 65 rules
 - 6 behavioral hooks (SessionStart, PreToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop)
-- 3 MCP servers (Context7, Exa, grep.app)
+- 3 MCP servers globally (Context7, Exa, grep.app) — available in all projects
 - Boss meta-orchestrator as default agent
 
 ## Step 1b: Manual install (if plugin unavailable)
