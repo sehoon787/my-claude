@@ -20,9 +20,9 @@
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-Claude Code 에이전트 하네스 환경을 한 번에 구성하기 위한 레포지토리입니다.
+Claude Code를 위한 올인원 에이전트 하네스 — 플러그인 하나로 185개 에이전트를 바로 사용.
 
-3개 MIT 업스트림 소스에서 **185개 에이전트**, **156개 스킬**, **65개 룰**, **6개 훅**, **3개 MCP 서버**를 하나의 플러그인에 번들. GitHub Actions CI가 매주 업스트림 변경사항을 자동 동기화. **Boss** 동적 메타 오케스트레이터가 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지하고 최적의 전문가에게 작업을 라우팅합니다.
+**Boss**가 런타임에 모든 에이전트, 스킬, MCP 툴을 자동 감지하고 최적의 전문가에게 작업을 라우팅합니다. 3개의 MIT 업스트림 레포를 번들하여 CI로 매주 동기화.
 
 <p align="center">
   <img src="../../assets/demo.svg" alt="my-claude 데모" width="700">

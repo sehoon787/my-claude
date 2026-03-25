@@ -20,9 +20,9 @@
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-All-in-One Claude Code Agent-Harness — einmal installieren, alles bekommen.
+All-in-One Agent-Harness für Claude Code — ein Plugin, 185 Agenten sofort einsatzbereit.
 
-Bündelt **185 Agenten**, **156 Skills**, **65 Regeln**, **6 Hooks** und **3 MCP-Server** aus 3 MIT-Upstream-Quellen in ein einzelnes Plugin. Der **Boss** dynamische Meta-Orchestrator entdeckt alle installierten Komponenten zur Laufzeit automatisch und leitet Aufgaben an den optimalen Spezialisten weiter. GitHub Actions CI synchronisiert Upstream-Änderungen wöchentlich.
+**Boss** erkennt zur Laufzeit automatisch alle Agenten, Skills und MCP-Tools und leitet Aufgaben an den passenden Spezialisten weiter. Drei MIT-Upstream-Repos gebündelt und wöchentlich per CI synchronisiert.
 
 <p align="center">
   <img src="../../assets/demo.svg" alt="my-claude demo" width="700">

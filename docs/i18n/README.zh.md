@@ -20,9 +20,9 @@
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-一体化 Claude Code 智能体治具（Agent Harness）— 安装一次，获得所有功能。
+Claude Code 的一体化智能体治具 — 单个插件，185 个智能体即刻可用。
 
-捆绑了来自 3 个 MIT 上游来源的 **185 个代理**、**156 个技能**、**65 个规则**、**6 个钩子**和 **3 个 MCP 服务器**到单一插件中。**Boss** 动态元编排器在运行时自动发现所有已安装的组件，并将任务路由到最优专家。GitHub Actions CI 每周同步上游变更。
+**Boss** 在运行时自动发现所有智能体、技能和 MCP 工具，并将任务路由到最优专家。三个 MIT 上游仓库打包集成，通过 CI 每周自动同步。
 
 <p align="center">
   <img src="../../assets/demo.svg" alt="my-claude demo" width="700">

@@ -20,9 +20,9 @@
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-Claude Code 用の完全なエージェントハーネス — 1 回インストールするだけで、すべてが揃います。
+Claude Code 用のオールインワン エージェントハーネス — プラグイン 1 つで 185 エージェントをすぐに使用可能。
 
-3 つの MIT アップストリーム ソースから **185 エージェント**、**156 スキル**、**65 ルール**、**6 つのフック**、**3 つの MCP サーバー** をバンドルして、1 つのプラグインにまとめています。**Boss** 動的メタ オーケストレータは、実行時にインストール済みのすべてのコンポーネントを自動検出し、最適な専門家にタスクをルーティングします。GitHub Actions CI は、アップストリームの変更を毎週同期します。
+**Boss** が実行時にすべてのエージェント、スキル、MCP ツールを自動検出し、最適な専門家にタスクをルーティングします。3 つの MIT アップストリームリポジトリをバンドルし、CI で毎週同期。
 
 <p align="center">
   <img src="../../assets/demo.svg" alt="my-claude demo" width="700">
