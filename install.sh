@@ -129,6 +129,11 @@ existing.agent = existing.agent || 'boss';
 if ('${TMUX_AVAILABLE}' === '1' && !existing.teammateMode) {
   existing.teammateMode = 'tmux';
 }
+existing.mcpServers = Object.assign({}, existing.mcpServers, {
+  context7: { type: 'url', url: 'https://mcp.context7.com/mcp' },
+  exa: { type: 'url', url: 'https://mcp.exa.ai/mcp?tools=web_search_exa' },
+  grep_app: { type: 'url', url: 'https://mcp.grep.app' }
+});
 fs.writeFileSync(dest, JSON.stringify(existing, null, 2) + '\n');
 console.log('  settings.json merged');
 "
@@ -143,8 +148,13 @@ const src  = path.join('${SCRIPT_DIR}', 'hooks', 'hooks.json');
 const existing  = fs.existsSync(dest) ? JSON.parse(fs.readFileSync(dest, 'utf8')) : {};
 const srcHooks  = JSON.parse(fs.readFileSync(src, 'utf8')).hooks || {};
 existing.hooks  = existing.hooks || {};
+// Resolve plugin-relative paths for non-plugin installs
+const hooksDir = path.join(process.env.HOME, '.claude', 'hooks').replace(/\\\\/g, '/');
+let rawHooks = JSON.stringify(srcHooks);
+rawHooks = rawHooks.split('\${CLAUDE_PLUGIN_ROOT}/hooks').join(hooksDir);
+const resolvedHooks = JSON.parse(rawHooks);
 // Add/replace each hook event from hooks.json into settings.json
-for (const [event, entries] of Object.entries(srcHooks)) {
+for (const [event, entries] of Object.entries(resolvedHooks)) {
   existing.hooks[event] = entries;
 }
 fs.writeFileSync(dest, JSON.stringify(existing, null, 2) + '\n');
