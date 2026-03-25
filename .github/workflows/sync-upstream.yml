@@ -129,7 +129,7 @@ jobs:
       # ── 5. Update documentation counts ──
       - name: Update documentation counts
         run: |
-          CORE_AGENTS=$(find agents/core -name '*.md' | wc -l)
+          CORE_AGENTS=$(find agents/core -name '*.md' ! -name 'agent-teams-reference.md' | wc -l)
           OMO_AGENTS=$(find agents/omo -name '*.md' | wc -l)
           ENGINEERING_COUNT=$(find agents/agency/engineering -name '*.md' | wc -l)
           STRATEGY_COUNT=$(find agents/agency/strategy -name '*.md' | wc -l)

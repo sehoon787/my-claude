@@ -13,7 +13,7 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-186-blue)
+![Agents](https://img.shields.io/badge/agents-185-blue)
 ![Skills](https://img.shields.io/badge/skills-156-purple)
 ![Rules](https://img.shields.io/badge/rules-65-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
@@ -22,7 +22,7 @@
 
 All-in-One Claude Code Multi-Agent-Orchestrierungs-Plugin — einmal installieren, alles bekommen.
 
-Bündelt **186 Agenten**, **156 Skills**, **65 Regeln**, **6 Hooks** und **3 MCP-Server** aus 3 MIT-Upstream-Quellen in ein einzelnes Plugin. Der **Boss** dynamische Meta-Orchestrator entdeckt alle installierten Komponenten zur Laufzeit automatisch und leitet Aufgaben an den optimalen Spezialisten weiter. GitHub Actions CI synchronisiert Upstream-Änderungen wöchentlich.
+Bündelt **185 Agenten**, **156 Skills**, **65 Regeln**, **6 Hooks** und **3 MCP-Server** aus 3 MIT-Upstream-Quellen in ein einzelnes Plugin. Der **Boss** dynamische Meta-Orchestrator entdeckt alle installierten Komponenten zur Laufzeit automatisch und leitet Aufgaben an den optimalen Spezialisten weiter. GitHub Actions CI synchronisiert Upstream-Änderungen wöchentlich.
 
 <p align="center">
   <img src="../../assets/demo.svg" alt="my-claude demo" width="700">
@@ -108,7 +108,7 @@ Lese die vollständige Ausgabe und führe jeden Schritt der Reihe nach aus. Verw
 - **grep.app**: GitHub Open-Source-Code-Suche
 
 ### All-in-One Bundle
-- Plugin-Installation bietet sofort **186 Agenten, 156 Skills und 65 Regeln**
+- Plugin-Installation bietet sofort **185 Agenten, 156 Skills und 65 Regeln**
 - Bündelt 3 MIT-Upstream-Quellen (agency-agents, everything-claude-code, oh-my-claudecode)
 - Wöchentliche CI-Auto-Sync hält gebündelte Inhalte mit Upstream auf dem neuesten Stand
 - Begleitendes `install.sh` fügt npm-Tools und proprietäre Anthropic Skills hinzu
@@ -117,7 +117,7 @@ Lese die vollständige Ausgabe und führe jeden Schritt der Reihe nach aus. Verw
 
 ## Kern- + OMO-Agenten
 
-**Boss** ist der einzige my-claude Original-Agent. Die verbleibenden 9 sind [OMO-Agenten](https://github.com/code-yeongyu/oh-my-openagent), die Boss als Sub-Orchestrators und Spezialisten nutzt. Das Plugin bündelt **53 Kern-Agenten** (Kern 1 + OMO 9 + Engineering 23 + OMC 19 + OMO-Spezialisten), die immer in `~/.claude/agents/` geladen werden, plus **133 Domain-Agent-Packs** in `~/.claude/agent-packs/`, die bei Bedarf aktiviert werden können. Boss wählt den besten entsprechenden Spezialisten aus allen aktiven Agenten über Priority 2 Fähigkeits-Matching. Siehe [Installierte Komponenten](#installierte-komponenten) unten.
+**Boss** ist der einzige my-claude Original-Agent. Die verbleibenden 9 sind [OMO-Agenten](https://github.com/code-yeongyu/oh-my-openagent), die Boss als Sub-Orchestrators und Spezialisten nutzt. Das Plugin bündelt **52 Kern-Agenten** (Kern 1 + OMO 9 + Engineering 23 + OMC 19 + OMO-Spezialisten), die immer in `~/.claude/agents/` geladen werden, plus **133 Domain-Agent-Packs** in `~/.claude/agent-packs/`, die bei Bedarf aktiviert werden können. Boss wählt den besten entsprechenden Spezialisten aus allen aktiven Agenten über Priority 2 Fähigkeits-Matching. Siehe [Installierte Komponenten](#installierte-komponenten) unten.
 
 | Agent | Quelle | Modell | Rolle |
 |---------|--------|------|------|
@@ -170,7 +170,7 @@ Das Befolgen von SETUP.md konfiguriert Folgendes:
 
 | Kategorie | Anzahl | Quelle | Gebündelt |
 |------|------|------|------|
-| Kern-Agenten | 53 | Kern 1 + OMO 9 + Engineering 23 + OMC 19 | Plugin |
+| Kern-Agenten | 52 | Kern 1 + OMO 9 + Engineering 23 + OMC 19 | Plugin |
 | Agent Packs | 133 | 12 Domain-Kategorien (Marketing, Spieleentwicklung, Verkauf, etc.) | Plugin |
 | Skills | 156 | ECC 125 + OMC 31 | Plugin |
 | Regeln | 65 | ECC (Common 9 + 8 Sprachen × 5) | Plugin |
@@ -526,7 +526,7 @@ Jede Delegation beinhaltet einen **6-Abschnitt strukturierten Prompt**: AUFGABE,
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 186 agents, 156 skills ready.
+[Boss] Phase 0: Scanning... 185 agents, 156 skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="
