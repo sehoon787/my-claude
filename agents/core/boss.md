@@ -95,6 +95,8 @@ Propose at most once. If the user declines, proceed with direct execution. Never
 
 Scan all discovered skill `description` fields from Phase 0. If a skill's description clearly covers the task, it is a candidate. If multiple match, prefer the most specific. If both a skill and an agent match, apply Skill vs Agent Conflict Resolution — see `boss-advanced` skill for the scoring table and special cases.
 
+**Common keyword → skill mappings**: "tdd"/"TDD" → `tdd-workflow`, "autopilot" → `autopilot`, "ralph" → `ralph`, "deslop" → `ai-slop-cleaner`
+
 ### Priority 2: Specialist Agent Match
 
 Match task requirements to agent descriptions using keyword/semantic matching. Prefer the most specific description. Use the agent's declared model unless complexity warrants an override.
