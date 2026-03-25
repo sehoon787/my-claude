@@ -171,10 +171,21 @@ for src in "$SCRIPT_DIR"/skills/omc/*/; do
     rm -f "$target"
   fi
 done
+for src in "$SCRIPT_DIR"/skills/core/*/; do
+  [ ! -d "$src" ] && continue
+  name=$(basename "$src")
+  target="$HOME/.claude/skills/$name"
+  if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
+    rm -f "$target"
+  fi
+done
 
 # skills
 cp -r "$SCRIPT_DIR"/skills/ecc/* "$HOME/.claude/skills/"
 cp -r "$SCRIPT_DIR"/skills/omc/* "$HOME/.claude/skills/"
+if [ -d "$SCRIPT_DIR/skills/core" ]; then
+  cp -r "$SCRIPT_DIR"/skills/core/* "$HOME/.claude/skills/"
+fi
 
 # rules
 cp -r "$SCRIPT_DIR"/rules/* "$HOME/.claude/rules/"
@@ -292,6 +303,7 @@ fi
   # Skills — from source directories
   find "$SCRIPT_DIR/skills/ecc" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
   find "$SCRIPT_DIR/skills/omc" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
+  find "$SCRIPT_DIR/skills/core" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \; 2>/dev/null
   # Rules — from source
   find "$SCRIPT_DIR/rules" -name '*.md' | while read -r f; do echo "rules/${f#$SCRIPT_DIR/rules/}"; done
   # Hooks
