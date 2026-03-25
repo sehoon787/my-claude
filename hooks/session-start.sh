@@ -8,13 +8,15 @@ INSTALLED=()
 
 # 1. Anthropic Skills
 if [ ! -d "$HOME/.claude/skills/pdf" ] && [ ! -d "$HOME/.claude/skills/docx" ]; then
-  cd /tmp && git clone --depth 1 https://github.com/anthropics/skills.git 2>/dev/null
-  if [ -d /tmp/skills/skills ]; then
+  _tmp_dir=$(mktemp -d)
+  git clone --depth 1 https://github.com/anthropics/skills.git "$_tmp_dir/skills" 2>/dev/null
+  if [ -d "$_tmp_dir/skills/skills" ]; then
     mkdir -p "$HOME/.claude/skills"
-    cp -r /tmp/skills/skills/* "$HOME/.claude/skills/" 2>/dev/null
-    rm -rf /tmp/skills
+    cp -r "$_tmp_dir/skills/skills/"* "$HOME/.claude/skills/" 2>/dev/null
+    rm -rf "$_tmp_dir"
     INSTALLED+=("anthropic-skills")
   else
+    rm -rf "$_tmp_dir"
     MISSING+=("anthropic-skills")
   fi
 fi
