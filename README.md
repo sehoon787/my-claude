@@ -20,7 +20,7 @@
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-All-in-one Claude Code multi-agent orchestration plugin — install once, get everything.
+All-in-one Claude Code agent harness — install once, get everything.
 
 Bundles **185 agents**, **156 skills**, **65 rules**, **6 hooks**, and **3 MCP servers** from 3 MIT upstream sources into a single plugin. The **Boss** dynamic meta-orchestrator auto-discovers all installed components at runtime and routes tasks to the optimal specialist. GitHub Actions CI syncs upstream changes weekly.
 
@@ -457,7 +457,7 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 
 ### 1. [Oh My Claude Code (OMC)](https://github.com/Yeachan-Heo/oh-my-claudecode)
 
-A multi-agent orchestration plugin dedicated to Claude Code. 18 specialist agents (architect, debugger, code reviewer, security reviewer, etc.) divide work by role, and magic keywords like `autopilot:` activate automatic parallel execution.
+An agent harness dedicated to Claude Code. 18 specialist agents (architect, debugger, code reviewer, security reviewer, etc.) divide work by role, and magic keywords like `autopilot:` activate automatic parallel execution.
 
 ### 2. [Oh My OpenAgent (omo)](https://github.com/code-yeongyu/oh-my-openagent)
 

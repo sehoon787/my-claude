@@ -20,7 +20,7 @@
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-Claude Code 멀티에이전트 오케스트레이션 환경을 한 번에 구성하기 위한 레포지토리입니다.
+Claude Code 에이전트 하네스 환경을 한 번에 구성하기 위한 레포지토리입니다.
 
 3개 MIT 업스트림 소스에서 **185개 에이전트**, **156개 스킬**, **65개 룰**, **6개 훅**, **3개 MCP 서버**를 하나의 플러그인에 번들. GitHub Actions CI가 매주 업스트림 변경사항을 자동 동기화. **Boss** 동적 메타 오케스트레이터가 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지하고 최적의 전문가에게 작업을 라우팅합니다.
 
@@ -90,7 +90,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ## 주요 기능
 
-### 멀티에이전트 오케스트레이션
+### 멀티에이전트 하네스
 - **Boss 동적 메타 오케스트레이터**: 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지 — 3D 충돌 해결(Scope/Depth×2/Interactivity)로 최적 라우팅. 중간 규모 작업은 서브 오케스트레이터 없이 직접 조율(P3a)
 - **서브 오케스트레이터 (P3b)**: 직접 처리하기 너무 복잡한 작업은 Boss가 Sisyphus(계획+검증), Atlas(태스크 조율), Hephaestus(자율 실행)에 위임 — 복잡한 멀티스텝 워크플로우 전용이며 모든 요청을 거치지 않음
 - **Skill vs Agent 충돌 해결**: 가중 3차원 스코어링(Scope, Depth×2, Interactivity)으로 각 작업에 Skill/Agent 여부를 판단 — 하드코딩 라우팅 테이블 없음
@@ -444,7 +444,7 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 
 ### 1. [Oh My Claude Code (OMC)](https://github.com/Yeachan-Heo/oh-my-claudecode)
 
-Claude Code 전용 멀티에이전트 오케스트레이션 플러그인. 18개의 전문 에이전트(아키텍트, 디버거, 코드리뷰어, 보안검토자 등)가 역할별로 분업하며, `autopilot:` 같은 매직 키워드로 자동 병렬 실행을 활성화합니다.
+Claude Code 전용 에이전트 하네스 플러그인. 18개의 전문 에이전트(아키텍트, 디버거, 코드리뷰어, 보안검토자 등)가 역할별로 분업하며, `autopilot:` 같은 매직 키워드로 자동 병렬 실행을 활성화합니다.
 
 ### 2. [Oh My OpenAgent (omo)](https://github.com/code-yeongyu/oh-my-openagent)
 

@@ -20,7 +20,7 @@
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-All-in-One Claude Code Multi-Agent-Orchestrierungs-Plugin — einmal installieren, alles bekommen.
+All-in-One Claude Code Agent-Harness — einmal installieren, alles bekommen.
 
 Bündelt **185 Agenten**, **156 Skills**, **65 Regeln**, **6 Hooks** und **3 MCP-Server** aus 3 MIT-Upstream-Quellen in ein einzelnes Plugin. Der **Boss** dynamische Meta-Orchestrator entdeckt alle installierten Komponenten zur Laufzeit automatisch und leitet Aufgaben an den optimalen Spezialisten weiter. GitHub Actions CI synchronisiert Upstream-Änderungen wöchentlich.
 
@@ -90,7 +90,7 @@ Lese die vollständige Ausgabe und führe jeden Schritt der Reihe nach aus. Verw
 
 ## Hauptfunktionen
 
-### Multi-Agent-Orchestrierung
+### Multi-Agent-Harness
 - **Boss Dynamischer Meta-Orchestrator**: Entdeckt alle installierten Agenten, Skills und MCP-Server zur Laufzeit automatisch — leitet Aufgaben über 3D-Konfliktauflösung (Scope/Tiefe×2/Interaktivität) weiter. Bearbeitet mittelgroße Aufgaben direkt (P3a) ohne Sub-Orchestrator-Overhead
 - **Agent Teams Direct Leadership**: Boss kann Agent Teams direkt führen (Priority 3c-DIRECT) mit Peer-to-Peer-Teamkommunikation, Dateieigentümer-Protokoll und Review-Chain-Mustern für Qualitätssicherung
 - **Sub-Orchestrators (P3b)**: Wenn Aufgaben zu komplex für direkte Bearbeitung sind, delegiert Boss an Sisyphus (Planung+Verifizierung), Atlas (Task-Koordination) oder Hephaestus (autonome Ausführung) — nur für komplexe mehrstufige Workflows, nicht für jede Anfrage
@@ -449,7 +449,7 @@ Jedes Sprachenverzeichnis enthält: coding-style.md, hooks.md, patterns.md, secu
 
 ### 1. [Oh My Claude Code (OMC)](https://github.com/Yeachan-Heo/oh-my-claudecode)
 
-Ein Multi-Agent-Orchestrierungs-Plugin für Claude Code. 18 Spezialisten-Agenten (Architect, Debugger, Code Reviewer, Security Reviewer, etc.) teilen die Arbeit nach Rolle auf, und magische Schlüsselwörter wie `autopilot:` aktivieren automatische parallele Ausführung.
+Ein Agent-Harness für Claude Code. 18 Spezialisten-Agenten (Architect, Debugger, Code Reviewer, Security Reviewer, etc.) teilen die Arbeit nach Rolle auf, und magische Schlüsselwörter wie `autopilot:` aktivieren automatische parallele Ausführung.
 
 ### 2. [Oh My OpenAgent (omo)](https://github.com/code-yeongyu/oh-my-openagent)
 
