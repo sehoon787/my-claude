@@ -37,7 +37,7 @@ This installs:
 ```bash
 # If plugin install is not available:
 git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude
-mkdir -p ~/.claude/agents ~/.claude/agent-packs ~/.claude/skills ~/.claude/rules
+mkdir -p ~/.claude/agents ~/.claude/agent-packs ~/.claude/skills ~/.claude/rules ~/.claude/hooks
 # Clean up old flat installs
 for prefix in marketing- sales- paid- academic- design- support- testing- specialized- product- project-management- game- godot- unity- unreal- roblox- xr- phase- scenario-; do
   rm -f ~/.claude/agents/${prefix}*.md
@@ -59,25 +59,25 @@ done
 mkdir -p ~/.claude/docs/nexus
 cp /tmp/my-claude/agents/core/agent-teams-reference.md ~/.claude/docs/nexus/
 find /tmp/my-claude/agents/agency/strategy -name '*.md' -exec cp {} ~/.claude/docs/nexus/ \;
+# Skills, rules, hooks
 cp -r /tmp/my-claude/skills/ecc/* ~/.claude/skills/
 cp -r /tmp/my-claude/skills/omc/* ~/.claude/skills/
 cp -r /tmp/my-claude/rules/* ~/.claude/rules/
+cp /tmp/my-claude/hooks/hooks.json ~/.claude/hooks/
+cp /tmp/my-claude/hooks/session-start.sh ~/.claude/hooks/
+# MCP servers
 claude mcp add --transport http --scope user context7 "https://mcp.context7.com/mcp"
 claude mcp add --transport http --scope user exa "https://mcp.exa.ai/mcp?tools=web_search_exa"
 claude mcp add --transport http --scope user grep_app "https://mcp.grep.app"
+# Merge hooks + settings
+node /tmp/my-claude/scripts/merge-hooks.js ~/.claude/hooks/hooks.json
+node /tmp/my-claude/scripts/merge-settings.js
 # Record installed version
-node -e "const v=require('/tmp/my-claude/.claude-plugin/plugin.json').version;require('fs').writeFileSync(require('path').join(require('os').homedir(),'.claude','.my-claude-version'),v+'\n')"
+node /tmp/my-claude/scripts/get-version.js /tmp/my-claude/.claude-plugin/plugin.json > ~/.claude/.my-claude-version
 rm -rf /tmp/my-claude
 ```
 
-After manual install, set Boss as default agent:
-
-```bash
-# Set Boss as default agent (one-time setup)
-node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir(),'.claude','settings.json');const s=fs.existsSync(f)?JSON.parse(fs.readFileSync(f,'utf8')):{};s.env={...s.env,CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:'1'};s.agent=s.agent||'boss';s.mcpServers={...s.mcpServers,context7:{type:'url',url:'https://mcp.context7.com/mcp'},exa:{type:'url',url:'https://mcp.exa.ai/mcp?tools=web_search_exa'},grep_app:{type:'url',url:'https://mcp.grep.app'}};fs.writeFileSync(f,JSON.stringify(s,null,2))"
-```
-
-Note: Manual install does not configure hooks. Run the node command above to set Boss as default agent. See SETUP.md Section 7 Option D for hooks setup.
+Note: Manual install now includes hooks configuration. The `scripts/merge-hooks.js` resolves paths for both macOS and Windows.
 
 ## Step 2: Install companion tools
 

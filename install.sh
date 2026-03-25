@@ -3,6 +3,17 @@
 # Usage: bash install.sh
 set -euo pipefail
 
+# Cross-platform SHA-256 checksum
+sha256() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | awk '{print $1}'
+  else
+    echo "no-sha256-tool"
+  fi
+}
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "=== my-claude installer ==="
@@ -16,7 +27,7 @@ command -v git  >/dev/null 2>&1 || { echo "ERROR: git not found"; exit 1; }
 echo "  Prerequisites OK"
 
 # ── Version info ──
-INSTALLING_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('$SCRIPT_DIR/.claude-plugin/plugin.json','utf8')).version)}catch(e){console.log('unknown')}" 2>/dev/null)
+INSTALLING_VERSION=$(node "$SCRIPT_DIR/scripts/get-version.js" "$SCRIPT_DIR/.claude-plugin/plugin.json" 2>/dev/null)
 INSTALLED_VERSION="none"
 if [ -f "$HOME/.claude/.my-claude-version" ]; then
   INSTALLED_VERSION=$(cat "$HOME/.claude/.my-claude-version")
@@ -139,47 +150,15 @@ echo "  MCP servers registered"
 
 # ── 4. Merge settings.json ──
 echo "[4/6] Merging settings.json..."
-node -e "
-const fs   = require('fs');
-const path = require('path');
-const dest = path.join(process.env.HOME, '.claude', 'settings.json');
-const existing = fs.existsSync(dest) ? JSON.parse(fs.readFileSync(dest, 'utf8')) : {};
-existing.env   = Object.assign({}, existing.env, { CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: '1' });
-existing.agent = existing.agent || 'boss';
-if ('${TMUX_AVAILABLE}' === '1' && !existing.teammateMode) {
-  existing.teammateMode = 'tmux';
-}
-existing.mcpServers = Object.assign({}, existing.mcpServers, {
-  context7: { type: 'url', url: 'https://mcp.context7.com/mcp' },
-  exa: { type: 'url', url: 'https://mcp.exa.ai/mcp?tools=web_search_exa' },
-  grep_app: { type: 'url', url: 'https://mcp.grep.app' }
-});
-fs.writeFileSync(dest, JSON.stringify(existing, null, 2) + '\n');
-console.log('  settings.json merged');
-"
+if [ "$TMUX_AVAILABLE" = "1" ]; then
+  node "$SCRIPT_DIR/scripts/merge-settings.js" --tmux
+else
+  node "$SCRIPT_DIR/scripts/merge-settings.js"
+fi
 
 # ── 4b. Merge hooks from hooks.json into settings.json ──
 echo "[4b] Merging hooks into settings.json..."
-node -e "
-const fs   = require('fs');
-const path = require('path');
-const dest = path.join(process.env.HOME, '.claude', 'settings.json');
-const src  = path.join('${SCRIPT_DIR}', 'hooks', 'hooks.json');
-const existing  = fs.existsSync(dest) ? JSON.parse(fs.readFileSync(dest, 'utf8')) : {};
-const srcHooks  = JSON.parse(fs.readFileSync(src, 'utf8')).hooks || {};
-existing.hooks  = existing.hooks || {};
-// Resolve plugin-relative paths for non-plugin installs
-const hooksDir = path.join(process.env.HOME, '.claude', 'hooks').replace(/\\\\/g, '/');
-let rawHooks = JSON.stringify(srcHooks);
-rawHooks = rawHooks.split('\${CLAUDE_PLUGIN_ROOT}/hooks').join(hooksDir);
-const resolvedHooks = JSON.parse(rawHooks);
-// Add/replace each hook event from hooks.json into settings.json
-for (const [event, entries] of Object.entries(resolvedHooks)) {
-  existing.hooks[event] = entries;
-}
-fs.writeFileSync(dest, JSON.stringify(existing, null, 2) + '\n');
-console.log('  hooks merged into settings.json');
-"
+node "$SCRIPT_DIR/scripts/merge-hooks.js" "$SCRIPT_DIR/hooks/hooks.json"
 
 # ── 5. Companion tools ──
 
@@ -238,7 +217,7 @@ else
   _tmp_karpathy=$(mktemp)
   trap 'rm -f "$_tmp_karpathy"' EXIT
   if curl -sL "$KARPATHY_URL" -o "$_tmp_karpathy" 2>/dev/null; then
-    ACTUAL_CHECKSUM=$(sha256sum "$_tmp_karpathy" | awk '{print $1}')
+    ACTUAL_CHECKSUM=$(sha256 "$_tmp_karpathy")
     if [ "$ACTUAL_CHECKSUM" = "$KARPATHY_EXPECTED_CHECKSUM" ]; then
       cat "$_tmp_karpathy" >> "$HOME/.claude/CLAUDE.md"
       echo "    Karpathy guidelines appended"
@@ -260,7 +239,7 @@ echo "  omc:              $(command -v omc            >/dev/null 2>&1 && echo 'O
 echo "  omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  ast-grep:         $(command -v ast-grep       >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  tmux:             $(command -v tmux >/dev/null 2>&1 && echo "OK ($(tmux -V))" || echo 'NOT INSTALLED (in-process mode)')"
-TEAMMATE_MODE=$(node -e 'try{console.log(JSON.parse(require("fs").readFileSync(process.env.HOME+"/.claude/settings.json","utf8")).teammateMode||"auto")}catch(e){console.log("auto")}')
+TEAMMATE_MODE=$(node -e "try{const h=process.env.HOME||process.env.USERPROFILE;console.log(JSON.parse(require('fs').readFileSync(h+'/.claude/settings.json','utf8')).teammateMode||'auto')}catch(e){console.log('auto')}")
 echo "  version:          v${INSTALLING_VERSION}"
 echo "  teammateMode:     $TEAMMATE_MODE"
 echo ""
