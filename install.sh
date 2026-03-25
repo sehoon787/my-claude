@@ -77,13 +77,6 @@ echo "[1/6] Installing plugin files..."
 #   ~/.claude/agent-packs/ → domain agents (not auto-loaded, available on demand)
 #   ~/.claude/docs/nexus/  → strategy docs (reference material, never parsed as agents)
 mkdir -p "$HOME/.claude/agents" "$HOME/.claude/skills" "$HOME/.claude/rules"
-mkdir -p "$HOME/.claude/agent-packs/academic" "$HOME/.claude/agent-packs/design" \
-         "$HOME/.claude/agent-packs/game-development" "$HOME/.claude/agent-packs/marketing" \
-         "$HOME/.claude/agent-packs/paid-media" "$HOME/.claude/agent-packs/product" \
-         "$HOME/.claude/agent-packs/project-management" "$HOME/.claude/agent-packs/sales" \
-         "$HOME/.claude/agent-packs/spatial-computing" "$HOME/.claude/agent-packs/specialized" \
-         "$HOME/.claude/agent-packs/support" "$HOME/.claude/agent-packs/testing"
-mkdir -p "$HOME/.claude/docs/nexus"
 
 # Manifest-based cleanup: remove only files from previous my-claude install
 if [ -f "$HOME/.claude/.my-claude-manifest" ]; then
@@ -94,6 +87,14 @@ if [ -f "$HOME/.claude/.my-claude-manifest" ]; then
   # Remove empty agent-pack directories (only if empty after cleanup)
   find "$HOME/.claude/agent-packs" -type d -empty -delete 2>/dev/null || true
 fi
+
+mkdir -p "$HOME/.claude/agent-packs/academic" "$HOME/.claude/agent-packs/design" \
+         "$HOME/.claude/agent-packs/game-development" "$HOME/.claude/agent-packs/marketing" \
+         "$HOME/.claude/agent-packs/paid-media" "$HOME/.claude/agent-packs/product" \
+         "$HOME/.claude/agent-packs/project-management" "$HOME/.claude/agent-packs/sales" \
+         "$HOME/.claude/agent-packs/spatial-computing" "$HOME/.claude/agent-packs/specialized" \
+         "$HOME/.claude/agent-packs/support" "$HOME/.claude/agent-packs/testing"
+mkdir -p "$HOME/.claude/docs/nexus"
 
 # Clean up old flattened agents from previous installs
 echo "  Cleaning up old flattened agents..."
