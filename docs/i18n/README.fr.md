@@ -20,7 +20,7 @@
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-Plugin d'orchestration multi-agents Claude Code tout-en-un — installez une fois, obtenez tout.
+Harnais d'agents (Agent Harness) Claude Code tout-en-un — installez une fois, obtenez tout.
 
 Regroupe **185 agents**, **156 skills**, **65 règles**, **6 hooks** et **3 serveurs MCP** issus de 3 sources upstream MIT dans un seul plugin. Le **Boss** méta-orchestrateur dynamique découvre automatiquement tous les composants installés au démarrage et route les tâches vers le spécialiste optimal. Une CI GitHub Actions synchronise les modifications upstream chaque semaine.
 
@@ -90,7 +90,7 @@ Lisez la sortie complète et exécutez chaque étape dans l'ordre. Utilisez `cur
 
 ## Fonctionnalités principales
 
-### Orchestration multi-agents
+### Harnais multi-agents
 - **Boss Méta-Orchestrateur Dynamique** : Découvre automatiquement tous les agents, skills et serveurs MCP installés à l'exécution — route les tâches via une résolution de conflits 3D (Portée/Profondeur×2/Interactivité). Traite directement les tâches de taille moyenne (P3a) sans overhead de sous-orchestrateur
 - **Leadership direct d'équipes d'agents** : Boss peut diriger des équipes d'agents directement (Priority 3c-DIRECT) avec communication pair-à-pair, protocole de propriété de fichiers et patterns de chaîne de révision pour l'assurance qualité
 - **Sous-orchestrateurs (P3b)** : Quand les tâches sont trop complexes pour un traitement direct, Boss délègue à Sisyphus (planification+vérification), Atlas (coordination de tâches) ou Hephaestus (exécution autonome) — uniquement pour les workflows complexes multi-étapes, pas pour chaque requête
@@ -449,7 +449,7 @@ Chaque répertoire de langage contient : coding-style.md, hooks.md, patterns.md,
 
 ### 1. [Oh My Claude Code (OMC)](https://github.com/Yeachan-Heo/oh-my-claudecode)
 
-Un plugin d'orchestration multi-agents pour Claude Code. 18 agents spécialistes (Architect, Debugger, Code Reviewer, Security Reviewer, etc.) se répartissent le travail par rôle, et des mots-clés magiques comme `autopilot:` déclenchent automatiquement une exécution parallèle.
+Un harnais d'agents pour Claude Code. 18 agents spécialistes (Architect, Debugger, Code Reviewer, Security Reviewer, etc.) se répartissent le travail par rôle, et des mots-clés magiques comme `autopilot:` déclenchent automatiquement une exécution parallèle.
 
 ### 2. [Oh My OpenAgent (omo)](https://github.com/code-yeongyu/oh-my-openagent)
 

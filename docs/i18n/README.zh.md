@@ -20,7 +20,7 @@
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-一体化 Claude Code 多代理编排插件 — 安装一次，获得所有功能。
+一体化 Claude Code 智能体治具（Agent Harness）— 安装一次，获得所有功能。
 
 捆绑了来自 3 个 MIT 上游来源的 **185 个代理**、**156 个技能**、**65 个规则**、**6 个钩子**和 **3 个 MCP 服务器**到单一插件中。**Boss** 动态元编排器在运行时自动发现所有已安装的组件，并将任务路由到最优专家。GitHub Actions CI 每周同步上游变更。
 
@@ -90,7 +90,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ## 主要功能
 
-### 多代理编排
+### 智能体治具
 - **Boss 动态元编排器**：在运行时自动发现所有已安装的代理、技能和 MCP 服务器 — 通过 3D 冲突解决（范围/深度×2/交互性）路由任务。直接处理中等规模任务（P3a），无需子编排器开销
 - **代理团队直接领导**：Boss 可以直接领导代理团队（优先级 3c-DIRECT），具有对等队友通信、文件所有权协议和审查链模式以确保质量保证
 - **子编排器（P3b）**：当任务对于直接处理过于复杂时，Boss 委派给 Sisyphus（规划+验证）、Atlas（任务协调）或 Hephaestus（自主执行）— 仅用于复杂的多步工作流，而不是每个请求
@@ -448,7 +448,7 @@ rm ~/.claude/agents/<agent-name>.md
 
 ### 1. [Oh My Claude Code (OMC)](https://github.com/Yeachan-Heo/oh-my-claudecode)
 
-一个专门用于 Claude Code 的多代理编排插件。18 个专家代理（架构师、调试器、代码审查员、安全审查员等）按角色分工，像 `autopilot:` 这样的魔法关键字激活自动并行执行。
+一个专门用于 Claude Code 的智能体治具。18 个专家代理（架构师、调试器、代码审查员、安全审查员等）按角色分工，像 `autopilot:` 这样的魔法关键字激活自动并行执行。
 
 ### 2. [Oh My OpenAgent (omo)](https://github.com/code-yeongyu/oh-my-openagent)
 

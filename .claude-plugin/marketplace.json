@@ -4,7 +4,7 @@
     "name": "sehoon787"
   },
   "metadata": {
-    "description": "All-in-one multi-agent orchestration for Claude Code — 52 core agents always loaded + 133 domain agent-packs on demand, 156 skills, 65 rules, 6 hooks, 3 MCP servers. Bundles agency-agents, everything-claude-code, and oh-my-claudecode with weekly CI auto-sync."
+    "description": "All-in-one agent harness for Claude Code — 52 core agents always loaded + 133 domain agent-packs on demand, 156 skills, 65 rules, 6 hooks, 3 MCP servers. Bundles agency-agents, everything-claude-code, and oh-my-claudecode with weekly CI auto-sync."
   },
   "plugins": [
     {
@@ -18,7 +18,7 @@
       "repository": "https://github.com/sehoon787/my-claude",
       "license": "MIT",
       "keywords": [
-        "orchestration",
+        "harness",
         "multi-agent",
         "boss",
         "sisyphus",
