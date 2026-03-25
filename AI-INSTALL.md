@@ -1,7 +1,7 @@
 # my-claude AI Installation Guide
 
 You are an AI agent setting up a Claude Code multi-agent orchestration environment.
-The plugin bundles 186 agents (53 core + 133 domain agent-packs), 156 skills, 65 rules, 6 hooks, and 3 MCP servers.
+The plugin bundles 185 agents (52 core + 133 domain agent-packs), 156 skills, 65 rules, 6 hooks, and 3 MCP servers.
 Only 2-3 steps are needed.
 
 ---
@@ -22,7 +22,7 @@ node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir
 ```
 
 This installs:
-- 53 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 23 engineering
+- 52 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 23 engineering
 - 133 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
 - 156 skills (125 ECC + 31 OMC)
 - 65 rules
@@ -66,7 +66,7 @@ After manual install, set Boss as default agent:
 
 ```bash
 # Set Boss as default agent (one-time setup)
-node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir(),'.claude','settings.json');const s=fs.existsSync(f)?JSON.parse(fs.readFileSync(f,'utf8')):{};s.env={...s.env,CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:'1'};s.agent=s.agent||'boss';fs.writeFileSync(f,JSON.stringify(s,null,2))"
+node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir(),'.claude','settings.json');const s=fs.existsSync(f)?JSON.parse(fs.readFileSync(f,'utf8')):{};s.env={...s.env,CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:'1'};s.agent=s.agent||'boss';s.mcpServers={...s.mcpServers,context7:{type:'url',url:'https://mcp.context7.com/mcp'},exa:{type:'url',url:'https://mcp.exa.ai/mcp?tools=web_search_exa'},grep_app:{type:'url',url:'https://mcp.grep.app'}};fs.writeFileSync(f,JSON.stringify(s,null,2))"
 ```
 
 Note: Manual install does not configure hooks. Run the node command above to set Boss as default agent. See SETUP.md Section 7 Option D for hooks setup.
@@ -131,7 +131,7 @@ echo "omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK'
 ```
 
 Expected:
-- Core agents: 53+
+- Core agents: 52+ (agent-teams-reference is in docs/nexus, not counted)
 - Agent packs: 133+
 - Plugin skills: 156+
 - Rules: 65
