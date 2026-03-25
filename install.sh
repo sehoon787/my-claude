@@ -85,17 +85,43 @@ mkdir -p "$HOME/.claude/agent-packs/academic" "$HOME/.claude/agent-packs/design"
          "$HOME/.claude/agent-packs/support" "$HOME/.claude/agent-packs/testing"
 mkdir -p "$HOME/.claude/docs/nexus"
 
+# Manifest-based cleanup: remove only files from previous my-claude install
+if [ -f "$HOME/.claude/.my-claude-manifest" ]; then
+  while IFS= read -r rel_path; do
+    target="$HOME/.claude/$rel_path"
+    [ -f "$target" ] && rm -f "$target"
+  done < "$HOME/.claude/.my-claude-manifest"
+  # Remove empty agent-pack directories (only if empty after cleanup)
+  find "$HOME/.claude/agent-packs" -type d -empty -delete 2>/dev/null || true
+fi
+
 # Clean up old flattened agents from previous installs
 echo "  Cleaning up old flattened agents..."
-for prefix in marketing- sales- paid- academic- design- support- testing- specialized- product- project-management- game- godot- unity- unreal- roblox- xr- phase- scenario- nexus-strategy EXECUTIVE-BRIEF QUICKSTART handoff-templates agent-activation-prompts; do
-  rm -f "$HOME/.claude/agents/${prefix}"*.md
+for prefix in marketing- sales- paid- academic- design- support- testing- specialized- product- project-management- game- godot- unity- unreal- roblox- xr- phase- scenario-; do
+  find "$HOME/.claude/agents" -maxdepth 1 -name "${prefix}*.md" -delete 2>/dev/null || true
+done
+# Also remove known non-agent files that may have leaked into agents/
+for name in nexus-strategy EXECUTIVE-BRIEF QUICKSTART handoff-templates agent-activation-prompts; do
+  find "$HOME/.claude/agents" -maxdepth 1 -name "${name}*.md" -delete 2>/dev/null || true
 done
 
 # Clean up old-named agent-pack directories from previous installs
 echo "  Cleaning up old naming variants..."
-rm -rf "$HOME/.claude/agent-packs/gamedev"
-rm -rf "$HOME/.claude/agent-packs/project-mgmt"
-rm -rf "$HOME/.claude/agent-packs/strategy"
+EXPECTED_PACKS=(academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing)
+if [ -d "$HOME/.claude/agent-packs" ]; then
+  for dir in "$HOME/.claude/agent-packs"/*/; do
+    [ ! -d "$dir" ] && continue
+    dirname=$(basename "$dir")
+    is_expected=0
+    for ep in "${EXPECTED_PACKS[@]}"; do
+      [ "$dirname" = "$ep" ] && is_expected=1 && break
+    done
+    if [ "$is_expected" = "0" ]; then
+      echo "  Removing stale agent-pack: $dirname"
+      rm -rf "$dir"
+    fi
+  done
+fi
 
 # agents — core tier (always loaded)
 find "$SCRIPT_DIR/agents/core" -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec cp {} "$HOME/.claude/agents/" \;
@@ -117,9 +143,34 @@ cp -r "$SCRIPT_DIR"/agents/agency/specialized/*.md         "$HOME/.claude/agent-
 cp -r "$SCRIPT_DIR"/agents/agency/support/*.md             "$HOME/.claude/agent-packs/support/"
 cp -r "$SCRIPT_DIR"/agents/agency/testing/*.md             "$HOME/.claude/agent-packs/testing/"
 
+# Dedup: remove agent-pack entries that duplicate core agents
+for f in "$HOME/.claude/agents"/*.md; do
+  [ ! -f "$f" ] && continue
+  name=$(basename "$f")
+  find "$HOME/.claude/agent-packs" -name "$name" -delete 2>/dev/null || true
+done
+
 # docs/nexus — strategy docs + reference material (never parsed as agents)
 cp "$SCRIPT_DIR/agents/core/agent-teams-reference.md"      "$HOME/.claude/docs/nexus/"
 find "$SCRIPT_DIR/agents/agency/strategy" -name '*.md' -exec cp {} "$HOME/.claude/docs/nexus/" \;
+
+# Pre-clean: resolve file/symlink vs directory conflicts for skills
+for src in "$SCRIPT_DIR"/skills/ecc/*/; do
+  [ ! -d "$src" ] && continue
+  name=$(basename "$src")
+  target="$HOME/.claude/skills/$name"
+  if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
+    rm -f "$target"
+  fi
+done
+for src in "$SCRIPT_DIR"/skills/omc/*/; do
+  [ ! -d "$src" ] && continue
+  name=$(basename "$src")
+  target="$HOME/.claude/skills/$name"
+  if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
+    rm -f "$target"
+  fi
+done
 
 # skills
 cp -r "$SCRIPT_DIR"/skills/ecc/* "$HOME/.claude/skills/"
@@ -226,6 +277,31 @@ else
     fi
   fi
 fi
+
+# Generate manifest from SOURCE files (only tracks what my-claude installs, not user content)
+{
+  # Core agents — from source directories
+  find "$SCRIPT_DIR/agents/core" -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
+  find "$SCRIPT_DIR/agents/omo" -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
+  find "$SCRIPT_DIR/agents/omc" -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
+  find "$SCRIPT_DIR/agents/agency/engineering" -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
+  # Agent packs — from source directories
+  for pack in academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing; do
+    find "$SCRIPT_DIR/agents/agency/$pack" -name '*.md' -exec sh -c 'echo "agent-packs/'"$pack"'/$(basename "$1")"' _ {} \; 2>/dev/null || true
+  done
+  # Skills — from source directories
+  find "$SCRIPT_DIR/skills/ecc" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
+  find "$SCRIPT_DIR/skills/omc" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
+  # Rules — from source
+  find "$SCRIPT_DIR/rules" -name '*.md' | while read -r f; do echo "rules/${f#$SCRIPT_DIR/rules/}"; done
+  # Hooks
+  echo "hooks/hooks.json"
+  echo "hooks/session-start.sh"
+  # Docs
+  echo "docs/nexus/agent-teams-reference.md"
+  find "$SCRIPT_DIR/agents/agency/strategy" -name '*.md' -exec sh -c 'echo "docs/nexus/$(basename "$1")"' _ {} \;
+} | sort -u > "$HOME/.claude/.my-claude-manifest"
+echo "  Manifest saved ($(wc -l < "$HOME/.claude/.my-claude-manifest") entries)"
 
 # ── 6. Verification ──
 echo ""
