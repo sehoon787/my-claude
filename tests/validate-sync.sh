@@ -63,6 +63,15 @@ else
   echo "OK: skills/omc — $OMC_SKILL_COUNT skills"
 fi
 
+# 5b. Core skills exist
+CORE_SKILL_COUNT=$(find skills/core -name 'SKILL.md' 2>/dev/null | wc -l)
+if [ "$CORE_SKILL_COUNT" -lt 1 ]; then
+  echo "FAIL: skills/core has $CORE_SKILL_COUNT skills (expected >= 1)"
+  ERRORS=$((ERRORS + 1))
+else
+  echo "OK: skills/core — $CORE_SKILL_COUNT skills"
+fi
+
 # 6. Rules exist
 RULE_COUNT=$(find rules -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l)
 if [ "$RULE_COUNT" -lt 10 ]; then
@@ -97,7 +106,7 @@ done
 # Summary
 echo ""
 TOTAL_AGENTS=$((CORE_COUNT + OMO_COUNT + AGENCY_COUNT + OMC_AGENT_COUNT))
-TOTAL_SKILLS=$((ECC_SKILL_COUNT + OMC_SKILL_COUNT))
+TOTAL_SKILLS=$((ECC_SKILL_COUNT + OMC_SKILL_COUNT + CORE_SKILL_COUNT))
 echo "=== Summary ==="
 echo "Total agents: $TOTAL_AGENTS"
 echo "Total skills: $TOTAL_SKILLS"
