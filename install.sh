@@ -15,6 +15,20 @@ command -v npm  >/dev/null 2>&1 || { echo "ERROR: npm not found"; exit 1; }
 command -v git  >/dev/null 2>&1 || { echo "ERROR: git not found"; exit 1; }
 echo "  Prerequisites OK"
 
+# ── Version info ──
+INSTALLING_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('$SCRIPT_DIR/.claude-plugin/plugin.json','utf8')).version)}catch(e){console.log('unknown')}" 2>/dev/null)
+INSTALLED_VERSION="none"
+if [ -f "$HOME/.claude/.my-claude-version" ]; then
+  INSTALLED_VERSION=$(cat "$HOME/.claude/.my-claude-version")
+fi
+if [ "$INSTALLED_VERSION" = "none" ]; then
+  echo "  Fresh install: v${INSTALLING_VERSION}"
+elif [ "$INSTALLED_VERSION" = "$INSTALLING_VERSION" ]; then
+  echo "  Reinstalling: v${INSTALLING_VERSION} (same version)"
+else
+  echo "  Updating: v${INSTALLED_VERSION} → v${INSTALLING_VERSION}"
+fi
+
 # ── 0b. tmux (optional — for Agent Teams split-pane mode) ──
 echo "[0b] Checking tmux..."
 if command -v tmux >/dev/null 2>&1; then
@@ -53,9 +67,9 @@ echo "[1/6] Installing plugin files..."
 #   ~/.claude/docs/nexus/  → strategy docs (reference material, never parsed as agents)
 mkdir -p "$HOME/.claude/agents" "$HOME/.claude/skills" "$HOME/.claude/rules"
 mkdir -p "$HOME/.claude/agent-packs/academic" "$HOME/.claude/agent-packs/design" \
-         "$HOME/.claude/agent-packs/gamedev" "$HOME/.claude/agent-packs/marketing" \
+         "$HOME/.claude/agent-packs/game-development" "$HOME/.claude/agent-packs/marketing" \
          "$HOME/.claude/agent-packs/paid-media" "$HOME/.claude/agent-packs/product" \
-         "$HOME/.claude/agent-packs/project-mgmt" "$HOME/.claude/agent-packs/sales" \
+         "$HOME/.claude/agent-packs/project-management" "$HOME/.claude/agent-packs/sales" \
          "$HOME/.claude/agent-packs/spatial-computing" "$HOME/.claude/agent-packs/specialized" \
          "$HOME/.claude/agent-packs/support" "$HOME/.claude/agent-packs/testing"
 mkdir -p "$HOME/.claude/docs/nexus"
@@ -66,6 +80,12 @@ for prefix in marketing- sales- paid- academic- design- support- testing- specia
   rm -f "$HOME/.claude/agents/${prefix}"*.md
 done
 
+# Clean up old-named agent-pack directories from previous installs
+echo "  Cleaning up old naming variants..."
+rm -rf "$HOME/.claude/agent-packs/gamedev"
+rm -rf "$HOME/.claude/agent-packs/project-mgmt"
+rm -rf "$HOME/.claude/agent-packs/strategy"
+
 # agents — core tier (always loaded)
 find "$SCRIPT_DIR/agents/core" -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec cp {} "$HOME/.claude/agents/" \;
 cp "$SCRIPT_DIR"/agents/omo/*.md  "$HOME/.claude/agents/"
@@ -75,11 +95,11 @@ cp -r "$SCRIPT_DIR"/agents/agency/engineering/*.md "$HOME/.claude/agents/"
 # agent-packs — domain agents (not auto-loaded)
 cp -r "$SCRIPT_DIR"/agents/agency/academic/*.md            "$HOME/.claude/agent-packs/academic/"
 cp -r "$SCRIPT_DIR"/agents/agency/design/*.md              "$HOME/.claude/agent-packs/design/"
-find "$SCRIPT_DIR/agents/agency/game-development" -name '*.md' -exec cp {} "$HOME/.claude/agent-packs/gamedev/" \;
+find "$SCRIPT_DIR/agents/agency/game-development" -name '*.md' -exec cp {} "$HOME/.claude/agent-packs/game-development/" \;
 cp -r "$SCRIPT_DIR"/agents/agency/marketing/*.md           "$HOME/.claude/agent-packs/marketing/"
 cp -r "$SCRIPT_DIR"/agents/agency/paid-media/*.md          "$HOME/.claude/agent-packs/paid-media/"
 cp -r "$SCRIPT_DIR"/agents/agency/product/*.md             "$HOME/.claude/agent-packs/product/"
-cp -r "$SCRIPT_DIR"/agents/agency/project-management/*.md  "$HOME/.claude/agent-packs/project-mgmt/"
+cp -r "$SCRIPT_DIR"/agents/agency/project-management/*.md  "$HOME/.claude/agent-packs/project-management/"
 cp -r "$SCRIPT_DIR"/agents/agency/sales/*.md               "$HOME/.claude/agent-packs/sales/"
 cp -r "$SCRIPT_DIR"/agents/agency/spatial-computing/*.md   "$HOME/.claude/agent-packs/spatial-computing/"
 cp -r "$SCRIPT_DIR"/agents/agency/specialized/*.md         "$HOME/.claude/agent-packs/specialized/"
@@ -241,6 +261,10 @@ echo "  omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'O
 echo "  ast-grep:         $(command -v ast-grep       >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  tmux:             $(command -v tmux >/dev/null 2>&1 && echo "OK ($(tmux -V))" || echo 'NOT INSTALLED (in-process mode)')"
 TEAMMATE_MODE=$(node -e 'try{console.log(JSON.parse(require("fs").readFileSync(process.env.HOME+"/.claude/settings.json","utf8")).teammateMode||"auto")}catch(e){console.log("auto")}')
+echo "  version:          v${INSTALLING_VERSION}"
 echo "  teammateMode:     $TEAMMATE_MODE"
 echo ""
+# Record installed version
+echo "$INSTALLING_VERSION" > "$HOME/.claude/.my-claude-version"
+
 echo "=== Install complete ==="

@@ -21,6 +21,8 @@ After plugin install, configure Boss and MCP servers globally:
 node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir(),'.claude','settings.json');const s=fs.existsSync(f)?JSON.parse(fs.readFileSync(f,'utf8')):{};s.env={...s.env,CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:'1'};s.agent=s.agent||'boss';s.mcpServers={...s.mcpServers,context7:{type:'url',url:'https://mcp.context7.com/mcp'},exa:{type:'url',url:'https://mcp.exa.ai/mcp?tools=web_search_exa'},grep_app:{type:'url',url:'https://mcp.grep.app'}};fs.writeFileSync(f,JSON.stringify(s,null,2))"
 ```
 
+The plugin records its version automatically. To check: `cat ~/.claude/.my-claude-version`
+
 This installs:
 - 52 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 23 engineering
 - 133 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
@@ -40,6 +42,10 @@ mkdir -p ~/.claude/agents ~/.claude/agent-packs ~/.claude/skills ~/.claude/rules
 for prefix in marketing- sales- paid- academic- design- support- testing- specialized- product- project-management- game- godot- unity- unreal- roblox- xr- phase- scenario-; do
   rm -f ~/.claude/agents/${prefix}*.md
 done
+# Clean up old-named agent-pack directories
+rm -rf ~/.claude/agent-packs/gamedev
+rm -rf ~/.claude/agent-packs/project-mgmt
+rm -rf ~/.claude/agent-packs/strategy
 # Core agents (always loaded)
 cp /tmp/my-claude/agents/core/boss.md /tmp/my-claude/agents/omo/*.md ~/.claude/agents/
 cp /tmp/my-claude/agents/omc/*.md ~/.claude/agents/
@@ -59,6 +65,8 @@ cp -r /tmp/my-claude/rules/* ~/.claude/rules/
 claude mcp add --transport http --scope user context7 "https://mcp.context7.com/mcp"
 claude mcp add --transport http --scope user exa "https://mcp.exa.ai/mcp?tools=web_search_exa"
 claude mcp add --transport http --scope user grep_app "https://mcp.grep.app"
+# Record installed version
+node -e "const v=require('/tmp/my-claude/.claude-plugin/plugin.json').version;require('fs').writeFileSync(require('path').join(require('os').homedir(),'.claude','.my-claude-version'),v+'\n')"
 rm -rf /tmp/my-claude
 ```
 
@@ -128,6 +136,7 @@ echo "Rules:            $(find ~/.claude/rules -name '*.md' 2>/dev/null | wc -l)
 echo "Anthropic skills: $(ls -d ~/.claude/skills/pdf ~/.claude/skills/docx 2>/dev/null | wc -l) key skills"
 echo "omc:              $(command -v omc >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
+echo "Version:          $(cat ~/.claude/.my-claude-version 2>/dev/null || echo 'unknown')"
 ```
 
 Expected:
@@ -138,5 +147,6 @@ Expected:
 - Anthropic skills: 2 key skills (pdf, docx)
 - omc: OK
 - omo: OK
+- Version: matches latest release
 
 Setup complete. Boss orchestrator is ready.
