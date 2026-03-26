@@ -254,7 +254,9 @@ jobs:
             sed -i -E "s/[0-9]+ skills, [0-9]+ rules/${TOTAL_SKILLS} skills, ${TOTAL_RULES} rules/" AI-INSTALL.md
             sed -i -E "s/[0-9]+ core agents in/${CORE_TOTAL} core agents in/" AI-INSTALL.md
             sed -i -E "s/[0-9]+ domain agent-packs in/${PACK_COUNT} domain agent-packs in/" AI-INSTALL.md
-            sed -i -E "s/[0-9]+ skills \([0-9]+ ECC \+ [0-9]+ OMC( \+ [0-9]+ Core)?( \+ [0-9]+ gstack)?\)/${TOTAL_SKILLS} skills (${ECC_SKILLS} ECC + ${OMC_SKILLS} OMC + ${CORE_SKILLS} Core + ${GSTACK_SKILLS} gstack)/" AI-INSTALL.md
+            PATTERN='[0-9]+ skills \([0-9]+ ECC \+ [0-9]+ OMC( \+ [0-9]+ Core)?( \+ [0-9]+ gstack)?\)'
+            REPLACE="${TOTAL_SKILLS} skills (${ECC_SKILLS} ECC + ${OMC_SKILLS} OMC + ${CORE_SKILLS} Core + ${GSTACK_SKILLS} gstack)"
+            sed -i -E "s/$PATTERN/$REPLACE/" AI-INSTALL.md
             sed -i -E "s/Core agents: [0-9]+\+/Core agents: ${CORE_TOTAL}+/" AI-INSTALL.md
             sed -i -E "s/Agent packs: [0-9]+\+/Agent packs: ${PACK_COUNT}+/" AI-INSTALL.md
             sed -i -E "s/Plugin skills: [0-9]+\+/Plugin skills: ${TOTAL_SKILLS}+/" AI-INSTALL.md
