@@ -115,17 +115,25 @@ echo "Errors:       $ERRORS"
 
 # 9. Validate docs/index.html counts match computed values
 if [ -f docs/index.html ]; then
-  HTML_AGENTS=$(grep -oP 'data-count="\K[0-9]+(?=">0<\/em> <span class="lang" data-en="agents")' docs/index.html || true)
-  HTML_SKILLS=$(grep -oP 'data-count="\K[0-9]+(?=">0<\/em> <span class="lang" data-en="skills")' docs/index.html || true)
+  HTML_AGENTS=$(perl -ne 'print "$1\n" while /data-count="(\d+)">0<\/em>\s*<span[^>]*data-en="agents"/g' docs/index.html | head -1)
+  HTML_SKILLS=$(perl -ne 'print "$1\n" while /data-count="(\d+)">0<\/em>\s*<span[^>]*data-en="skills"/g' docs/index.html | head -1)
   if [ -z "$HTML_AGENTS" ] || [ -z "$HTML_SKILLS" ]; then
     echo "WARN: docs/index.html data-count attributes not found — skipping count check"
-  elif [ "$HTML_AGENTS" != "$TOTAL_AGENTS" ] || [ "$HTML_SKILLS" != "$TOTAL_SKILLS" ]; then
-    echo "FAIL: docs/index.html counts mismatch"
-    echo "  agents: html=$HTML_AGENTS expected=$TOTAL_AGENTS"
-    echo "  skills: html=$HTML_SKILLS expected=$TOTAL_SKILLS"
-    ERRORS=$((ERRORS + 1))
   else
-    echo "OK: docs/index.html counts — $HTML_AGENTS agents, $HTML_SKILLS skills"
+    # agents must match exactly
+    if [ "$HTML_AGENTS" != "$TOTAL_AGENTS" ]; then
+      echo "FAIL: docs/index.html agents=$HTML_AGENTS expected=$TOTAL_AGENTS"
+      ERRORS=$((ERRORS + 1))
+    else
+      echo "OK: docs/index.html agents count — $HTML_AGENTS"
+    fi
+    # skills: docs includes gstack (runtime), repo does not — check >= repo count
+    if [ "$HTML_SKILLS" -lt "$TOTAL_SKILLS" ]; then
+      echo "FAIL: docs/index.html skills=$HTML_SKILLS < repo=$TOTAL_SKILLS"
+      ERRORS=$((ERRORS + 1))
+    else
+      echo "OK: docs/index.html skills count — $HTML_SKILLS (repo=$TOTAL_SKILLS + gstack runtime)"
+    fi
   fi
 fi
 
