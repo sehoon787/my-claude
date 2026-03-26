@@ -22,7 +22,7 @@
 
 All-in-One Agent-Harness für Claude Code — ein Plugin, 202 Agenten sofort einsatzbereit.
 
-**Boss** erkennt zur Laufzeit automatisch alle Agenten, Skills und MCP-Tools und leitet Aufgaben an den passenden Spezialisten weiter. Drei MIT-Upstream-Repos gebündelt und wöchentlich per CI synchronisiert.
+**Boss** erkennt zur Laufzeit automatisch alle Agenten, Skills und MCP-Tools und leitet Aufgaben an den passenden Spezialisten weiter. Vier MIT-Upstream-Repos gebündelt und wöchentlich per CI synchronisiert.
 
 <p align="center">
   <img src="../../assets/demo.svg" alt="my-claude demo" width="700">
@@ -109,7 +109,7 @@ Lese die vollständige Ausgabe und führe jeden Schritt der Reihe nach aus. Verw
 
 ### All-in-One Bundle
 - Plugin-Installation bietet sofort **202 Agenten, 184 Skills und 65 Regeln**
-- Bündelt 3 MIT-Upstream-Quellen (agency-agents, everything-claude-code, oh-my-claudecode)
+- Bündelt 4 MIT-Upstream-Quellen (agency-agents, everything-claude-code, oh-my-claudecode, gstack)
 - Wöchentliche CI-Auto-Sync hält gebündelte Inhalte mit Upstream auf dem neuesten Stand
 - Begleitendes `install.sh` fügt npm-Tools und proprietäre Anthropic Skills hinzu
 
@@ -471,6 +471,10 @@ Das offizielle Agenten-Skills-Repository direkt von Anthropic bereitgestellt. Er
 
 Eine Bibliothek von 164 Business-Spezialisten-Agent-Personas. Bietet Spezialisten-Perspektiven in Business-Kontexten über technische Rollen hinaus — UX-Architekten, Data Engineers, Security Auditors, QA-Manager und mehr.
 
+### 7. [gstack](https://github.com/garrytan/gstack)
+
+Ein Sprint-Prozess-Harness von Garry Tan mit 27 Skills. Bietet browserbasiertes QA-Testing (`/qa`), Code-Review mit Scope-Drift-Erkennung (`/review`), Sicherheitsaudit (`/cso`) und einen vollständigen Plan→Review→QA→Ship-Deployment-Workflow. Enthält einen kompilierten Playwright-Browser-Daemon für Echtbrowser-Tests.
+
 ---
 
 ## So funktioniert Boss
@@ -626,6 +630,7 @@ Wöchentlich aktualisiert durch [CI Auto-Sync](.github/workflows/sync-upstream.y
 | [agency-agents](https://github.com/msitarzewski/agency-agents) | `6254154` | — | 2026-03-18 | [compare](https://github.com/msitarzewski/agency-agents/compare/6254154...HEAD) |
 | [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `fce4513` | — | 2026-03-18 | [compare](https://github.com/affaan-m/everything-claude-code/compare/fce4513...HEAD) |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `7d07356` | v4.8.2 | 2026-03-18 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/7d07356...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | — | — | — | [compare](https://github.com/garrytan/gstack/compare/HEAD...HEAD) |
 
 ---
 
@@ -639,6 +644,7 @@ Dieses Repository basiert auf der Arbeit der folgenden Open-Source-Projekte:
 - [everything-claude-code](https://github.com/affaan-m/everything-claude-code) — affaan-m
 - [anthropic/skills](https://github.com/anthropics/skills) — Anthropic
 - [agency-agents](https://github.com/msitarzewski/agency-agents) — msitarzewski
+- [gstack](https://github.com/garrytan/gstack) — garrytan
 
 ---
 
