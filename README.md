@@ -22,7 +22,7 @@
 
 All-in-one agent harness for Claude Code — one plugin, 185 agents ready.
 
-**Boss** auto-discovers every agent, skill, and MCP tool at runtime, then routes your task to the right specialist. Three MIT upstream repos bundled and synced weekly via CI.
+**Boss** auto-discovers every agent, skill, and MCP tool at runtime, then routes your task to the right specialist. Four MIT upstream repos bundled and synced weekly via CI.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
@@ -117,7 +117,7 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 
 ### All-in-One Bundle
 - Plugin install provides **185 agents, 156 skills, and 65 rules** instantly
-- Bundles 3 MIT upstream sources (agency-agents, everything-claude-code, oh-my-claudecode)
+- Bundles 4 MIT upstream sources (agency-agents, everything-claude-code, oh-my-claudecode, gstack)
 - Weekly CI auto-sync keeps bundled content up-to-date with upstream
 - Companion `install.sh` adds npm tools and proprietary Anthropic skills
 

@@ -91,11 +91,34 @@ Propose at most once. If the user declines, proceed with direct execution. Never
 
 ## PHASE 2: DYNAMIC CAPABILITY MATCHING
 
+### Priority 0: gstack Preferred Match
+
+gstack 스킬이 Capability Registry에 있으면 해당 영역에서 gstack을 최우선 사용.
+역제안(Counter-Proposal)에서도 gstack 스킬을 우선 추천.
+
+| 영역 | gstack 스킬 | 조건 |
+|------|-------------|------|
+| 코드 리뷰 | /review | PR/diff 리뷰 |
+| QA/테스트 | /qa, /qa-only | 웹앱 QA |
+| 디버깅 | /investigate | 버그 근본원인 조사 |
+| 벤치마크 | /benchmark | 성능 측정 |
+| 보안 감사 | /cso | 보안 감사/위협 모델링 |
+| 배포 | /ship, /land-and-deploy | 테스트→PR→배포 |
+| 모니터링 | /canary | 배포 후 카나리 |
+| 안전장치 | /guard, /careful, /freeze | 파괴적 명령 차단 |
+| 디자인 | /design-review, /design-consultation | 비주얼 QA/디자인 시스템 |
+| 계획 리뷰 | /plan-ceo-review, /plan-eng-review, /autoplan | 계획 비평 |
+| 문서 | /document-release | 배포 후 문서 업데이트 |
+| 아이디어 | /office-hours | 아이디어 검증 |
+| 회고 | /retro | 주간 회고 |
+
+gstack 미설치 시 P1-P4 폴백으로 자연스럽게 전환.
+
 ### Priority 1: Skill Match
 
 Scan all discovered skill `description` fields from Phase 0. If a skill's description clearly covers the task, it is a candidate. If multiple match, prefer the most specific. If both a skill and an agent match, apply Skill vs Agent Conflict Resolution — see `boss-advanced` skill for the scoring table and special cases.
 
-**Common keyword → skill mappings**: "tdd"/"TDD" → `tdd-workflow`, "autopilot" → `autopilot`, "ralph" → `ralph`, "deslop" → `ai-slop-cleaner`
+**Common keyword → skill mappings**: "tdd"/"TDD" → `tdd-workflow`, "autopilot" → `autopilot`, "ralph" → `ralph`, "deslop" → `ai-slop-cleaner`, "review"/"코드리뷰" → gstack `/review`, "QA"/"qa" → gstack `/qa`, "배포"/"ship"/"deploy" → gstack `/ship`, "보안"/"security audit" → gstack `/cso`, "디버그"/"investigate" → gstack `/investigate`
 
 ### Priority 2: Specialist Agent Match
 
@@ -115,6 +138,23 @@ Brief routing summary:
 - **3a** (2-4 agents, simple dependencies): Boss spawns directly
 - **3b** (5+ agents, complex chains): Delegate to sisyphus / atlas / hephaestus
 - **3c** (inter-agent communication needed): Agent Teams via `/team` skill or Boss direct leadership
+
+### gstack Sprint Workflow
+
+기능 구현이나 배포 워크플로우를 구성할 때, gstack 스킬을 아래 순서로 사용한다.
+
+**정규 순서:** Plan → Review → QA → Ship
+
+| 단계 | 스킬 | 설명 |
+|------|------|------|
+| 1. Plan | `/plan-ceo-review` → `/plan-eng-review` | CEO+엔지니어링 리뷰. `/autoplan`으로 자동화 가능 |
+| 2. Review | `/review` | 코드 리뷰 — 범위이탈 탐지, 적대적 리뷰, 계획 항목 완료 체크 |
+| 3. QA | `/qa https://...` | 브라우저 QA + 자동 수정 루프 |
+| 4. Ship | `/ship` | 테스트→커밋→PR. 리뷰 준비도 대시보드 포함 |
+
+선택적 후속: `/land-and-deploy` → `/canary` → `/document-release` → `/retro`
+
+Boss 규칙: end-to-end 요청 시 이 순서를 따른다. 각 단계 순차 실행, 실패 시 수정 후 재실행.
 
 ### Priority 4: General-Purpose Fallback
 

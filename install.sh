@@ -180,6 +180,16 @@ for src in "$SCRIPT_DIR"/skills/core/*/; do
     rm -f "$target"
   fi
 done
+if [ -d "$HOME/.claude/skills/gstack" ]; then
+  for src in "$HOME/.claude/skills/gstack"/*/; do
+    [ ! -d "$src" ] && continue
+    name=$(basename "$src")
+    target="$HOME/.claude/skills/$name"
+    if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
+      rm -f "$target"
+    fi
+  done
+fi
 
 # skills
 cp -r "$SCRIPT_DIR"/skills/ecc/* "$HOME/.claude/skills/"
@@ -187,6 +197,39 @@ cp -r "$SCRIPT_DIR"/skills/omc/* "$HOME/.claude/skills/"
 if [ -d "$SCRIPT_DIR/skills/core" ]; then
   cp -r "$SCRIPT_DIR"/skills/core/* "$HOME/.claude/skills/"
 fi
+
+# gstack skills
+GSTACK_DIR="$HOME/.claude/skills/gstack"
+if [ -d "$GSTACK_DIR" ]; then
+  echo "  Updating gstack..."
+  git -C "$GSTACK_DIR" pull --ff-only 2>/dev/null || true
+else
+  echo "  Installing gstack..."
+  git clone --depth 1 https://github.com/garrytan/gstack.git "$GSTACK_DIR" 2>/dev/null || true
+fi
+if [ -d "$GSTACK_DIR" ] && command -v bun >/dev/null 2>&1; then
+  (cd "$GSTACK_DIR" && ./setup --host claude 2>/dev/null || true)
+fi
+# Set auto_upgrade in gstack config
+mkdir -p "$HOME/.gstack"
+GSTACK_CONFIG="$HOME/.gstack/config.json"
+if [ -f "$GSTACK_CONFIG" ]; then
+  node -e "
+    const fs = require('fs');
+    const cfg = JSON.parse(fs.readFileSync('$GSTACK_CONFIG', 'utf8'));
+    cfg.auto_upgrade = true;
+    fs.writeFileSync('$GSTACK_CONFIG', JSON.stringify(cfg, null, 2));
+  " 2>/dev/null || true
+else
+  echo '{"auto_upgrade":true}' > "$GSTACK_CONFIG"
+fi
+# Remove superseded ECC skills replaced by gstack
+for skill in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
+  target="$HOME/.claude/skills/$skill"
+  if [ -L "$target" ] || [ -d "$target" ]; then
+    rm -rf "$target"
+  fi
+done
 
 # rules
 cp -r "$SCRIPT_DIR"/rules/* "$HOME/.claude/rules/"
@@ -305,6 +348,7 @@ fi
   find "$SCRIPT_DIR/skills/ecc" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
   find "$SCRIPT_DIR/skills/omc" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
   find "$SCRIPT_DIR/skills/core" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \; 2>/dev/null
+  find "$HOME/.claude/skills/gstack" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \; 2>/dev/null || true
   # Rules — from source
   find "$SCRIPT_DIR/rules" -name '*.md' | while read -r f; do echo "rules/${f#$SCRIPT_DIR/rules/}"; done
   # Hooks
