@@ -13,14 +13,14 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-185-blue)
-![Skills](https://img.shields.io/badge/skills-156-purple)
+![Agents](https://img.shields.io/badge/agents-202-blue)
+![Skills](https://img.shields.io/badge/skills-184-purple)
 ![Rules](https://img.shields.io/badge/rules-65-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-Claude Code 的一体化智能体治具 — 单个插件，185 个智能体即刻可用。
+Claude Code 的一体化智能体治具 — 单个插件，202 个智能体即刻可用。
 
 **Boss** 在运行时自动发现所有智能体、技能和 MCP 工具，并将任务路由到最优专家。三个 MIT 上游仓库打包集成，通过 CI 每周自动同步。
 
@@ -108,7 +108,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 - **grep.app**：GitHub 开源代码搜索
 
 ### 一体化包
-- 插件安装提供 **185 个代理、156 个技能和 65 个规则**，即时可用
+- 插件安装提供 **202 个代理、184 个技能和 65 个规则**，即时可用
 - 捆绑 3 个 MIT 上游来源（agency-agents、everything-claude-code、oh-my-claudecode）
 - 每周 CI 自动同步保持捆绑内容与上游最新
 - 伴随 `install.sh` 添加 npm 工具和专有 Anthropic 技能
@@ -172,7 +172,7 @@ rm ~/.claude/agents/<agent-name>.md
 |------|------|------|------|
 | 核心代理 | 52 | Core 1 + OMO 9 + 工程 23 + OMC 19 | 插件 |
 | 代理包 | 133 | 12 个领域类别（营销、游戏开发、销售等） | 插件 |
-| 技能 | 156 | ECC 125 + OMC 31 | 插件 |
+| 技能 | 184 | ECC 118 + OMC 31 + Core 1 + gstack 27（运行时） | 插件 + install.sh |
 | 规则 | 65 | ECC（通用 9 + 8 种语言 × 5） | 插件 |
 | MCP 服务器 | 3 | Context7、Exa、grep.app | 插件 |
 | 钩子 | 6 | my-claude（Boss 协议 + SessionStart） | 插件 |
@@ -525,7 +525,7 @@ Boss 通过 4 级优先级链路由每个请求：
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: 扫描中... 185 个代理，156 个技能就绪。
+[Boss] Phase 0: 扫描中... 202 个代理，184 个技能就绪。
 [Boss] Phase 1: 意图 → 安全分析 | 优先级：P2
 [Boss] Phase 2: 匹配 → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="

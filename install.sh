@@ -198,19 +198,44 @@ if [ -d "$SCRIPT_DIR/skills/core" ]; then
   cp -r "$SCRIPT_DIR"/skills/core/* "$HOME/.claude/skills/"
 fi
 
-# gstack skills
+# ── gstack (runtime install — not bundled in repo) ──
+echo "  [gstack] Installing/updating..."
 GSTACK_DIR="$HOME/.claude/skills/gstack"
-if [ -d "$GSTACK_DIR" ]; then
-  echo "  Updating gstack..."
+if [ -d "$GSTACK_DIR/.git" ]; then
   git -C "$GSTACK_DIR" pull --ff-only 2>/dev/null || true
 else
-  echo "  Installing gstack..."
+  rm -rf "$GSTACK_DIR"
   git clone --depth 1 https://github.com/garrytan/gstack.git "$GSTACK_DIR" 2>/dev/null || true
 fi
-if [ -d "$GSTACK_DIR" ] && command -v bun >/dev/null 2>&1; then
+
+# Install bun if missing (required for gstack browser)
+if ! command -v bun >/dev/null 2>&1; then
+  echo "  [gstack] Installing bun..."
+  curl -fsSL https://bun.sh/install | bash 2>/dev/null || true
+  export BUN_INSTALL="$HOME/.bun"
+  export PATH="$BUN_INSTALL/bin:$PATH"
+fi
+
+# Run gstack setup (builds browse binary + creates symlinks)
+if [ -d "$GSTACK_DIR" ] && command -v bun >/dev/null 2>&1 && [ -f "$GSTACK_DIR/setup" ]; then
   (cd "$GSTACK_DIR" && ./setup --host claude 2>/dev/null || true)
 fi
-# Set auto_upgrade in gstack config
+
+# Fallback: ensure individual gstack skills are accessible at depth 1
+if [ -d "$GSTACK_DIR" ]; then
+  for skill_dir in "$GSTACK_DIR"/*/; do
+    [ -f "$skill_dir/SKILL.md" ] || continue
+    skill_name=$(basename "$skill_dir")
+    case "$skill_name" in .git|bin|node_modules|agents) continue ;; esac
+    target="$HOME/.claude/skills/$skill_name"
+    # Only create if not already present (don't overwrite ECC/OMC skills)
+    if [ ! -e "$target" ] && [ ! -L "$target" ]; then
+      ln -s "$(cd "$skill_dir" && pwd)" "$target" 2>/dev/null || cp -r "$skill_dir" "$target"
+    fi
+  done
+fi
+
+# gstack auto_upgrade config
 mkdir -p "$HOME/.gstack"
 GSTACK_CONFIG="$HOME/.gstack/config.json"
 if [ -f "$GSTACK_CONFIG" ]; then
@@ -223,6 +248,7 @@ if [ -f "$GSTACK_CONFIG" ]; then
 else
   echo '{"auto_upgrade":true}' > "$GSTACK_CONFIG"
 fi
+
 # Remove superseded ECC skills replaced by gstack
 for skill in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
   target="$HOME/.claude/skills/$skill"

@@ -13,14 +13,14 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-185-blue)
-![Skills](https://img.shields.io/badge/skills-156-purple)
+![Agents](https://img.shields.io/badge/agents-202-blue)
+![Skills](https://img.shields.io/badge/skills-184-purple)
 ![Rules](https://img.shields.io/badge/rules-65-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-All-in-one agent harness for Claude Code — one plugin, 185 agents ready.
+All-in-one agent harness for Claude Code — one plugin, 202 agents ready.
 
 **Boss** auto-discovers every agent, skill, and MCP tool at runtime, then routes your task to the right specialist. Four MIT upstream repos bundled and synced weekly via CI.
 
@@ -116,7 +116,7 @@ Read the full output and execute each step in order. Use `curl`, not `WebFetch`.
 - **grep.app**: GitHub open-source code search
 
 ### All-in-One Bundle
-- Plugin install provides **185 agents, 156 skills, and 65 rules** instantly
+- Plugin install provides **202 agents, 184 skills, and 65 rules** instantly
 - Bundles 4 MIT upstream sources (agency-agents, everything-claude-code, oh-my-claudecode, gstack)
 - Weekly CI auto-sync keeps bundled content up-to-date with upstream
 - Companion `install.sh` adds npm tools and proprietary Anthropic skills
@@ -180,7 +180,7 @@ Following SETUP.md will configure the following:
 |------|------|------|------|
 | Core Agents | 52 | Core 1 + OMO 9 + Engineering 23 + OMC 19 | Plugin |
 | Agent Packs | 133 | 12 domain categories (marketing, gamedev, sales, etc.) | Plugin |
-| Skills | 156 | ECC 125 + OMC 31 | Plugin |
+| Skills | 184 | ECC 118 + OMC 31 + Core 1 + gstack 27 (runtime) | Plugin + install.sh |
 | Rules | 65 | ECC (common 9 + 8 languages × 5) | Plugin |
 | MCP Servers | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 6 | my-claude (Boss protocol + SessionStart) | Plugin |
@@ -534,7 +534,7 @@ Every delegation includes a **6-section structured prompt**: TASK, EXPECTED OUTC
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 185 agents, 156 skills ready.
+[Boss] Phase 0: Scanning... 202 agents, 184 skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="
