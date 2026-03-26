@@ -113,6 +113,22 @@ echo "Total skills: $TOTAL_SKILLS"
 echo "Total rules:  $RULE_COUNT"
 echo "Errors:       $ERRORS"
 
+# 9. Validate docs/index.html counts match computed values
+if [ -f docs/index.html ]; then
+  HTML_AGENTS=$(grep -oP 'data-count="\K[0-9]+(?=">0<\/em> <span class="lang" data-en="agents")' docs/index.html || true)
+  HTML_SKILLS=$(grep -oP 'data-count="\K[0-9]+(?=">0<\/em> <span class="lang" data-en="skills")' docs/index.html || true)
+  if [ -z "$HTML_AGENTS" ] || [ -z "$HTML_SKILLS" ]; then
+    echo "WARN: docs/index.html data-count attributes not found — skipping count check"
+  elif [ "$HTML_AGENTS" != "$TOTAL_AGENTS" ] || [ "$HTML_SKILLS" != "$TOTAL_SKILLS" ]; then
+    echo "FAIL: docs/index.html counts mismatch"
+    echo "  agents: html=$HTML_AGENTS expected=$TOTAL_AGENTS"
+    echo "  skills: html=$HTML_SKILLS expected=$TOTAL_SKILLS"
+    ERRORS=$((ERRORS + 1))
+  else
+    echo "OK: docs/index.html counts — $HTML_AGENTS agents, $HTML_SKILLS skills"
+  fi
+fi
+
 if [ "$ERRORS" -gt 0 ]; then
   echo "VALIDATION FAILED"
   exit 1
