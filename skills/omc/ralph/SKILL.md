@@ -87,9 +87,14 @@ By default, ralph operates in PRD mode. A scaffold `prd.json` is auto-generated 
 6. **Check PRD completion**:
    a. Read `prd.json` -- are ALL stories marked `passes: true`?
    b. If NOT all complete, loop back to Step 2 (pick next story)
-   c. If ALL complete, proceed to Step 7 (architect verification)
+   c. If ALL complete, proceed to Step 7a/7b (verification)
 
-7. **Reviewer verification** (tiered, against acceptance criteria):
+7a. **gstack /review** (additive, non-blocking):
+   - If gstack is installed, invoke `/review` skill for code review (scope drift detection, adversarial review, plan-item completion check)
+   - If gstack is not installed or /review fails, skip this step silently and proceed to Step 7b
+   - This is an additional verification layer — it does NOT replace Step 7b
+
+7b. **Reviewer verification** (tiered, against acceptance criteria) (always runs, regardless of 7a result):
    - <5 files, <100 lines with full tests: STANDARD tier minimum (architect-medium / Sonnet)
    - Standard changes: STANDARD tier (architect-medium / Sonnet)
    - >20 files or security/architectural changes: THOROUGH tier (architect / Opus)

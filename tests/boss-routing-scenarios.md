@@ -1,4 +1,4 @@
-# Boss Routing Test Scenarios (180)
+# Boss Routing Test Scenarios (185)
 
 ## Test Framework
 
@@ -312,6 +312,28 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 15. **Project overrides global** — Same-name project agent wins
 16. **Verification retry escalation** — resume→fresh→consult→report
 17. **Parallel vs sequential in P3a** — Independent=parallel, dependent=sequential
+
+---
+
+## Category 13: gstack 3-Phase Sprint Workflow (181-185)
+
+### P0 Priority + 3-Phase Sprint
+
+| # | Input | Expected Route | Verify | Phase |
+|---|-------|---------------|--------|-------|
+| 181 | "이 기능 만들어줘" (end-to-end feature request) | Boss → 3-Phase Sprint: Phase 1 (/plan-ceo-review → /plan-eng-review) → Phase 2 (ralph with Step 7a gstack /review + Step 7b architect) → Phase 3 (design doc 대조 + AskUserQuestion) | All 3 phases execute in order; Phase transitions are explicit | Phase 1→2→3 |
+| 182 | "코드 리뷰해줘" (standalone code review) | Boss → P0 → gstack `/review` directly (NOT 3-Phase Sprint) | Single skill invocation, no Sprint workflow triggered | N/A (direct P0) |
+| 183 | gstack not installed + "배포해줘" | Boss → P1-P4 fallback (ralph with architect/critic only, no gstack skills) | ralph Step 7a skipped silently; Step 7b architect runs normally | Fallback |
+| 184 | ralph Step 7a: /review returns findings | ralph logs /review findings → proceeds to Step 7b architect verification → both results reported | Both 7a and 7b run; neither blocks the other | Phase 2 |
+| 185 | Phase 3: 사용자가 "개선 필요" 선택 | Boss → Phase 2 재진입 (ralph re-executes with updated scope) → Phase 3 재검수 | design doc re-read from disk; AskUserQuestion presented again | Phase 3→2→3 |
+
+### Verification Rules for Category 13
+
+1. **3-Phase trigger** — Only end-to-end requests ("만들어줘", "구현해줘", "배포해줘") trigger the full Sprint. Standalone requests ("리뷰해줘", "QA해줘") go directly to P0.
+2. **Phase 1 is always interactive** — AskUserQuestion must be used for design decisions. No silent assumptions.
+3. **Phase 2 always uses ralph** — Boss never calls ultrawork directly in Sprint mode. ralph handles internal routing.
+4. **Step 7a is non-blocking** — gstack /review failure must not prevent Step 7b from running.
+5. **Phase 3 re-reads design doc** — Context recovery from `~/.gstack/projects/` path, not from memory.
 
 ---
 

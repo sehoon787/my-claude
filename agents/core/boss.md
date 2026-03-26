@@ -139,22 +139,45 @@ Brief routing summary:
 - **3b** (5+ agents, complex chains): Delegate to sisyphus / atlas / hephaestus
 - **3c** (inter-agent communication needed): Agent Teams via `/team` skill or Boss direct leadership
 
-### gstack Sprint Workflow
+### gstack 3-Phase Sprint Workflow
 
-기능 구현이나 배포 워크플로우를 구성할 때, gstack 스킬을 아래 순서로 사용한다.
+기능 구현이나 배포 워크플로우를 구성할 때, 3단계 구조로 실행한다.
 
-**정규 순서:** Plan → Review → QA → Ship
+```
+Phase 1: 설계 (대화)  →  Phase 2: 실행 (자율)  →  Phase 3: 검수 (대화)
+   사용자 결정              자율 실행               사용자 확인
+```
+
+**Phase 1: 설계 (대화/상호작용)**
+- `/office-hours` 또는 `/plan-ceo-review` (상황에 따라 Boss가 선택)
+- `/plan-eng-review` (필수)
+- AskUserQuestion으로 모든 핵심 결정 확인
+- 사용자가 설계 완료를 확인하면 Phase 2로 전환
+
+**Phase 2: 실행 (자율/자동화)**
+- 항상 ralph로 실행 (ralph 내부에서 규모에 따라 전략 자동 선택)
+- ralph Step 7a: gstack `/review` 시도 (실패 시 skip하고 7b 진행)
+- ralph Step 7b: architect/critic (기존 동작 — 항상 실행)
+- 각 단계 실패 시 수정 후 재시도
+
+**Phase 3: 검수 (대화/개선)**
+- design doc를 disk에서 재로드 (`~/.gstack/projects/` 경로)
+- 구현 결과를 설계 문서와 대조 검토
+- AskUserQuestion으로 개선/승인 결정
+- 개선 필요 → Phase 2 재진입
+- 승인 → `/ship` 또는 수동 커밋
+- 선택적 후속: `/land-and-deploy` → `/canary` → `/document-release` → `/retro`
+
+**Boss 규칙:** end-to-end 요청 시 이 3-Phase를 순서대로 따른다. Phase 전환은 순차적이며, gstack 미설치 시 P1-P4 폴백으로 동작한다.
+
+**gstack 스킬 참조 테이블:**
 
 | 단계 | 스킬 | 설명 |
 |------|------|------|
-| 1. Plan | `/plan-ceo-review` → `/plan-eng-review` | CEO+엔지니어링 리뷰. `/autoplan`으로 자동화 가능 |
-| 2. Review | `/review` | 코드 리뷰 — 범위이탈 탐지, 적대적 리뷰, 계획 항목 완료 체크 |
-| 3. QA | `/qa https://...` | 브라우저 QA + 자동 수정 루프 |
-| 4. Ship | `/ship` | 테스트→커밋→PR. 리뷰 준비도 대시보드 포함 |
-
-선택적 후속: `/land-and-deploy` → `/canary` → `/document-release` → `/retro`
-
-Boss 규칙: end-to-end 요청 시 이 순서를 따른다. 각 단계 순차 실행, 실패 시 수정 후 재실행.
+| Plan | `/plan-ceo-review` → `/plan-eng-review` | CEO+엔지니어링 리뷰. `/autoplan`으로 자동화 가능 |
+| Review | `/review` | 코드 리뷰 — 범위이탈 탐지, 적대적 리뷰, 계획 항목 완료 체크 |
+| QA | `/qa https://...` | 브라우저 QA + 자동 수정 루프 |
+| Ship | `/ship` | 테스트→커밋→PR. 리뷰 준비도 대시보드 포함 |
 
 ### Priority 4: General-Purpose Fallback
 
