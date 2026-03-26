@@ -63,6 +63,26 @@ jobs:
           echo "ECC_SKILLS=$ECC_SKILLS" >> $GITHUB_ENV
           echo "ECC_RULES=$ECC_RULES" >> $GITHUB_ENV
 
+      # ── 3b. Sync gstack ──
+      - name: Sync gstack skills
+        run: |
+          git clone --depth 1 https://github.com/garrytan/gstack.git /tmp/gstack
+          rm -rf skills/gstack && mkdir -p skills/gstack
+          for d in /tmp/gstack/*/; do
+            skill_name=$(basename "$d")
+            if [ -f "$d/SKILL.md" ]; then
+              mkdir -p "skills/gstack/$skill_name"
+              cp "$d/SKILL.md" "skills/gstack/$skill_name/"
+              [ -d "$d/bin" ] && cp -r "$d/bin" "skills/gstack/$skill_name/"
+            fi
+          done
+          # Remove ECC skills superseded by gstack
+          for d in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
+            rm -rf "skills/ecc/$d"
+          done
+          GSTACK_SKILLS=$(find skills/gstack -name 'SKILL.md' | wc -l | tr -d ' ')
+          echo "GSTACK_SKILLS=$GSTACK_SKILLS" >> $GITHUB_ENV
+
       # ── 3. OMC Agents + Skills ──
       - name: Sync oh-my-claudecode
         run: |
@@ -121,6 +141,13 @@ jobs:
                 syncedAt: '$NOW',
                 compareUrl: 'https://github.com/Yeachan-Heo/oh-my-claudecode/compare/' + short('$OMC_SHA') + '...HEAD',
                 files: { agents: parseInt('$OMC_AGENTS'), skills: parseInt('$OMC_SKILLS') }
+              },
+              'gstack': {
+                repo: 'https://github.com/garrytan/gstack',
+                branch: 'main',
+                syncedAt: '$NOW',
+                license: 'MIT',
+                files: { skills: parseInt('$GSTACK_SKILLS') }
               }
             };
             fs.mkdirSync('upstream', { recursive: true });
@@ -138,7 +165,7 @@ jobs:
           PACK_COUNT=$((AGENCY_COUNT - ENGINEERING_COUNT - STRATEGY_COUNT))
           TOTAL_AGENTS=$((CORE_TOTAL + PACK_COUNT))
           CORE_SKILLS=$(find skills/core -name 'SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
-          TOTAL_SKILLS=$((ECC_SKILLS + OMC_SKILLS + CORE_SKILLS))
+          TOTAL_SKILLS=$((ECC_SKILLS + OMC_SKILLS + CORE_SKILLS + GSTACK_SKILLS))
           TOTAL_RULES=$((ECC_RULES))
           HOOKS=$(python3 -c "import json; d=json.load(open('hooks/hooks.json')); print(len(d.get('hooks',d)))" 2>/dev/null || echo 6)
 
@@ -152,7 +179,7 @@ jobs:
           sed -i "s/\*\*[0-9]\+ skills\*\*/\*\*${TOTAL_SKILLS} skills\*\*/g" README.md
           sed -i "s/\*\*[0-9]\+ rules\*\*/\*\*${TOTAL_RULES} rules\*\*/g" README.md
           sed -i "s/[0-9]\+ agents, [0-9]\+ skills, and [0-9]\+ rules/${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills, and ${TOTAL_RULES} rules/" README.md
-          sed -i "s/ECC [0-9]\+ + OMC [0-9]\+\( + Core [0-9]\+\)\?/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS} + Core ${CORE_SKILLS}/" README.md
+          sed -i "s/ECC [0-9]\+ + OMC [0-9]\+\( + Core [0-9]\+\)\?\( + gstack [0-9]\+\)\?/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS} + Core ${CORE_SKILLS} + gstack ${GSTACK_SKILLS}/" README.md
           sed -i "s/| Rules | [0-9]\+ |/| Rules | ${TOTAL_RULES} |/" README.md
           sed -i "s/Rules ([0-9]\+)/Rules (${TOTAL_RULES})/" README.md
           sed -i "s/| Skills | [0-9]\+ |/| Skills | ${TOTAL_SKILLS} |/" README.md
@@ -169,7 +196,7 @@ jobs:
           sed -i "s/\*\*[0-9]\+개 스킬\*\*/\*\*${TOTAL_SKILLS}개 스킬\*\*/g" "$KO"
           sed -i "s/\*\*[0-9]\+개 룰\*\*/\*\*${TOTAL_RULES}개 룰\*\*/g" "$KO"
           sed -i "s/[0-9]\+ 에이전트, [0-9]\+ 스킬, [0-9]\+ 룰/${TOTAL_AGENTS} 에이전트, ${TOTAL_SKILLS} 스킬, ${TOTAL_RULES} 룰/" "$KO"
-          sed -i "s/ECC [0-9]\+ + OMC [0-9]\+\( + Core [0-9]\+\)\?/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS} + Core ${CORE_SKILLS}/" "$KO"
+          sed -i "s/ECC [0-9]\+ + OMC [0-9]\+\( + Core [0-9]\+\)\?\( + gstack [0-9]\+\)\?/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS} + Core ${CORE_SKILLS} + gstack ${GSTACK_SKILLS}/" "$KO"
           sed -i "s/룰 ([0-9]\+개)/룰 (${TOTAL_RULES}개)/" "$KO"
           sed -i "s/| 스킬 | [0-9]\+ |/| 스킬 | ${TOTAL_SKILLS} |/" "$KO"
           sed -i "s/| 룰 | [0-9]\+ |/| 룰 | ${TOTAL_RULES} |/" "$KO"
@@ -182,7 +209,7 @@ jobs:
           sed -i "s/\*\*[0-9]\+ skills\*\*/\*\*${TOTAL_SKILLS} skills\*\*/g" docs/i18n/README.fr.md
           sed -i "s/\*\*[0-9]\+ règles\*\*/\*\*${TOTAL_RULES} règles\*\*/g" docs/i18n/README.fr.md
           sed -i "s/[0-9]\+ agents, [0-9]\+ skills et [0-9]\+ règles/${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills et ${TOTAL_RULES} règles/g" docs/i18n/README.fr.md
-          sed -i "s/ECC [0-9]\+ + OMC [0-9]\+\( + Core [0-9]\+\)\?/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS} + Core ${CORE_SKILLS}/" docs/i18n/README.fr.md
+          sed -i "s/ECC [0-9]\+ + OMC [0-9]\+\( + Core [0-9]\+\)\?\( + gstack [0-9]\+\)\?/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS} + Core ${CORE_SKILLS} + gstack ${GSTACK_SKILLS}/" docs/i18n/README.fr.md
           sed -i "s/| Agents cœur | [0-9]\+ |/| Agents cœur | ${CORE_TOTAL} |/" docs/i18n/README.fr.md
           sed -i "s/| Agent Packs | [0-9]\+ |/| Agent Packs | ${PACK_COUNT} |/" docs/i18n/README.fr.md
           sed -i "s/| Skills | [0-9]\+ |/| Skills | ${TOTAL_SKILLS} |/" docs/i18n/README.fr.md
@@ -200,7 +227,7 @@ jobs:
           sed -i -E "s/\| 代理包 \| [0-9]+ \|/| 代理包 | ${PACK_COUNT} |/" docs/i18n/README.zh.md
           sed -i -E "s/\| 技能 \| [0-9]+ \|/| 技能 | ${TOTAL_SKILLS} |/" docs/i18n/README.zh.md
           sed -i -E "s/\| 规则 \| [0-9]+ \|/| 规则 | ${TOTAL_RULES} |/" docs/i18n/README.zh.md
-          sed -i -E "s/ECC [0-9]+ \+ OMC [0-9]+( \+ Core [0-9]+)?/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS} + Core ${CORE_SKILLS}/" docs/i18n/README.zh.md
+          sed -i -E "s/ECC [0-9]+ \+ OMC [0-9]+( \+ Core [0-9]+)?( \+ gstack [0-9]+)?/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS} + Core ${CORE_SKILLS} + gstack ${GSTACK_SKILLS}/" docs/i18n/README.zh.md
           sed -i -E "s/扫描中\.\.\. [0-9]+ 个代理，[0-9]+ 个技能就绪/扫描中... ${TOTAL_AGENTS} 个代理，${TOTAL_SKILLS} 个技能就绪/" docs/i18n/README.zh.md
 
           # docs/i18n/README.de.md
@@ -212,7 +239,7 @@ jobs:
           sed -i -E "s/\*\*[0-9]+ Domain-Agent-Packs\*\*/**${PACK_COUNT} Domain-Agent-Packs**/g" docs/i18n/README.de.md
           sed -i -E "s/\| Kern-Agenten \| [0-9]+ \|/| Kern-Agenten | ${CORE_TOTAL} |/" docs/i18n/README.de.md
           sed -i -E "s/\| Skills \| [0-9]+ \|/| Skills | ${TOTAL_SKILLS} |/" docs/i18n/README.de.md
-          sed -i -E "s/ECC [0-9]+ \+ OMC [0-9]+( \+ Core [0-9]+)?/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS} + Core ${CORE_SKILLS}/" docs/i18n/README.de.md
+          sed -i -E "s/ECC [0-9]+ \+ OMC [0-9]+( \+ Core [0-9]+)?( \+ gstack [0-9]+)?/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS} + Core ${CORE_SKILLS} + gstack ${GSTACK_SKILLS}/" docs/i18n/README.de.md
           sed -i -E "s/Scanning\.\.\. [0-9]+ agents, [0-9]+ skills ready/Scanning... ${TOTAL_AGENTS} agents, ${TOTAL_SKILLS} skills ready/" docs/i18n/README.de.md
 
           # docs/i18n/README.ja.md
@@ -226,7 +253,7 @@ jobs:
           sed -i -E "s/\| コア エージェント \| [0-9]+ \|/| コア エージェント | ${CORE_TOTAL} |/" "$JA"
           sed -i -E "s/\| エージェント パック \| [0-9]+ \|/| エージェント パック | ${PACK_COUNT} |/" "$JA"
           sed -i -E "s/\| スキル \| [0-9]+ \|/| スキル | ${TOTAL_SKILLS} |/" "$JA"
-          sed -i -E "s/ECC [0-9]+ \+ OMC [0-9]+( \+ Core [0-9]+)?/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS} + Core ${CORE_SKILLS}/" "$JA"
+          sed -i -E "s/ECC [0-9]+ \+ OMC [0-9]+( \+ Core [0-9]+)?( \+ gstack [0-9]+)?/ECC ${ECC_SKILLS} + OMC ${OMC_SKILLS} + Core ${CORE_SKILLS} + gstack ${GSTACK_SKILLS}/" "$JA"
           sed -i -E "s/スキャン中\.\.\./スキャン中.../" "$JA"
           sed -i -E "s/[0-9]+ エージェント、[0-9]+ スキル準備完了/${TOTAL_AGENTS} エージェント、${TOTAL_SKILLS} スキル準備完了/" "$JA"
 
@@ -236,7 +263,7 @@ jobs:
             sed -i -E "s/[0-9]+ skills, [0-9]+ rules/${TOTAL_SKILLS} skills, ${TOTAL_RULES} rules/" AI-INSTALL.md
             sed -i -E "s/[0-9]+ core agents in/${CORE_TOTAL} core agents in/" AI-INSTALL.md
             sed -i -E "s/[0-9]+ domain agent-packs in/${PACK_COUNT} domain agent-packs in/" AI-INSTALL.md
-            sed -i -E "s/[0-9]+ skills \([0-9]+ ECC \+ [0-9]+ OMC( \+ [0-9]+ Core)?\)/${TOTAL_SKILLS} skills (${ECC_SKILLS} ECC + ${OMC_SKILLS} OMC + ${CORE_SKILLS} Core)/" AI-INSTALL.md
+            sed -i -E "s/[0-9]+ skills \([0-9]+ ECC \+ [0-9]+ OMC( \+ [0-9]+ Core)?( \+ [0-9]+ gstack)?\)/${TOTAL_SKILLS} skills (${ECC_SKILLS} ECC + ${OMC_SKILLS} OMC + ${CORE_SKILLS} Core + ${GSTACK_SKILLS} gstack)/" AI-INSTALL.md
             sed -i -E "s/Core agents: [0-9]+\+/Core agents: ${CORE_TOTAL}+/" AI-INSTALL.md
             sed -i -E "s/Agent packs: [0-9]+\+/Agent packs: ${PACK_COUNT}+/" AI-INSTALL.md
             sed -i -E "s/Plugin skills: [0-9]+\+/Plugin skills: ${TOTAL_SKILLS}+/" AI-INSTALL.md
@@ -315,6 +342,7 @@ jobs:
             printf '| agency-agents | `%s` | %s | %s agents |\n' "${AGENCY_SHA:0:7}" "$AGENCY_TAG" "$AGENCY_COUNT" >> /tmp/pr-body.md
             printf '| everything-claude-code | `%s` | %s | %s skills, %s rules |\n' "${ECC_SHA:0:7}" "$ECC_TAG" "$ECC_SKILLS" "$ECC_RULES" >> /tmp/pr-body.md
             printf '| oh-my-claudecode | `%s` | %s | %s agents, %s skills |\n' "${OMC_SHA:0:7}" "$OMC_TAG" "$OMC_AGENTS" "$OMC_SKILLS" >> /tmp/pr-body.md
+            printf '| gstack | — | — | %s skills |\n' "$GSTACK_SKILLS" >> /tmp/pr-body.md
             printf '\nReview agent/skill diffs before merging.\n' >> /tmp/pr-body.md
             gh label create "auto-sync" --description "Automated upstream sync" --color "0E8A16" 2>/dev/null || true
             gh pr create \

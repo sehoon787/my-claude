@@ -47,8 +47,8 @@ fi
 
 # 4. ECC skills exist
 ECC_SKILL_COUNT=$(find skills/ecc -name 'SKILL.md' 2>/dev/null | wc -l)
-if [ "$ECC_SKILL_COUNT" -lt 40 ]; then
-  echo "FAIL: skills/ecc has $ECC_SKILL_COUNT skills (expected >= 40)"
+if [ "$ECC_SKILL_COUNT" -lt 33 ]; then
+  echo "FAIL: skills/ecc has $ECC_SKILL_COUNT skills (expected >= 33)"
   ERRORS=$((ERRORS + 1))
 else
   echo "OK: skills/ecc — $ECC_SKILL_COUNT skills"
@@ -70,6 +70,15 @@ if [ "$CORE_SKILL_COUNT" -lt 1 ]; then
   ERRORS=$((ERRORS + 1))
 else
   echo "OK: skills/core — $CORE_SKILL_COUNT skills"
+fi
+
+# 5c. gstack skills exist
+GSTACK_SKILL_COUNT=$(find skills/gstack -name 'SKILL.md' 2>/dev/null | wc -l)
+if [ "$GSTACK_SKILL_COUNT" -lt 20 ]; then
+  echo "FAIL: skills/gstack has $GSTACK_SKILL_COUNT skills (expected >= 20)"
+  ERRORS=$((ERRORS + 1))
+else
+  echo "OK: skills/gstack — $GSTACK_SKILL_COUNT skills"
 fi
 
 # 6. Rules exist
@@ -106,7 +115,7 @@ done
 # Summary
 echo ""
 TOTAL_AGENTS=$((CORE_COUNT + OMO_COUNT + AGENCY_COUNT + OMC_AGENT_COUNT))
-TOTAL_SKILLS=$((ECC_SKILL_COUNT + OMC_SKILL_COUNT + CORE_SKILL_COUNT))
+TOTAL_SKILLS=$((ECC_SKILL_COUNT + OMC_SKILL_COUNT + CORE_SKILL_COUNT + GSTACK_SKILL_COUNT))
 echo "=== Summary ==="
 echo "Total agents: $TOTAL_AGENTS"
 echo "Total skills: $TOTAL_SKILLS"

@@ -33,5 +33,16 @@
       "agents": 19,
       "skills": 31
     }
+  },
+  "gstack": {
+    "repo": "https://github.com/garrytan/gstack",
+    "branch": "main",
+    "syncedSha": "initial",
+    "syncedTag": null,
+    "syncedAt": "2026-03-26T00:00:00Z",
+    "compareUrl": "https://github.com/garrytan/gstack/compare/initial...HEAD",
+    "files": {
+      "skills": 27
+    }
   }
 }
