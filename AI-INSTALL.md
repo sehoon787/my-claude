@@ -1,7 +1,7 @@
 # my-claude AI Installation Guide
 
 You are an AI agent setting up a Claude Code multi-agent orchestration environment.
-The plugin bundles 185 agents (52 core + 133 domain agent-packs), 156 skills, 65 rules, 6 hooks, and 3 MCP servers.
+The plugin bundles 202 agents (52 core + 150 domain agent-packs), 184 skills (125 ECC + 31 OMC + 1 Core + 27 gstack), 65 rules, 6 hooks, and 3 MCP servers.
 Only 2-3 steps are needed.
 
 ---
@@ -25,8 +25,9 @@ The plugin records its version automatically. To check: `cat ~/.claude/.my-claud
 
 This installs:
 - 52 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 23 engineering
-- 133 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
-- 156 skills (125 ECC + 31 OMC)
+- 150 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
+- 157 skills (125 ECC + 31 OMC + 1 Core)
+  Note: gstack skills (27) are installed separately in Step 2.
 - 65 rules
 - 6 behavioral hooks (SessionStart, PreToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop)
 - 3 MCP servers globally (Context7, Exa, grep.app) — available in all projects
@@ -98,6 +99,33 @@ done
 cp -r /tmp/my-claude/skills/ecc/* ~/.claude/skills/
 cp -r /tmp/my-claude/skills/omc/* ~/.claude/skills/
 
+# ── gstack (sprint-process harness with 27 skills) ──
+GSTACK_DIR="$HOME/.claude/skills/gstack"
+if [ -d "$GSTACK_DIR/.git" ]; then
+  (cd "$GSTACK_DIR" && git pull --ff-only 2>/dev/null || true)
+else
+  git clone --depth 1 https://github.com/garrytan/gstack.git "$GSTACK_DIR" 2>/dev/null || true
+fi
+# Remove ECC skills superseded by gstack
+for skill in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
+  target="$HOME/.claude/skills/$skill"
+  if [ -L "$target" ]; then
+    link_dest=$(readlink "$target")
+    case "$link_dest" in *gstack*) continue ;; esac
+    rm -f "$target"
+  elif [ -d "$target" ]; then
+    rm -rf "$target"
+  fi
+done
+# Run gstack setup if bun is available
+if [ -d "$GSTACK_DIR" ] && command -v bun >/dev/null 2>&1 && [ -f "$GSTACK_DIR/setup" ]; then
+  (cd "$GSTACK_DIR" && bun install 2>/dev/null && ./setup --host claude 2>/dev/null || true)
+  git -C "$GSTACK_DIR" checkout -- '*/SKILL.md' 'SKILL.md' 2>/dev/null || true
+fi
+# Auto-upgrade config
+mkdir -p "$HOME/.gstack"
+echo '{"auto_upgrade":true}' > "$HOME/.gstack/config.json"
+
 # Rules, hooks
 cp -r /tmp/my-claude/rules/* ~/.claude/rules/
 cp /tmp/my-claude/hooks/hooks.json ~/.claude/hooks/
@@ -152,6 +180,7 @@ This installs:
 - omo CLI (`oh-my-opencode`)
 - ast-grep + comment-checker
 - Karpathy coding guidelines (appended to CLAUDE.md)
+- gstack sprint-process harness (27 skills — code review, QA, debugging, security, deployment)
 
 ## Step 3 (Optional): Fix OpenCode TUI crash
 
@@ -184,6 +213,8 @@ npx skills add sehoon787/my-claude -y -g
 
 This installs skills to `~/.agents/skills/` and auto-symlinks to `~/.claude/skills/`. Cross-platform: works with Claude Code, Codex, Cursor, and other tools that support the skills.sh standard. For the full experience (agents, hooks, rules, MCP), complete Steps 1–2 above instead.
 
+Note: `npx skills add` does NOT install gstack. gstack requires Step 2 (`install.sh`) for full installation, including the superseded-skill cleanup and auto-upgrade config.
+
 ## Verify
 
 ```bash
@@ -194,6 +225,7 @@ echo "Rules:            $(find ~/.claude/rules -name '*.md' 2>/dev/null | wc -l)
 echo "Anthropic skills: $(ls -d ~/.claude/skills/pdf ~/.claude/skills/docx 2>/dev/null | wc -l) key skills"
 echo "Manifest:         $(wc -l < ~/.claude/.my-claude-manifest 2>/dev/null || echo 'MISSING') entries"
 echo "Duplicates:       $(find ~/.claude/agents ~/.claude/agent-packs -name '*.md' -exec basename {} \; | sort | uniq -d | wc -l | tr -d ' ') (should be 0)"
+echo "gstack:           $(test -d ~/.claude/skills/gstack/.git && echo 'OK' || echo 'MISSING')"
 echo "omc:              $(command -v omc >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "Version:          $(cat ~/.claude/.my-claude-version 2>/dev/null || echo 'unknown')"
@@ -201,12 +233,13 @@ echo "Version:          $(cat ~/.claude/.my-claude-version 2>/dev/null || echo '
 
 Expected:
 - Core agents: 52+ (no domain agents in core)
-- Agent packs: 133+
-- Plugin skills: 156+
+- Agent packs: 150+
+- Plugin skills: 184+
 - Rules: 65
 - Anthropic skills: 2 key skills (pdf, docx)
 - Manifest: 300+ entries
 - Duplicates: 0 (should be 0)
+- gstack: OK
 - omc: OK
 - omo: OK
 - Version: matches latest release
