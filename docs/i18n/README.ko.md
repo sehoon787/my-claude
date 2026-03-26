@@ -13,14 +13,14 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-185-blue)
-![Skills](https://img.shields.io/badge/skills-156-purple)
+![Agents](https://img.shields.io/badge/agents-202-blue)
+![Skills](https://img.shields.io/badge/skills-184-purple)
 ![Rules](https://img.shields.io/badge/rules-65-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-Claude Code를 위한 올인원 에이전트 하네스 — 플러그인 하나로 185개 에이전트를 바로 사용.
+Claude Code를 위한 올인원 에이전트 하네스 — 플러그인 하나로 202개 에이전트를 바로 사용.
 
 **Boss**가 런타임에 모든 에이전트, 스킬, MCP 툴을 자동 감지하고 최적의 전문가에게 작업을 라우팅합니다. 3개의 MIT 업스트림 레포를 번들하여 CI로 매주 동기화.
 
@@ -107,7 +107,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 - **grep.app**: GitHub 오픈소스 코드 검색
 
 ### 통합 생태계
-- 플러그인 하나로 **185 에이전트, 156 스킬, 65 룰**을 한 환경에 구성
+- 플러그인 하나로 **202 에이전트, 184 스킬, 65 룰**을 한 환경에 구성
 - 6개 오픈소스 도구(OMC, omo, ECC, Anthropic Skills, Agency, Karpathy)를 하나로 통합
 
 ---
@@ -169,7 +169,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 |------|------|------|------|
 | 코어 에이전트 | 52 | Core 1 + OMO 9 + Engineering 23 + OMC 19 | 플러그인 |
 | 에이전트 팩 | 133 | 12개 도메인 카테고리 (마케팅, 게임 개발, 영업 등) | 플러그인 |
-| 스킬 | 156 | ECC 125 + OMC 31 | 플러그인 |
+| 스킬 | 184 | ECC 118 + OMC 31 + Core 1 + gstack 27 (런타임) | 플러그인 + install.sh |
 | 룰 | 65 | ECC (common 9 + 8 languages × 5) | 플러그인 |
 | MCP 서버 | 3 | Context7, Exa, grep.app | 플러그인 |
 | 훅 | 4 | my-claude (Boss 프로토콜 + SessionStart) | 플러그인 |
@@ -519,7 +519,7 @@ Boss는 모든 요청을 4단계 우선순위 체인으로 라우팅합니다:
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 185 agents, 156 skills ready.
+[Boss] Phase 0: Scanning... 202 agents, 184 skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="

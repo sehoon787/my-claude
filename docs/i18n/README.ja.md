@@ -13,14 +13,14 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-185-blue)
-![Skills](https://img.shields.io/badge/skills-156-purple)
+![Agents](https://img.shields.io/badge/agents-202-blue)
+![Skills](https://img.shields.io/badge/skills-184-purple)
 ![Rules](https://img.shields.io/badge/rules-65-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-Claude Code 用のオールインワン エージェントハーネス — プラグイン 1 つで 185 エージェントをすぐに使用可能。
+Claude Code 用のオールインワン エージェントハーネス — プラグイン 1 つで 202 エージェントをすぐに使用可能。
 
 **Boss** が実行時にすべてのエージェント、スキル、MCP ツールを自動検出し、最適な専門家にタスクをルーティングします。3 つの MIT アップストリームリポジトリをバンドルし、CI で毎週同期。
 
@@ -108,7 +108,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 - **grep.app**: GitHub オープンソース コード検索
 
 ### ワンパッケージ バンドル
-- プラグイン インストールは **185 エージェント、156 スキル、65 ルール** を即座に提供
+- プラグイン インストールは **202 エージェント、184 スキル、65 ルール** を即座に提供
 - 3 つの MIT アップストリーム ソース（agency-agents、everything-claude-code、oh-my-claudecode）をバンドル
 - 毎週 CI オート同期によるアップストリーム コンテンツ最新化
 - コンパニオン `install.sh` は npm ツールと独自 Anthropic スキルを追加
@@ -172,7 +172,7 @@ SETUP.md に従うと、以下が設定されます:
 |------|------|------|------|
 | コア エージェント | 52 | Core 1 + OMO 9 + Engineering 23 + OMC 19 | プラグイン |
 | エージェント パック | 133 | 12 ドメイン カテゴリ（マーケティング、ゲーム開発、セールスなど） | プラグイン |
-| スキル | 156 | ECC 125 + OMC 31 | プラグイン |
+| スキル | 184 | ECC 118 + OMC 31 + Core 1 + gstack 27（ランタイム） | プラグイン + install.sh |
 | ルール | 65 | ECC（共通 9 + 8 言語 × 5） | プラグイン |
 | MCP サーバー | 3 | Context7、Exa、grep.app | プラグイン |
 | フック | 6 | my-claude（Boss プロトコル + SessionStart） | プラグイン |
@@ -526,7 +526,7 @@ Boss はすべてのリクエストを 4 レベル優先度チェーンを通じ
 ```
 $ claude "セキュリティ脆弱性について認証モジュール分析"
 
-[Boss] Phase 0: スキャン中... 185 エージェント、156 スキル準備完了.
+[Boss] Phase 0: スキャン中... 202 エージェント、184 スキル準備完了.
 [Boss] Phase 1: 意図 → セキュリティ分析 | 優先度: P2
 [Boss] Phase 2: マッチ → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="

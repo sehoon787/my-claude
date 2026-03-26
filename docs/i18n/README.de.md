@@ -13,14 +13,14 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-185-blue)
-![Skills](https://img.shields.io/badge/skills-156-purple)
+![Agents](https://img.shields.io/badge/agents-202-blue)
+![Skills](https://img.shields.io/badge/skills-184-purple)
 ![Rules](https://img.shields.io/badge/rules-65-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-6-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-All-in-One Agent-Harness für Claude Code — ein Plugin, 185 Agenten sofort einsatzbereit.
+All-in-One Agent-Harness für Claude Code — ein Plugin, 202 Agenten sofort einsatzbereit.
 
 **Boss** erkennt zur Laufzeit automatisch alle Agenten, Skills und MCP-Tools und leitet Aufgaben an den passenden Spezialisten weiter. Drei MIT-Upstream-Repos gebündelt und wöchentlich per CI synchronisiert.
 
@@ -108,7 +108,7 @@ Lese die vollständige Ausgabe und führe jeden Schritt der Reihe nach aus. Verw
 - **grep.app**: GitHub Open-Source-Code-Suche
 
 ### All-in-One Bundle
-- Plugin-Installation bietet sofort **185 Agenten, 156 Skills und 65 Regeln**
+- Plugin-Installation bietet sofort **202 Agenten, 184 Skills und 65 Regeln**
 - Bündelt 3 MIT-Upstream-Quellen (agency-agents, everything-claude-code, oh-my-claudecode)
 - Wöchentliche CI-Auto-Sync hält gebündelte Inhalte mit Upstream auf dem neuesten Stand
 - Begleitendes `install.sh` fügt npm-Tools und proprietäre Anthropic Skills hinzu
@@ -172,7 +172,7 @@ Das Befolgen von SETUP.md konfiguriert Folgendes:
 |------|------|------|------|
 | Kern-Agenten | 52 | Kern 1 + OMO 9 + Engineering 23 + OMC 19 | Plugin |
 | Agent Packs | 133 | 12 Domain-Kategorien (Marketing, Spieleentwicklung, Verkauf, etc.) | Plugin |
-| Skills | 156 | ECC 125 + OMC 31 | Plugin |
+| Skills | 184 | ECC 118 + OMC 31 + Core 1 + gstack 27 (Laufzeit) | Plugin + install.sh |
 | Regeln | 65 | ECC (Common 9 + 8 Sprachen × 5) | Plugin |
 | MCP-Server | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 6 | my-claude (Boss-Protokoll + SessionStart) | Plugin |
@@ -526,7 +526,7 @@ Jede Delegation beinhaltet einen **6-Abschnitt strukturierten Prompt**: AUFGABE,
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 185 agents, 156 skills ready.
+[Boss] Phase 0: Scanning... 202 agents, 184 skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="
