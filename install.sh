@@ -216,10 +216,26 @@ if ! command -v bun >/dev/null 2>&1; then
   export PATH="$BUN_INSTALL/bin:$PATH"
 fi
 
+# Remove superseded ECC skills replaced by gstack (preserve gstack symlinks)
+for skill in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
+  target="$HOME/.claude/skills/$skill"
+  # Skip if it's a symlink pointing into gstack (i.e. gstack's own replacement)
+  if [ -L "$target" ]; then
+    link_dest=$(readlink "$target")
+    case "$link_dest" in *gstack*) continue ;; esac
+    rm -f "$target"
+  elif [ -d "$target" ]; then
+    rm -rf "$target"
+  fi
+done
+
 # Run gstack setup (builds browse binary + creates symlinks)
 if [ -d "$GSTACK_DIR" ] && command -v bun >/dev/null 2>&1 && [ -f "$GSTACK_DIR/setup" ]; then
   (cd "$GSTACK_DIR" && ./setup --host claude 2>/dev/null || true)
 fi
+
+# Restore SKILL.md files if deleted by gen:skill-docs
+git -C "$GSTACK_DIR" checkout -- '*/SKILL.md' 'SKILL.md' 2>/dev/null || true
 
 # Fallback: ensure individual gstack skills are accessible at depth 1
 if [ -d "$GSTACK_DIR" ]; then
@@ -248,14 +264,6 @@ if [ -f "$GSTACK_CONFIG" ]; then
 else
   echo '{"auto_upgrade":true}' > "$GSTACK_CONFIG"
 fi
-
-# Remove superseded ECC skills replaced by gstack
-for skill in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
-  target="$HOME/.claude/skills/$skill"
-  if [ -L "$target" ] || [ -d "$target" ]; then
-    rm -rf "$target"
-  fi
-done
 
 # rules
 cp -r "$SCRIPT_DIR"/rules/* "$HOME/.claude/rules/"
