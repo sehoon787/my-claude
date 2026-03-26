@@ -22,7 +22,7 @@
 
 Harnais d'agents tout-en-un pour Claude Code — un seul plugin, 202 agents prêts à l'emploi.
 
-**Boss** détecte automatiquement tous les agents, skills et outils MCP au démarrage, puis route chaque tâche vers le bon spécialiste. Trois dépôts upstream MIT intégrés et synchronisés chaque semaine via CI.
+**Boss** détecte automatiquement tous les agents, skills et outils MCP au démarrage, puis route chaque tâche vers le bon spécialiste. Quatre dépôts upstream MIT intégrés et synchronisés chaque semaine via CI.
 
 <p align="center">
   <img src="../../assets/demo.svg" alt="my-claude demo" width="700">
@@ -109,7 +109,7 @@ Lisez la sortie complète et exécutez chaque étape dans l'ordre. Utilisez `cur
 
 ### Bundle tout-en-un
 - L'installation via plugin fournit immédiatement **202 agents, 184 skills et 65 règles**
-- Regroupe 3 sources upstream MIT (agency-agents, everything-claude-code, oh-my-claudecode)
+- Regroupe 4 sources upstream MIT (agency-agents, everything-claude-code, oh-my-claudecode, gstack)
 - La CI auto-sync hebdomadaire maintient le contenu groupé à jour avec l'upstream
 - Le `install.sh` d'accompagnement ajoute les outils npm et les Anthropic Skills propriétaires
 
@@ -471,6 +471,10 @@ Le référentiel officiel de skills d'agents fourni directement par Anthropic. P
 
 Une bibliothèque de 164 personas d'agents spécialistes métier. Fournit des perspectives spécialisées dans des contextes professionnels au-delà des rôles techniques — architectes UX, ingénieurs données, auditeurs de sécurité, responsables QA et plus encore.
 
+### 7. [gstack](https://github.com/garrytan/gstack)
+
+Un harnais de processus sprint par Garry Tan avec 27 skills. Fournit des tests QA basés sur navigateur (`/qa`), une revue de code avec détection de dérive de portée (`/review`), un audit de sécurité (`/cso`), et un workflow de déploiement complet Plan→Review→QA→Ship. Inclut un démon Playwright compilé pour les tests en navigateur réel.
+
 ---
 
 ## Comment fonctionne Boss
@@ -626,6 +630,7 @@ Mises à jour hebdomadaires par [CI Auto-Sync](.github/workflows/sync-upstream.y
 | [agency-agents](https://github.com/msitarzewski/agency-agents) | `6254154` | — | 2026-03-18 | [compare](https://github.com/msitarzewski/agency-agents/compare/6254154...HEAD) |
 | [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `fce4513` | — | 2026-03-18 | [compare](https://github.com/affaan-m/everything-claude-code/compare/fce4513...HEAD) |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `7d07356` | v4.8.2 | 2026-03-18 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/7d07356...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | — | — | — | [compare](https://github.com/garrytan/gstack/compare/HEAD...HEAD) |
 
 ---
 
@@ -639,6 +644,7 @@ Ce référentiel repose sur le travail des projets open source suivants :
 - [everything-claude-code](https://github.com/affaan-m/everything-claude-code) — affaan-m
 - [anthropic/skills](https://github.com/anthropics/skills) — Anthropic
 - [agency-agents](https://github.com/msitarzewski/agency-agents) — msitarzewski
+- [gstack](https://github.com/garrytan/gstack) — garrytan
 
 ---
 

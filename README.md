@@ -479,6 +479,10 @@ The official agent skills repository provided directly by Anthropic. Enables spe
 
 A library of 164 business specialist agent personas. Provides specialist perspectives in business contexts beyond technical roles — UX architects, data engineers, security auditors, QA managers, and more.
 
+### 7. [gstack](https://github.com/garrytan/gstack)
+
+A sprint-process harness by Garry Tan with 27 skills. Provides browser-based QA testing (`/qa`), code review with scope-drift detection (`/review`), security auditing (`/cso`), and a full Plan→Review→QA→Ship deployment workflow. Includes a compiled Playwright browser daemon for real-browser testing.
+
 ---
 
 ## How Boss Works
@@ -634,6 +638,7 @@ Updated weekly by [CI auto-sync](.github/workflows/sync-upstream.yml). See `upst
 | [agency-agents](https://github.com/msitarzewski/agency-agents) | `6254154` | — | 2026-03-18 | [compare](https://github.com/msitarzewski/agency-agents/compare/6254154...HEAD) |
 | [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `fce4513` | — | 2026-03-18 | [compare](https://github.com/affaan-m/everything-claude-code/compare/fce4513...HEAD) |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `7d07356` | v4.8.2 | 2026-03-18 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/7d07356...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | — | — | — | [compare](https://github.com/garrytan/gstack/compare/HEAD...HEAD) |
 
 ---
 
@@ -647,6 +652,7 @@ This repository builds on the work of the following open-source projects:
 - [everything-claude-code](https://github.com/affaan-m/everything-claude-code) — affaan-m
 - [anthropic/skills](https://github.com/anthropics/skills) — Anthropic
 - [agency-agents](https://github.com/msitarzewski/agency-agents) — msitarzewski
+- [gstack](https://github.com/garrytan/gstack) — garrytan
 
 ---
 
