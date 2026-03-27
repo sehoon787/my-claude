@@ -14,10 +14,10 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-202-blue)
-![Skills](https://img.shields.io/badge/skills-184-purple)
-![Rules](https://img.shields.io/badge/rules-65-orange)
+![Skills](https://img.shields.io/badge/skills-185-purple)
+![Rules](https://img.shields.io/badge/rules-64-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
-![Hooks](https://img.shields.io/badge/hooks-6-red)
+![Hooks](https://img.shields.io/badge/hooks-7-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
 Claude Code를 위한 올인원 에이전트 하네스 — 플러그인 하나로 202개 에이전트를 바로 사용.
@@ -107,14 +107,14 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 - **grep.app**: GitHub 오픈소스 코드 검색
 
 ### 통합 생태계
-- 플러그인 하나로 **202 에이전트, 184 스킬, 65 룰**을 한 환경에 구성
+- 플러그인 하나로 **202 에이전트, 185 스킬, 64 룰**을 한 환경에 구성
 - 7개 오픈소스 도구(OMC, omo, ECC, Anthropic Skills, Agency, Karpathy, gstack)를 하나로 통합
 
 ---
 
 ## Core + OMO 에이전트
 
-**Boss**만 my-claude 고유 에이전트입니다. 나머지 9개는 Boss가 서브 오케스트레이터 및 전문가로 사용하는 [OMO 에이전트](https://github.com/code-yeongyu/oh-my-openagent)입니다. 플러그인은 **52개 코어 에이전트** (Core 1 + OMO 9 + Engineering 23 + OMC 19 + OMO 전문가)를 `~/.claude/agents/`에 항상 로드하며, **133개 도메인 에이전트 팩**은 `~/.claude/agent-packs/`에 설치되어 필요 시 활성화할 수 있습니다. Boss는 Priority 2 능력 매칭으로 활성화된 전체 에이전트 풀에서 최적의 전문가를 선택합니다. 전체 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
+**Boss**만 my-claude 고유 에이전트입니다. 나머지 9개는 Boss가 서브 오케스트레이터 및 전문가로 사용하는 [OMO 에이전트](https://github.com/code-yeongyu/oh-my-openagent)입니다. 플러그인은 **52개 코어 에이전트** (Core 2 + OMO 9 + Engineering 23 + OMC 19 + OMO 전문가)를 `~/.claude/agents/`에 항상 로드하며, **133개 도메인 에이전트 팩**은 `~/.claude/agent-packs/`에 설치되어 필요 시 활성화할 수 있습니다. Boss는 Priority 2 능력 매칭으로 활성화된 전체 에이전트 풀에서 최적의 전문가를 선택합니다. 전체 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
 
 | 에이전트 | 출처 | 모델 | 역할 |
 |---------|------|------|------|
@@ -167,12 +167,12 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 
 | 카테고리 | 개수 | 출처 | 번들 |
 |------|------|------|------|
-| 코어 에이전트 | 52 | Core 1 + OMO 9 + Engineering 23 + OMC 19 | 플러그인 |
+| 코어 에이전트 | 52 | Core 2 + OMO 9 + Engineering 23 + OMC 19 | 플러그인 |
 | 에이전트 팩 | 133 | 12개 도메인 카테고리 (마케팅, 게임 개발, 영업 등) | 플러그인 |
-| 스킬 | 184 | ECC 118 + OMC 31 + Core 1 + gstack 27 (런타임) | 플러그인 + install.sh |
-| 룰 | 65 | ECC (common 9 + 8 languages × 5) | 플러그인 |
+| 스킬 | 185 | ECC 125 + OMC 31 + Core 2 + gstack 27 (런타임) | 플러그인 + install.sh |
+| 룰 | 64 | ECC (common 9 + 8 languages × 5) | 플러그인 |
 | MCP 서버 | 3 | Context7, Exa, grep.app | 플러그인 |
-| 훅 | 4 | my-claude (Boss 프로토콜 + SessionStart) | 플러그인 |
+| 훅 | 7 | my-claude (Boss 프로토콜 + SessionStart) | 플러그인 |
 | Anthropic 스킬 | 14+ | Anthropic 공식 | install.sh |
 | CLI 도구 | 3 | omc, omo, ast-grep | install.sh |
 
@@ -224,7 +224,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 <details>
 <summary>Agency 에이전트 (172, 14개 카테고리) — 비즈니스 전문 페르소나 (전체 model: claude-sonnet-4-6)</summary>
 
-**Engineering (22개)**
+**Engineering (23개)**
 
 | 에이전트 | 역할 |
 |---------|------|
@@ -330,7 +330,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 </details>
 
 <details>
-<summary>룰 (65개) — ECC 코딩 규칙</summary>
+<summary>룰 (64개) — ECC 코딩 규칙</summary>
 
 **Common (9개)** — 모든 프로젝트에 적용
 
@@ -363,7 +363,7 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 </details>
 
 <details>
-<summary>MCP 서버 (3개) + 행동 교정 훅 (6개)</summary>
+<summary>MCP 서버 (3개) + 행동 교정 훅 (7개)</summary>
 
 **MCP 서버**
 
@@ -523,7 +523,7 @@ Boss는 모든 요청을 4단계 우선순위 체인으로 라우팅합니다:
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 202 agents, 184 skills ready.
+[Boss] Phase 0: Scanning... 202 agents, 185 skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="

@@ -14,10 +14,10 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-202-blue)
-![Skills](https://img.shields.io/badge/skills-184-purple)
+![Skills](https://img.shields.io/badge/skills-185-purple)
 ![Rules](https://img.shields.io/badge/rules-65-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
-![Hooks](https://img.shields.io/badge/hooks-6-red)
+![Hooks](https://img.shields.io/badge/hooks-7-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
 Claude Code 用のオールインワン エージェントハーネス — プラグイン 1 つで 202 エージェントをすぐに使用可能。
@@ -108,7 +108,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 - **grep.app**: GitHub オープンソース コード検索
 
 ### ワンパッケージ バンドル
-- プラグイン インストールは **202 エージェント、184 スキル、65 ルール** を即座に提供
+- プラグイン インストールは **202 エージェント、185 スキル、65 ルール** を即座に提供
 - 4 つの MIT アップストリーム ソース（agency-agents、everything-claude-code、oh-my-claudecode、gstack）をバンドル
 - 毎週 CI オート同期によるアップストリーム コンテンツ最新化
 - コンパニオン `install.sh` は npm ツールと独自 Anthropic スキルを追加
@@ -117,7 +117,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ## コア + OMO エージェント
 
-**Boss** は my-claude の唯一のオリジナル エージェントです。残りの 9 つは [OMO エージェント](https://github.com/code-yeongyu/oh-my-openagent)で、Boss がサブ オーケストレータおよび専門家として使用します。プラグインは **52 のコア エージェント**（Core 1 + OMO 9 + Engineering 23 + OMC 19 + OMO 専門家）を `~/.claude/agents/` に常時ロードし、さらに **133 のドメイン エージェント パック**を `~/.claude/agent-packs/` に置いており、必要に応じて有効化できます。Boss は、すべてのアクティブなエージェントから優先度 2 の機能マッチングを通じて最適マッチ専門家を選択します。以下の[インストール済みコンポーネント](#installed-components)を参照してください。
+**Boss** は my-claude の唯一のオリジナル エージェントです。残りの 9 つは [OMO エージェント](https://github.com/code-yeongyu/oh-my-openagent)で、Boss がサブ オーケストレータおよび専門家として使用します。プラグインは **52 のコア エージェント**（Core 2 + OMO 9 + Engineering 23 + OMC 19 + OMO 専門家）を `~/.claude/agents/` に常時ロードし、さらに **133 のドメイン エージェント パック**を `~/.claude/agent-packs/` に置いており、必要に応じて有効化できます。Boss は、すべてのアクティブなエージェントから優先度 2 の機能マッチングを通じて最適マッチ専門家を選択します。以下の[インストール済みコンポーネント](#installed-components)を参照してください。
 
 | エージェント | ソース | モデル | 役割 |
 |---------|--------|------|------|
@@ -170,12 +170,12 @@ SETUP.md に従うと、以下が設定されます:
 
 | カテゴリ | 数 | ソース | バンドル |
 |------|------|------|------|
-| コア エージェント | 52 | Core 1 + OMO 9 + Engineering 23 + OMC 19 | プラグイン |
+| コア エージェント | 52 | Core 2 + OMO 9 + Engineering 23 + OMC 19 | プラグイン |
 | エージェント パック | 133 | 12 ドメイン カテゴリ（マーケティング、ゲーム開発、セールスなど） | プラグイン |
-| スキル | 184 | ECC 118 + OMC 31 + Core 1 + gstack 27（ランタイム） | プラグイン + install.sh |
+| スキル | 185 | ECC 125 + OMC 31 + Core 2 + gstack 27（ランタイム） | プラグイン + install.sh |
 | ルール | 65 | ECC（共通 9 + 8 言語 × 5） | プラグイン |
 | MCP サーバー | 3 | Context7、Exa、grep.app | プラグイン |
-| フック | 6 | my-claude（Boss プロトコル + SessionStart） | プラグイン |
+| フック | 7 | my-claude（Boss プロトコル + SessionStart） | プラグイン |
 | Anthropic スキル | 14+ | Anthropic オフィシャル | install.sh |
 | CLI ツール | 3 | omc、omo、ast-grep | install.sh |
 
@@ -227,7 +227,7 @@ SETUP.md に従うと、以下が設定されます:
 <details>
 <summary>Agency エージェント（172） — 14 カテゴリにわたるビジネス専門家ペルソナ（すべてモデル: claude-sonnet-4-6）</summary>
 
-**Engineering（22）**
+**Engineering（23）**
 
 | エージェント | 役割 |
 |---------|------|
@@ -366,7 +366,7 @@ SETUP.md に従うと、以下が設定されます:
 </details>
 
 <details>
-<summary>MCP サーバー（3） + 動作修正フック（6）</summary>
+<summary>MCP サーバー（3） + 動作修正フック（7）</summary>
 
 **MCP サーバー**
 
@@ -530,7 +530,7 @@ Boss はすべてのリクエストを 4 レベル優先度チェーンを通じ
 ```
 $ claude "セキュリティ脆弱性について認証モジュール分析"
 
-[Boss] Phase 0: スキャン中... 202 エージェント、184 スキル準備完了.
+[Boss] Phase 0: スキャン中... 202 エージェント、185 スキル準備完了.
 [Boss] Phase 1: 意図 → セキュリティ分析 | 優先度: P2
 [Boss] Phase 2: マッチ → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="

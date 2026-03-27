@@ -14,10 +14,10 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-202-blue)
-![Skills](https://img.shields.io/badge/skills-184-purple)
-![Rules](https://img.shields.io/badge/rules-65-orange)
+![Skills](https://img.shields.io/badge/skills-185-purple)
+![Rules](https://img.shields.io/badge/rules-64-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
-![Hooks](https://img.shields.io/badge/hooks-6-red)
+![Hooks](https://img.shields.io/badge/hooks-7-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
 All-in-One Agent-Harness für Claude Code — ein Plugin, 202 Agenten sofort einsatzbereit.
@@ -108,7 +108,7 @@ Lese die vollständige Ausgabe und führe jeden Schritt der Reihe nach aus. Verw
 - **grep.app**: GitHub Open-Source-Code-Suche
 
 ### All-in-One Bundle
-- Plugin-Installation bietet sofort **202 Agenten, 184 Skills und 65 Regeln**
+- Plugin-Installation bietet sofort **202 Agenten, 185 Skills und 64 Regeln**
 - Bündelt 4 MIT-Upstream-Quellen (agency-agents, everything-claude-code, oh-my-claudecode, gstack)
 - Wöchentliche CI-Auto-Sync hält gebündelte Inhalte mit Upstream auf dem neuesten Stand
 - Begleitendes `install.sh` fügt npm-Tools und proprietäre Anthropic Skills hinzu
@@ -117,7 +117,7 @@ Lese die vollständige Ausgabe und führe jeden Schritt der Reihe nach aus. Verw
 
 ## Kern- + OMO-Agenten
 
-**Boss** ist der einzige my-claude Original-Agent. Die verbleibenden 9 sind [OMO-Agenten](https://github.com/code-yeongyu/oh-my-openagent), die Boss als Sub-Orchestrators und Spezialisten nutzt. Das Plugin bündelt **52 Kern-Agenten** (Kern 1 + OMO 9 + Engineering 23 + OMC 19 + OMO-Spezialisten), die immer in `~/.claude/agents/` geladen werden, plus **133 Domain-Agent-Packs** in `~/.claude/agent-packs/`, die bei Bedarf aktiviert werden können. Boss wählt den besten entsprechenden Spezialisten aus allen aktiven Agenten über Priority 2 Fähigkeits-Matching. Siehe [Installierte Komponenten](#installierte-komponenten) unten.
+**Boss** ist der einzige my-claude Original-Agent. Die verbleibenden 9 sind [OMO-Agenten](https://github.com/code-yeongyu/oh-my-openagent), die Boss als Sub-Orchestrators und Spezialisten nutzt. Das Plugin bündelt **52 Kern-Agenten** (Kern 2 + OMO 9 + Engineering 23 + OMC 19 + OMO-Spezialisten), die immer in `~/.claude/agents/` geladen werden, plus **133 Domain-Agent-Packs** in `~/.claude/agent-packs/`, die bei Bedarf aktiviert werden können. Boss wählt den besten entsprechenden Spezialisten aus allen aktiven Agenten über Priority 2 Fähigkeits-Matching. Siehe [Installierte Komponenten](#installierte-komponenten) unten.
 
 | Agent | Quelle | Modell | Rolle |
 |---------|--------|------|------|
@@ -170,12 +170,12 @@ Das Befolgen von SETUP.md konfiguriert Folgendes:
 
 | Kategorie | Anzahl | Quelle | Gebündelt |
 |------|------|------|------|
-| Kern-Agenten | 52 | Kern 1 + OMO 9 + Engineering 23 + OMC 19 | Plugin |
+| Kern-Agenten | 52 | Kern 2 + OMO 9 + Engineering 23 + OMC 19 | Plugin |
 | Agent Packs | 133 | 12 Domain-Kategorien (Marketing, Spieleentwicklung, Verkauf, etc.) | Plugin |
-| Skills | 184 | ECC 118 + OMC 31 + Core 1 + gstack 27 (Laufzeit) | Plugin + install.sh |
-| Regeln | 65 | ECC (Common 9 + 8 Sprachen × 5) | Plugin |
+| Skills | 185 | ECC 125 + OMC 31 + Core 2 + gstack 27 (Laufzeit) | Plugin + install.sh |
+| Regeln | 64 | ECC (Common 9 + 8 Sprachen × 5) | Plugin |
 | MCP-Server | 3 | Context7, Exa, grep.app | Plugin |
-| Hooks | 6 | my-claude (Boss-Protokoll + SessionStart) | Plugin |
+| Hooks | 7 | my-claude (Boss-Protokoll + SessionStart) | Plugin |
 | Anthropic Skills | 14+ | Anthropic Official | install.sh |
 | CLI Tools | 3 | omc, omo, ast-grep | install.sh |
 
@@ -227,7 +227,7 @@ Das Befolgen von SETUP.md konfiguriert Folgendes:
 <details>
 <summary>Agency-Agenten (172) — Business-Spezialisten-Personas in 14 Kategorien (alle Modell: claude-sonnet-4-6)</summary>
 
-**Engineering (22)**
+**Engineering (23)**
 
 | Agent | Rolle |
 |---------|------|
@@ -333,7 +333,7 @@ Das Befolgen von SETUP.md konfiguriert Folgendes:
 </details>
 
 <details>
-<summary>Regeln (65) — ECC Coding Rules</summary>
+<summary>Regeln (64) — ECC Coding Rules</summary>
 
 **Common (9)** — Angewendet auf alle Projekte
 
@@ -366,7 +366,7 @@ Jedes Sprachenverzeichnis enthält: coding-style.md, hooks.md, patterns.md, secu
 </details>
 
 <details>
-<summary>MCP-Server (3) + Verhaltenskorrektur-Hooks (6)</summary>
+<summary>MCP-Server (3) + Verhaltenskorrektur-Hooks (7)</summary>
 
 **MCP-Server**
 
@@ -530,7 +530,7 @@ Jede Delegation beinhaltet einen **6-Abschnitt strukturierten Prompt**: AUFGABE,
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 202 agents, 184 skills ready.
+[Boss] Phase 0: Scanning... 202 agents, 185 skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="
