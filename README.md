@@ -38,6 +38,23 @@ All-in-one agent harness for Claude Code — one plugin, 202 agents ready.
 | **Discovery** | Runtime capability matching — no hardcoded routing tables. Every agent, skill, and MCP server is auto-discovered at session start |
 | **Verification** | Trust but verify. Every subagent result is independently checked before acceptance |
 
+## 🎯 my-claude Originals
+
+Features built specifically for my-claude, beyond what upstream sources provide:
+
+| Feature | Description |
+|---------|-------------|
+| **Boss Meta-Orchestrator** | Dynamic capability discovery at runtime — scans all agents, skills, MCP servers, and hooks to route tasks to the optimal specialist |
+| **3-Phase Sprint Workflow** | Design (interactive) → Execute (autonomous) → Review (interactive) — structured workflow combining user decisions with autonomous execution |
+| **Agent Tier Priority** | Intelligent duplicate resolution: core > omo > omc > agency, ensuring the most specialized agent handles each task |
+| **Agency Cost Optimization** | Automatic model routing — haiku for simple advisory, sonnet for implementation — reducing costs for 172 domain specialist agents |
+| **Agent Telemetry** | PostToolUse hook automatically logs agent usage to `agent-usage.jsonl` for usage analytics |
+| **Smart Packs** | Project-type detection recommends relevant agent packs (engineering, game-dev, marketing, etc.) at session start |
+| **CI SHA Pre-check** | Upstream sync skips unchanged sources via `git ls-remote` SHA comparison, reducing unnecessary CI runs |
+| **Agent Dedup Detection** | Normalized name comparison catches duplicates across upstream sources during CI sync |
+
+---
+
 ## Quick Start
 
 ### If you are a human
