@@ -48,6 +48,10 @@ Sequential task execution wastes time when tasks are independent. Ultrawork enab
    - Build/typecheck passes
    - Affected tests pass
    - No new errors introduced
+7.5 **gstack /qa** (additive, non-blocking):
+   - If gstack is installed, invoke /qa skill for browser QA
+   - If gstack is not installed or /qa fails, skip this step silently and proceed
+   - This is an additional verification layer — it does NOT replace Step 7
 </Steps>
 
 <Tool_Usage>
@@ -109,6 +113,7 @@ Why bad: Opus is expensive overkill for a trivial fix. Use executor with Haiku i
 - [ ] Build/typecheck passes
 - [ ] Affected tests pass
 - [ ] No new errors introduced
+- [ ] gstack /qa pass completed (or skipped if unavailable)
 </Final_Checklist>
 
 <Advanced>

@@ -26,6 +26,28 @@ command -v npm  >/dev/null 2>&1 || { echo "ERROR: npm not found"; exit 1; }
 command -v git  >/dev/null 2>&1 || { echo "ERROR: git not found"; exit 1; }
 echo "  Prerequisites OK"
 
+# ── Argument parsing ──
+WITH_PACKS=""
+for arg in "$@"; do
+  case "$arg" in
+    --with-packs=*) WITH_PACKS="${arg#*=}" ;;
+    -h|--help)
+      cat <<'EOF'
+Usage:
+  bash install.sh
+  bash install.sh --with-packs <pack1,pack2,...>
+
+Options:
+  --with-packs=<packs>  Comma-separated list of agent packs to symlink into ~/.claude/agents/
+                        Available: academic, design, game-development, marketing, paid-media,
+                                   product, project-management, sales, spatial-computing,
+                                   specialized, support, testing
+EOF
+      exit 0
+      ;;
+  esac
+done
+
 # ── Version info ──
 INSTALLING_VERSION=$(node "$SCRIPT_DIR/scripts/get-version.js" "$SCRIPT_DIR/.claude-plugin/plugin.json" 2>/dev/null)
 INSTALLED_VERSION="none"
@@ -143,6 +165,26 @@ cp -r "$SCRIPT_DIR"/agents/agency/spatial-computing/*.md   "$HOME/.claude/agent-
 cp -r "$SCRIPT_DIR"/agents/agency/specialized/*.md         "$HOME/.claude/agent-packs/specialized/"
 cp -r "$SCRIPT_DIR"/agents/agency/support/*.md             "$HOME/.claude/agent-packs/support/"
 cp -r "$SCRIPT_DIR"/agents/agency/testing/*.md             "$HOME/.claude/agent-packs/testing/"
+
+# --with-packs: symlink requested pack agents into ~/.claude/agents/
+if [ -n "$WITH_PACKS" ]; then
+  IFS=',' read -ra PACKS <<< "$WITH_PACKS"
+  for pack in "${PACKS[@]}"; do
+    pack_dir="$HOME/.claude/agent-packs/$pack"
+    if [ -d "$pack_dir" ]; then
+      for agent in "$pack_dir"/*.md; do
+        [ -f "$agent" ] || continue
+        basename=$(basename "$agent")
+        # Skip if file already exists (dedup)
+        [ -f "$HOME/.claude/agents/$basename" ] && continue
+        ln -sf "$agent" "$HOME/.claude/agents/$basename"
+        echo "  Symlinked: $basename (from $pack)"
+      done
+    else
+      echo "  WARNING: Pack '$pack' not found in $HOME/.claude/agent-packs/"
+    fi
+  done
+fi
 
 # Dedup: remove agent-pack entries that duplicate core agents
 for f in "$HOME/.claude/agents"/*.md; do

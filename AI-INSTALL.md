@@ -182,6 +182,21 @@ This installs:
 - Karpathy coding guidelines (appended to CLAUDE.md)
 - gstack sprint-process harness (27 skills — code review, QA, debugging, security, deployment)
 
+### Activating Agent Packs
+
+After installation, activate domain-specific agent packs:
+
+```bash
+# Activate specific packs (symlinks agents to ~/.claude/agents/)
+bash install.sh --with-packs marketing,testing,sales
+
+# Available packs: academic, design, game-development, marketing,
+# paid-media, product, project-management, sales, spatial-computing,
+# specialized, support, testing
+```
+
+Plugin users don't need this — all 150 domain agents are already accessible via the `my-claude:agency:*` namespace.
+
 ## Step 3 (Optional): Fix OpenCode TUI crash
 
 If using OpenCode, enable the fallback builder agent:

@@ -8,7 +8,10 @@
     "compareUrl": "https://github.com/msitarzewski/agency-agents/compare/6254154...HEAD",
     "files": {
       "agents": 172
-    }
+    },
+    "strategy": "vendor",
+    "patchRules": ["inject-model-field"],
+    "syncFrequency": "weekly"
   },
   "everything-claude-code": {
     "repo": "https://github.com/affaan-m/everything-claude-code",
@@ -20,7 +23,10 @@
     "files": {
       "skills": 125,
       "rules": 65
-    }
+    },
+    "strategy": "vendor",
+    "patchRules": ["remove-gstack-superseded"],
+    "syncFrequency": "weekly"
   },
   "oh-my-claudecode": {
     "repo": "https://github.com/Yeachan-Heo/oh-my-claudecode",
@@ -32,7 +38,10 @@
     "files": {
       "agents": 19,
       "skills": 31
-    }
+    },
+    "strategy": "vendor",
+    "patchRules": ["preserve-core-skills"],
+    "syncFrequency": "weekly"
   },
   "gstack": {
     "repo": "https://github.com/garrytan/gstack",
@@ -43,6 +52,10 @@
     "compareUrl": "https://github.com/garrytan/gstack/compare/initial...HEAD",
     "files": {
       "skills": 27
-    }
+    },
+    "strategy": "runtime",
+    "installCommand": "git clone --depth 1",
+    "updateCommand": "git pull --ff-only",
+    "syncFrequency": "on-install"
   }
 }

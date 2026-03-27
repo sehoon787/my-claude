@@ -53,18 +53,36 @@ else
 fi
 if [ "$_needs_regen" -eq 1 ]; then
   _ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+  # Detect project type from current directory
+  _recommended_packs="[]"
+  if [ -f "package.json" ] || [ -f "tsconfig.json" ] || [ -f "Cargo.toml" ] || \
+     [ -f "requirements.txt" ] || [ -f "pyproject.toml" ] || [ -f "go.mod" ] || [ -f "Gemfile" ]; then
+    _recommended_packs='["engineering"]'
+  elif ls *.unity 2>/dev/null | grep -q . || [ -d "Assets" ]; then
+    _recommended_packs='["game-development"]'
+  fi
+
   _agents_json="["
   _first_agent=1
-  for _f in "$HOME/.claude/agents/"*.md .claude/agents/*.md; do
+  for _f in "$HOME/.claude/agents/"*.md "$HOME/.claude/agents/core/"*.md "$HOME/.claude/agents/omo/"*.md "$HOME/.claude/agents/omc/"*.md "$HOME/.claude/agents/agency/"**/*.md .claude/agents/*.md; do
     [ -f "$_f" ] || continue
     case "$_f" in "$HOME/.claude/agents/"*) _scope="global" ;; *) _scope="project" ;; esac
+    # Determine tier from path
+    case "$_f" in
+      */agents/core/*) _tier="core" ;;
+      */agents/omo/*)  _tier="omo" ;;
+      */agents/omc/*)  _tier="omc" ;;
+      */agents/agency/*) _tier="agency" ;;
+      *) _tier="" ;;
+    esac
     _name=$(sed -n '/^---/,/^---/p' "$_f" 2>/dev/null | grep '^name:' | head -1 | sed 's/^name:[[:space:]]*//' | tr -d '"'"'"'')
     _desc=$(sed -n '/^---/,/^---/p' "$_f" 2>/dev/null | grep '^description:' | head -1 | sed 's/^description:[[:space:]]*//' | tr -d '"'"'"'')
     _model=$(sed -n '/^---/,/^---/p' "$_f" 2>/dev/null | grep '^model:' | head -1 | sed 's/^model:[[:space:]]*//' | tr -d '"'"'"'')
     [ -z "$_name" ] && _name=$(basename "$_f" .md)
     [ -z "$_model" ] && _model=""
     if [ "$_first_agent" -eq 1 ]; then _first_agent=0; else _agents_json="${_agents_json},"; fi
-    _agents_json="${_agents_json}{\"name\":\"${_name}\",\"description\":\"${_desc}\",\"model\":\"${_model}\",\"scope\":\"${_scope}\"}"
+    _agents_json="${_agents_json}{\"name\":\"${_name}\",\"description\":\"${_desc}\",\"model\":\"${_model}\",\"scope\":\"${_scope}\",\"tier\":\"${_tier}\"}"
   done
   _agents_json="${_agents_json}]"
   _skills_json="["
@@ -89,8 +107,8 @@ $(grep -o '"[^"]*"[[:space:]]*:' "$_sf" 2>/dev/null | sed -n '/mcpServers/,/}/p'
 EOF
   done
   _mcp_json="${_mcp_json}]"
-  printf '{"generated_at":"%s","agents":%s,"skills":%s,"mcp_servers":%s}\n' \
-    "$_ts" "$_agents_json" "$_skills_json" "$_mcp_json" > "$REGISTRY_FILE" 2>/dev/null \
+  printf '{"generated_at":"%s","agents":%s,"skills":%s,"mcp_servers":%s,"recommended_packs":%s}\n' \
+    "$_ts" "$_agents_json" "$_skills_json" "$_mcp_json" "$_recommended_packs" > "$REGISTRY_FILE" 2>/dev/null \
     && REGISTRY_STATUS="regenerated" || REGISTRY_STATUS="failed"
 fi
 

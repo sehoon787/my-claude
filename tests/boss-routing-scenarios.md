@@ -359,3 +359,103 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 **Input**: "Show me all available agents"
 **Expected**: Boss reports 185 agents (52 core + 133 packs) from the plugin bundle
 **Verify**: Count includes all three subdirectories
+
+---
+
+## New Scenarios: Architecture Improvements (v0.21+)
+
+### Scenario: Agent tier priority — OMC over Agency
+**Input**: "Do a code review"
+**Expected**: Boss selects `agents/omc/code-reviewer.md` (tier 3) over `agents/agency/engineering/Code Reviewer.md` (tier 4)
+**Verify**: Tier priority core(1) > omo(2) > omc(3) > agency(4) applied
+
+### Scenario: Agency agent cost optimization — haiku for advisory
+**Input**: "What's the best social media strategy for a B2B SaaS?"
+**Expected**: Boss routes to agency Social Media Strategist with `model="haiku"` (simple advisory, no files to modify)
+**Verify**: model parameter is haiku, not sonnet
+
+### Scenario: Agency agent cost optimization — sonnet for implementation
+**Input**: "Write a LinkedIn content calendar for next month"
+**Expected**: Boss routes to agency LinkedIn Content Creator with `model="sonnet"` (produces file output)
+**Verify**: model parameter is sonnet (implementation work)
+
+### Scenario: install.sh --with-packs symlinks
+**Input**: `bash install.sh --with-packs=marketing,testing`
+**Expected**: Marketing and testing agent .md files symlinked from `~/.claude/agent-packs/` to `~/.claude/agents/`
+**Verify**: `ls -la ~/.claude/agents/ | grep -l "agent-packs"` shows symlinks; existing core agents not overwritten
+
+### Scenario: CI SHA pre-check skips unchanged upstream
+**Input**: CI sync runs when agency-agents SHA unchanged
+**Expected**: Sync step skipped with message "agency-agents: no changes (SHA ...)"
+**Verify**: `steps.check-agency.outputs.skip == 'true'` and clone step not executed
+
+### Scenario: CI agent dedup detection
+**Input**: CI sync with "Code Reviewer" (agency) and "code-reviewer" (omc)
+**Expected**: Dedup report includes "⚠️ Code Reviewer ↔ code-reviewer"
+**Verify**: Normalized name comparison catches case/spacing differences
+
+### Scenario: Smart Packs recommendation
+**Input**: Session starts in a project with `package.json` and `tsconfig.json`
+**Expected**: capability-registry.json includes `"recommended_packs": ["engineering"]`
+**Verify**: Boss Phase 0 reads recommended_packs and offers to activate if not already active
+
+### Scenario: Agent telemetry PostToolUse hook
+**Input**: Boss delegates to executor agent
+**Expected**: `~/.gstack/analytics/agent-usage.jsonl` appended with `{"agent":"executor","model":"sonnet","ts":"...","tool":"Agent"}`
+**Verify**: JSONL entry written with correct agent name and model
+
+### Scenario: gstack 3-Phase Sprint E2E
+**Input**: "이 기능 만들어줘" (end-to-end feature request)
+**Expected**: Boss initiates Phase 1 (설계/대화) → Phase 2 (실행/자율 via ralph) → Phase 3 (검수/대화)
+**Verify**: Each phase transition is sequential; AskUserQuestion used for user decisions
+
+### Scenario: gstack fallback when not installed
+**Input**: Boss tries /review but gstack not installed
+**Expected**: Graceful fallback to OMC code-reviewer agent
+**Verify**: No error thrown; review still completed via fallback path
+
+---
+
+## Part 3: gstack-sprint + 라우팅 보강
+
+### Scenario 186: gstack-sprint 트리거 — end-to-end 기능 구현
+- **Input**: "사용자 프로필 페이지를 추가해줘"
+- **Expected**: Boss → Intent Gate (Build) → Counter-Proposal: gstack-sprint → Skill(skill: "gstack-sprint") 호출
+- **Verify**: gstack-sprint Phase 1(설계/대화)으로 진입, AskUserQuestion 발생
+- **Not Expected**: 바로 executor로 위임하거나 ralph 직접 호출
+
+### Scenario 187: gstack-sprint 미트리거 — 순수 설계/기획
+- **Input**: "새 프로젝트 아이디어가 있는데 같이 검토해줘"
+- **Expected**: Boss → Intent Gate (Collaborative/Architecture) → /office-hours 또는 deep-interview 제안
+- **Verify**: gstack-sprint이 트리거되지 않음
+- **Not Expected**: gstack-sprint 호출
+
+### Scenario 188: gstack-sprint 미트리거 — 단발성 코드 리뷰
+- **Input**: "코드 리뷰해줘"
+- **Expected**: Boss → P0 gstack /review 매칭 → Skill(skill: "review") 직접 호출
+- **Verify**: gstack-sprint이 아닌 /review 직접 호출
+- **Not Expected**: gstack-sprint 호출
+
+### Scenario 189: gstack-sprint 미트리거 — 버그 수정
+- **Input**: "이 버그 고쳐줘: 로그인 시 500 에러"
+- **Expected**: Boss → Intent Gate (Trivial/Mid-sized) → debugger 또는 executor 직접 위임
+- **Verify**: gstack-sprint이 트리거되지 않음
+- **Not Expected**: gstack-sprint 호출
+
+### Scenario 190: gstack-sprint 미트리거 — 설계만 요청
+- **Input**: "이 기능 설계만 해줘, 구현은 나중에"
+- **Expected**: Boss → Intent Gate (Architecture) → /plan-ceo-review 또는 /office-hours 직접 호출
+- **Verify**: gstack-sprint이 트리거되지 않음 (구현 단계 없음)
+- **Not Expected**: gstack-sprint 호출
+
+### Scenario 191: gstack 미설치 환경에서 end-to-end 요청
+- **Input**: "이 기능 만들어줘" (gstack 미설치 상태)
+- **Expected**: Boss → gstack-sprint 호출 시도 → gstack-sprint 내부에서 폴백 → OMC planner → ralph → Boss 직접 검수
+- **Verify**: Phase 1은 planner 에이전트로, Phase 3는 Boss 직접 파일 읽고 검수
+- **Not Expected**: 에러로 중단
+
+### Scenario 192: Phase 3 검수 거부 → Phase 2 재진입
+- **Input**: gstack-sprint Phase 3에서 사용자가 "개선 필요" 선택
+- **Expected**: Phase 2 재진입 — 수정사항만 ralph로 전달, 전체 재구현 아님
+- **Verify**: ralph가 delta만 처리, Phase 3 다시 실행
+- **Not Expected**: 전체 구현 재시작
