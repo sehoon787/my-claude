@@ -238,7 +238,8 @@ If the trace produces no clear "most likely explanation" (all lanes low-confiden
 
 Follow deep-interview SKILL.md Phases 2-4 exactly:
 - Ambiguity scoring across all dimensions (same weights as deep-interview)
-- One question at a time targeting the weakest dimension
+- One question at a time targeting the weakest dimension, with the same explicit weakest-dimension rationale reporting required by deep-interview
+- Brownfield confirmation questions inherit deep-interview's repo-evidence citation requirement before asking the user to choose a direction
 - Challenge agents activate at the same round thresholds as deep-interview
 - Soft/hard caps at the same round limits as deep-interview
 - Score display after every round

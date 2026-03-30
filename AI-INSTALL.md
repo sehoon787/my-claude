@@ -1,7 +1,7 @@
 # my-claude AI Installation Guide
 
 You are an AI agent setting up a Claude Code multi-agent orchestration environment.
-The plugin bundles 202 agents (52 core + 150 domain agent-packs), 185 skills (125 ECC + 31 OMC + 2 Core + 27 gstack), 64 rules, 7 hooks, and 3 MCP servers.
+The plugin bundles 191 agents (55 core + 136 domain agent-packs), 199 skills (135 ECC + 31 OMC + 2 Core + 31 gstack), 64 rules, 7 hooks, and 3 MCP servers.
 Only 2-3 steps are needed.
 
 ---
@@ -24,9 +24,9 @@ node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir
 The plugin records its version automatically. To check: `cat ~/.claude/.my-claude-version`
 
 This installs:
-- 52 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 23 engineering
-- 150 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
-- 158 skills (125 ECC + 31 OMC + 2 Core)
+- 55 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 23 engineering
+- 136 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
+- 199 skills (135 ECC + 31 OMC + 2 Core + 31 gstack)
   Note: gstack skills (27) are installed separately in Step 2.
 - 64 rules
 - 7 behavioral hooks (SessionStart, PreToolUse, PostToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop)
@@ -247,10 +247,10 @@ echo "Version:          $(cat ~/.claude/.my-claude-version 2>/dev/null || echo '
 ```
 
 Expected:
-- Core agents: 52+ (no domain agents in core)
-- Agent packs: 150+
-- Plugin skills: 185+
-- Rules: 64
+- Core agents: 55+ (no domain agents in core)
+- Agent packs: 136+
+- Plugin skills: 199+
+- Rules: 77
 - Anthropic skills: 2 key skills (pdf, docx)
 - Manifest: 300+ entries
 - Duplicates: 0 (should be 0)

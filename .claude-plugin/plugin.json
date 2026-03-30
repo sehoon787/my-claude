@@ -1,6 +1,6 @@
 {
   "name": "my-claude",
-  "description": "All-in-one agent harness plugin — 52 core agents + 133 domain agent-packs, 185 skills, behavioral hooks, and MCP servers bundled from 4 MIT upstream sources with weekly CI auto-sync",
+  "description": "All-in-one agent harness plugin — 55 core agents + 136 domain agent-packs, 199 skills, behavioral hooks, and MCP servers bundled from 4 MIT upstream sources with weekly CI auto-sync",
   "version": "0.1.0",
   "author": {
     "name": "sehoon787"
