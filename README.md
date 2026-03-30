@@ -7,8 +7,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-202-blue)
-![Skills](https://img.shields.io/badge/skills-185-purple)
+![Agents](https://img.shields.io/badge/agents-191-blue)
+![Skills](https://img.shields.io/badge/skills-199-purple)
 ![Rules](https://img.shields.io/badge/rules-64-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-7-red)
@@ -127,7 +127,7 @@ For human-readable step-by-step setup, see `SETUP.md`.
 - **grep.app**: GitHub open-source code search
 
 ### All-in-One Bundle
-- Plugin install provides **202 agents, 185 skills, and 64 rules** instantly
+- Plugin install provides **191 agents, 199 skills, and 77 rules** instantly
 - Bundles 4 MIT upstream sources (agency-agents, everything-claude-code, oh-my-claudecode, gstack)
 - Weekly CI auto-sync keeps bundled content up-to-date with upstream
 - Companion `install.sh` adds npm tools and proprietary Anthropic skills
@@ -178,10 +178,10 @@ Following SETUP.md will configure the following:
 
 | Category | Count | Source | Bundled |
 |------|------|------|------|
-| Core Agents | 52 | Core 1 + OMO 9 + Engineering 23 + OMC 19 | Plugin |
-| Agent Packs | 133 | 12 domain categories (marketing, gamedev, sales, etc.) | Plugin |
-| Skills | 185 | ECC 125 + OMC 31 + Core 2 + gstack 27 (runtime) | Plugin + install.sh |
-| Rules | 64 | ECC (common 9 + 8 languages × 5) | Plugin |
+| Core Agents | 55 | Core 1 + OMO 9 + Engineering 23 + OMC 19 | Plugin |
+| Agent Packs | 136 | 12 domain categories (marketing, gamedev, sales, etc.) | Plugin |
+| Skills | 199 | ECC 135 + OMC 31 + Core 2 + gstack 31 (runtime) | Plugin + install.sh |
+| Rules | 77 | ECC (common 9 + 8 languages × 5) | Plugin |
 | MCP Servers | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 7 | my-claude (Boss protocol + SessionStart) | Plugin |
 | Anthropic Skills | 14+ | Anthropic Official | install.sh |
@@ -342,7 +342,7 @@ Following SETUP.md will configure the following:
 </details>
 
 <details>
-<summary>Rules (64) — ECC Coding Rules</summary>
+<summary>Rules (77) — ECC Coding Rules</summary>
 
 **Common (9)** — Applied to all projects
 
@@ -540,7 +540,7 @@ Every delegation includes a **6-section structured prompt**: TASK, EXPECTED OUTC
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 202 agents, 185 skills ready.
+[Boss] Phase 0: Scanning... 191 agents, 199 skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="

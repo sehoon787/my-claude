@@ -13,8 +13,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-202-blue)
-![Skills](https://img.shields.io/badge/skills-185-purple)
+![Agents](https://img.shields.io/badge/agents-191-blue)
+![Skills](https://img.shields.io/badge/skills-199-purple)
 ![Rules](https://img.shields.io/badge/rules-64-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-7-red)
@@ -107,7 +107,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 - **grep.app**: GitHub 오픈소스 코드 검색
 
 ### 통합 생태계
-- 플러그인 하나로 **202 에이전트, 185 스킬, 64 룰**을 한 환경에 구성
+- 플러그인 하나로 **191 에이전트, 199 스킬, 77 룰**을 한 환경에 구성
 - 7개 오픈소스 도구(OMC, omo, ECC, Anthropic Skills, Agency, Karpathy, gstack)를 하나로 통합
 
 ---
@@ -167,10 +167,10 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 
 | 카테고리 | 개수 | 출처 | 번들 |
 |------|------|------|------|
-| 코어 에이전트 | 52 | Core 2 + OMO 9 + Engineering 23 + OMC 19 | 플러그인 |
-| 에이전트 팩 | 133 | 12개 도메인 카테고리 (마케팅, 게임 개발, 영업 등) | 플러그인 |
-| 스킬 | 185 | ECC 125 + OMC 31 + Core 2 + gstack 27 (런타임) | 플러그인 + install.sh |
-| 룰 | 64 | ECC (common 9 + 8 languages × 5) | 플러그인 |
+| 코어 에이전트 | 55 | Core 2 + OMO 9 + Engineering 23 + OMC 19 | 플러그인 |
+| 에이전트 팩 | 136 | 12개 도메인 카테고리 (마케팅, 게임 개발, 영업 등) | 플러그인 |
+| 스킬 | 199 | ECC 135 + OMC 31 + Core 2 + gstack 31 (런타임) | 플러그인 + install.sh |
+| 룰 | 77 | ECC (common 9 + 8 languages × 5) | 플러그인 |
 | MCP 서버 | 3 | Context7, Exa, grep.app | 플러그인 |
 | 훅 | 7 | my-claude (Boss 프로토콜 + SessionStart) | 플러그인 |
 | Anthropic 스킬 | 14+ | Anthropic 공식 | install.sh |
@@ -330,7 +330,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 </details>
 
 <details>
-<summary>룰 (64개) — ECC 코딩 규칙</summary>
+<summary>룰 (77개) — ECC 코딩 규칙</summary>
 
 **Common (9개)** — 모든 프로젝트에 적용
 
@@ -523,7 +523,7 @@ Boss는 모든 요청을 4단계 우선순위 체인으로 라우팅합니다:
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 202 agents, 185 skills ready.
+[Boss] Phase 0: Scanning... 191 agents, 199 skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="

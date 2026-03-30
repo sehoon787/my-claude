@@ -201,7 +201,7 @@ Native multi-agent orchestration plugin for Claude Code.
 # Tested with v1.x — check https://www.npmjs.com/package/oh-my-claudecode for latest
 npm i -g oh-my-claude-sisyphus@latest
 
-# Run setup (installs 18 agents + HUD + CLAUDE.md configuration)
+# Run setup (installs 19 agents + HUD + CLAUDE.md configuration)
 omc setup
 
 # Verify
@@ -879,7 +879,7 @@ for f in ~/.claude/agents/{engineering,design,testing,product}-*.md; do
   fi
 done
 
-# Full install (all 164 agents)
+# Full install (all 178 agents)
 # cp -r /tmp/agency-agents/{engineering,testing,design,product,marketing,sales,project-management,spatial-computing,game-development,specialized,support,strategy,paid-media}/*.md ~/.claude/agents/
 ```
 
@@ -889,7 +889,7 @@ done
 
 ## 13. Agent Overlap Analysis (OMC vs omo)
 
-OMC has 18 agents and omo has 11 agents. 7 pairs overlap in function — **both are kept** for situational selection.
+OMC has 19 agents and omo has 9 agents. 7 pairs overlap in function — **both are kept** for situational selection.
 
 ### Overlapping Agent Pairs
 
@@ -1103,7 +1103,7 @@ wsl --status                     # Verify WSL is running
 | | |
 |---|---|
 | **Purpose** | Business-specialist agent persona library |
-| **Core** | 164 agents organized by department (engineering, design, QA, marketing, etc.) |
+| **Core** | 178 agents organized by department (engineering, design, QA, marketing, etc.) |
 | **Agent format** | Markdown + YAML frontmatter (name, description, model, color, emoji, vibe) + personality/workflow/deliverable definitions |
 | **Departments** | Engineering (21), Design (8), Testing (8), Product (4), Marketing (19), Sales (8), PM (6), Game Dev (5), Specialized (16) |
 | **When to use** | When you need a specialized business-role persona (e.g., UX architect, QA engineer, security auditor) |

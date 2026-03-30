@@ -2,60 +2,45 @@
   "agency-agents": {
     "repo": "https://github.com/msitarzewski/agency-agents",
     "branch": "main",
-    "syncedSha": "6254154899f510eb4a4de10561fecfc1f32ff17f",
+    "syncedSha": "4feb0cd736dd0e2e9830cd54dfc99770621bed90",
     "syncedTag": null,
-    "syncedAt": "2026-03-24T06:16:44Z",
-    "compareUrl": "https://github.com/msitarzewski/agency-agents/compare/6254154...HEAD",
+    "syncedAt": "2026-03-30T07:19:29Z",
+    "compareUrl": "https://github.com/msitarzewski/agency-agents/compare/4feb0cd...HEAD",
     "files": {
-      "agents": 172
-    },
-    "strategy": "vendor",
-    "patchRules": ["inject-model-field"],
-    "syncFrequency": "weekly"
+      "agents": 178
+    }
   },
   "everything-claude-code": {
     "repo": "https://github.com/affaan-m/everything-claude-code",
     "branch": "main",
-    "syncedSha": "df4f2df297847687bd8835c440803de36966b2c9",
+    "syncedSha": "118e57e14bdcf925b4c79c2ca3351a5ff3c26c0d",
     "syncedTag": null,
-    "syncedAt": "2026-03-24T06:16:44Z",
-    "compareUrl": "https://github.com/affaan-m/everything-claude-code/compare/df4f2df...HEAD",
+    "syncedAt": "2026-03-30T07:19:29Z",
+    "compareUrl": "https://github.com/affaan-m/everything-claude-code/compare/118e57e...HEAD",
     "files": {
-      "skills": 125,
-      "rules": 65
-    },
-    "strategy": "vendor",
-    "patchRules": ["remove-gstack-superseded"],
-    "syncFrequency": "weekly"
+      "skills": 135,
+      "rules": 77
+    }
   },
   "oh-my-claudecode": {
     "repo": "https://github.com/Yeachan-Heo/oh-my-claudecode",
     "branch": "main",
-    "syncedSha": "275272679a878809686cb7977c7e2f9a22db4037",
+    "syncedSha": "fae376508355fb03ea6a2477453f37f0a59e707f",
     "syncedTag": null,
-    "syncedAt": "2026-03-24T06:16:44Z",
-    "compareUrl": "https://github.com/Yeachan-Heo/oh-my-claudecode/compare/2752726...HEAD",
+    "syncedAt": "2026-03-30T07:19:29Z",
+    "compareUrl": "https://github.com/Yeachan-Heo/oh-my-claudecode/compare/fae3765...HEAD",
     "files": {
       "agents": 19,
       "skills": 31
-    },
-    "strategy": "vendor",
-    "patchRules": ["preserve-core-skills"],
-    "syncFrequency": "weekly"
+    }
   },
   "gstack": {
     "repo": "https://github.com/garrytan/gstack",
     "branch": "main",
-    "syncedSha": "initial",
-    "syncedTag": null,
-    "syncedAt": "2026-03-26T00:00:00Z",
-    "compareUrl": "https://github.com/garrytan/gstack/compare/initial...HEAD",
+    "syncedAt": "2026-03-30T07:19:29Z",
+    "license": "MIT",
     "files": {
-      "skills": 27
-    },
-    "strategy": "runtime",
-    "installCommand": "git clone --depth 1",
-    "updateCommand": "git pull --ff-only",
-    "syncFrequency": "on-install"
+      "skills": 31
+    }
   }
 }
