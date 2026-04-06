@@ -140,7 +140,7 @@ For human-readable step-by-step setup, see `SETUP.md`.
 
 ## OMO Agents
 
-9 agents from [Oh My OpenAgent](https://github.com/code-yeongyu/oh-my-openagent) that Boss uses as sub-orchestrators and specialists. The plugin bundles **56 core agents** (Core 1 + OMO 9 + Engineering 23 + OMC 19 + Superpowers 1) always loaded into `~/.claude/agents/`, plus **136 domain agent-packs** in `~/.claude/agent-packs/` that can be activated on demand. Boss selects the best-matching specialist from all active agents via Priority 2 capability matching. See [Installed Components](#installed-components) below.
+9 agents from [Oh My OpenAgent](https://github.com/code-yeongyu/oh-my-openagent) that Boss uses as sub-orchestrators and specialists. The plugin bundles **56 core agents** (my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1) always loaded into `~/.claude/agents/`, plus **136 domain agent-packs** in `~/.claude/agent-packs/` that can be activated on demand. Boss selects the best-matching specialist from all active agents via Priority 2 capability matching. See [Installed Components](#installed-components) below.
 
 ---
 
@@ -158,19 +158,18 @@ rm ~/.claude/agents/<agent-name>.md
 
 | Pack | Count | Examples |
 |------|-------|---------|
-| marketing | 27 | Douyin, Xiaohongshu, WeChat OA, TikTok |
-| gamedev | 19 | Unity, Unreal, Godot, Roblox |
-| engineering-domain | 8 | Mobile, Solidity, Embedded, Feishu |
-| sales | 9 | SDR, Account Executive, Revenue Ops |
-| specialized | 10+ | Legal, Finance, Healthcare, Education |
+| marketing | 29 | Douyin, Xiaohongshu, WeChat OA, TikTok, SEO |
+| specialized | 28 | Legal, Finance, Healthcare, Education, MCP Builder |
+| game-development | 20 | Unity, Unreal, Godot, Roblox, Blender, Narrative |
 | design | 8 | Brand, UI, UX, Visual Storytelling |
 | testing | 8 | API, Accessibility, Performance, E2E |
-| product | 5 | Sprint, Feedback, Trend Research |
+| sales | 8 | Deal Strategy, Discovery, Pipeline Analysis |
 | paid-media | 7 | Google Ads, Meta Ads, Programmatic |
-| project-mgmt | 5 | Scrum, Kanban, Risk Management |
-| academic | 5 | Research, Literature Review, Citation |
+| project-management | 6 | Scrum, Kanban, Risk Management |
+| spatial-computing | 6 | visionOS, ARKit, WebXR, Metal |
 | support | 6 | Customer Success, Escalation, Triage |
-| spatial-computing | 3 | ARKit, visionOS, Spatial Audio |
+| academic | 5 | Research, Literature Review, Citation |
+| product | 5 | Product Manager, Sprint, Feedback, Trend |
 
 ---
 
@@ -180,7 +179,7 @@ Following SETUP.md will configure the following:
 
 | Category | Count | Source | Bundled |
 |------|------|------|------|
-| Core Agents | 56 | Core 1 + OMO 9 + Engineering 23 + OMC 19 + Superpowers 1 | Plugin |
+| Core Agents | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | Plugin |
 | Agent Packs | 136 | 12 domain categories (marketing, gamedev, sales, etc.) | Plugin |
 | Skills | 213 | ECC 135 + OMC 31 + Core 2 + gstack 31 (runtime) + Superpowers 14 | Plugin + install.sh |
 | Rules | 77 | ECC (common 9 + 8 languages × 5) | Plugin |
@@ -245,9 +244,7 @@ Note: `agent-teams-reference` is a reference document for Agent Teams patterns, 
 </details>
 
 <details>
-<summary>Agency Agents (172) — Business specialist personas across 14 categories (all model: claude-sonnet-4-6)</summary>
-
-**Engineering (23)**
+<summary>Agency Engineering Agents (26) — Always-loaded engineering specialists from agency-agents</summary>
 
 | Agent | Role |
 |---------|------|
@@ -255,12 +252,15 @@ Note: `agent-teams-reference` is a reference document for Agent Teams patterns, 
 | ai-engineer | AI/ML engineering |
 | autonomous-optimization-architect | Autonomous optimization architecture |
 | backend-architect | Backend architecture |
+| cms-developer | CMS development |
 | code-reviewer | Code review |
 | data-engineer | Data engineering |
 | database-optimizer | Database optimization |
 | devops-automator | DevOps automation |
+| email-intelligence-engineer | Email intelligence |
 | embedded-firmware-engineer | Embedded firmware |
 | feishu-integration-developer | Feishu integration development |
+| filament-optimization-specialist | Filament optimization |
 | frontend-developer | Frontend development |
 | git-workflow-master | Git workflow |
 | incident-response-commander | Incident response |
@@ -275,81 +275,55 @@ Note: `agent-teams-reference` is a reference document for Agent Teams patterns, 
 | threat-detection-engineer | Threat detection engineering |
 | wechat-mini-program-developer | WeChat mini program development |
 
-**Testing (8)**
+</details>
 
-| Agent | Role |
-|---------|------|
-| accessibility-auditor | Accessibility auditing |
-| api-tester | API testing |
-| evidence-collector | Test evidence collection |
-| performance-benchmarker | Performance benchmarking |
-| reality-checker | Reality verification |
-| test-results-analyzer | Test results analysis |
-| tool-evaluator | Tool evaluation |
-| workflow-optimizer | Workflow optimization |
+<details>
+<summary>Superpowers Agent (1) — Code review from superpowers</summary>
 
-**Design (8)**
-
-| Agent | Role |
-|---------|------|
-| brand-guardian | Brand guideline enforcement |
-| image-prompt-engineer | Image prompt engineering |
-| inclusive-visuals-specialist | Inclusive visual design |
-| ui-designer | UI design |
-| ux-architect | UX architecture |
-| ux-researcher | UX research |
-| visual-storyteller | Visual storytelling |
-| whimsy-injector | Injecting fun and whimsy |
-
-**Product (4)**
-
-| Agent | Role |
-|---------|------|
-| behavioral-nudge-engine | Behavioral nudge design |
-| feedback-synthesizer | Feedback synthesis |
-| sprint-prioritizer | Sprint prioritization |
-| trend-researcher | Trend research |
+| Agent | Model | Role |
+|---------|------|------|
+| superpowers-code-reviewer | Sonnet | Thorough code review covering correctness, error handling, performance, security, testing, readability, and maintainability |
 
 </details>
 
 <details>
-<summary>Skills (33) — Anthropic Official + ECC</summary>
+<summary>Agency Agent Packs (136) — On-demand domain specialists from agency-agents (12 categories)</summary>
 
-| Skill | Source | Description |
-|------|------|------|
-| algorithmic-art | Anthropic | Generative art based on p5.js |
-| backend-patterns | ECC | Backend architecture patterns |
-| brand-guidelines | Anthropic | Applying Anthropic brand style |
-| canvas-design | Anthropic | PNG/PDF visual design |
-| claude-api | Anthropic | Building apps with the Claude API/SDK |
-| clickhouse-io | ECC | ClickHouse query optimization |
-| coding-standards | ECC | TypeScript/React coding standards |
-| continuous-learning | ECC | Automatic pattern extraction from sessions |
-| continuous-learning-v2 | ECC | Instinct-based learning system |
-| doc-coauthoring | Anthropic | Document co-authoring workflow |
-| docx | Anthropic | Word document creation/editing |
-| eval-harness | ECC | Evaluation-driven development (EDD) |
-| frontend-design | Anthropic | Frontend UI design |
-| frontend-patterns | ECC | React/Next.js patterns |
-| internal-comms | Anthropic | Internal communication writing |
-| iterative-retrieval | ECC | Incremental context retrieval |
-| karpathy-guidelines | Anthropic | Karpathy AI coding guidelines |
-| learned | ECC | Learned pattern repository |
-| mcp-builder | Anthropic | MCP server development guide |
-| pdf | Anthropic | PDF reading/merging/splitting/OCR |
-| postgres-patterns | ECC | PostgreSQL optimization |
-| pptx | Anthropic | PowerPoint creation/editing |
-| project-guidelines-example | Anthropic | Project guidelines example |
-| security-review | ECC | Security checklist |
-| skill-creator | Anthropic | Meta-skill for creating custom skills |
-| slack-gif-creator | Anthropic | GIF creation for Slack |
-| strategic-compact | ECC | Strategic context compression |
-| tdd-workflow | ECC | TDD workflow enforcement |
-| theme-factory | Anthropic | Applying themes to artifacts |
-| verification-loop | Anthropic | Verification loop |
-| web-artifacts-builder | Anthropic | Building composite web artifacts |
-| webapp-testing | Anthropic | Playwright web app testing |
-| xlsx | Anthropic | Excel file creation/editing |
+| Pack | Count | Examples |
+|------|-------|---------|
+| marketing | 29 | Douyin, Xiaohongshu, WeChat OA, TikTok, SEO |
+| specialized | 28 | Legal, Finance, Healthcare, Education, MCP Builder |
+| game-development | 20 | Unity, Unreal, Godot, Roblox, Blender, Narrative |
+| design | 8 | Brand, UI, UX, Visual Storytelling |
+| testing | 8 | API, Accessibility, Performance, E2E |
+| sales | 8 | Deal Strategy, Discovery, Pipeline Analysis |
+| paid-media | 7 | Google Ads, Meta Ads, Programmatic |
+| project-management | 6 | Scrum, Kanban, Risk Management |
+| spatial-computing | 6 | visionOS, ARKit, WebXR, Metal |
+| support | 6 | Analytics, Finance, Infrastructure, Legal |
+| academic | 5 | Anthropologist, Geographer, Historian, Narratologist, Psychologist |
+| product | 5 | Product Manager, Sprint, Feedback, Trend, Behavioral Nudge |
+
+Activate a pack: `ln -s ~/.claude/agent-packs/<pack>/*.md ~/.claude/agents/`
+
+</details>
+
+<details>
+<summary>Skills (213) — By upstream source</summary>
+
+| Source | Count | Key Skills |
+|--------|-------|------------|
+| everything-claude-code (ECC) | 135 | tdd-workflow, coding-standards, frontend-patterns, backend-patterns, autopilot, ralph, security-review, continuous-learning |
+| oh-my-claudecode (OMC) | 31 | plan, team, trace, deep-dive, blueprint, ultrawork, sciomc, omc-setup |
+| superpowers | 14 | brainstorming, systematic-debugging, test-driven-development, subagent-driven-development, writing-plans, executing-plans, dispatching-parallel-agents, using-git-worktrees, requesting-code-review, receiving-code-review, verification-before-completion, finishing-a-development-branch, writing-skills, using-superpowers |
+| my-claude Core | 2 | boss-advanced, omc-reference |
+| gstack (runtime) | 31 | /qa, /review, /ship, /cso, /investigate, /design-review, /office-hours, /autoplan |
+
+**Installed separately via install.sh:**
+
+| Source | Count | Key Skills |
+|--------|-------|------------|
+| Anthropic Official | 14+ | pdf, docx, pptx, xlsx, canvas-design, mcp-builder, skill-creator |
 
 </details>
 

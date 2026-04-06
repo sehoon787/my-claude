@@ -122,7 +122,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ## OMO 에이전트
 
-Boss가 서브 오케스트레이터 및 전문가로 사용하는 [Oh My OpenAgent](https://github.com/code-yeongyu/oh-my-openagent)의 9개 에이전트입니다. 플러그인은 **56개 코어 에이전트** (Core 1 + OMO 9 + Engineering 23 + OMC 19 + Superpowers 1)를 `~/.claude/agents/`에 항상 로드하며, **136개 도메인 에이전트 팩**은 `~/.claude/agent-packs/`에 설치되어 필요 시 활성화할 수 있습니다. Boss는 Priority 2 능력 매칭으로 활성화된 전체 에이전트 풀에서 최적의 전문가를 선택합니다. 전체 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
+Boss가 서브 오케스트레이터 및 전문가로 사용하는 [Oh My OpenAgent](https://github.com/code-yeongyu/oh-my-openagent)의 9개 에이전트입니다. 플러그인은 **56개 코어 에이전트** (my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1)를 `~/.claude/agents/`에 항상 로드하며, **136개 도메인 에이전트 팩**은 `~/.claude/agent-packs/`에 설치되어 필요 시 활성화할 수 있습니다. Boss는 Priority 2 능력 매칭으로 활성화된 전체 에이전트 풀에서 최적의 전문가를 선택합니다. 전체 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
 
 | 에이전트 | 출처 | 모델 | 역할 |
 |---------|------|------|------|
@@ -152,19 +152,18 @@ rm ~/.claude/agents/<agent-name>.md
 
 | 팩 | 개수 | 예시 |
 |----|------|------|
-| marketing | 27 | 더우인, 샤오홍슈, WeChat OA, TikTok |
-| gamedev | 19 | Unity, Unreal, Godot, Roblox |
-| engineering-domain | 8 | 모바일, Solidity, 임베디드, Feishu |
-| sales | 9 | SDR, 어카운트 이그제큐티브, 리버뉴 옵스 |
-| specialized | 10+ | 법률, 금융, 헬스케어, 교육 |
+| marketing | 29 | 더우인, 샤오홍슈, WeChat OA, TikTok, SEO |
+| specialized | 28 | 법률, 금융, 헬스케어, 교육, MCP Builder |
+| game-development | 20 | Unity, Unreal, Godot, Roblox, Blender, Narrative |
 | design | 8 | 브랜드, UI, UX, 시각적 스토리텔링 |
 | testing | 8 | API, 접근성, 성능, E2E |
-| product | 5 | 스프린트, 피드백, 트렌드 리서치 |
+| sales | 8 | 딜 전략, 디스커버리, 파이프라인 분석 |
 | paid-media | 7 | Google Ads, Meta Ads, 프로그래매틱 |
-| project-mgmt | 5 | 스크럼, 칸반, 리스크 관리 |
-| academic | 5 | 연구, 문헌 검토, 인용 |
+| project-management | 6 | 스크럼, 칸반, 리스크 관리 |
+| spatial-computing | 6 | visionOS, ARKit, WebXR, Metal |
 | support | 6 | 고객 성공, 에스컬레이션, 트리아지 |
-| spatial-computing | 3 | ARKit, visionOS, 공간 오디오 |
+| academic | 5 | 연구, 문헌 검토, 인용 |
+| product | 5 | 프로덕트 매니저, 스프린트, 피드백, 트렌드 |
 
 ---
 
@@ -174,7 +173,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 
 | 카테고리 | 개수 | 출처 | 번들 |
 |------|------|------|------|
-| 코어 에이전트 | 56 | Core 1 + OMO 9 + Engineering 23 + OMC 19 + Superpowers 1 | 플러그인 |
+| 코어 에이전트 | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | 플러그인 |
 | 에이전트 팩 | 136 | 12개 도메인 카테고리 (마케팅, 게임 개발, 영업 등) | 플러그인 |
 | 스킬 | 213 | ECC 135 + OMC 31 + Core 2 + gstack 31 (런타임) + Superpowers 14 | 플러그인 + install.sh |
 | 룰 | 77 | ECC (common 9 + 8 languages × 5) | 플러그인 |
@@ -239,21 +238,23 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 </details>
 
 <details>
-<summary>Agency 에이전트 (172, 14개 카테고리) — 비즈니스 전문 페르소나 (전체 model: claude-sonnet-4-6)</summary>
-
-**Engineering (23개)**
+<summary>Agency Engineering 에이전트 (26개) — agency-agents의 항상 로드되는 엔지니어링 전문가</summary>
 
 | 에이전트 | 역할 |
 |---------|------|
+| ai-data-remediation-engineer | AI 데이터 정제 |
 | ai-engineer | AI/ML 엔지니어링 |
 | autonomous-optimization-architect | 자율 최적화 아키텍처 |
 | backend-architect | 백엔드 아키텍처 |
+| cms-developer | CMS 개발 |
 | code-reviewer | 코드 리뷰 |
 | data-engineer | 데이터 엔지니어링 |
 | database-optimizer | 데이터베이스 최적화 |
 | devops-automator | DevOps 자동화 |
+| email-intelligence-engineer | 이메일 인텔리전스 |
 | embedded-firmware-engineer | 임베디드 펌웨어 |
 | feishu-integration-developer | Feishu 통합 개발 |
+| filament-optimization-specialist | 필라멘트 최적화 |
 | frontend-developer | 프론트엔드 개발 |
 | git-workflow-master | Git 워크플로우 |
 | incident-response-commander | 장애 대응 |
@@ -268,81 +269,55 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 | threat-detection-engineer | 위협 탐지 엔지니어링 |
 | wechat-mini-program-developer | WeChat 미니 프로그램 개발 |
 
-**Testing (8개)**
+</details>
 
-| 에이전트 | 역할 |
-|---------|------|
-| accessibility-auditor | 접근성 감사 |
-| api-tester | API 테스트 |
-| evidence-collector | 테스트 증거 수집 |
-| performance-benchmarker | 성능 벤치마크 |
-| reality-checker | 현실성 검증 |
-| test-results-analyzer | 테스트 결과 분석 |
-| tool-evaluator | 도구 평가 |
-| workflow-optimizer | 워크플로우 최적화 |
+<details>
+<summary>Superpowers 에이전트 (1개) — superpowers의 코드 리뷰 에이전트</summary>
 
-**Design (8개)**
-
-| 에이전트 | 역할 |
-|---------|------|
-| brand-guardian | 브랜드 가이드라인 수호 |
-| image-prompt-engineer | 이미지 프롬프트 엔지니어링 |
-| inclusive-visuals-specialist | 포용적 시각 디자인 |
-| ui-designer | UI 디자인 |
-| ux-architect | UX 아키텍처 |
-| ux-researcher | UX 리서치 |
-| visual-storyteller | 시각적 스토리텔링 |
-| whimsy-injector | 재미 요소 주입 |
-
-**Product (4개)**
-
-| 에이전트 | 역할 |
-|---------|------|
-| behavioral-nudge-engine | 행동 넛지 설계 |
-| feedback-synthesizer | 피드백 종합 |
-| sprint-prioritizer | 스프린트 우선순위 |
-| trend-researcher | 트렌드 리서치 |
+| 에이전트 | 모델 | 역할 |
+|---------|------|------|
+| superpowers-code-reviewer | Sonnet | 정확성, 에러 처리, 성능, 보안, 테스트, 가독성, 유지보수성을 포괄하는 철저한 코드 리뷰 |
 
 </details>
 
 <details>
-<summary>스킬 (33개) — Anthropic Official + ECC</summary>
+<summary>Agency 에이전트 팩 (136개) — agency-agents의 온디맨드 도메인 전문가 (12개 카테고리)</summary>
 
-| 스킬 | 출처 | 설명 |
-|------|------|------|
-| algorithmic-art | Anthropic | p5.js 기반 생성형 아트 |
-| backend-patterns | ECC | 백엔드 아키텍처 패턴 |
-| brand-guidelines | Anthropic | Anthropic 브랜드 스타일 적용 |
-| canvas-design | Anthropic | PNG/PDF 시각 디자인 |
-| claude-api | Anthropic | Claude API/SDK 앱 빌드 |
-| clickhouse-io | ECC | ClickHouse 쿼리 최적화 |
-| coding-standards | ECC | TypeScript/React 코딩 표준 |
-| continuous-learning | ECC | 세션에서 패턴 자동 추출 |
-| continuous-learning-v2 | ECC | 본능 기반 학습 시스템 |
-| doc-coauthoring | Anthropic | 문서 공동 작성 워크플로우 |
-| docx | Anthropic | Word 문서 생성/편집 |
-| eval-harness | ECC | 평가 주도 개발 (EDD) |
-| frontend-design | Anthropic | 프론트엔드 UI 디자인 |
-| frontend-patterns | ECC | React/Next.js 패턴 |
-| internal-comms | Anthropic | 사내 커뮤니케이션 작성 |
-| iterative-retrieval | ECC | 점진적 컨텍스트 검색 |
-| karpathy-guidelines | Anthropic | Karpathy AI 코딩 가이드라인 |
-| learned | ECC | 학습된 패턴 저장소 |
-| mcp-builder | Anthropic | MCP 서버 개발 가이드 |
-| pdf | Anthropic | PDF 읽기/합치기/분할/OCR |
-| postgres-patterns | ECC | PostgreSQL 최적화 |
-| pptx | Anthropic | PowerPoint 생성/편집 |
-| project-guidelines-example | Anthropic | 프로젝트 가이드라인 예제 |
-| security-review | ECC | 보안 체크리스트 |
-| skill-creator | Anthropic | 커스텀 스킬 생성 메타스킬 |
-| slack-gif-creator | Anthropic | Slack용 GIF 생성 |
-| strategic-compact | ECC | 전략적 컨텍스트 압축 |
-| tdd-workflow | ECC | TDD 워크플로우 강제 |
-| theme-factory | Anthropic | 아티팩트 테마 적용 |
-| verification-loop | Anthropic | 검증 루프 |
-| web-artifacts-builder | Anthropic | 복합 웹 아티팩트 빌드 |
-| webapp-testing | Anthropic | Playwright 웹앱 테스트 |
-| xlsx | Anthropic | Excel 파일 생성/편집 |
+| 팩 | 개수 | 예시 |
+|----|------|------|
+| marketing | 29 | 더우인, 샤오홍슈, WeChat OA, TikTok, SEO |
+| specialized | 28 | 법률, 금융, 헬스케어, 교육, MCP Builder |
+| game-development | 20 | Unity, Unreal, Godot, Roblox, Blender, Narrative |
+| design | 8 | 브랜드, UI, UX, 시각적 스토리텔링 |
+| testing | 8 | API, 접근성, 성능, E2E |
+| sales | 8 | 딜 전략, 디스커버리, 파이프라인 분석 |
+| paid-media | 7 | Google Ads, Meta Ads, 프로그래매틱 |
+| project-management | 6 | 스크럼, 칸반, 리스크 관리 |
+| spatial-computing | 6 | visionOS, ARKit, WebXR, Metal |
+| support | 6 | 분석, 금융, 인프라, 법률 |
+| academic | 5 | 인류학자, 지리학자, 역사학자, 서사학자, 심리학자 |
+| product | 5 | 프로덕트 매니저, 스프린트, 피드백, 트렌드, 행동 넛지 |
+
+팩 활성화: `ln -s ~/.claude/agent-packs/<pack>/*.md ~/.claude/agents/`
+
+</details>
+
+<details>
+<summary>스킬 (213개) — 업스트림 출처별</summary>
+
+| 출처 | 개수 | 주요 스킬 |
+|------|------|----------|
+| everything-claude-code (ECC) | 135 | tdd-workflow, coding-standards, frontend-patterns, backend-patterns, autopilot, ralph, security-review, continuous-learning |
+| oh-my-claudecode (OMC) | 31 | plan, team, trace, deep-dive, blueprint, ultrawork, sciomc, omc-setup |
+| superpowers | 14 | brainstorming, systematic-debugging, test-driven-development, subagent-driven-development, writing-plans, executing-plans, dispatching-parallel-agents, using-git-worktrees, requesting-code-review, receiving-code-review, verification-before-completion, finishing-a-development-branch, writing-skills, using-superpowers |
+| my-claude Core | 2 | boss-advanced, omc-reference |
+| gstack (런타임) | 31 | /qa, /review, /ship, /cso, /investigate, /design-review, /office-hours, /autoplan |
+
+**install.sh로 별도 설치:**
+
+| 출처 | 개수 | 주요 스킬 |
+|------|------|----------|
+| Anthropic Official | 14+ | pdf, docx, pptx, xlsx, canvas-design, mcp-builder, skill-creator |
 
 </details>
 
@@ -394,10 +369,13 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 
 | 훅 | 이벤트 | 동작 |
 |----|--------|------|
+| Session Setup | SessionStart | 누락된 컴패니언 도구(omc, omo, ast-grep, Anthropic 스킬) 자동 감지 및 설치 |
 | Delegation Guard | PreToolUse (Edit/Write) | Boss가 직접 파일 수정 시 서브에이전트 위임을 상기 |
+| Agent Telemetry | PostToolUse (Agent) | 에이전트 사용 이력을 `agent-usage.jsonl`에 자동 기록 |
 | Subagent Verifier | SubagentStop | 서브에이전트 완료 후 독립 검증 수행을 강제 |
 | Completion Check | Stop | 모든 태스크가 완료 및 검증되었는지 확인 후 세션 종료 허용 |
-| 세션 설정 | SessionStart | 누락된 컴패니언 도구(omc, omo, ast-grep, Anthropic 스킬) 자동 감지 및 설치 |
+| Teammate Idle Guide | TeammateIdle | 팀원이 유휴 상태일 때 리더에게 TaskList 확인 및 종료/다음 지시 전달을 상기 |
+| Task Quality Gate | TaskCompleted | 리더에게 산출물 존재 확인 및 품질 검증 후 완료 수락을 상기 |
 
 </details>
 
