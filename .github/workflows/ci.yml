@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Init submodules
+        run: git submodule update --init --depth 1
       - name: Validate plugin manifest
         run: |
           # Check plugin.json is valid JSON
@@ -31,8 +33,41 @@ jobs:
           done
       - name: Validate agent frontmatter
         run: |
-          for f in agents/core/boss.md agents/omo/*.md agents/omc/*.md; do
+          for f in agents/core/boss.md agents/omo/*.md; do
             head -1 "$f" | grep -q '^---' || (echo "Missing frontmatter in $f" && exit 1)
+          done
+      - name: Check skills/core SKILL.md files exist
+        run: |
+          COUNT=$(find skills/core -name 'SKILL.md' 2>/dev/null | wc -l)
+          [ "$COUNT" -ge 2 ] || (echo "FAIL: skills/core has $COUNT SKILL.md files (expected >= 2)" && exit 1)
+          echo "OK: skills/core — $COUNT skills"
+      - name: Validate upstream submodule file counts
+        run: |
+          for sub in agency-agents ecc omc gstack superpowers; do
+            subdir="upstream/$sub"
+            [ -d "$subdir" ] && [ -n "$(ls -A "$subdir" 2>/dev/null)" ] || { echo "SKIP: $subdir not initialized"; continue; }
+            case "$sub" in
+              agency-agents)
+                COUNT=$(find "$subdir" -name '*.md' | wc -l)
+                [ "$COUNT" -ge 100 ] || (echo "FAIL: $sub has $COUNT agents" && exit 1)
+                echo "OK: $sub — $COUNT agents" ;;
+              ecc)
+                COUNT=$(find "$subdir/skills" -name 'SKILL.md' | wc -l)
+                [ "$COUNT" -ge 30 ] || (echo "FAIL: $sub has $COUNT skills" && exit 1)
+                echo "OK: $sub — $COUNT skills" ;;
+              omc)
+                COUNT=$(find "$subdir/agents" -name '*.md' | wc -l)
+                [ "$COUNT" -ge 15 ] || (echo "FAIL: $sub has $COUNT agents" && exit 1)
+                echo "OK: $sub — $COUNT agents" ;;
+              gstack)
+                COUNT=$(find "$subdir" -name 'SKILL.md' | wc -l)
+                [ "$COUNT" -ge 20 ] || (echo "FAIL: $sub has $COUNT skills" && exit 1)
+                echo "OK: $sub — $COUNT skills" ;;
+              superpowers)
+                COUNT=$(find "$subdir/agents" -name '*.md' | wc -l)
+                [ "$COUNT" -ge 1 ] || (echo "FAIL: $sub has $COUNT agents" && exit 1)
+                echo "OK: $sub — $COUNT agents" ;;
+            esac
           done
       - name: Lint YAML workflows
         uses: ibiqlik/action-yamllint@v3

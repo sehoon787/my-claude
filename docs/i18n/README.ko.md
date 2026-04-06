@@ -13,8 +13,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-13-blue)
-![Skills](https://img.shields.io/badge/skills-255-purple)
+![Agents](https://img.shields.io/badge/agents-200%2B-blue)
+![Skills](https://img.shields.io/badge/skills-200%2B-purple)
 ![Rules](https://img.shields.io/badge/rules-64-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-7-red)
@@ -107,7 +107,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 - **grep.app**: GitHub 오픈소스 코드 검색
 
 ### 통합 생태계
-- 플러그인 하나로 **13 에이전트, 255 스킬, 89 룰**을 한 환경에 구성
+- 플러그인 하나로 **200+ 에이전트, 200+ 스킬, 룰**을 한 환경에 구성
 - 8개 오픈소스 도구(OMC, omo, ECC, Anthropic Skills, Agency, Karpathy, gstack, superpowers)를 하나로 통합
 
 ---
@@ -173,10 +173,10 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 
 | 카테고리 | 개수 | 출처 | 번들 |
 |------|------|------|------|
-| 코어 에이전트 | 55 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | 플러그인 |
-| 에이전트 팩 | -42 | 12개 도메인 카테고리 (마케팅, 게임 개발, 영업 등) | 플러그인 |
-| 스킬 | 255 | ECC 181 + OMC 36 + Core 2 + gstack 36 (런타임) + Superpowers 14 | 플러그인 + install.sh |
-| 룰 | 89 | ECC (common 9 + 8 languages × 5) | 플러그인 |
+| 코어 에이전트 | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | 플러그인 |
+| 에이전트 팩 | 136 | 12개 도메인 카테고리 (마케팅, 게임 개발, 영업 등) | 플러그인 |
+| 스킬 | 200+ | ECC 135 + OMC 31 + Core 2 + gstack 31 (런타임) + Superpowers 14 | 플러그인 + install.sh |
+| 룰 | 200+ | ECC (common 9 + 8 languages × 5) | 플러그인 |
 | MCP 서버 | 3 | Context7, Exa, grep.app | 플러그인 |
 | 훅 | 7 | my-claude (Boss 프로토콜 + SessionStart) | 플러그인 |
 | Anthropic 스킬 | 14+ | Anthropic 공식 | install.sh |
@@ -303,7 +303,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 </details>
 
 <details>
-<summary>스킬 (213개) — 업스트림 출처별</summary>
+<summary>스킬 (200+) — 업스트림 출처별</summary>
 
 | 출처 | 개수 | 주요 스킬 |
 |------|------|----------|
@@ -322,7 +322,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 </details>
 
 <details>
-<summary>룰 (89개) — ECC 코딩 규칙</summary>
+<summary>룰 (200+) — ECC 코딩 규칙</summary>
 
 **Common (9개)** — 모든 프로젝트에 적용
 
@@ -399,7 +399,7 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 │Skill │ │Special-│ │ Direct │ │Sub-orc-│ │ Agent  │
 │Match │ │ist     │ │Parallel│ │hestrat-│ │ Teams  │
 │      │ │Agent   │ │ (2-4)  │ │ors     │ │  P2P   │
-│      │ │ (192)  │ │        │ │Sisyphus│ │        │
+│      │ │(200+)  │ │        │ │Sisyphus│ │        │
 └──────┘ └────────┘ └────────┘ │ Atlas  │ └────────┘
                                 │Hephaes-│
                                 │ tus    │
@@ -522,7 +522,7 @@ Boss는 모든 요청을 4단계 우선순위 체인으로 라우팅합니다:
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 13 agents, 255 skills ready.
+[Boss] Phase 0: Scanning... 200+ agents, 200+ skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="

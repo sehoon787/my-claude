@@ -28,20 +28,38 @@ echo "  Prerequisites OK"
 
 # ── Argument parsing ──
 WITH_PACKS=""
+SKIP_AGENCY=0
+SKIP_ECC=0
+SKIP_OMC=0
+SKIP_GSTACK=0
+SKIP_SUPERPOWERS=0
+SELF_ONLY=0
 for arg in "$@"; do
   case "$arg" in
     --with-packs=*) WITH_PACKS="${arg#*=}" ;;
+    --skip-agency)     SKIP_AGENCY=1 ;;
+    --skip-ecc)        SKIP_ECC=1 ;;
+    --skip-omc)        SKIP_OMC=1 ;;
+    --skip-gstack)     SKIP_GSTACK=1 ;;
+    --skip-superpowers) SKIP_SUPERPOWERS=1 ;;
+    --self-only)       SELF_ONLY=1; SKIP_AGENCY=1; SKIP_ECC=1; SKIP_OMC=1; SKIP_GSTACK=1; SKIP_SUPERPOWERS=1 ;;
     -h|--help)
       cat <<'EOF'
 Usage:
   bash install.sh
-  bash install.sh --with-packs <pack1,pack2,...>
+  bash install.sh --with-packs=<pack1,pack2,...>
 
 Options:
-  --with-packs=<packs>  Comma-separated list of agent packs to symlink into ~/.claude/agents/
-                        Available: academic, design, game-development, marketing, paid-media,
-                                   product, project-management, sales, spatial-computing,
-                                   specialized, support, testing
+  --with-packs=<packs>    Comma-separated list of agent packs to symlink into ~/.claude/agents/
+                          Available: academic, design, game-development, marketing, paid-media,
+                                     product, project-management, sales, spatial-computing,
+                                     specialized, support, testing
+  --skip-agency           Skip agency-agents upstream install
+  --skip-ecc              Skip everything-claude-code upstream install
+  --skip-omc              Skip oh-my-claudecode upstream install
+  --skip-gstack           Skip gstack upstream install
+  --skip-superpowers      Skip superpowers upstream install
+  --self-only             Install only self-owned files (implies all --skip-* flags)
 EOF
       exit 0
       ;;
@@ -91,6 +109,27 @@ else
     echo "  tmux install failed — will use in-process mode (no action needed)"
   fi
 fi
+
+# ── Upstream helper ──
+CLONE_TMPDIR=$(mktemp -d)
+trap 'rm -rf "$CLONE_TMPDIR"' EXIT
+
+UPSTREAM_DIR=""
+init_upstream() {
+  local name="$1" url="$2"
+  local submod_path="$SCRIPT_DIR/upstream/$name"
+  if [ -d "$submod_path/.git" ] || [ -f "$submod_path/.git" ]; then
+    UPSTREAM_DIR="$submod_path"
+    return 0
+  fi
+  if git -C "$SCRIPT_DIR" submodule update --init --depth 1 "upstream/$name" 2>/dev/null; then
+    UPSTREAM_DIR="$submod_path"
+    return 0
+  fi
+  echo "  WARNING: submodule init failed for $name, falling back to git clone..."
+  UPSTREAM_DIR="$CLONE_TMPDIR/$name"
+  git clone --depth 1 "$url" "$UPSTREAM_DIR" 2>/dev/null || return 1
+}
 
 # ── 1. Plugin files (agents, skills, rules) ──
 echo "[1/6] Installing plugin files..."
@@ -146,28 +185,206 @@ if [ -d "$HOME/.claude/agent-packs" ]; then
   done
 fi
 
+# ── 1a. Self-owned files (always installed) ──
+echo "  [core] Installing self-owned files..."
+
 # agents — core tier (always loaded)
 find "$SCRIPT_DIR/agents/core" -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec cp {} "$HOME/.claude/agents/" \;
-cp "$SCRIPT_DIR"/agents/omo/*.md  "$HOME/.claude/agents/"
-cp "$SCRIPT_DIR"/agents/omc/*.md  "$HOME/.claude/agents/"
-cp "$SCRIPT_DIR"/agents/superpowers/*.md "$HOME/.claude/agents/"
-cp -r "$SCRIPT_DIR"/agents/agency/engineering/*.md "$HOME/.claude/agents/"
+cp "$SCRIPT_DIR"/agents/omo/*.md "$HOME/.claude/agents/"
 
-# agent-packs — domain agents (not auto-loaded)
-cp -r "$SCRIPT_DIR"/agents/agency/academic/*.md            "$HOME/.claude/agent-packs/academic/"
-cp -r "$SCRIPT_DIR"/agents/agency/design/*.md              "$HOME/.claude/agent-packs/design/"
-find "$SCRIPT_DIR/agents/agency/game-development" -name '*.md' -exec cp {} "$HOME/.claude/agent-packs/game-development/" \;
-cp -r "$SCRIPT_DIR"/agents/agency/marketing/*.md           "$HOME/.claude/agent-packs/marketing/"
-cp -r "$SCRIPT_DIR"/agents/agency/paid-media/*.md          "$HOME/.claude/agent-packs/paid-media/"
-cp -r "$SCRIPT_DIR"/agents/agency/product/*.md             "$HOME/.claude/agent-packs/product/"
-cp -r "$SCRIPT_DIR"/agents/agency/project-management/*.md  "$HOME/.claude/agent-packs/project-management/"
-cp -r "$SCRIPT_DIR"/agents/agency/sales/*.md               "$HOME/.claude/agent-packs/sales/"
-cp -r "$SCRIPT_DIR"/agents/agency/spatial-computing/*.md   "$HOME/.claude/agent-packs/spatial-computing/"
-cp -r "$SCRIPT_DIR"/agents/agency/specialized/*.md         "$HOME/.claude/agent-packs/specialized/"
-cp -r "$SCRIPT_DIR"/agents/agency/support/*.md             "$HOME/.claude/agent-packs/support/"
-cp -r "$SCRIPT_DIR"/agents/agency/testing/*.md             "$HOME/.claude/agent-packs/testing/"
+# skills/core
+if [ -d "$SCRIPT_DIR/skills/core" ]; then
+  for src in "$SCRIPT_DIR"/skills/core/*/; do
+    [ ! -d "$src" ] && continue
+    name=$(basename "$src")
+    target="$HOME/.claude/skills/$name"
+    if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
+      rm -f "$target"
+    fi
+  done
+  cp -r "$SCRIPT_DIR"/skills/core/* "$HOME/.claude/skills/"
+fi
 
-# --with-packs: symlink requested pack agents into ~/.claude/agents/
+# docs/nexus — reference material (never parsed as agents)
+cp "$SCRIPT_DIR/agents/core/agent-teams-reference.md" "$HOME/.claude/docs/nexus/"
+
+# ── 1b. agency-agents upstream ──
+if [ "$SKIP_AGENCY" = "0" ]; then
+  echo "  [agency] Installing agency-agents..."
+  if init_upstream "agency-agents" "https://github.com/msitarzewski/agency-agents"; then
+    # engineering/*.md → core agents (always loaded)
+    find "$UPSTREAM_DIR/engineering" -maxdepth 1 -name '*.md' -exec cp {} "$HOME/.claude/agents/" \;
+
+    # domain agent-packs
+    for pack in academic design marketing paid-media product project-management sales spatial-computing specialized support testing; do
+      [ -d "$UPSTREAM_DIR/$pack" ] && cp -r "$UPSTREAM_DIR/$pack/"*.md "$HOME/.claude/agent-packs/$pack/" 2>/dev/null || true
+    done
+    # game-development may contain subdirectories; use find to flatten
+    if [ -d "$UPSTREAM_DIR/game-development" ]; then
+      find "$UPSTREAM_DIR/game-development" -name '*.md' -exec cp {} "$HOME/.claude/agent-packs/game-development/" \;
+    fi
+
+    # strategy/*.md → docs/nexus (never parsed as agents)
+    if [ -d "$UPSTREAM_DIR/strategy" ]; then
+      find "$UPSTREAM_DIR/strategy" -name '*.md' -exec cp {} "$HOME/.claude/docs/nexus/" \;
+    fi
+  else
+    echo "  WARNING: agency-agents install failed"
+  fi
+fi
+
+# ── 1c. ECC upstream ──
+if [ "$SKIP_ECC" = "0" ]; then
+  echo "  [ecc] Installing everything-claude-code..."
+  if ! claude plugin add affaan-m/everything-claude-code 2>/dev/null; then
+    if init_upstream "ecc" "https://github.com/affaan-m/everything-claude-code"; then
+      # Pre-clean: resolve file/symlink vs directory conflicts
+      for src in "$UPSTREAM_DIR"/skills/*/; do
+        [ ! -d "$src" ] && continue
+        name=$(basename "$src")
+        target="$HOME/.claude/skills/$name"
+        if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
+          rm -f "$target"
+        fi
+      done
+      cp -r "$UPSTREAM_DIR"/skills/* "$HOME/.claude/skills/"
+      if [ -d "$UPSTREAM_DIR/rules" ]; then
+        cp -r "$UPSTREAM_DIR"/rules/* "$HOME/.claude/rules/"
+      fi
+    else
+      echo "  WARNING: ECC install failed"
+    fi
+  fi
+fi
+
+# ── 1d. OMC upstream ──
+if [ "$SKIP_OMC" = "0" ]; then
+  echo "  [omc] Installing oh-my-claudecode..."
+  if init_upstream "omc" "https://github.com/Yeachan-Heo/oh-my-claudecode"; then
+    # Pre-clean: resolve file/symlink vs directory conflicts for skills
+    for src in "$UPSTREAM_DIR"/skills/*/; do
+      [ ! -d "$src" ] && continue
+      name=$(basename "$src")
+      target="$HOME/.claude/skills/$name"
+      if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
+        rm -f "$target"
+      fi
+    done
+    find "$UPSTREAM_DIR/agents" -maxdepth 1 -name '*.md' -exec cp {} "$HOME/.claude/agents/" \;
+    cp -r "$UPSTREAM_DIR"/skills/* "$HOME/.claude/skills/"
+  else
+    echo "  WARNING: OMC install failed"
+  fi
+fi
+
+# ── 1e. gstack upstream ──
+if [ "$SKIP_GSTACK" = "0" ]; then
+  echo "  [gstack] Installing gstack skills..."
+
+  # 1) Remove ECC skills superseded by gstack (before gstack copy)
+  for skill in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
+    target="$HOME/.claude/skills/$skill"
+    if [ -L "$target" ]; then
+      rm -f "$target"
+    elif [ -d "$target" ]; then
+      rm -rf "$target"
+    fi
+  done
+
+  if init_upstream "gstack" "https://github.com/garrytan/gstack"; then
+    # Pre-clean: resolve file/symlink vs directory conflicts
+    for src in "$UPSTREAM_DIR"/*/; do
+      [ ! -d "$src" ] && continue
+      name=$(basename "$src")
+      target="$HOME/.claude/skills/$name"
+      if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
+        rm -f "$target"
+      fi
+    done
+
+    # Root gstack meta-skill
+    mkdir -p "$HOME/.claude/skills/gstack"
+    cp "$UPSTREAM_DIR/SKILL.md" "$HOME/.claude/skills/gstack/" 2>/dev/null || true
+
+    # Individual skill subdirectories
+    for skill_dir in "$UPSTREAM_DIR"/*/; do
+      [ -f "$skill_dir/SKILL.md" ] || continue
+      skill_name=$(basename "$skill_dir")
+      mkdir -p "$HOME/.claude/skills/$skill_name"
+      cp "$skill_dir/SKILL.md" "$HOME/.claude/skills/$skill_name/"
+    done
+  else
+    echo "  WARNING: gstack skills install failed"
+  fi
+
+  # 2) Runtime binary build (optional — needed for /browse and /qa)
+  echo "  [gstack] Setting up runtime (browser binary)..."
+  GSTACK_RUNTIME="$HOME/.gstack/runtime"
+
+  # Install bun if missing (required for gstack browser)
+  if ! command -v bun >/dev/null 2>&1; then
+    echo "  [gstack] Installing bun..."
+    curl -fsSL https://bun.sh/install | bash 2>/dev/null || true
+    export BUN_INSTALL="$HOME/.bun"
+    export PATH="$BUN_INSTALL/bin:$PATH"
+  fi
+
+  # Clone gstack for binary build (separate from vendored skills)
+  if [ -d "$GSTACK_RUNTIME/.git" ]; then
+    git -C "$GSTACK_RUNTIME" pull --ff-only 2>/dev/null || true
+  else
+    rm -rf "$GSTACK_RUNTIME"
+    git clone --depth 1 https://github.com/garrytan/gstack.git "$GSTACK_RUNTIME" 2>/dev/null || true
+  fi
+
+  # Run gstack setup for binary compilation
+  GSTACK_BROWSER_OK=0
+  if [ -d "$GSTACK_RUNTIME" ] && command -v bun >/dev/null 2>&1 && [ -f "$GSTACK_RUNTIME/setup" ]; then
+    if (cd "$GSTACK_RUNTIME" && ./setup --host claude 2>/dev/null); then
+      GSTACK_BROWSER_OK=1
+    fi
+  fi
+  if [ "$GSTACK_BROWSER_OK" = "0" ]; then
+    echo "  [gstack] WARNING: Browser runtime not available. /browse and /qa skills will not work."
+    echo "           Text-based gstack skills (review, ship, plan-*, etc.) are installed and functional."
+  fi
+
+  # gstack auto_upgrade config
+  mkdir -p "$HOME/.gstack"
+  GSTACK_CONFIG="$HOME/.gstack/config.json"
+  if [ -f "$GSTACK_CONFIG" ]; then
+    node -e "
+      const fs = require('fs');
+      const cfg = JSON.parse(fs.readFileSync('$GSTACK_CONFIG', 'utf8'));
+      cfg.auto_upgrade = true;
+      fs.writeFileSync('$GSTACK_CONFIG', JSON.stringify(cfg, null, 2));
+    " 2>/dev/null || true
+  else
+    echo '{"auto_upgrade":true}' > "$GSTACK_CONFIG"
+  fi
+fi
+
+# ── 1f. superpowers upstream ──
+if [ "$SKIP_SUPERPOWERS" = "0" ]; then
+  echo "  [superpowers] Installing superpowers..."
+  if init_upstream "superpowers" "https://github.com/obra/superpowers"; then
+    # Pre-clean: resolve file/symlink vs directory conflicts
+    for src in "$UPSTREAM_DIR"/skills/*/; do
+      [ ! -d "$src" ] && continue
+      name=$(basename "$src")
+      target="$HOME/.claude/skills/$name"
+      if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
+        rm -f "$target"
+      fi
+    done
+    find "$UPSTREAM_DIR/agents" -maxdepth 1 -name '*.md' -exec cp {} "$HOME/.claude/agents/" \;
+    cp -r "$UPSTREAM_DIR"/skills/* "$HOME/.claude/skills/"
+  else
+    echo "  WARNING: superpowers install failed"
+  fi
+fi
+
+# ── --with-packs: symlink requested pack agents into ~/.claude/agents/ ──
 if [ -n "$WITH_PACKS" ]; then
   IFS=',' read -ra PACKS <<< "$WITH_PACKS"
   for pack in "${PACKS[@]}"; do
@@ -193,126 +410,6 @@ for f in "$HOME/.claude/agents"/*.md; do
   name=$(basename "$f")
   find "$HOME/.claude/agent-packs" -name "$name" -delete 2>/dev/null || true
 done
-
-# docs/nexus — strategy docs + reference material (never parsed as agents)
-cp "$SCRIPT_DIR/agents/core/agent-teams-reference.md"      "$HOME/.claude/docs/nexus/"
-find "$SCRIPT_DIR/agents/agency/strategy" -name '*.md' -exec cp {} "$HOME/.claude/docs/nexus/" \;
-
-# Pre-clean: resolve file/symlink vs directory conflicts for skills
-for src in "$SCRIPT_DIR"/skills/ecc/*/; do
-  [ ! -d "$src" ] && continue
-  name=$(basename "$src")
-  target="$HOME/.claude/skills/$name"
-  if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
-    rm -f "$target"
-  fi
-done
-for src in "$SCRIPT_DIR"/skills/omc/*/; do
-  [ ! -d "$src" ] && continue
-  name=$(basename "$src")
-  target="$HOME/.claude/skills/$name"
-  if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
-    rm -f "$target"
-  fi
-done
-for src in "$SCRIPT_DIR"/skills/core/*/; do
-  [ ! -d "$src" ] && continue
-  name=$(basename "$src")
-  target="$HOME/.claude/skills/$name"
-  if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
-    rm -f "$target"
-  fi
-done
-if [ -d "$HOME/.claude/skills/gstack" ]; then
-  for src in "$HOME/.claude/skills/gstack"/*/; do
-    [ ! -d "$src" ] && continue
-    name=$(basename "$src")
-    target="$HOME/.claude/skills/$name"
-    if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
-      rm -f "$target"
-    fi
-  done
-fi
-
-# skills
-cp -r "$SCRIPT_DIR"/skills/ecc/* "$HOME/.claude/skills/"
-cp -r "$SCRIPT_DIR"/skills/omc/* "$HOME/.claude/skills/"
-if [ -d "$SCRIPT_DIR/skills/core" ]; then
-  cp -r "$SCRIPT_DIR"/skills/core/* "$HOME/.claude/skills/"
-fi
-if [ -d "$SCRIPT_DIR/skills/superpowers" ]; then
-  cp -r "$SCRIPT_DIR"/skills/superpowers/* "$HOME/.claude/skills/"
-fi
-
-# ── gstack (runtime install — not bundled in repo) ──
-echo "  [gstack] Installing/updating..."
-GSTACK_DIR="$HOME/.claude/skills/gstack"
-if [ -d "$GSTACK_DIR/.git" ]; then
-  git -C "$GSTACK_DIR" pull --ff-only 2>/dev/null || true
-else
-  rm -rf "$GSTACK_DIR"
-  git clone --depth 1 https://github.com/garrytan/gstack.git "$GSTACK_DIR" 2>/dev/null || true
-fi
-
-# Install bun if missing (required for gstack browser)
-if ! command -v bun >/dev/null 2>&1; then
-  echo "  [gstack] Installing bun..."
-  curl -fsSL https://bun.sh/install | bash 2>/dev/null || true
-  export BUN_INSTALL="$HOME/.bun"
-  export PATH="$BUN_INSTALL/bin:$PATH"
-fi
-
-# Remove superseded ECC skills replaced by gstack (preserve gstack symlinks)
-for skill in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
-  target="$HOME/.claude/skills/$skill"
-  # Skip if it's a symlink pointing into gstack (i.e. gstack's own replacement)
-  if [ -L "$target" ]; then
-    link_dest=$(readlink "$target")
-    case "$link_dest" in *gstack*) continue ;; esac
-    rm -f "$target"
-  elif [ -d "$target" ]; then
-    rm -rf "$target"
-  fi
-done
-
-# Run gstack setup (builds browse binary + creates symlinks)
-if [ -d "$GSTACK_DIR" ] && command -v bun >/dev/null 2>&1 && [ -f "$GSTACK_DIR/setup" ]; then
-  (cd "$GSTACK_DIR" && ./setup --host claude 2>/dev/null || true)
-fi
-
-# Restore SKILL.md files if deleted by gen:skill-docs
-git -C "$GSTACK_DIR" checkout -- '*/SKILL.md' 'SKILL.md' 2>/dev/null || true
-
-# Fallback: ensure individual gstack skills are accessible at depth 1
-if [ -d "$GSTACK_DIR" ]; then
-  for skill_dir in "$GSTACK_DIR"/*/; do
-    [ -f "$skill_dir/SKILL.md" ] || continue
-    skill_name=$(basename "$skill_dir")
-    case "$skill_name" in .git|bin|node_modules|agents) continue ;; esac
-    target="$HOME/.claude/skills/$skill_name"
-    # Only create if not already present (don't overwrite ECC/OMC skills)
-    if [ ! -e "$target" ] && [ ! -L "$target" ]; then
-      ln -s "$(cd "$skill_dir" && pwd)" "$target" 2>/dev/null || cp -r "$skill_dir" "$target"
-    fi
-  done
-fi
-
-# gstack auto_upgrade config
-mkdir -p "$HOME/.gstack"
-GSTACK_CONFIG="$HOME/.gstack/config.json"
-if [ -f "$GSTACK_CONFIG" ]; then
-  node -e "
-    const fs = require('fs');
-    const cfg = JSON.parse(fs.readFileSync('$GSTACK_CONFIG', 'utf8'));
-    cfg.auto_upgrade = true;
-    fs.writeFileSync('$GSTACK_CONFIG', JSON.stringify(cfg, null, 2));
-  " 2>/dev/null || true
-else
-  echo '{"auto_upgrade":true}' > "$GSTACK_CONFIG"
-fi
-
-# rules
-cp -r "$SCRIPT_DIR"/rules/* "$HOME/.claude/rules/"
 
 echo "  Plugin files installed"
 
@@ -413,30 +510,18 @@ else
   fi
 fi
 
-# Generate manifest from SOURCE files (only tracks what my-claude installs, not user content)
+# ── Generate manifest from installed files in $HOME/.claude/ ──
 {
-  # Core agents — from source directories
-  find "$SCRIPT_DIR/agents/core" -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
-  find "$SCRIPT_DIR/agents/omo" -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
-  find "$SCRIPT_DIR/agents/omc" -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
-  find "$SCRIPT_DIR/agents/agency/engineering" -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
-  # Agent packs — from source directories
+  find "$HOME/.claude/agents" -maxdepth 1 -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
   for pack in academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing; do
-    find "$SCRIPT_DIR/agents/agency/$pack" -name '*.md' -exec sh -c 'echo "agent-packs/'"$pack"'/$(basename "$1")"' _ {} \; 2>/dev/null || true
+    find "$HOME/.claude/agent-packs/$pack" -name '*.md' -exec sh -c 'echo "agent-packs/'"$pack"'/$(basename "$1")"' _ {} \; 2>/dev/null || true
   done
-  # Skills — from source directories
-  find "$SCRIPT_DIR/skills/ecc" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
-  find "$SCRIPT_DIR/skills/omc" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
-  find "$SCRIPT_DIR/skills/core" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \; 2>/dev/null
-  find "$HOME/.claude/skills/gstack" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \; 2>/dev/null || true
-  # Rules — from source
-  find "$SCRIPT_DIR/rules" -name '*.md' | while read -r f; do echo "rules/${f#$SCRIPT_DIR/rules/}"; done
-  # Hooks
+  find "$HOME/.claude/skills" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
+  find "$HOME/.claude/rules" -name '*.md' | while read -r f; do echo "rules/${f#$HOME/.claude/rules/}"; done 2>/dev/null || true
   echo "hooks/hooks.json"
   echo "hooks/session-start.sh"
-  # Docs
   echo "docs/nexus/agent-teams-reference.md"
-  find "$SCRIPT_DIR/agents/agency/strategy" -name '*.md' -exec sh -c 'echo "docs/nexus/$(basename "$1")"' _ {} \;
+  find "$HOME/.claude/docs/nexus" -name '*.md' -exec sh -c 'echo "docs/nexus/$(basename "$1")"' _ {} \; 2>/dev/null || true
 } | sort -u > "$HOME/.claude/.my-claude-manifest"
 echo "  Manifest saved ($(wc -l < "$HOME/.claude/.my-claude-manifest") entries)"
 

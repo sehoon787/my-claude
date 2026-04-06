@@ -1,46 +1,27 @@
 {
   "agency-agents": {
     "repo": "https://github.com/msitarzewski/agency-agents",
-    "branch": "main",
-    "syncedSha": "",
-    "syncedTag": "",
-    "syncedAt": "2026-04-06T07:21:33Z",
-    "compareUrl": "https://github.com/msitarzewski/agency-agents/compare/...HEAD",
-    "files": {
-      "agents": null
-    }
+    "method": "submodule",
+    "note": "engineering/ → core tier, domain categories → agent-packs"
   },
   "everything-claude-code": {
     "repo": "https://github.com/affaan-m/everything-claude-code",
-    "branch": "main",
-    "syncedSha": "7dfdbe0b1704a79669a6e24e2dbe76433caf5795",
-    "syncedTag": null,
-    "syncedAt": "2026-04-06T07:21:33Z",
-    "compareUrl": "https://github.com/affaan-m/everything-claude-code/compare/7dfdbe0...HEAD",
-    "files": {
-      "skills": 181,
-      "rules": 89
-    }
+    "method": "submodule + plugin-add",
+    "note": "ECC plugin install attempted first, submodule as fallback"
   },
   "oh-my-claudecode": {
     "repo": "https://github.com/Yeachan-Heo/oh-my-claudecode",
-    "branch": "main",
-    "syncedSha": "2487d3878f8d25e60802940b020d5ee8774d135e",
-    "syncedTag": "v4.10.2",
-    "syncedAt": "2026-04-06T07:21:33Z",
-    "compareUrl": "https://github.com/Yeachan-Heo/oh-my-claudecode/compare/2487d38...HEAD",
-    "files": {
-      "agents": 19,
-      "skills": 36
-    }
+    "method": "submodule + npm-cli",
+    "package": "oh-my-claude-sisyphus"
   },
   "gstack": {
     "repo": "https://github.com/garrytan/gstack",
-    "branch": "main",
-    "syncedAt": "2026-04-06T07:21:33Z",
-    "license": "MIT",
-    "files": {
-      "skills": 36
-    }
+    "method": "submodule + setup",
+    "supersedes": ["benchmark", "canary-watch", "safety-guard", "browser-qa",
+                   "verification-loop", "security-review", "design-system"]
+  },
+  "superpowers": {
+    "repo": "https://github.com/obra/superpowers",
+    "method": "submodule"
   }
 }
