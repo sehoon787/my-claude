@@ -55,6 +55,16 @@ jobs:
           AGENCY_COUNT=$(find agents/agency -name '*.md' | wc -l)
           echo "AGENCY_COUNT=$AGENCY_COUNT" >> $GITHUB_ENV
 
+      - name: Count agency-agents (when unchanged)
+        if: steps.check-agency.outputs.skip == 'true'
+        run: |
+          AGENCY_COUNT=$(find agents/agency -name '*.md' | wc -l)
+          AGENCY_SHA=$(jq -r '.["agency-agents"].syncedSha // ""' upstream/SOURCES.json)
+          AGENCY_TAG=$(jq -r '.["agency-agents"].syncedTag // "null"' upstream/SOURCES.json)
+          echo "AGENCY_COUNT=$AGENCY_COUNT" >> $GITHUB_ENV
+          echo "AGENCY_SHA=$AGENCY_SHA" >> $GITHUB_ENV
+          echo "AGENCY_TAG=$AGENCY_TAG" >> $GITHUB_ENV
+
       # ── 2. ECC Skills + Rules ──
       - name: Check everything-claude-code for changes
         id: check-ecc
@@ -83,7 +93,17 @@ jobs:
             cp -r /tmp/ecc/skills/* skills/ecc/
           fi
           if [ -d /tmp/ecc/rules ]; then
-            rm -rf rules && mkdir -p rules
+            # Remove only ECC-sourced rule directories (preserve any my-claude originals)
+            for ecc_dir in /tmp/ecc/rules/*/; do
+              [ ! -d "$ecc_dir" ] && continue
+              rm -rf "rules/$(basename "$ecc_dir")"
+            done
+            # Remove ECC-sourced root files (e.g. README.md)
+            for ecc_file in /tmp/ecc/rules/*; do
+              [ ! -f "$ecc_file" ] && continue
+              rm -f "rules/$(basename "$ecc_file")"
+            done
+            mkdir -p rules
             cp -r /tmp/ecc/rules/* rules/
           fi
           ECC_SKILLS=$(find skills/ecc -name 'SKILL.md' | wc -l)
@@ -91,16 +111,71 @@ jobs:
           echo "ECC_SKILLS=$ECC_SKILLS" >> $GITHUB_ENV
           echo "ECC_RULES=$ECC_RULES" >> $GITHUB_ENV
 
-      # ── 3b. gstack count (runtime-only — not stored in repo) ──
-      - name: Count gstack skills
+      - name: Count everything-claude-code (when unchanged)
+        if: steps.check-ecc.outputs.skip == 'true'
+        run: |
+          ECC_SKILLS=$(find skills/ecc -name 'SKILL.md' 2>/dev/null | wc -l)
+          ECC_RULES=$(find rules -name '*.md' 2>/dev/null | wc -l)
+          ECC_SHA=$(jq -r '.["everything-claude-code"].syncedSha // ""' upstream/SOURCES.json)
+          ECC_TAG=$(jq -r '.["everything-claude-code"].syncedTag // "null"' upstream/SOURCES.json)
+          echo "ECC_SKILLS=$ECC_SKILLS" >> $GITHUB_ENV
+          echo "ECC_RULES=$ECC_RULES" >> $GITHUB_ENV
+          echo "ECC_SHA=$ECC_SHA" >> $GITHUB_ENV
+          echo "ECC_TAG=$ECC_TAG" >> $GITHUB_ENV
+
+      # ── 3b. gstack (vendor skill .md files) ──
+      - name: Check gstack for changes
+        id: check-gstack
+        run: |
+          REMOTE_SHA=$(git ls-remote https://github.com/garrytan/gstack.git HEAD | cut -f1)
+          LOCAL_SHA=$(jq -r '.gstack.syncedSha // "none"' upstream/SOURCES.json)
+          if [ "$REMOTE_SHA" = "$LOCAL_SHA" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "gstack: no changes (SHA $LOCAL_SHA)"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "gstack: changes detected ($LOCAL_SHA → $REMOTE_SHA)"
+          fi
+
+      - name: Sync gstack skills
+        if: steps.check-gstack.outputs.skip != 'true'
         run: |
           git clone --depth 1 https://github.com/garrytan/gstack.git /tmp/gstack
-          GSTACK_SKILLS=$(find /tmp/gstack -maxdepth 2 -name 'SKILL.md' | wc -l | tr -d ' ')
+          GSTACK_SHA=$(cd /tmp/gstack && git rev-parse HEAD)
+          GSTACK_TAG=$(cd /tmp/gstack && git describe --tags --exact-match 2>/dev/null || echo "null")
+          echo "GSTACK_SHA=$GSTACK_SHA" >> $GITHUB_ENV
+          echo "GSTACK_TAG=$GSTACK_TAG" >> $GITHUB_ENV
+
+          # Vendor SKILL.md files only (no binaries, no node_modules)
+          rm -rf skills/gstack && mkdir -p skills/gstack
+          # Root SKILL.md
+          cp /tmp/gstack/SKILL.md skills/gstack/
+          # Sub-skill directories
+          for dir in /tmp/gstack/*/; do
+            [ -f "$dir/SKILL.md" ] || continue
+            name=$(basename "$dir")
+            case "$name" in .git|.github|bin|node_modules|agents|lib|scripts|test|docs|extension|hosts|contrib|openclaw|design) continue ;; esac
+            mkdir -p "skills/gstack/$name"
+            cp "$dir/SKILL.md" "skills/gstack/$name/"
+          done
+
+          GSTACK_SKILLS=$(find skills/gstack -name 'SKILL.md' | wc -l | tr -d ' ')
           echo "GSTACK_SKILLS=$GSTACK_SKILLS" >> $GITHUB_ENV
+
           # Remove ECC skills superseded by gstack
           for d in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
             rm -rf "skills/ecc/$d"
           done
+
+      - name: Count gstack skills (when unchanged)
+        if: steps.check-gstack.outputs.skip == 'true'
+        run: |
+          GSTACK_SKILLS=$(find skills/gstack -name 'SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
+          GSTACK_SHA=$(jq -r '.gstack.syncedSha // ""' upstream/SOURCES.json)
+          GSTACK_TAG=$(jq -r '.gstack.syncedTag // "null"' upstream/SOURCES.json)
+          echo "GSTACK_SKILLS=$GSTACK_SKILLS" >> $GITHUB_ENV
+          echo "GSTACK_SHA=$GSTACK_SHA" >> $GITHUB_ENV
+          echo "GSTACK_TAG=$GSTACK_TAG" >> $GITHUB_ENV
 
       # ── 3. OMC Agents + Skills ──
       - name: Check oh-my-claudecode for changes
@@ -139,6 +214,68 @@ jobs:
           echo "OMC_AGENTS=$OMC_AGENTS" >> $GITHUB_ENV
           echo "OMC_SKILLS=$OMC_SKILLS" >> $GITHUB_ENV
 
+      - name: Count oh-my-claudecode (when unchanged)
+        if: steps.check-omc.outputs.skip == 'true'
+        run: |
+          OMC_AGENTS=$(find agents/omc -name '*.md' 2>/dev/null | wc -l)
+          OMC_SKILLS=$(find skills/omc -name 'SKILL.md' 2>/dev/null | wc -l)
+          OMC_SHA=$(jq -r '.["oh-my-claudecode"].syncedSha // ""' upstream/SOURCES.json)
+          OMC_TAG=$(jq -r '.["oh-my-claudecode"].syncedTag // "null"' upstream/SOURCES.json)
+          echo "OMC_AGENTS=$OMC_AGENTS" >> $GITHUB_ENV
+          echo "OMC_SKILLS=$OMC_SKILLS" >> $GITHUB_ENV
+          echo "OMC_SHA=$OMC_SHA" >> $GITHUB_ENV
+          echo "OMC_TAG=$OMC_TAG" >> $GITHUB_ENV
+
+      # ── 3c. Superpowers ──
+      - name: Check superpowers for changes
+        id: check-superpowers
+        run: |
+          REMOTE_SHA=$(git ls-remote https://github.com/obra/superpowers.git HEAD | cut -f1)
+          LOCAL_SHA=$(jq -r '.superpowers.syncedSha // "none"' upstream/SOURCES.json)
+          if [ "$REMOTE_SHA" = "$LOCAL_SHA" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "superpowers: no changes (SHA $LOCAL_SHA)"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "superpowers: changes detected ($LOCAL_SHA → $REMOTE_SHA)"
+          fi
+
+      - name: Sync superpowers
+        if: steps.check-superpowers.outputs.skip != 'true'
+        run: |
+          git clone --depth 1 https://github.com/obra/superpowers.git /tmp/superpowers
+          SUPERPOWERS_SHA=$(cd /tmp/superpowers && git rev-parse HEAD)
+          SUPERPOWERS_TAG=$(cd /tmp/superpowers && git describe --tags --exact-match 2>/dev/null || echo "null")
+          echo "SUPERPOWERS_SHA=$SUPERPOWERS_SHA" >> $GITHUB_ENV
+          echo "SUPERPOWERS_TAG=$SUPERPOWERS_TAG" >> $GITHUB_ENV
+
+          # Agent
+          if [ -d /tmp/superpowers/agents ]; then
+            rm -rf agents/superpowers && mkdir -p agents/superpowers
+            cp /tmp/superpowers/agents/*.md agents/superpowers/ 2>/dev/null || true
+          fi
+          # Skills
+          if [ -d /tmp/superpowers/skills ]; then
+            rm -rf skills/superpowers && mkdir -p skills/superpowers
+            cp -r /tmp/superpowers/skills/* skills/superpowers/
+          fi
+          SUPERPOWERS_AGENTS=$(find agents/superpowers -name '*.md' 2>/dev/null | wc -l)
+          SUPERPOWERS_SKILLS=$(find skills/superpowers -name 'SKILL.md' 2>/dev/null | wc -l)
+          echo "SUPERPOWERS_AGENTS=$SUPERPOWERS_AGENTS" >> $GITHUB_ENV
+          echo "SUPERPOWERS_SKILLS=$SUPERPOWERS_SKILLS" >> $GITHUB_ENV
+
+      - name: Count superpowers (when unchanged)
+        if: steps.check-superpowers.outputs.skip == 'true'
+        run: |
+          SUPERPOWERS_AGENTS=$(find agents/superpowers -name '*.md' 2>/dev/null | wc -l)
+          SUPERPOWERS_SKILLS=$(find skills/superpowers -name 'SKILL.md' 2>/dev/null | wc -l)
+          SUPERPOWERS_SHA=$(jq -r '.superpowers.syncedSha // ""' upstream/SOURCES.json)
+          SUPERPOWERS_TAG=$(jq -r '.superpowers.syncedTag // "null"' upstream/SOURCES.json)
+          echo "SUPERPOWERS_AGENTS=$SUPERPOWERS_AGENTS" >> $GITHUB_ENV
+          echo "SUPERPOWERS_SKILLS=$SUPERPOWERS_SKILLS" >> $GITHUB_ENV
+          echo "SUPERPOWERS_SHA=$SUPERPOWERS_SHA" >> $GITHUB_ENV
+          echo "SUPERPOWERS_TAG=$SUPERPOWERS_TAG" >> $GITHUB_ENV
+
       # ── 4. Update SOURCES.json ──
       - name: Update SOURCES.json with SHA tracking
         run: |
@@ -175,11 +312,33 @@ jobs:
                 compareUrl: 'https://github.com/Yeachan-Heo/oh-my-claudecode/compare/' + short('$OMC_SHA') + '...HEAD',
                 files: { agents: parseInt('$OMC_AGENTS'), skills: parseInt('$OMC_SKILLS') }
               },
+              'superpowers': {
+                repo: 'https://github.com/obra/superpowers',
+                branch: 'main',
+                syncedSha: '$SUPERPOWERS_SHA',
+                syncedTag: q('$SUPERPOWERS_TAG'),
+                syncedAt: '$NOW',
+                compareUrl: 'https://github.com/obra/superpowers/compare/' + short('$SUPERPOWERS_SHA') + '...HEAD',
+                files: { agents: parseInt('$SUPERPOWERS_AGENTS'), skills: parseInt('$SUPERPOWERS_SKILLS') }
+              },
+              'omo': {
+                repo: 'self-maintained',
+                branch: 'main',
+                syncedSha: 'n/a',
+                syncedTag: null,
+                syncedAt: '$NOW',
+                note: 'Curated agents derived from oh-my-opencode, maintained independently',
+                files: { agents: 9 }
+              },
               'gstack': {
                 repo: 'https://github.com/garrytan/gstack',
                 branch: 'main',
+                syncedSha: '$GSTACK_SHA',
+                syncedTag: q('$GSTACK_TAG'),
                 syncedAt: '$NOW',
                 license: 'MIT',
+                strategy: 'vendor-skills',
+                compareUrl: 'https://github.com/garrytan/gstack/compare/' + short('$GSTACK_SHA') + '...HEAD',
                 files: { skills: parseInt('$GSTACK_SKILLS') }
               }
             };
@@ -194,11 +353,11 @@ jobs:
           OMO_AGENTS=$(find agents/omo -name '*.md' | wc -l)
           ENGINEERING_COUNT=$(find agents/agency/engineering -name '*.md' | wc -l)
           STRATEGY_COUNT=$(find agents/agency/strategy -name '*.md' | wc -l)
-          CORE_TOTAL=$((CORE_AGENTS + OMO_AGENTS + OMC_AGENTS + ENGINEERING_COUNT))
+          CORE_TOTAL=$((CORE_AGENTS + OMO_AGENTS + OMC_AGENTS + ENGINEERING_COUNT + SUPERPOWERS_AGENTS))
           PACK_COUNT=$((AGENCY_COUNT - ENGINEERING_COUNT - STRATEGY_COUNT))
           TOTAL_AGENTS=$((CORE_TOTAL + PACK_COUNT))
           CORE_SKILLS=$(find skills/core -name 'SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
-          TOTAL_SKILLS=$((ECC_SKILLS + OMC_SKILLS + CORE_SKILLS + GSTACK_SKILLS))
+          TOTAL_SKILLS=$((ECC_SKILLS + OMC_SKILLS + CORE_SKILLS + GSTACK_SKILLS + SUPERPOWERS_SKILLS))
           TOTAL_RULES=$((ECC_RULES))
           HOOKS=$(python3 -c "import json; d=json.load(open('hooks/hooks.json')); print(len(d.get('hooks',d)))" 2>/dev/null || echo 6)
 
@@ -370,7 +529,7 @@ jobs:
           echo "## Agent Duplicate Report" > /tmp/dedup-report.md
           DUPES_FOUND=false
           # Compare core/omo/omc agents against agency agents
-          for core_agent in agents/core/*.md agents/omo/*.md agents/omc/*.md; do
+          for core_agent in agents/core/*.md agents/omo/*.md agents/omc/*.md agents/superpowers/*.md; do
             [ -f "$core_agent" ] || continue
             core_name=$(head -5 "$core_agent" | grep '^name:' | sed 's/^name: *//')
             [ -z "$core_name" ] && continue
@@ -394,6 +553,41 @@ jobs:
             echo "DEDUP_REPORT=No duplicates detected." >> $GITHUB_ENV
           fi
 
+      # ── 6b. Detect skill name duplicates ──
+      - name: Detect skill name duplicates
+        run: |
+          echo "" >> /tmp/dedup-report.md
+          echo "## Skill Duplicate Report" >> /tmp/dedup-report.md
+          SKILL_DUPES=false
+          # Check for skill directories that exist in multiple sources
+          for src1_skill in skills/ecc/*/SKILL.md; do
+            [ -f "$src1_skill" ] || continue
+            name1=$(basename "$(dirname "$src1_skill")")
+            for src2 in skills/omc skills/gstack skills/superpowers skills/core; do
+              if [ -f "$src2/$name1/SKILL.md" ]; then
+                echo "- ⚠️ **$name1** found in skills/ecc/ and $src2/" >> /tmp/dedup-report.md
+                SKILL_DUPES=true
+              fi
+            done
+          done
+          for src1_skill in skills/omc/*/SKILL.md; do
+            [ -f "$src1_skill" ] || continue
+            name1=$(basename "$(dirname "$src1_skill")")
+            for src2 in skills/gstack skills/superpowers skills/core; do
+              if [ -f "$src2/$name1/SKILL.md" ]; then
+                echo "- ⚠️ **$name1** found in skills/omc/ and $src2/" >> /tmp/dedup-report.md
+                SKILL_DUPES=true
+              fi
+            done
+          done
+          if [ "$SKILL_DUPES" = true ]; then
+            CURRENT="${DEDUP_REPORT:-No duplicates detected.}"
+            echo "DEDUP_REPORT<<EOF" >> $GITHUB_ENV
+            echo "$CURRENT" >> $GITHUB_ENV
+            cat /tmp/dedup-report.md >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          fi
+
       # ── 7. Create PR if changes exist ──
       - name: Create sync PR
         run: |
@@ -411,7 +605,8 @@ jobs:
             printf '| agency-agents | `%s` | %s | %s agents |\n' "${AGENCY_SHA:0:7}" "$AGENCY_TAG" "$AGENCY_COUNT" >> /tmp/pr-body.md
             printf '| everything-claude-code | `%s` | %s | %s skills, %s rules |\n' "${ECC_SHA:0:7}" "$ECC_TAG" "$ECC_SKILLS" "$ECC_RULES" >> /tmp/pr-body.md
             printf '| oh-my-claudecode | `%s` | %s | %s agents, %s skills |\n' "${OMC_SHA:0:7}" "$OMC_TAG" "$OMC_AGENTS" "$OMC_SKILLS" >> /tmp/pr-body.md
-            printf '| gstack | — | — | %s skills |\n' "$GSTACK_SKILLS" >> /tmp/pr-body.md
+            printf '| superpowers | `%s` | %s | %s agents, %s skills |\n' "${SUPERPOWERS_SHA:0:7}" "$SUPERPOWERS_TAG" "$SUPERPOWERS_AGENTS" "$SUPERPOWERS_SKILLS" >> /tmp/pr-body.md
+            printf '| gstack | `%s` | %s | %s skills |\n' "${GSTACK_SHA:0:7}" "$GSTACK_TAG" "$GSTACK_SKILLS" >> /tmp/pr-body.md
             printf '\nReview agent/skill diffs before merging.\n' >> /tmp/pr-body.md
             printf '\n${{ env.DEDUP_REPORT }}\n' >> /tmp/pr-body.md
             gh label create "auto-sync" --description "Automated upstream sync" --color "0E8A16" 2>/dev/null || true

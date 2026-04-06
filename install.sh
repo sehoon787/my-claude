@@ -150,7 +150,9 @@ fi
 find "$SCRIPT_DIR/agents/core" -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec cp {} "$HOME/.claude/agents/" \;
 cp "$SCRIPT_DIR"/agents/omo/*.md  "$HOME/.claude/agents/"
 cp "$SCRIPT_DIR"/agents/omc/*.md  "$HOME/.claude/agents/"
-cp "$SCRIPT_DIR"/agents/superpowers/*.md "$HOME/.claude/agents/"
+if [ -d "$SCRIPT_DIR/agents/superpowers" ]; then
+  cp "$SCRIPT_DIR"/agents/superpowers/*.md "$HOME/.claude/agents/" 2>/dev/null || true
+fi
 cp -r "$SCRIPT_DIR"/agents/agency/engineering/*.md "$HOME/.claude/agents/"
 
 # agent-packs — domain agents (not auto-loaded)
@@ -233,6 +235,22 @@ if [ -d "$HOME/.claude/skills/gstack" ]; then
     fi
   done
 fi
+for src in "$SCRIPT_DIR"/skills/gstack/*/; do
+  [ ! -d "$src" ] && continue
+  name=$(basename "$src")
+  target="$HOME/.claude/skills/$name"
+  if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
+    rm -f "$target"
+  fi
+done
+for src in "$SCRIPT_DIR"/skills/superpowers/*/; do
+  [ ! -d "$src" ] && continue
+  name=$(basename "$src")
+  target="$HOME/.claude/skills/$name"
+  if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
+    rm -f "$target"
+  fi
+done
 
 # skills
 cp -r "$SCRIPT_DIR"/skills/ecc/* "$HOME/.claude/skills/"
@@ -244,15 +262,36 @@ if [ -d "$SCRIPT_DIR/skills/superpowers" ]; then
   cp -r "$SCRIPT_DIR"/skills/superpowers/* "$HOME/.claude/skills/"
 fi
 
-# ── gstack (runtime install — not bundled in repo) ──
-echo "  [gstack] Installing/updating..."
-GSTACK_DIR="$HOME/.claude/skills/gstack"
-if [ -d "$GSTACK_DIR/.git" ]; then
-  git -C "$GSTACK_DIR" pull --ff-only 2>/dev/null || true
-else
-  rm -rf "$GSTACK_DIR"
-  git clone --depth 1 https://github.com/garrytan/gstack.git "$GSTACK_DIR" 2>/dev/null || true
+# ── gstack (vendored skills + runtime binary build) ──
+echo "  [gstack] Installing vendored skills..."
+
+# 1) Remove ECC skills superseded by gstack (before gstack copy)
+for skill in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
+  target="$HOME/.claude/skills/$skill"
+  if [ -L "$target" ]; then
+    rm -f "$target"
+  elif [ -d "$target" ]; then
+    rm -rf "$target"
+  fi
+done
+
+# 2) Copy vendored gstack SKILL.md files (bundled in repo)
+if [ -d "$SCRIPT_DIR/skills/gstack" ]; then
+  # Root gstack meta-skill
+  mkdir -p "$HOME/.claude/skills/gstack"
+  cp "$SCRIPT_DIR/skills/gstack/SKILL.md" "$HOME/.claude/skills/gstack/" 2>/dev/null || true
+  # Individual skill subdirectories
+  for skill_dir in "$SCRIPT_DIR"/skills/gstack/*/; do
+    [ -f "$skill_dir/SKILL.md" ] || continue
+    skill_name=$(basename "$skill_dir")
+    mkdir -p "$HOME/.claude/skills/$skill_name"
+    cp "$skill_dir/SKILL.md" "$HOME/.claude/skills/$skill_name/"
+  done
 fi
+
+# 3) Runtime binary build (optional — needed for /browse and /qa)
+echo "  [gstack] Setting up runtime (browser binary)..."
+GSTACK_RUNTIME="$HOME/.gstack/runtime"
 
 # Install bun if missing (required for gstack browser)
 if ! command -v bun >/dev/null 2>&1; then
@@ -262,39 +301,24 @@ if ! command -v bun >/dev/null 2>&1; then
   export PATH="$BUN_INSTALL/bin:$PATH"
 fi
 
-# Remove superseded ECC skills replaced by gstack (preserve gstack symlinks)
-for skill in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
-  target="$HOME/.claude/skills/$skill"
-  # Skip if it's a symlink pointing into gstack (i.e. gstack's own replacement)
-  if [ -L "$target" ]; then
-    link_dest=$(readlink "$target")
-    case "$link_dest" in *gstack*) continue ;; esac
-    rm -f "$target"
-  elif [ -d "$target" ]; then
-    rm -rf "$target"
-  fi
-done
-
-# Run gstack setup (builds browse binary + creates symlinks)
-if [ -d "$GSTACK_DIR" ] && command -v bun >/dev/null 2>&1 && [ -f "$GSTACK_DIR/setup" ]; then
-  (cd "$GSTACK_DIR" && ./setup --host claude 2>/dev/null || true)
+# Clone gstack for binary build (separate from vendored skills)
+if [ -d "$GSTACK_RUNTIME/.git" ]; then
+  git -C "$GSTACK_RUNTIME" pull --ff-only 2>/dev/null || true
+else
+  rm -rf "$GSTACK_RUNTIME"
+  git clone --depth 1 https://github.com/garrytan/gstack.git "$GSTACK_RUNTIME" 2>/dev/null || true
 fi
 
-# Restore SKILL.md files if deleted by gen:skill-docs
-git -C "$GSTACK_DIR" checkout -- '*/SKILL.md' 'SKILL.md' 2>/dev/null || true
-
-# Fallback: ensure individual gstack skills are accessible at depth 1
-if [ -d "$GSTACK_DIR" ]; then
-  for skill_dir in "$GSTACK_DIR"/*/; do
-    [ -f "$skill_dir/SKILL.md" ] || continue
-    skill_name=$(basename "$skill_dir")
-    case "$skill_name" in .git|bin|node_modules|agents) continue ;; esac
-    target="$HOME/.claude/skills/$skill_name"
-    # Only create if not already present (don't overwrite ECC/OMC skills)
-    if [ ! -e "$target" ] && [ ! -L "$target" ]; then
-      ln -s "$(cd "$skill_dir" && pwd)" "$target" 2>/dev/null || cp -r "$skill_dir" "$target"
-    fi
-  done
+# Run gstack setup for binary compilation
+GSTACK_BROWSER_OK=0
+if [ -d "$GSTACK_RUNTIME" ] && command -v bun >/dev/null 2>&1 && [ -f "$GSTACK_RUNTIME/setup" ]; then
+  if (cd "$GSTACK_RUNTIME" && ./setup --host claude 2>/dev/null); then
+    GSTACK_BROWSER_OK=1
+  fi
+fi
+if [ "$GSTACK_BROWSER_OK" = "0" ]; then
+  echo "  [gstack] WARNING: Browser runtime not available. /browse and /qa skills will not work."
+  echo "           Text-based gstack skills (review, ship, plan-*, etc.) are installed and functional."
 fi
 
 # gstack auto_upgrade config
@@ -428,7 +452,9 @@ fi
   find "$SCRIPT_DIR/skills/ecc" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
   find "$SCRIPT_DIR/skills/omc" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
   find "$SCRIPT_DIR/skills/core" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \; 2>/dev/null
-  find "$HOME/.claude/skills/gstack" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \; 2>/dev/null || true
+  find "$SCRIPT_DIR/skills/gstack" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \; 2>/dev/null || true
+  find "$SCRIPT_DIR/skills/superpowers" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \; 2>/dev/null || true
+  find "$SCRIPT_DIR/agents/superpowers" -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \; 2>/dev/null || true
   # Rules — from source
   find "$SCRIPT_DIR/rules" -name '*.md' | while read -r f; do echo "rules/${f#$SCRIPT_DIR/rules/}"; done
   # Hooks

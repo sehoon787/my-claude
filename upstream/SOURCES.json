@@ -37,10 +37,14 @@
   "gstack": {
     "repo": "https://github.com/garrytan/gstack",
     "branch": "main",
+    "syncedSha": "dae251e066c1eb33470f718033da54785ca05c2b",
+    "syncedTag": null,
     "syncedAt": "2026-03-30T07:19:29Z",
+    "compareUrl": "https://github.com/garrytan/gstack/compare/dae251e...HEAD",
     "license": "MIT",
+    "strategy": "vendor-skills",
     "files": {
-      "skills": 31
+      "skills": 36
     }
   },
   "superpowers": {

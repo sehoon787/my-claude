@@ -45,6 +45,15 @@ else
   echo "OK: agents/omc — $OMC_AGENT_COUNT agents"
 fi
 
+# 3b. Superpowers agents exist
+SUPERPOWERS_AGENT_COUNT=$(find agents/superpowers -name '*.md' 2>/dev/null | wc -l)
+if [ "$SUPERPOWERS_AGENT_COUNT" -lt 1 ]; then
+  echo "FAIL: agents/superpowers has $SUPERPOWERS_AGENT_COUNT files (expected >= 1)"
+  ERRORS=$((ERRORS + 1))
+else
+  echo "OK: agents/superpowers — $SUPERPOWERS_AGENT_COUNT agents"
+fi
+
 # 4. ECC skills exist
 ECC_SKILL_COUNT=$(find skills/ecc -name 'SKILL.md' 2>/dev/null | wc -l)
 if [ "$ECC_SKILL_COUNT" -lt 33 ]; then
@@ -72,6 +81,24 @@ else
   echo "OK: skills/core — $CORE_SKILL_COUNT skills"
 fi
 
+# 5c. gstack skills exist (vendored)
+GSTACK_SKILL_COUNT=$(find skills/gstack -name 'SKILL.md' 2>/dev/null | wc -l)
+if [ "$GSTACK_SKILL_COUNT" -lt 20 ]; then
+  echo "FAIL: skills/gstack has $GSTACK_SKILL_COUNT skills (expected >= 20)"
+  ERRORS=$((ERRORS + 1))
+else
+  echo "OK: skills/gstack — $GSTACK_SKILL_COUNT skills"
+fi
+
+# 5d. Superpowers skills exist
+SUPERPOWERS_SKILL_COUNT=$(find skills/superpowers -name 'SKILL.md' 2>/dev/null | wc -l)
+if [ "$SUPERPOWERS_SKILL_COUNT" -lt 10 ]; then
+  echo "FAIL: skills/superpowers has $SUPERPOWERS_SKILL_COUNT skills (expected >= 10)"
+  ERRORS=$((ERRORS + 1))
+else
+  echo "OK: skills/superpowers — $SUPERPOWERS_SKILL_COUNT skills"
+fi
+
 # 6. Rules exist
 RULE_COUNT=$(find rules -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l)
 if [ "$RULE_COUNT" -lt 10 ]; then
@@ -95,6 +122,23 @@ else
   ERRORS=$((ERRORS + 1))
 fi
 
+# 7b. SOURCES.json schema completeness
+if [ -f upstream/SOURCES.json ]; then
+  SCHEMA_ERRORS=0
+  for src in agency-agents everything-claude-code oh-my-claudecode gstack superpowers; do
+    SHA=$(node -e "const d=JSON.parse(require('fs').readFileSync('upstream/SOURCES.json','utf8')); console.log(d['$src']?.syncedSha || '')" 2>/dev/null)
+    if [ -z "$SHA" ] || [ "$SHA" = "undefined" ]; then
+      echo "FAIL: SOURCES.json missing syncedSha for $src"
+      SCHEMA_ERRORS=$((SCHEMA_ERRORS + 1))
+    fi
+  done
+  if [ "$SCHEMA_ERRORS" -gt 0 ]; then
+    ERRORS=$((ERRORS + SCHEMA_ERRORS))
+  else
+    echo "OK: SOURCES.json has syncedSha for all 5 upstream sources"
+  fi
+fi
+
 # 8. No duplicate agent filenames across scopes (warning only)
 echo ""
 echo "=== Duplicate Check (informational) ==="
@@ -103,10 +147,46 @@ for name in $(find agents -name '*.md' -exec basename {} \; | sort | uniq -d); d
   find agents -name "$name" -exec echo "  {}" \;
 done
 
+# 8b. Skill name collisions across sources
+echo ""
+echo "=== Skill Collision Check ==="
+SKILL_COLLISIONS=0
+for ecc_skill in skills/ecc/*/; do
+  [ ! -d "$ecc_skill" ] && continue
+  name=$(basename "$ecc_skill")
+  for other_src in skills/omc skills/gstack skills/superpowers skills/core; do
+    if [ -d "$other_src/$name" ]; then
+      echo "WARN: skill '$name' exists in both skills/ecc/ and $other_src/"
+      SKILL_COLLISIONS=$((SKILL_COLLISIONS + 1))
+    fi
+  done
+done
+if [ "$SKILL_COLLISIONS" -gt 0 ]; then
+  echo "INFO: $SKILL_COLLISIONS skill name collisions found (check for intentional supersession)"
+else
+  echo "OK: No skill name collisions across sources"
+fi
+
+# 8c. ECC superseded skills removed
+echo ""
+echo "=== ECC Supersession Check ==="
+SUPERSEDE_ERRORS=0
+for skill in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
+  if [ -d "skills/ecc/$skill" ]; then
+    echo "FAIL: skills/ecc/$skill should have been removed (superseded by gstack)"
+    SUPERSEDE_ERRORS=$((SUPERSEDE_ERRORS + 1))
+  fi
+done
+if [ "$SUPERSEDE_ERRORS" -gt 0 ]; then
+  ERRORS=$((ERRORS + SUPERSEDE_ERRORS))
+else
+  echo "OK: All 7 ECC skills correctly superseded by gstack"
+fi
+
 # Summary
 echo ""
-TOTAL_AGENTS=$((CORE_COUNT + OMO_COUNT + AGENCY_COUNT + OMC_AGENT_COUNT))
-TOTAL_SKILLS=$((ECC_SKILL_COUNT + OMC_SKILL_COUNT + CORE_SKILL_COUNT))
+TOTAL_AGENTS=$((CORE_COUNT + OMO_COUNT + AGENCY_COUNT + OMC_AGENT_COUNT + SUPERPOWERS_AGENT_COUNT))
+TOTAL_SKILLS=$((ECC_SKILL_COUNT + OMC_SKILL_COUNT + CORE_SKILL_COUNT + GSTACK_SKILL_COUNT + SUPERPOWERS_SKILL_COUNT))
 echo "=== Summary ==="
 echo "Total agents: $TOTAL_AGENTS"
 echo "Total skills: $TOTAL_SKILLS"
@@ -120,19 +200,17 @@ if [ -f docs/index.html ]; then
   if [ -z "$HTML_AGENTS" ] || [ -z "$HTML_SKILLS" ]; then
     echo "WARN: docs/index.html data-count attributes not found — skipping count check"
   else
-    # agents must match exactly
+    # agents: warn if stale (CI workflow updates these counts)
     if [ "$HTML_AGENTS" != "$TOTAL_AGENTS" ]; then
-      echo "FAIL: docs/index.html agents=$HTML_AGENTS expected=$TOTAL_AGENTS"
-      ERRORS=$((ERRORS + 1))
+      echo "WARN: docs/index.html agents=$HTML_AGENTS expected=$TOTAL_AGENTS (CI will fix)"
     else
       echo "OK: docs/index.html agents count — $HTML_AGENTS"
     fi
-    # skills: docs includes gstack (runtime), repo does not — check >= repo count
-    if [ "$HTML_SKILLS" -lt "$TOTAL_SKILLS" ]; then
-      echo "FAIL: docs/index.html skills=$HTML_SKILLS < repo=$TOTAL_SKILLS"
-      ERRORS=$((ERRORS + 1))
+    # skills: warn if stale (CI workflow updates these counts)
+    if [ "$HTML_SKILLS" != "$TOTAL_SKILLS" ]; then
+      echo "WARN: docs/index.html skills=$HTML_SKILLS expected=$TOTAL_SKILLS (CI will fix)"
     else
-      echo "OK: docs/index.html skills count — $HTML_SKILLS (repo=$TOTAL_SKILLS + gstack runtime)"
+      echo "OK: docs/index.html skills count — $HTML_SKILLS"
     fi
   fi
 fi
