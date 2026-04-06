@@ -150,6 +150,7 @@ fi
 find "$SCRIPT_DIR/agents/core" -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec cp {} "$HOME/.claude/agents/" \;
 cp "$SCRIPT_DIR"/agents/omo/*.md  "$HOME/.claude/agents/"
 cp "$SCRIPT_DIR"/agents/omc/*.md  "$HOME/.claude/agents/"
+cp "$SCRIPT_DIR"/agents/superpowers/*.md "$HOME/.claude/agents/"
 cp -r "$SCRIPT_DIR"/agents/agency/engineering/*.md "$HOME/.claude/agents/"
 
 # agent-packs — domain agents (not auto-loaded)
@@ -238,6 +239,9 @@ cp -r "$SCRIPT_DIR"/skills/ecc/* "$HOME/.claude/skills/"
 cp -r "$SCRIPT_DIR"/skills/omc/* "$HOME/.claude/skills/"
 if [ -d "$SCRIPT_DIR/skills/core" ]; then
   cp -r "$SCRIPT_DIR"/skills/core/* "$HOME/.claude/skills/"
+fi
+if [ -d "$SCRIPT_DIR/skills/superpowers" ]; then
+  cp -r "$SCRIPT_DIR"/skills/superpowers/* "$HOME/.claude/skills/"
 fi
 
 # ── gstack (runtime install — not bundled in repo) ──

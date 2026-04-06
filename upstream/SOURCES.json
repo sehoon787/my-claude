@@ -42,5 +42,17 @@
     "files": {
       "skills": 31
     }
+  },
+  "superpowers": {
+    "repo": "https://github.com/obra/superpowers",
+    "branch": "main",
+    "syncedSha": "b7a8f76985f1e93e75dd2f2a3b424dc731bd9d37",
+    "syncedTag": "v5.0.7",
+    "syncedAt": "2026-04-06T00:00:00Z",
+    "compareUrl": "https://github.com/obra/superpowers/compare/b7a8f76...HEAD",
+    "files": {
+      "agents": 1,
+      "skills": 14
+    }
   }
 }

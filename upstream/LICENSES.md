@@ -29,6 +29,14 @@ All original copyrights and licenses are preserved.
 - **Bundled as**: `agents/omc/`, `skills/omc/`
 - **Content**: 19 agent definitions, 28 skill definitions
 
+## superpowers
+
+- **Repository**: https://github.com/obra/superpowers
+- **License**: MIT
+- **Copyright**: Copyright (c) Jesse Vincent and contributors
+- **Bundled as**: `agents/superpowers/`, `skills/superpowers/`
+- **Content**: 1 agent definition, 14 skill definitions
+
 ---
 
 ## MIT License (Common)
