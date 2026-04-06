@@ -1,3 +1,13 @@
 .omc/
 node_modules/
 PROMOTION.md
+
+# Legacy vendored paths (now served via submodules in upstream/)
+agents/agency/
+agents/omc/
+agents/superpowers/
+skills/ecc/
+skills/omc/
+skills/gstack/
+skills/superpowers/
+rules/
