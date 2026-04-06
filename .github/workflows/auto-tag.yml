@@ -17,7 +17,8 @@ jobs:
       - name: Get latest tag
         id: get_tag
         run: |
-          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          TAG=$(git tag --merged HEAD --sort=-v:refname | head -1)
+          if [ -z "$TAG" ]; then TAG="v0.0.0"; fi
           echo "tag=$TAG" >> $GITHUB_OUTPUT
       - name: Determine bump level
         id: bump
@@ -91,7 +92,7 @@ jobs:
           git add .claude-plugin/plugin.json
           if ! git diff --cached --quiet; then
             git commit -m "chore: bump plugin version to $VERSION [skip ci]"
-            git push -u origin "$BRANCH"
+            git push -u origin "$BRANCH" --force
             COMMIT_SHA=$(git rev-parse HEAD)
             gh api "repos/${{ github.repository }}/statuses/$COMMIT_SHA" \
               -X POST \
