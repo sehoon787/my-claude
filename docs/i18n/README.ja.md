@@ -117,7 +117,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ## コア + OMO エージェント
 
-**Boss** は my-claude の唯一のオリジナル エージェントです。残りの 9 つは [OMO エージェント](https://github.com/code-yeongyu/oh-my-openagent)で、Boss がサブ オーケストレータおよび専門家として使用します。プラグインは **52 のコア エージェント**（Core 2 + OMO 9 + Engineering 23 + OMC 19 + OMO 専門家）を `~/.claude/agents/` に常時ロードし、さらに **136 のドメイン エージェント パック**を `~/.claude/agent-packs/` に置いており、必要に応じて有効化できます。Boss は、すべてのアクティブなエージェントから優先度 2 の機能マッチングを通じて最適マッチ専門家を選択します。以下の[インストール済みコンポーネント](#installed-components)を参照してください。
+**Boss** は my-claude の唯一のオリジナル エージェントです。残りの 9 つは [OMO エージェント](https://github.com/code-yeongyu/oh-my-openagent)で、Boss がサブ オーケストレータおよび専門家として使用します。プラグインは **52 のコア エージェント**（Core 2 + OMO 9 + Engineering 23 + OMC 19 + OMO 専門家）を `~/.claude/agents/` に常時ロードし、さらに **-42 のドメイン エージェント パック**を `~/.claude/agent-packs/` に置いており、必要に応じて有効化できます。Boss は、すべてのアクティブなエージェントから優先度 2 の機能マッチングを通じて最適マッチ専門家を選択します。以下の[インストール済みコンポーネント](#installed-components)を参照してください。
 
 | エージェント | ソース | モデル | 役割 |
 |---------|--------|------|------|

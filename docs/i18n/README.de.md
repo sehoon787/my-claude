@@ -117,7 +117,7 @@ Lese die vollständige Ausgabe und führe jeden Schritt der Reihe nach aus. Verw
 
 ## Kern- + OMO-Agenten
 
-**Boss** ist der einzige my-claude Original-Agent. Die verbleibenden 9 sind [OMO-Agenten](https://github.com/code-yeongyu/oh-my-openagent), die Boss als Sub-Orchestrators und Spezialisten nutzt. Das Plugin bündelt **55 Kern-Agenten** (Kern 2 + OMO 9 + Engineering 23 + OMC 19 + OMO-Spezialisten), die immer in `~/.claude/agents/` geladen werden, plus **136 Domain-Agent-Packs** in `~/.claude/agent-packs/`, die bei Bedarf aktiviert werden können. Boss wählt den besten entsprechenden Spezialisten aus allen aktiven Agenten über Priority 2 Fähigkeits-Matching. Siehe [Installierte Komponenten](#installierte-komponenten) unten.
+**Boss** ist der einzige my-claude Original-Agent. Die verbleibenden 9 sind [OMO-Agenten](https://github.com/code-yeongyu/oh-my-openagent), die Boss als Sub-Orchestrators und Spezialisten nutzt. Das Plugin bündelt **55 Kern-Agenten** (Kern 2 + OMO 9 + Engineering 23 + OMC 19 + OMO-Spezialisten), die immer in `~/.claude/agents/` geladen werden, plus **-42 Domain-Agent-Packs** in `~/.claude/agent-packs/`, die bei Bedarf aktiviert werden können. Boss wählt den besten entsprechenden Spezialisten aus allen aktiven Agenten über Priority 2 Fähigkeits-Matching. Siehe [Installierte Komponenten](#installierte-komponenten) unten.
 
 | Agent | Quelle | Modell | Rolle |
 |---------|--------|------|------|

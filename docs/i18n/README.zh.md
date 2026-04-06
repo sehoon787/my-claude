@@ -117,7 +117,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ## 核心 + OMO 代理
 
-**Boss** 是唯一的 my-claude 原创代理。其余 9 个是 [OMO 代理](https://github.com/code-yeongyu/oh-my-openagent)，Boss 用作子编排器和专家。该插件捆绑了 **55 个核心代理**（核心 2 + OMO 9 + 工程 23 + OMC 19 + OMO 专家）始终加载到 `~/.claude/agents/`，加上 **136 个领域代理包**在 `~/.claude/agent-packs/` 中，可以按需激活。Boss 通过优先级 2 能力匹配从所有活跃代理中选择最佳匹配的专家。请参见下面的 [已安装组件](#已安装组件)。
+**Boss** 是唯一的 my-claude 原创代理。其余 9 个是 [OMO 代理](https://github.com/code-yeongyu/oh-my-openagent)，Boss 用作子编排器和专家。该插件捆绑了 **55 个核心代理**（核心 2 + OMO 9 + 工程 23 + OMC 19 + OMO 专家）始终加载到 `~/.claude/agents/`，加上 **-42 个领域代理包**在 `~/.claude/agent-packs/` 中，可以按需激活。Boss 通过优先级 2 能力匹配从所有活跃代理中选择最佳匹配的专家。请参见下面的 [已安装组件](#已安装组件)。
 
 | 代理 | 来源 | 模型 | 角色 |
 |---------|--------|------|------|

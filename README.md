@@ -328,7 +328,7 @@ Activate a pack: `ln -s ~/.claude/agent-packs/<pack>/*.md ~/.claude/agents/`
 </details>
 
 <details>
-<summary>Rules (77) — ECC Coding Rules</summary>
+<summary>Rules (89) — ECC Coding Rules</summary>
 
 **Common (9)** — Applied to all projects
 

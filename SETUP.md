@@ -879,7 +879,7 @@ for f in ~/.claude/agents/{engineering,design,testing,product}-*.md; do
   fi
 done
 
-# Full install (all 178 agents)
+# Full install (all  agents)
 # cp -r /tmp/agency-agents/{engineering,testing,design,product,marketing,sales,project-management,spatial-computing,game-development,specialized,support,strategy,paid-media}/*.md ~/.claude/agents/
 ```
 
@@ -1103,7 +1103,7 @@ wsl --status                     # Verify WSL is running
 | | |
 |---|---|
 | **Purpose** | Business-specialist agent persona library |
-| **Core** | 178 agents organized by department (engineering, design, QA, marketing, etc.) |
+| **Core** |  agents organized by department (engineering, design, QA, marketing, etc.) |
 | **Agent format** | Markdown + YAML frontmatter (name, description, model, color, emoji, vibe) + personality/workflow/deliverable definitions |
 | **Departments** | Engineering (21), Design (8), Testing (8), Product (4), Marketing (19), Sales (8), PM (6), Game Dev (5), Specialized (16) |
 | **When to use** | When you need a specialized business-role persona (e.g., UX architect, QA engineer, security auditor) |
