@@ -134,11 +134,13 @@ For human-readable step-by-step setup, see `SETUP.md`.
 
 ---
 
-## Core + OMO Agents
+## Core Agent
 
-**Boss** is the only my-claude original agent. The remaining 9 are [OMO agents](https://github.com/code-yeongyu/oh-my-openagent) that Boss uses as sub-orchestrators and specialists. The plugin bundles **56 core agents** (Core 1 + OMO 9 + Engineering 23 + OMC 19 + OMO specialists + Superpowers 1) always loaded into `~/.claude/agents/`, plus **136 domain agent-packs** in `~/.claude/agent-packs/` that can be activated on demand. Boss selects the best-matching specialist from all active agents via Priority 2 capability matching. See [Installed Components](#installed-components) below.
+**Boss** is the only my-claude original agent — the dynamic meta-orchestrator that auto-discovers all installed agents, skills, and MCP servers at runtime. (`agent-teams-reference` is a reference document for Agent Teams patterns, not a runnable agent.)
 
-See the [Core + OMO Agents table](#installed-components) in the Installed Components section below for the full agent list with roles and models.
+## OMO Agents
+
+9 agents from [Oh My OpenAgent](https://github.com/code-yeongyu/oh-my-openagent) that Boss uses as sub-orchestrators and specialists. The plugin bundles **56 core agents** (Core 1 + OMO 9 + Engineering 23 + OMC 19 + Superpowers 1) always loaded into `~/.claude/agents/`, plus **136 domain agent-packs** in `~/.claude/agent-packs/` that can be activated on demand. Boss selects the best-matching specialist from all active agents via Priority 2 capability matching. See [Installed Components](#installed-components) below.
 
 ---
 
@@ -188,11 +190,21 @@ Following SETUP.md will configure the following:
 | CLI Tools | 3 | omc, omo, ast-grep | install.sh |
 
 <details>
-<summary>Core + OMO Agents (10) — Boss meta-orchestrator + omo agents</summary>
+<summary>Core Agent (1) — Boss meta-orchestrator</summary>
 
 | Agent | Model | Type | Role | Read-only |
 |---------|------|------|------|-----------|
 | Boss | Opus | Meta-orchestrator | Dynamic runtime discovery of all agents/skills/MCP → capability matching → optimal routing | Yes |
+
+Note: `agent-teams-reference` is a reference document for Agent Teams patterns, not a runnable agent.
+
+</details>
+
+<details>
+<summary>OMO Agents (9) — Oh My OpenAgent sub-orchestrators and specialists</summary>
+
+| Agent | Model | Type | Role | Read-only |
+|---------|------|------|------|-----------|
 | Sisyphus | Opus | Sub-orchestrator | Intent classification → specialist agent delegation → independent verification. Does not write code directly | No |
 | Hephaestus | Opus | Autonomous execution | Autonomously performs explore → plan → execute → verify. Completes tasks without asking for permission | No |
 | Metis | Opus | Analysis | User intent analysis, ambiguity detection, AI-slop prevention | Yes |

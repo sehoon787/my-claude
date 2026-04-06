@@ -112,13 +112,20 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ---
 
-## Core + OMO 에이전트
+## Core 에이전트
 
-**Boss**만 my-claude 고유 에이전트입니다. 나머지 9개는 Boss가 서브 오케스트레이터 및 전문가로 사용하는 [OMO 에이전트](https://github.com/code-yeongyu/oh-my-openagent)입니다. 플러그인은 **56개 코어 에이전트** (Core 1 + OMO 9 + Engineering 23 + OMC 19 + OMO 전문가 + Superpowers 1)를 `~/.claude/agents/`에 항상 로드하며, **136개 도메인 에이전트 팩**은 `~/.claude/agent-packs/`에 설치되어 필요 시 활성화할 수 있습니다. Boss는 Priority 2 능력 매칭으로 활성화된 전체 에이전트 풀에서 최적의 전문가를 선택합니다. 전체 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
+**Boss**만 my-claude 고유 에이전트입니다 — 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지하는 동적 메타 오케스트레이터입니다. (`agent-teams-reference`는 Agent Teams 패턴의 참조 문서이며, 실행 가능한 에이전트가 아닙니다.)
 
 | 에이전트 | 출처 | 모델 | 역할 |
 |---------|------|------|------|
 | **Boss** | my-claude | Opus | 동적 메타 오케스트레이터. 런타임에 모든 에이전트/스킬/MCP를 자동 감지하고 최적의 전문가에게 라우팅 |
+
+## OMO 에이전트
+
+Boss가 서브 오케스트레이터 및 전문가로 사용하는 [Oh My OpenAgent](https://github.com/code-yeongyu/oh-my-openagent)의 9개 에이전트입니다. 플러그인은 **56개 코어 에이전트** (Core 1 + OMO 9 + Engineering 23 + OMC 19 + Superpowers 1)를 `~/.claude/agents/`에 항상 로드하며, **136개 도메인 에이전트 팩**은 `~/.claude/agent-packs/`에 설치되어 필요 시 활성화할 수 있습니다. Boss는 Priority 2 능력 매칭으로 활성화된 전체 에이전트 풀에서 최적의 전문가를 선택합니다. 전체 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
+
+| 에이전트 | 출처 | 모델 | 역할 |
+|---------|------|------|------|
 | **Sisyphus** | OMO | Opus | 서브 오케스트레이터. 의도 분류와 검증 프로토콜로 복잡한 멀티스텝 워크플로우 관리 |
 | **Hephaestus** | OMO | Opus | 자율 딥 워커. 탐색 → 계획 → 실행 → 검증 사이클을 자율적으로 수행 |
 | **Metis** | OMO | Opus | 사전 의도 분석. AI-slop 방지를 위해 요청을 실행 전에 구조화 |
@@ -177,11 +184,21 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 | CLI 도구 | 3 | omc, omo, ast-grep | install.sh |
 
 <details>
-<summary>Core + OMO 에이전트 (10개) — Boss 메타 오케스트레이터 + omo 에이전트</summary>
+<summary>Core 에이전트 (1개) — Boss 메타 오케스트레이터</summary>
 
 | 에이전트 | 모델 | 유형 | 역할 | Read-only |
 |---------|------|------|------|-----------|
 | Boss | Opus | 메타 오케스트레이터 | 런타임에 모든 에이전트/스킬/MCP 동적 감지 → 능력 매칭 → 최적 라우팅 | Yes |
+
+참고: `agent-teams-reference`는 Agent Teams 패턴의 참조 문서이며, 실행 가능한 에이전트가 아닙니다.
+
+</details>
+
+<details>
+<summary>OMO 에이전트 (9개) — Oh My OpenAgent 서브 오케스트레이터 및 전문가</summary>
+
+| 에이전트 | 모델 | 유형 | 역할 | Read-only |
+|---------|------|------|------|-----------|
 | Sisyphus | Opus | 서브 오케스트레이터 | 의도 분류 → 전문 에이전트 위임 → 독립 검증. 직접 코드 작성 안 함 | No |
 | Hephaestus | Opus | 자율 실행 | 탐색→계획→실행→검증 자율 수행. 허락 없이 작업 완료 | No |
 | Metis | Opus | 분석 | 사용자 의도 분석, 모호성 감지, AI-slop 방지 | Yes |
