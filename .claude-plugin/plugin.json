@@ -1,7 +1,7 @@
 {
   "name": "my-claude",
-  "description": "All-in-one agent harness plugin — 56 core agents + 136 domain agent-packs, 213 skills, behavioral hooks, and MCP servers bundled from 5 MIT upstream sources (agency-agents, everything-claude-code, oh-my-claudecode, gstack, superpowers) with weekly CI auto-sync",
-  "version": "0.24.0",
+  "description": "Dynamic orchestrator plugin — 200+ agents, 200+ skills, hooks, and MCP servers. Upstream sources linked via git submodules (agency-agents, everything-claude-code, oh-my-claudecode, gstack, superpowers)",
+  "version": "0.25.0",
   "author": {
     "name": "sehoon787"
   }

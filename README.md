@@ -7,14 +7,14 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-192-blue)
-![Skills](https://img.shields.io/badge/skills-213-purple)
+![Agents](https://img.shields.io/badge/agents-200%2B-blue)
+![Skills](https://img.shields.io/badge/skills-200%2B-purple)
 ![Rules](https://img.shields.io/badge/rules-64-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-7-red)
 ![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
 
-All-in-one agent harness for Claude Code — one plugin, 202 agents ready.
+All-in-one agent harness for Claude Code — one plugin, 200+ agents ready.
 
 **Boss** auto-discovers every agent, skill, and MCP tool at runtime, then routes your task to the right specialist. Five MIT upstream repos bundled and synced weekly via CI.
 
@@ -127,9 +127,9 @@ For human-readable step-by-step setup, see `SETUP.md`.
 - **grep.app**: GitHub open-source code search
 
 ### All-in-One Bundle
-- Plugin install provides **192 agents, 213 skills, and 77 rules** instantly
-- Bundles 5 MIT upstream sources (agency-agents, everything-claude-code, oh-my-claudecode, gstack, superpowers)
-- Weekly CI auto-sync keeps bundled content up-to-date with upstream
+- Plugin install provides **200+ agents, 200+ skills, and rules** instantly
+- Links via submodules from 5 MIT upstream sources (agency-agents, everything-claude-code, oh-my-claudecode, gstack, superpowers)
+- git submodules keep content up-to-date with upstream
 - Companion `install.sh` adds npm tools and proprietary Anthropic skills
 
 ---
@@ -181,7 +181,7 @@ Following SETUP.md will configure the following:
 |------|------|------|------|
 | Core Agents | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | Plugin |
 | Agent Packs | 136 | 12 domain categories (marketing, gamedev, sales, etc.) | Plugin |
-| Skills | 213 | ECC 135 + OMC 31 + Core 2 + gstack 31 (runtime) + Superpowers 14 | Plugin + install.sh |
+| Skills | 200+ | ECC 135 + OMC 31 + Core 2 + gstack 31 (runtime) + Superpowers 14 | Plugin + install.sh |
 | Rules | 77 | ECC (common 9 + 8 languages × 5) | Plugin |
 | MCP Servers | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 7 | my-claude (Boss protocol + SessionStart) | Plugin |
@@ -309,7 +309,7 @@ Activate a pack: `ln -s ~/.claude/agent-packs/<pack>/*.md ~/.claude/agents/`
 </details>
 
 <details>
-<summary>Skills (213) — By upstream source</summary>
+<summary>Skills (200+) — By upstream source</summary>
 
 | Source | Count | Key Skills |
 |--------|-------|------------|
@@ -405,7 +405,7 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 │Skill │ │Special-│ │ Direct │ │Sub-orc-│ │ Agent  │
 │Match │ │ist     │ │Parallel│ │hestrat-│ │ Teams  │
 │      │ │Agent   │ │ (2-4)  │ │ors     │ │  P2P   │
-│      │ │ (192)  │ │        │ │Sisyphus│ │        │
+│      │ │ (200+) │ │        │ │Sisyphus│ │        │
 └──────┘ └────────┘ └────────┘ │ Atlas  │ └────────┘
                                 │Hephaes-│
                                 │ tus    │
@@ -530,7 +530,7 @@ Every delegation includes a **6-section structured prompt**: TASK, EXPECTED OUTC
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 192 agents, 213 skills ready.
+[Boss] Phase 0: Scanning... 200+ agents, 200+ skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="
@@ -623,7 +623,7 @@ Issues and PRs are welcome. When adding a new agent, add a `.md` file to the `ag
 
 ## Bundled Upstream Versions
 
-Updated weekly by [CI auto-sync](.github/workflows/sync-upstream.yml). See `upstream/SOURCES.json` for exact SHAs.
+Linked via git submodules. See `upstream/SOURCES.json` for exact SHAs.
 
 | Source | Synced SHA | Tag | Date | Diff |
 |--------|-----------|-----|------|------|

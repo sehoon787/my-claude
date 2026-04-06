@@ -13,8 +13,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-191-blue)
-![Skills](https://img.shields.io/badge/skills-199-purple)
+![Agents](https://img.shields.io/badge/agents-200%2B-blue)
+![Skills](https://img.shields.io/badge/skills-200%2B-purple)
 ![Rules](https://img.shields.io/badge/rules-64-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-7-red)
@@ -108,7 +108,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 - **grep.app**：GitHub 开源代码搜索
 
 ### 一体化包
-- 插件安装提供 **191 个代理、199 个技能和 77 个规则**，即时可用
+- 插件安装提供 **200+ 个代理、200+ 个技能和规则**，即时可用
 - 捆绑 4 个 MIT 上游来源（agency-agents、everything-claude-code、oh-my-claudecode、gstack）
 - 每周 CI 自动同步保持捆绑内容与上游最新
 - 伴随 `install.sh` 添加 npm 工具和专有 Anthropic 技能
@@ -172,8 +172,8 @@ rm ~/.claude/agents/<agent-name>.md
 |------|------|------|------|
 | 核心代理 | 55 | Core 2 + OMO 9 + 工程 23 + OMC 19 | 插件 |
 | 代理包 | 136 | 12 个领域类别（营销、游戏开发、销售等） | 插件 |
-| 技能 | 199 | ECC 135 + OMC 31 + Core 2 + gstack 31（运行时） | 插件 + install.sh |
-| 规则 | 77 | ECC（通用 9 + 8 种语言 × 5） | 插件 |
+| 技能 | 200+ | ECC 135 + OMC 31 + Core 2 + gstack 31（运行时） | 插件 + install.sh |
+| 规则 | 200+ | ECC（通用 9 + 8 种语言 × 5） | 插件 |
 | MCP 服务器 | 3 | Context7、Exa、grep.app | 插件 |
 | 钩子 | 7 | my-claude（Boss 协议 + SessionStart） | 插件 |
 | Anthropic 技能 | 14+ | Anthropic 官方 | install.sh |
@@ -408,7 +408,7 @@ rm ~/.claude/agents/<agent-name>.md
 │  P1  │ │   P2   │ │  P3a   │ │  P3b   │ │  P3c   │
 │技能  │ │专家    │ │直接    │ │子编    │ │代理    │
 │匹配  │ │代理    │ │并行    │ │排器    │ │团队    │
-│      │ │ (191)  │ │ (2-4)  │ │Sisyphus│ │P2P    │
+│      │ │(200+)  │ │ (2-4)  │ │Sisyphus│ │P2P    │
 │      │ │        │ │        │ │ Atlas  │ │        │
 └──────┘ └────────┘ └────────┘ │Hephaes-│ └────────┘
                                 │ tus    │
@@ -529,7 +529,7 @@ Boss 通过 4 级优先级链路由每个请求：
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: 扫描中... 191 个代理，199 个技能就绪。
+[Boss] Phase 0: 扫描中... 200+ 个代理，200+ 个技能就绪。
 [Boss] Phase 1: 意图 → 安全分析 | 优先级：P2
 [Boss] Phase 2: 匹配 → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="

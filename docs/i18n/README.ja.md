@@ -13,8 +13,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-191-blue)
-![Skills](https://img.shields.io/badge/skills-199-purple)
+![Agents](https://img.shields.io/badge/agents-200%2B-blue)
+![Skills](https://img.shields.io/badge/skills-200%2B-purple)
 ![Rules](https://img.shields.io/badge/rules-65-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-7-red)
@@ -108,7 +108,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 - **grep.app**: GitHub オープンソース コード検索
 
 ### ワンパッケージ バンドル
-- プラグイン インストールは **191 エージェント、199 スキル、77 ルール** を即座に提供
+- プラグイン インストールは **200+ エージェント、200+ スキル、ルール** を即座に提供
 - 4 つの MIT アップストリーム ソース（agency-agents、everything-claude-code、oh-my-claudecode、gstack）をバンドル
 - 毎週 CI オート同期によるアップストリーム コンテンツ最新化
 - コンパニオン `install.sh` は npm ツールと独自 Anthropic スキルを追加
@@ -172,7 +172,7 @@ SETUP.md に従うと、以下が設定されます:
 |------|------|------|------|
 | コア エージェント | 55 | Core 2 + OMO 9 + Engineering 23 + OMC 19 | プラグイン |
 | エージェント パック | 136 | 12 ドメイン カテゴリ（マーケティング、ゲーム開発、セールスなど） | プラグイン |
-| スキル | 199 | ECC 135 + OMC 31 + Core 2 + gstack 31（ランタイム） | プラグイン + install.sh |
+| スキル | 200+ | ECC 135 + OMC 31 + Core 2 + gstack 31（ランタイム） | プラグイン + install.sh |
 | ルール | 65 | ECC（共通 9 + 8 言語 × 5） | プラグイン |
 | MCP サーバー | 3 | Context7、Exa、grep.app | プラグイン |
 | フック | 7 | my-claude（Boss プロトコル + SessionStart） | プラグイン |
@@ -409,7 +409,7 @@ SETUP.md に従うと、以下が設定されます:
 │Skill │ │Special-│ │ Direct │ │Sub-orc-│ │ Agent  │
 │Match │ │ist     │ │Parallel│ │hestrat-│ │ Teams  │
 │      │ │Agent   │ │ (2-4)  │ │ors     │ │  P2P   │
-│      │ │ (191)  │ │        │ │Sisyphus│ │        │
+│      │ │(200+)  │ │        │ │Sisyphus│ │        │
 └──────┘ └────────┘ └────────┘ │ Atlas  │ └────────┘
                                 │Hephaes-│
                                 │ tus    │
@@ -530,7 +530,7 @@ Boss はすべてのリクエストを 4 レベル優先度チェーンを通じ
 ```
 $ claude "セキュリティ脆弱性について認証モジュール分析"
 
-[Boss] Phase 0: スキャン中... 191 エージェント、199 スキル準備完了.
+[Boss] Phase 0: スキャン中... 200+ エージェント、200+ スキル準備完了.
 [Boss] Phase 1: 意図 → セキュリティ分析 | 優先度: P2
 [Boss] Phase 2: マッチ → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="

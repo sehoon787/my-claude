@@ -13,8 +13,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-191-blue)
-![Skills](https://img.shields.io/badge/skills-199-purple)
+![Agents](https://img.shields.io/badge/agents-200%2B-blue)
+![Skills](https://img.shields.io/badge/skills-200%2B-purple)
 ![Rules](https://img.shields.io/badge/rules-64-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-7-red)
@@ -108,7 +108,7 @@ Lese die vollständige Ausgabe und führe jeden Schritt der Reihe nach aus. Verw
 - **grep.app**: GitHub Open-Source-Code-Suche
 
 ### All-in-One Bundle
-- Plugin-Installation bietet sofort **191 Agenten, 199 Skills und 77 Regeln**
+- Plugin-Installation bietet sofort **200+ Agenten, 200+ Skills und Regeln**
 - Bündelt 4 MIT-Upstream-Quellen (agency-agents, everything-claude-code, oh-my-claudecode, gstack)
 - Wöchentliche CI-Auto-Sync hält gebündelte Inhalte mit Upstream auf dem neuesten Stand
 - Begleitendes `install.sh` fügt npm-Tools und proprietäre Anthropic Skills hinzu
@@ -172,7 +172,7 @@ Das Befolgen von SETUP.md konfiguriert Folgendes:
 |------|------|------|------|
 | Kern-Agenten | 55 | Kern 2 + OMO 9 + Engineering 23 + OMC 19 | Plugin |
 | Agent Packs | 133 | 12 Domain-Kategorien (Marketing, Spieleentwicklung, Verkauf, etc.) | Plugin |
-| Skills | 199 | ECC 135 + OMC 31 + Core 2 + gstack 31 (Laufzeit) | Plugin + install.sh |
+| Skills | 200+ | ECC 135 + OMC 31 + Core 2 + gstack 31 (Laufzeit) | Plugin + install.sh |
 | Regeln | 64 | ECC (Common 9 + 8 Sprachen × 5) | Plugin |
 | MCP-Server | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 7 | my-claude (Boss-Protokoll + SessionStart) | Plugin |
@@ -409,7 +409,7 @@ Jedes Sprachenverzeichnis enthält: coding-style.md, hooks.md, patterns.md, secu
 │Skill │ │Special-│ │ Direct │ │Sub-orc-│ │ Agent  │
 │Match │ │ist     │ │Parallel│ │hestrat-│ │ Teams  │
 │      │ │Agent   │ │ (2-4)  │ │ors     │ │  P2P   │
-│      │ │ (191)  │ │        │ │Sisyphus│ │        │
+│      │ │(200+)  │ │        │ │Sisyphus│ │        │
 └──────┘ └────────┘ └────────┘ │ Atlas  │ └────────┘
                                 │Hephaes-│
                                 │ tus    │
@@ -530,7 +530,7 @@ Jede Delegation beinhaltet einen **6-Abschnitt strukturierten Prompt**: AUFGABE,
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 191 agents, 199 skills ready.
+[Boss] Phase 0: Scanning... 200+ agents, 200+ skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="
