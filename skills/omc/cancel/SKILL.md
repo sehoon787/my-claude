@@ -1,6 +1,7 @@
 ---
 name: cancel
 description: Cancel any active OMC mode (autopilot, ralph, ultrawork, ultraqa, swarm, ultrapilot, pipeline, team)
+argument-hint: "[--force|--all]"
 level: 2
 ---
 
@@ -86,8 +87,9 @@ if [ -n "$SESSION_ID" ] && [ -d "$OMC_STATE/sessions/$SESSION_ID" ]; then
   rm -f "$OMC_STATE/sessions/$SESSION_ID/${MODE}-stop-breaker.json"
   # Write cancel signal so stop hook detects cancellation in progress
   NOW_ISO="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-  printf '{"active":true,"requested_at":"%s","mode":"%s","source":"bash_fallback"}' \
-    "$NOW_ISO" "$MODE" > "$OMC_STATE/sessions/$SESSION_ID/cancel-signal-state.json"
+  EXPIRES_ISO="$(date -u -d "+30 seconds" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || python3 - <<'PY'\nfrom datetime import datetime, timedelta, timezone\nprint((datetime.now(timezone.utc) + timedelta(seconds=30)).strftime('%Y-%m-%dT%H:%M:%SZ'))\nPY\n)"
+  printf '{"active":true,"requested_at":"%s","expires_at":"%s","mode":"%s","source":"bash_fallback"}' \
+    "$NOW_ISO" "$EXPIRES_ISO" "$MODE" > "$OMC_STATE/sessions/$SESSION_ID/cancel-signal-state.json"
 fi
 
 # Clear legacy state only if no session ID (avoid clearing another session's state)
@@ -115,6 +117,7 @@ Active modes are still cancelled in dependency order:
 8. Team (Claude Code native)
 9. OMC Teams (tmux CLI workers)
 10. Plan Consensus (standalone)
+11. Self-Improve (standalone — clear state, clean orphaned worktrees, preserve iteration_state for resume, set status: "user_stopped" in .omc/self-improve/state/agent-settings.json)
 
 ## Force Clear All
 
@@ -315,6 +318,11 @@ The cancel skill runs as follows:
 3. When operating in default mode, call `state_clear` with that session_id to remove only the session’s files, then run mode-specific cleanup (autopilot → ralph → …) based on the state tool signals.
 4. In force mode, iterate every active session, call `state_clear` per session, then run a global `state_clear` without `session_id` to drop legacy files (`.omc/state/*.json`, compatibility artifacts) and report success. Swarm remains a shared SQLite/marker mode outside session scoping.
 5. Team artifacts (`~/.claude/teams/*/`, `~/.claude/tasks/*/`, `.omc/state/team-state.json`) remain best-effort cleanup items invoked during the legacy/global pass.
+6. **Always** clear skill-active state as the final step, regardless of which mode was active or whether `--force` was used:
+   ```
+   state_clear(mode="skill-active", session_id)
+   ```
+   This ensures the stop hook does not keep firing skill-protection reinforcements after cancel due to a stale `skill-active-state.json`. See issue #2118.
 
 State tools always honor the `session_id` argument, so even force mode still clears the session-scoped paths before deleting compatibility-only legacy state.
 

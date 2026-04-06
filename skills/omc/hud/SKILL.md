@@ -1,6 +1,7 @@
 ---
 name: hud
 description: Configure HUD display options (layout, presets, display elements)
+argument-hint: "[setup|minimal|focused|full|status]"
 role: config-writer  # DOCUMENTATION ONLY - This skill writes to ~/.claude/ paths
 scope: ~/.claude/**  # DOCUMENTATION ONLY - Allowed write scope
 level: 2
@@ -277,6 +278,7 @@ You can manually edit the config file. Each option can be set individually - any
     "sessionHealth": true,
     "useBars": true,
     "showCallCounts": true,
+    "callCountsFormat": "auto",
     "safeMode": true,
     "maxOutputLines": 4
   },
@@ -293,6 +295,13 @@ You can manually edit the config file. Each option can be set individually - any
   }
 }
 ```
+
+### callCountsFormat
+
+Controls the call-count badge icon style:
+- `"auto"` (default): emoji on macOS/Linux, ASCII on Windows/WSL
+- `"emoji"`: force `🔧 🤖 ⚡`
+- `"ascii"`: force `T: A: S:`
 
 ### safeMode
 

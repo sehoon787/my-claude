@@ -13,8 +13,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-191-blue)
-![Skills](https://img.shields.io/badge/skills-199-purple)
+![Agents](https://img.shields.io/badge/agents-13-blue)
+![Skills](https://img.shields.io/badge/skills-255-purple)
 ![Rules](https://img.shields.io/badge/rules-64-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-7-red)
@@ -108,7 +108,7 @@ Lese die vollständige Ausgabe und führe jeden Schritt der Reihe nach aus. Verw
 - **grep.app**: GitHub Open-Source-Code-Suche
 
 ### All-in-One Bundle
-- Plugin-Installation bietet sofort **191 Agenten, 199 Skills und 77 Regeln**
+- Plugin-Installation bietet sofort **13 Agenten, 255 Skills und 89 Regeln**
 - Bündelt 4 MIT-Upstream-Quellen (agency-agents, everything-claude-code, oh-my-claudecode, gstack)
 - Wöchentliche CI-Auto-Sync hält gebündelte Inhalte mit Upstream auf dem neuesten Stand
 - Begleitendes `install.sh` fügt npm-Tools und proprietäre Anthropic Skills hinzu
@@ -117,7 +117,7 @@ Lese die vollständige Ausgabe und führe jeden Schritt der Reihe nach aus. Verw
 
 ## Kern- + OMO-Agenten
 
-**Boss** ist der einzige my-claude Original-Agent. Die verbleibenden 9 sind [OMO-Agenten](https://github.com/code-yeongyu/oh-my-openagent), die Boss als Sub-Orchestrators und Spezialisten nutzt. Das Plugin bündelt **55 Kern-Agenten** (Kern 2 + OMO 9 + Engineering 23 + OMC 19 + OMO-Spezialisten), die immer in `~/.claude/agents/` geladen werden, plus **136 Domain-Agent-Packs** in `~/.claude/agent-packs/`, die bei Bedarf aktiviert werden können. Boss wählt den besten entsprechenden Spezialisten aus allen aktiven Agenten über Priority 2 Fähigkeits-Matching. Siehe [Installierte Komponenten](#installierte-komponenten) unten.
+**Boss** ist der einzige my-claude Original-Agent. Die verbleibenden 9 sind [OMO-Agenten](https://github.com/code-yeongyu/oh-my-openagent), die Boss als Sub-Orchestrators und Spezialisten nutzt. Das Plugin bündelt **55 Kern-Agenten** (Kern 2 + OMO 9 + Engineering 23 + OMC 19 + OMO-Spezialisten), die immer in `~/.claude/agents/` geladen werden, plus **-42 Domain-Agent-Packs** in `~/.claude/agent-packs/`, die bei Bedarf aktiviert werden können. Boss wählt den besten entsprechenden Spezialisten aus allen aktiven Agenten über Priority 2 Fähigkeits-Matching. Siehe [Installierte Komponenten](#installierte-komponenten) unten.
 
 | Agent | Quelle | Modell | Rolle |
 |---------|--------|------|------|
@@ -172,7 +172,7 @@ Das Befolgen von SETUP.md konfiguriert Folgendes:
 |------|------|------|------|
 | Kern-Agenten | 55 | Kern 2 + OMO 9 + Engineering 23 + OMC 19 | Plugin |
 | Agent Packs | 133 | 12 Domain-Kategorien (Marketing, Spieleentwicklung, Verkauf, etc.) | Plugin |
-| Skills | 199 | ECC 135 + OMC 31 + Core 2 + gstack 31 (Laufzeit) | Plugin + install.sh |
+| Skills | 255 | ECC 181 + OMC 36 + Core 2 + gstack 36 (Laufzeit) | Plugin + install.sh |
 | Regeln | 64 | ECC (Common 9 + 8 Sprachen × 5) | Plugin |
 | MCP-Server | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 7 | my-claude (Boss-Protokoll + SessionStart) | Plugin |
@@ -530,7 +530,7 @@ Jede Delegation beinhaltet einen **6-Abschnitt strukturierten Prompt**: AUFGABE,
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 191 agents, 199 skills ready.
+[Boss] Phase 0: Scanning... 13 agents, 255 skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="

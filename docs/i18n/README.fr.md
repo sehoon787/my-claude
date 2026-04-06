@@ -13,8 +13,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-191-blue)
-![Skills](https://img.shields.io/badge/skills-199-purple)
+![Agents](https://img.shields.io/badge/agents-13-blue)
+![Skills](https://img.shields.io/badge/skills-255-purple)
 ![Rules](https://img.shields.io/badge/rules-64-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-7-red)
@@ -108,7 +108,7 @@ Lisez la sortie complète et exécutez chaque étape dans l'ordre. Utilisez `cur
 - **grep.app** : Recherche de code open source sur GitHub
 
 ### Bundle tout-en-un
-- L'installation via plugin fournit immédiatement **191 agents, 199 skills et 77 règles**
+- L'installation via plugin fournit immédiatement **13 agents, 255 skills et 89 règles**
 - Regroupe 4 sources upstream MIT (agency-agents, everything-claude-code, oh-my-claudecode, gstack)
 - La CI auto-sync hebdomadaire maintient le contenu groupé à jour avec l'upstream
 - Le `install.sh` d'accompagnement ajoute les outils npm et les Anthropic Skills propriétaires
@@ -171,9 +171,9 @@ Suivre SETUP.md configure les éléments suivants :
 | Catégorie | Nombre | Source | Inclus dans |
 |------|------|------|------|
 | Agents cœur | 55 | Cœur 2 + OMO 9 + Engineering 23 + OMC 19 | Plugin |
-| Agent Packs | 136 | 12 catégories de domaine (Marketing, Développement de jeux, Vente, etc.) | Plugin |
-| Skills | 199 | ECC 135 + OMC 31 + Core 2 + gstack 31 (runtime) | Plugin + install.sh |
-| Règles | 77 | ECC (Common 9 + 8 langages × 5) | Plugin |
+| Agent Packs | -42 | 12 catégories de domaine (Marketing, Développement de jeux, Vente, etc.) | Plugin |
+| Skills | 255 | ECC 181 + OMC 36 + Core 2 + gstack 36 (runtime) | Plugin + install.sh |
+| Règles | 89 | ECC (Common 9 + 8 langages × 5) | Plugin |
 | Serveurs MCP | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 7 | my-claude (protocole Boss + SessionStart) | Plugin |
 | Anthropic Skills | 14+ | Anthropic Official | install.sh |
@@ -530,7 +530,7 @@ Chaque délégation inclut un **prompt structuré en 6 sections** : TÂCHE, RÉS
 ```
 $ claude "analyze auth module for security vulnerabilities"
 
-[Boss] Phase 0: Scanning... 191 agents, 199 skills ready.
+[Boss] Phase 0: Scanning... 13 agents, 255 skills ready.
 [Boss] Phase 1: Intent → Security Analysis | Priority: P2
 [Boss] Phase 2: Matched → security-reviewer (sonnet)
 [Boss] Agent(description="security review", model="sonnet", prompt="
