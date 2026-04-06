@@ -1,223 +1,123 @@
 #!/usr/bin/env bash
-# Validate sync integrity — run after sync-upstream workflow
+# Validate submodule integrity and/or installation state
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
+MODE="repo"
+[ "${1:-}" = "--installed" ] && MODE="installed"
+
 ERRORS=0
 
-echo "=== Sync Integrity Validation ==="
+if [ "$MODE" = "repo" ]; then
+  echo "=== Repo Validation (submodule-based) ==="
 
-# 1. Core agents exist
-CORE_COUNT=$(find agents/core -name '*.md' 2>/dev/null | wc -l)
-if [ "$CORE_COUNT" -lt 2 ]; then
-  echo "FAIL: agents/core has $CORE_COUNT files (expected >= 2)"
-  ERRORS=$((ERRORS + 1))
-else
-  echo "OK: agents/core — $CORE_COUNT files"
-fi
+  # 1. Self-owned files exist
+  for f in agents/core/boss.md agents/core/agent-teams-reference.md; do
+    test -f "$f" && echo "OK: $f" || { echo "FAIL: $f missing"; ERRORS=$((ERRORS + 1)); }
+  done
 
-# 1b. OMO agents exist
-OMO_COUNT=$(find agents/omo -name '*.md' 2>/dev/null | wc -l)
-if [ "$OMO_COUNT" -lt 9 ]; then
-  echo "FAIL: agents/omo has $OMO_COUNT files (expected >= 9)"
-  ERRORS=$((ERRORS + 1))
-else
-  echo "OK: agents/omo — $OMO_COUNT agents"
-fi
+  OMO_COUNT=$(find agents/omo -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+  [ "$OMO_COUNT" -ge 9 ] && echo "OK: agents/omo — $OMO_COUNT agents" || { echo "FAIL: agents/omo has $OMO_COUNT (expected >= 9)"; ERRORS=$((ERRORS + 1)); }
 
-# 2. Agency agents exist
-AGENCY_COUNT=$(find agents/agency -name '*.md' 2>/dev/null | wc -l)
-if [ "$AGENCY_COUNT" -lt 100 ]; then
-  echo "FAIL: agents/agency has $AGENCY_COUNT files (expected >= 100)"
-  ERRORS=$((ERRORS + 1))
-else
-  echo "OK: agents/agency — $AGENCY_COUNT agents"
-fi
+  CORE_SKILL_COUNT=$(find skills/core -name 'SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
+  [ "$CORE_SKILL_COUNT" -ge 2 ] && echo "OK: skills/core — $CORE_SKILL_COUNT skills" || { echo "FAIL: skills/core has $CORE_SKILL_COUNT (expected >= 2)"; ERRORS=$((ERRORS + 1)); }
 
-# 3. OMC agents exist
-OMC_AGENT_COUNT=$(find agents/omc -name '*.md' 2>/dev/null | wc -l)
-if [ "$OMC_AGENT_COUNT" -lt 15 ]; then
-  echo "FAIL: agents/omc has $OMC_AGENT_COUNT files (expected >= 15)"
-  ERRORS=$((ERRORS + 1))
-else
-  echo "OK: agents/omc — $OMC_AGENT_COUNT agents"
-fi
+  # 2. Submodules initialized — check each
+  echo ""
+  echo "=== Submodule Validation ==="
+  for sub in agency-agents ecc omc gstack superpowers; do
+    subdir="upstream/$sub"
+    if [ ! -d "$subdir" ] || [ -z "$(ls -A "$subdir" 2>/dev/null)" ]; then
+      echo "SKIP: $subdir not initialized (run: git submodule update --init)"
+      continue
+    fi
+    case "$sub" in
+      agency-agents)
+        COUNT=$(find "$subdir" -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+        [ "$COUNT" -ge 100 ] && echo "OK: $sub — $COUNT agents" || { echo "FAIL: $sub has $COUNT agents (expected >= 100)"; ERRORS=$((ERRORS + 1)); }
+        ;;
+      ecc)
+        SKILL_COUNT=$(find "$subdir/skills" -name 'SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
+        [ "$SKILL_COUNT" -ge 30 ] && echo "OK: $sub — $SKILL_COUNT skills" || { echo "FAIL: $sub has $SKILL_COUNT skills (expected >= 30)"; ERRORS=$((ERRORS + 1)); }
+        ;;
+      omc)
+        AGENT_COUNT=$(find "$subdir/agents" -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+        SKILL_COUNT=$(find "$subdir/skills" -name 'SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
+        [ "$AGENT_COUNT" -ge 15 ] && echo "OK: $sub — $AGENT_COUNT agents" || { echo "FAIL: $sub has $AGENT_COUNT agents (expected >= 15)"; ERRORS=$((ERRORS + 1)); }
+        [ "$SKILL_COUNT" -ge 20 ] && echo "OK: $sub — $SKILL_COUNT skills" || { echo "FAIL: $sub has $SKILL_COUNT skills (expected >= 20)"; ERRORS=$((ERRORS + 1)); }
+        ;;
+      gstack)
+        SKILL_COUNT=$(find "$subdir" -name 'SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
+        [ "$SKILL_COUNT" -ge 20 ] && echo "OK: $sub — $SKILL_COUNT skills" || { echo "FAIL: $sub has $SKILL_COUNT skills (expected >= 20)"; ERRORS=$((ERRORS + 1)); }
+        ;;
+      superpowers)
+        AGENT_COUNT=$(find "$subdir/agents" -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+        SKILL_COUNT=$(find "$subdir/skills" -name 'SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
+        [ "$AGENT_COUNT" -ge 1 ] && echo "OK: $sub — $AGENT_COUNT agents" || { echo "FAIL: $sub has $AGENT_COUNT agents (expected >= 1)"; ERRORS=$((ERRORS + 1)); }
+        [ "$SKILL_COUNT" -ge 10 ] && echo "OK: $sub — $SKILL_COUNT skills" || { echo "FAIL: $sub has $SKILL_COUNT skills (expected >= 10)"; ERRORS=$((ERRORS + 1)); }
+        ;;
+    esac
+  done
 
-# 3b. Superpowers agents exist
-SUPERPOWERS_AGENT_COUNT=$(find agents/superpowers -name '*.md' 2>/dev/null | wc -l)
-if [ "$SUPERPOWERS_AGENT_COUNT" -lt 1 ]; then
-  echo "FAIL: agents/superpowers has $SUPERPOWERS_AGENT_COUNT files (expected >= 1)"
-  ERRORS=$((ERRORS + 1))
-else
-  echo "OK: agents/superpowers — $SUPERPOWERS_AGENT_COUNT agents"
-fi
-
-# 4. ECC skills exist
-ECC_SKILL_COUNT=$(find skills/ecc -name 'SKILL.md' 2>/dev/null | wc -l)
-if [ "$ECC_SKILL_COUNT" -lt 33 ]; then
-  echo "FAIL: skills/ecc has $ECC_SKILL_COUNT skills (expected >= 33)"
-  ERRORS=$((ERRORS + 1))
-else
-  echo "OK: skills/ecc — $ECC_SKILL_COUNT skills"
-fi
-
-# 5. OMC skills exist
-OMC_SKILL_COUNT=$(find skills/omc -name 'SKILL.md' 2>/dev/null | wc -l)
-if [ "$OMC_SKILL_COUNT" -lt 20 ]; then
-  echo "FAIL: skills/omc has $OMC_SKILL_COUNT skills (expected >= 20)"
-  ERRORS=$((ERRORS + 1))
-else
-  echo "OK: skills/omc — $OMC_SKILL_COUNT skills"
-fi
-
-# 5b. Core skills exist
-CORE_SKILL_COUNT=$(find skills/core -name 'SKILL.md' 2>/dev/null | wc -l)
-if [ "$CORE_SKILL_COUNT" -lt 1 ]; then
-  echo "FAIL: skills/core has $CORE_SKILL_COUNT skills (expected >= 1)"
-  ERRORS=$((ERRORS + 1))
-else
-  echo "OK: skills/core — $CORE_SKILL_COUNT skills"
-fi
-
-# 5c. gstack skills exist (vendored)
-GSTACK_SKILL_COUNT=$(find skills/gstack -name 'SKILL.md' 2>/dev/null | wc -l)
-if [ "$GSTACK_SKILL_COUNT" -lt 20 ]; then
-  echo "FAIL: skills/gstack has $GSTACK_SKILL_COUNT skills (expected >= 20)"
-  ERRORS=$((ERRORS + 1))
-else
-  echo "OK: skills/gstack — $GSTACK_SKILL_COUNT skills"
-fi
-
-# 5d. Superpowers skills exist
-SUPERPOWERS_SKILL_COUNT=$(find skills/superpowers -name 'SKILL.md' 2>/dev/null | wc -l)
-if [ "$SUPERPOWERS_SKILL_COUNT" -lt 10 ]; then
-  echo "FAIL: skills/superpowers has $SUPERPOWERS_SKILL_COUNT skills (expected >= 10)"
-  ERRORS=$((ERRORS + 1))
-else
-  echo "OK: skills/superpowers — $SUPERPOWERS_SKILL_COUNT skills"
-fi
-
-# 6. Rules exist
-RULE_COUNT=$(find rules -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l)
-if [ "$RULE_COUNT" -lt 10 ]; then
-  echo "FAIL: rules has $RULE_COUNT files (expected >= 10)"
-  ERRORS=$((ERRORS + 1))
-else
-  echo "OK: rules — $RULE_COUNT rule files"
-fi
-
-# 7. SOURCES.json exists and is valid JSON
-if [ -f upstream/SOURCES.json ]; then
-  node -e "JSON.parse(require('fs').readFileSync('upstream/SOURCES.json','utf8'))" 2>/dev/null
-  if [ $? -eq 0 ]; then
-    echo "OK: upstream/SOURCES.json is valid JSON"
+  # 3. SOURCES.json valid
+  echo ""
+  if [ -f upstream/SOURCES.json ]; then
+    node -e "JSON.parse(require('fs').readFileSync('upstream/SOURCES.json','utf8'))" 2>/dev/null \
+      && echo "OK: upstream/SOURCES.json is valid JSON" \
+      || { echo "FAIL: upstream/SOURCES.json is not valid JSON"; ERRORS=$((ERRORS + 1)); }
   else
-    echo "FAIL: upstream/SOURCES.json is not valid JSON"
-    ERRORS=$((ERRORS + 1))
+    echo "FAIL: upstream/SOURCES.json not found"; ERRORS=$((ERRORS + 1))
   fi
-else
-  echo "FAIL: upstream/SOURCES.json not found"
-  ERRORS=$((ERRORS + 1))
-fi
 
-# 7b. SOURCES.json schema completeness
-if [ -f upstream/SOURCES.json ]; then
-  SCHEMA_ERRORS=0
-  for src in agency-agents everything-claude-code oh-my-claudecode gstack superpowers; do
-    SHA=$(node -e "const d=JSON.parse(require('fs').readFileSync('upstream/SOURCES.json','utf8')); console.log(d['$src']?.syncedSha || '')" 2>/dev/null)
-    if [ -z "$SHA" ] || [ "$SHA" = "undefined" ]; then
-      echo "FAIL: SOURCES.json missing syncedSha for $src"
-      SCHEMA_ERRORS=$((SCHEMA_ERRORS + 1))
+  # 4. No duplicate agent filenames (informational)
+  echo ""
+  echo "=== Duplicate Check ==="
+  ALL_AGENTS=$(mktemp)
+  find agents -name '*.md' -exec basename {} \; 2>/dev/null >> "$ALL_AGENTS"
+  for sub in agency-agents omc superpowers; do
+    [ -d "upstream/$sub" ] && find "upstream/$sub" -path '*/agents/*.md' -exec basename {} \; 2>/dev/null >> "$ALL_AGENTS"
+  done
+  DUPES=$(sort "$ALL_AGENTS" | uniq -d | wc -l | tr -d ' ')
+  [ "$DUPES" -eq 0 ] && echo "OK: No duplicate agent names" || echo "INFO: $DUPES duplicate agent name(s) found"
+  rm -f "$ALL_AGENTS"
+
+elif [ "$MODE" = "installed" ]; then
+  echo "=== Install Validation (~/.claude/) ==="
+
+  AGENT_COUNT=$(find "$HOME/.claude/agents" -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+  [ "$AGENT_COUNT" -ge 10 ] && echo "OK: agents — $AGENT_COUNT installed" || { echo "FAIL: agents has $AGENT_COUNT (expected >= 10)"; ERRORS=$((ERRORS + 1)); }
+
+  SKILL_COUNT=$(find "$HOME/.claude/skills" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+  [ "$SKILL_COUNT" -ge 5 ] && echo "OK: skills — $SKILL_COUNT installed" || { echo "FAIL: skills has $SKILL_COUNT (expected >= 5)"; ERRORS=$((ERRORS + 1)); }
+
+  [ -f "$HOME/.claude/hooks/hooks.json" ] && echo "OK: hooks.json present" || { echo "FAIL: hooks.json missing"; ERRORS=$((ERRORS + 1)); }
+  [ -f "$HOME/.claude/settings.json" ] && echo "OK: settings.json present" || { echo "FAIL: settings.json missing"; ERRORS=$((ERRORS + 1)); }
+  [ -f "$HOME/.claude/.my-claude-manifest" ] && echo "OK: manifest present" || { echo "FAIL: manifest missing"; ERRORS=$((ERRORS + 1)); }
+
+  # Supersession check
+  echo ""
+  echo "=== Supersession Check ==="
+  SUPERSEDE_ERRORS=0
+  for skill in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
+    if [ -d "$HOME/.claude/skills/$skill" ]; then
+      echo "FAIL: ~/.claude/skills/$skill should have been removed (superseded by gstack)"
+      SUPERSEDE_ERRORS=$((SUPERSEDE_ERRORS + 1))
     fi
   done
-  if [ "$SCHEMA_ERRORS" -gt 0 ]; then
-    ERRORS=$((ERRORS + SCHEMA_ERRORS))
-  else
-    echo "OK: SOURCES.json has syncedSha for all 5 upstream sources"
-  fi
-fi
+  [ "$SUPERSEDE_ERRORS" -eq 0 ] && echo "OK: All 7 ECC skills correctly superseded" || ERRORS=$((ERRORS + SUPERSEDE_ERRORS))
 
-# 8. No duplicate agent filenames across scopes (warning only)
-echo ""
-echo "=== Duplicate Check (informational) ==="
-for name in $(find agents -name '*.md' -exec basename {} \; | sort | uniq -d); do
-  echo "INFO: duplicate agent name '$name' found in:"
-  find agents -name "$name" -exec echo "  {}" \;
-done
-
-# 8b. Skill name collisions across sources
-echo ""
-echo "=== Skill Collision Check ==="
-SKILL_COLLISIONS=0
-for ecc_skill in skills/ecc/*/; do
-  [ ! -d "$ecc_skill" ] && continue
-  name=$(basename "$ecc_skill")
-  for other_src in skills/omc skills/gstack skills/superpowers skills/core; do
-    if [ -d "$other_src/$name" ]; then
-      echo "WARN: skill '$name' exists in both skills/ecc/ and $other_src/"
-      SKILL_COLLISIONS=$((SKILL_COLLISIONS + 1))
-    fi
-  done
-done
-if [ "$SKILL_COLLISIONS" -gt 0 ]; then
-  echo "INFO: $SKILL_COLLISIONS skill name collisions found (check for intentional supersession)"
-else
-  echo "OK: No skill name collisions across sources"
-fi
-
-# 8c. ECC superseded skills removed
-echo ""
-echo "=== ECC Supersession Check ==="
-SUPERSEDE_ERRORS=0
-for skill in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
-  if [ -d "skills/ecc/$skill" ]; then
-    echo "FAIL: skills/ecc/$skill should have been removed (superseded by gstack)"
-    SUPERSEDE_ERRORS=$((SUPERSEDE_ERRORS + 1))
-  fi
-done
-if [ "$SUPERSEDE_ERRORS" -gt 0 ]; then
-  ERRORS=$((ERRORS + SUPERSEDE_ERRORS))
-else
-  echo "OK: All 7 ECC skills correctly superseded by gstack"
+  # Companion tools
+  echo ""
+  echo "=== Companion Tools ==="
+  command -v omc >/dev/null 2>&1 && echo "OK: omc" || echo "WARN: omc not found"
+  command -v oh-my-opencode >/dev/null 2>&1 && echo "OK: omo" || echo "WARN: omo not found"
+  command -v ast-grep >/dev/null 2>&1 && echo "OK: ast-grep" || echo "WARN: ast-grep not found"
 fi
 
 # Summary
 echo ""
-TOTAL_AGENTS=$((CORE_COUNT + OMO_COUNT + AGENCY_COUNT + OMC_AGENT_COUNT + SUPERPOWERS_AGENT_COUNT))
-TOTAL_SKILLS=$((ECC_SKILL_COUNT + OMC_SKILL_COUNT + CORE_SKILL_COUNT + GSTACK_SKILL_COUNT + SUPERPOWERS_SKILL_COUNT))
 echo "=== Summary ==="
-echo "Total agents: $TOTAL_AGENTS"
-echo "Total skills: $TOTAL_SKILLS"
-echo "Total rules:  $RULE_COUNT"
-echo "Errors:       $ERRORS"
-
-# 9. Validate docs/index.html counts match computed values
-if [ -f docs/index.html ]; then
-  HTML_AGENTS=$(perl -ne 'print "$1\n" while /data-count="(\d+)">0<\/em>\s*<span[^>]*data-en="agents"/g' docs/index.html | head -1)
-  HTML_SKILLS=$(perl -ne 'print "$1\n" while /data-count="(\d+)">0<\/em>\s*<span[^>]*data-en="skills"/g' docs/index.html | head -1)
-  if [ -z "$HTML_AGENTS" ] || [ -z "$HTML_SKILLS" ]; then
-    echo "WARN: docs/index.html data-count attributes not found — skipping count check"
-  else
-    # agents: warn if stale (CI workflow updates these counts)
-    if [ "$HTML_AGENTS" != "$TOTAL_AGENTS" ]; then
-      echo "WARN: docs/index.html agents=$HTML_AGENTS expected=$TOTAL_AGENTS (CI will fix)"
-    else
-      echo "OK: docs/index.html agents count — $HTML_AGENTS"
-    fi
-    # skills: warn if stale (CI workflow updates these counts)
-    if [ "$HTML_SKILLS" != "$TOTAL_SKILLS" ]; then
-      echo "WARN: docs/index.html skills=$HTML_SKILLS expected=$TOTAL_SKILLS (CI will fix)"
-    else
-      echo "OK: docs/index.html skills count — $HTML_SKILLS"
-    fi
-  fi
-fi
-
-if [ "$ERRORS" -gt 0 ]; then
-  echo "VALIDATION FAILED"
-  exit 1
-else
-  echo "VALIDATION PASSED"
-fi
+echo "Errors: $ERRORS"
+[ "$ERRORS" -gt 0 ] && { echo "VALIDATION FAILED"; exit 1; } || echo "VALIDATION PASSED"

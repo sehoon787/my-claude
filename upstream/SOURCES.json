@@ -1,62 +1,27 @@
 {
   "agency-agents": {
     "repo": "https://github.com/msitarzewski/agency-agents",
-    "branch": "main",
-    "syncedSha": "4feb0cd736dd0e2e9830cd54dfc99770621bed90",
-    "syncedTag": null,
-    "syncedAt": "2026-03-30T07:19:29Z",
-    "compareUrl": "https://github.com/msitarzewski/agency-agents/compare/4feb0cd...HEAD",
-    "files": {
-      "agents": 178
-    }
+    "method": "submodule",
+    "note": "engineering/ → core tier, domain categories → agent-packs"
   },
   "everything-claude-code": {
     "repo": "https://github.com/affaan-m/everything-claude-code",
-    "branch": "main",
-    "syncedSha": "118e57e14bdcf925b4c79c2ca3351a5ff3c26c0d",
-    "syncedTag": null,
-    "syncedAt": "2026-03-30T07:19:29Z",
-    "compareUrl": "https://github.com/affaan-m/everything-claude-code/compare/118e57e...HEAD",
-    "files": {
-      "skills": 135,
-      "rules": 77
-    }
+    "method": "submodule + plugin-add",
+    "note": "ECC plugin install attempted first, submodule as fallback"
   },
   "oh-my-claudecode": {
     "repo": "https://github.com/Yeachan-Heo/oh-my-claudecode",
-    "branch": "main",
-    "syncedSha": "fae376508355fb03ea6a2477453f37f0a59e707f",
-    "syncedTag": null,
-    "syncedAt": "2026-03-30T07:19:29Z",
-    "compareUrl": "https://github.com/Yeachan-Heo/oh-my-claudecode/compare/fae3765...HEAD",
-    "files": {
-      "agents": 19,
-      "skills": 31
-    }
+    "method": "submodule + npm-cli",
+    "package": "oh-my-claude-sisyphus"
   },
   "gstack": {
     "repo": "https://github.com/garrytan/gstack",
-    "branch": "main",
-    "syncedSha": "dae251e066c1eb33470f718033da54785ca05c2b",
-    "syncedTag": null,
-    "syncedAt": "2026-03-30T07:19:29Z",
-    "compareUrl": "https://github.com/garrytan/gstack/compare/dae251e...HEAD",
-    "license": "MIT",
-    "strategy": "vendor-skills",
-    "files": {
-      "skills": 36
-    }
+    "method": "submodule + setup",
+    "supersedes": ["benchmark", "canary-watch", "safety-guard", "browser-qa",
+                   "verification-loop", "security-review", "design-system"]
   },
   "superpowers": {
     "repo": "https://github.com/obra/superpowers",
-    "branch": "main",
-    "syncedSha": "b7a8f76985f1e93e75dd2f2a3b424dc731bd9d37",
-    "syncedTag": "v5.0.7",
-    "syncedAt": "2026-04-06T00:00:00Z",
-    "compareUrl": "https://github.com/obra/superpowers/compare/b7a8f76...HEAD",
-    "files": {
-      "agents": 1,
-      "skills": 14
-    }
+    "method": "submodule"
   }
 }
