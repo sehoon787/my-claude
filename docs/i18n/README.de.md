@@ -172,7 +172,7 @@ Das Befolgen von SETUP.md konfiguriert Folgendes:
 |------|------|------|------|
 | Kern-Agenten | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | Plugin |
 | Agent Packs | 136 | 12 Domain-Kategorien (Marketing, Spieleentwicklung, Verkauf, etc.) | Plugin |
-| Skills | 200+ | ECC 180+ + OMC 36 + Core 2 + gstack 36 (Laufzeit) + Superpowers 14 | Plugin + install.sh |
+| Skills | 200+ | ECC 180+ + OMC 36 + Core 3 + gstack 36 (Laufzeit) + Superpowers 14 | Plugin + install.sh |
 | Regeln | 87 | ECC (common + 14 language dirs) | Plugin |
 | MCP-Server | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 7 | my-claude (Boss-Protokoll + SessionStart) | Plugin |

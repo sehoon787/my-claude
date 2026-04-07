@@ -26,7 +26,7 @@ The plugin records its version automatically. To check: `cat ~/.claude/.my-claud
 This installs:
 - 56 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 26 engineering
 - 136 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
-- 200+ skills (180+ ECC + 36 OMC + 2 Core + 36 gstack)
+- 200+ skills (180+ ECC + 36 OMC + 3 Core + 36 gstack)
   Note: gstack skills are installed separately in Step 2.
 - 89 rules
 - 7 behavioral hooks (SessionStart, PreToolUse, PostToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop)

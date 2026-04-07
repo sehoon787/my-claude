@@ -175,7 +175,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 |------|------|------|------|
 | 코어 에이전트 | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | 플러그인 |
 | 에이전트 팩 | 136 | 12개 도메인 카테고리 (마케팅, 게임 개발, 영업 등) | 플러그인 |
-| 스킬 | 200+ | ECC 180+ + OMC 36 + Core 2 + gstack 36 (런타임) + Superpowers 14 | 플러그인 + install.sh |
+| 스킬 | 200+ | ECC 180+ + OMC 36 + Core 3 + gstack 36 (런타임) + Superpowers 14 | 플러그인 + install.sh |
 | 룰 | 87 | ECC (common + 14 language dirs) | 플러그인 |
 | MCP 서버 | 3 | Context7, Exa, grep.app | 플러그인 |
 | 훅 | 7 | my-claude (Boss 프로토콜 + SessionStart) | 플러그인 |

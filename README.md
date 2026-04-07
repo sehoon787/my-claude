@@ -181,7 +181,7 @@ Following SETUP.md will configure the following:
 |------|------|------|------|
 | Core Agents | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | Plugin |
 | Agent Packs | 136 | 12 domain categories (marketing, gamedev, sales, etc.) | Plugin |
-| Skills | 200+ | ECC 180+ + OMC 36 + Core 2 + gstack 36 (runtime) + Superpowers 14 | Plugin + install.sh |
+| Skills | 200+ | ECC 180+ + OMC 36 + Core 3 + gstack 36 (runtime) + Superpowers 14 | Plugin + install.sh |
 | Rules | 87 | ECC (common + 14 language dirs) | Plugin |
 | MCP Servers | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 7 | my-claude (Boss protocol + SessionStart) | Plugin |
@@ -316,7 +316,7 @@ Activate a pack: `ln -s ~/.claude/agent-packs/<pack>/*.md ~/.claude/agents/`
 | everything-claude-code (ECC) | 180+ | tdd-workflow, coding-standards, frontend-patterns, backend-patterns, autopilot, ralph, security-review, continuous-learning |
 | oh-my-claudecode (OMC) | 36 | plan, team, trace, deep-dive, blueprint, ultrawork, sciomc, omc-setup |
 | superpowers | 14 | brainstorming, systematic-debugging, test-driven-development, subagent-driven-development, writing-plans, executing-plans, dispatching-parallel-agents, using-git-worktrees, requesting-code-review, receiving-code-review, verification-before-completion, finishing-a-development-branch, writing-skills, using-superpowers |
-| my-claude Core | 2 | boss-advanced, gstack-sprint |
+| my-claude Core | 3 | boss-advanced, gstack-sprint, knowledge-vault |
 | gstack (runtime) | 36 | /qa, /review, /ship, /cso, /investigate, /design-review, /office-hours, /autoplan |
 
 **Installed separately via install.sh:**

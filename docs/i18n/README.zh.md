@@ -172,7 +172,7 @@ rm ~/.claude/agents/<agent-name>.md
 |------|------|------|------|
 | 核心代理 | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | 插件 |
 | 代理包 | 136 | 12 个领域类别（营销、游戏开发、销售等） | 插件 |
-| 技能 | 200+ | ECC 180+ + OMC 36 + Core 2 + gstack 36（运行时）+ Superpowers 14 | 插件 + install.sh |
+| 技能 | 200+ | ECC 180+ + OMC 36 + Core 3 + gstack 36（运行时）+ Superpowers 14 | 插件 + install.sh |
 | 规则 | 87 | ECC（common + 14 language dirs） | 插件 |
 | MCP 服务器 | 3 | Context7、Exa、grep.app | 插件 |
 | 钩子 | 7 | my-claude（Boss 协议 + SessionStart） | 插件 |

@@ -172,7 +172,7 @@ SETUP.md に従うと、以下が設定されます:
 |------|------|------|------|
 | コア エージェント | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | プラグイン |
 | エージェント パック | 136 | 12 ドメイン カテゴリ（マーケティング、ゲーム開発、セールスなど） | プラグイン |
-| スキル | 200+ | ECC 180+ + OMC 36 + Core 2 + gstack 36（ランタイム）+ Superpowers 14 | プラグイン + install.sh |
+| スキル | 200+ | ECC 180+ + OMC 36 + Core 3 + gstack 36（ランタイム）+ Superpowers 14 | プラグイン + install.sh |
 | ルール | 87 | ECC（common + 14 language dirs） | プラグイン |
 | MCP サーバー | 3 | Context7、Exa、grep.app | プラグイン |
 | フック | 7 | my-claude（Boss プロトコル + SessionStart） | プラグイン |
