@@ -1,7 +1,7 @@
 # my-claude AI Installation Guide
 
 You are an AI agent setting up a Claude Code multi-agent orchestration environment.
-The plugin bundles 200+ agents (50+ core + 136 domain agent-packs), 200+ skills, 64 rules, 7 hooks, and 3 MCP servers.
+The plugin bundles 200+ agents (56 core + 136 domain agent-packs), 200+ skills, 87 rules, 7 hooks, and 3 MCP servers.
 Only 2-3 steps are needed.
 
 ---
@@ -24,11 +24,11 @@ node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir
 The plugin records its version automatically. To check: `cat ~/.claude/.my-claude-version`
 
 This installs:
-- 50+ core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 23 engineering
+- 56 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 26 engineering
 - 136 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
-- 200+ skills (135 ECC + 31 OMC + 2 Core + 31 gstack)
-  Note: gstack skills (27) are installed separately in Step 2.
-- 64 rules
+- 200+ skills (180+ ECC + 36 OMC + 2 Core + 36 gstack)
+  Note: gstack skills are installed separately in Step 2.
+- 87 rules
 - 7 behavioral hooks (SessionStart, PreToolUse, PostToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop)
 - 3 MCP servers globally (Context7, Exa, grep.app) — available in all projects
 - Boss meta-orchestrator as default agent
@@ -38,6 +38,7 @@ This installs:
 ```bash
 # If plugin install is not available:
 git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude
+git -C /tmp/my-claude submodule update --init --depth 1
 mkdir -p ~/.claude/agents ~/.claude/agent-packs ~/.claude/skills ~/.claude/rules ~/.claude/hooks ~/.claude/docs/nexus
 
 # ── Manifest-based cleanup (safe upgrade: only removes my-claude's own files) ──
@@ -64,9 +65,8 @@ done
 
 # ── Core agents (always loaded) ──
 find /tmp/my-claude/agents/core -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec cp {} ~/.claude/agents/ \;
-cp /tmp/my-claude/agents/omo/*.md ~/.claude/agents/
-cp /tmp/my-claude/agents/omc/*.md ~/.claude/agents/
-cp /tmp/my-claude/agents/agency/engineering/*.md ~/.claude/agents/
+cp /tmp/my-claude/upstream/omc/agents/*.md ~/.claude/agents/
+find /tmp/my-claude/upstream/agency-agents/engineering -name '*.md' -exec cp {} ~/.claude/agents/ \;
 
 # ── Domain agent-packs (on-demand) ──
 for dir in academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing; do
@@ -86,18 +86,18 @@ cp /tmp/my-claude/agents/core/agent-teams-reference.md ~/.claude/docs/nexus/
 find /tmp/my-claude/agents/agency/strategy -name '*.md' -exec cp {} ~/.claude/docs/nexus/ \;
 
 # ── Skills (pre-clean file/symlink conflicts, then copy) ──
-for src in /tmp/my-claude/skills/ecc/*/; do
+for src in /tmp/my-claude/upstream/ecc/skills/*/; do
   [ ! -d "$src" ] && continue
   target="$HOME/.claude/skills/$(basename "$src")"
   { [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; } && rm -f "$target"
 done
-for src in /tmp/my-claude/skills/omc/*/; do
+for src in /tmp/my-claude/upstream/omc/skills/*/; do
   [ ! -d "$src" ] && continue
   target="$HOME/.claude/skills/$(basename "$src")"
   { [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; } && rm -f "$target"
 done
-cp -r /tmp/my-claude/skills/ecc/* ~/.claude/skills/
-cp -r /tmp/my-claude/skills/omc/* ~/.claude/skills/
+cp -r /tmp/my-claude/upstream/ecc/skills/* ~/.claude/skills/
+cp -r /tmp/my-claude/upstream/omc/skills/* ~/.claude/skills/
 
 # ── gstack (sprint-process harness with 27 skills) ──
 GSTACK_DIR="$HOME/.claude/skills/gstack"
@@ -143,14 +143,13 @@ node /tmp/my-claude/scripts/merge-settings.js
 # ── Generate manifest from SOURCE (only tracks my-claude's own files, not user content) ──
 {
   find /tmp/my-claude/agents/core -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
-  find /tmp/my-claude/agents/omo -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
-  find /tmp/my-claude/agents/omc -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
-  find /tmp/my-claude/agents/agency/engineering -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
+  find /tmp/my-claude/upstream/omc/agents -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
+  find /tmp/my-claude/upstream/agency-agents/engineering -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
   for pack in academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing; do
     find /tmp/my-claude/agents/agency/$pack -name '*.md' -exec sh -c 'echo "agent-packs/'"$pack"'/$(basename "$1")"' _ {} \; 2>/dev/null || true
   done
-  find /tmp/my-claude/skills/ecc -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
-  find /tmp/my-claude/skills/omc -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
+  find /tmp/my-claude/upstream/ecc/skills -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
+  find /tmp/my-claude/upstream/omc/skills -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
   find /tmp/my-claude/rules -name '*.md' | while read -r f; do echo "rules/${f#/tmp/my-claude/rules/}"; done
   echo "hooks/hooks.json"
   echo "hooks/session-start.sh"
@@ -250,7 +249,7 @@ Expected:
 - Core agents: 55+ (no domain agents in core)
 - Agent packs: 136+
 - Plugin skills: 200+
-- Rules: 77
+- Rules: 87
 - Anthropic skills: 2 key skills (pdf, docx)
 - Manifest: 300+ entries
 - Duplicates: 0 (should be 0)

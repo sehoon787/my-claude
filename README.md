@@ -9,14 +9,14 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-200%2B-blue)
 ![Skills](https://img.shields.io/badge/skills-200%2B-purple)
-![Rules](https://img.shields.io/badge/rules-64-orange)
+![Rules](https://img.shields.io/badge/rules-87-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-7-red)
-![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
+![Auto Sync](https://img.shields.io/badge/upstream-submodules-brightgreen)
 
 All-in-one agent harness for Claude Code — one plugin, 200+ agents ready.
 
-**Boss** auto-discovers every agent, skill, and MCP tool at runtime, then routes your task to the right specialist. Five MIT upstream repos bundled and synced weekly via CI.
+**Boss** auto-discovers every agent, skill, and MCP tool at runtime, then routes your task to the right specialist. Five MIT upstream repos linked via git submodules.
 
 <p align="center">
   <img src="./assets/demo.svg" alt="my-claude demo" width="700">
@@ -181,8 +181,8 @@ Following SETUP.md will configure the following:
 |------|------|------|------|
 | Core Agents | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | Plugin |
 | Agent Packs | 136 | 12 domain categories (marketing, gamedev, sales, etc.) | Plugin |
-| Skills | 200+ | ECC 135 + OMC 31 + Core 2 + gstack 31 (runtime) + Superpowers 14 | Plugin + install.sh |
-| Rules | 77 | ECC (common 9 + 8 languages × 5) | Plugin |
+| Skills | 200+ | ECC 180+ + OMC 36 + Core 2 + gstack 36 (runtime) + Superpowers 14 | Plugin + install.sh |
+| Rules | 87 | ECC (common + 14 language dirs) | Plugin |
 | MCP Servers | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 7 | my-claude (Boss protocol + SessionStart) | Plugin |
 | Anthropic Skills | 14+ | Anthropic Official | install.sh |
@@ -313,11 +313,11 @@ Activate a pack: `ln -s ~/.claude/agent-packs/<pack>/*.md ~/.claude/agents/`
 
 | Source | Count | Key Skills |
 |--------|-------|------------|
-| everything-claude-code (ECC) | 135 | tdd-workflow, coding-standards, frontend-patterns, backend-patterns, autopilot, ralph, security-review, continuous-learning |
-| oh-my-claudecode (OMC) | 31 | plan, team, trace, deep-dive, blueprint, ultrawork, sciomc, omc-setup |
+| everything-claude-code (ECC) | 180+ | tdd-workflow, coding-standards, frontend-patterns, backend-patterns, autopilot, ralph, security-review, continuous-learning |
+| oh-my-claudecode (OMC) | 36 | plan, team, trace, deep-dive, blueprint, ultrawork, sciomc, omc-setup |
 | superpowers | 14 | brainstorming, systematic-debugging, test-driven-development, subagent-driven-development, writing-plans, executing-plans, dispatching-parallel-agents, using-git-worktrees, requesting-code-review, receiving-code-review, verification-before-completion, finishing-a-development-branch, writing-skills, using-superpowers |
 | my-claude Core | 2 | boss-advanced, omc-reference |
-| gstack (runtime) | 31 | /qa, /review, /ship, /cso, /investigate, /design-review, /office-hours, /autoplan |
+| gstack (runtime) | 36 | /qa, /review, /ship, /cso, /investigate, /design-review, /office-hours, /autoplan |
 
 **Installed separately via install.sh:**
 
@@ -328,7 +328,7 @@ Activate a pack: `ln -s ~/.claude/agent-packs/<pack>/*.md ~/.claude/agents/`
 </details>
 
 <details>
-<summary>Rules (89) — ECC Coding Rules</summary>
+<summary>Rules (87) — ECC Coding Rules</summary>
 
 **Common (9)** — Applied to all projects
 
@@ -607,7 +607,7 @@ OMC and omo have agent pairs with overlapping functionality. Keep both and choos
 | Code Review | code-reviewer | Momus | OMC: focused review, omo: includes AI-slop detection |
 | Exploration | explore | Explore | Use whichever belongs to the current platform |
 
-**omo-exclusive agents (6):** Sisyphus, Sisyphus-Junior, Hephaestus, Oracle, Multimodal-Looker, Librarian
+**omo-exclusive agents (5):** Sisyphus, Hephaestus, Oracle, Multimodal-Looker, Librarian
 
 **OMC-exclusive agents (14):** analyst, architect, code-simplifier, critic, debugger, designer, document-specialist, executor, git-master, qa-tester, scientist, test-engineer, verifier, writer
 
