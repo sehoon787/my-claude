@@ -6,6 +6,8 @@
 
 # my-claude
 
+[![SafeSkill 30/100](https://img.shields.io/badge/SafeSkill-30%2F100_Blocked-red)](https://safeskill.dev/scan/sehoon787-my-claude)
+
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-200%2B-blue)
 ![Skills](https://img.shields.io/badge/skills-200%2B-purple)
