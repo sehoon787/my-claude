@@ -1,7 +1,7 @@
 # my-claude AI Installation Guide
 
 You are an AI agent setting up a Claude Code multi-agent orchestration environment.
-The plugin bundles 200+ agents (56 core + 136 domain agent-packs), 200+ skills, 87 rules, 7 hooks, and 3 MCP servers.
+The plugin bundles 200+ agents (56 core + 136 domain agent-packs), 200+ skills, 89 rules, 7 hooks, and 3 MCP servers.
 Only 2-3 steps are needed.
 
 ---
@@ -28,7 +28,7 @@ This installs:
 - 136 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
 - 200+ skills (180+ ECC + 36 OMC + 2 Core + 36 gstack)
   Note: gstack skills are installed separately in Step 2.
-- 87 rules
+- 89 rules
 - 7 behavioral hooks (SessionStart, PreToolUse, PostToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop)
 - 3 MCP servers globally (Context7, Exa, grep.app) — available in all projects
 - Boss meta-orchestrator as default agent
@@ -65,6 +65,7 @@ done
 
 # ── Core agents (always loaded) ──
 find /tmp/my-claude/agents/core -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec cp {} ~/.claude/agents/ \;
+cp /tmp/my-claude/agents/omo/*.md ~/.claude/agents/
 cp /tmp/my-claude/upstream/omc/agents/*.md ~/.claude/agents/
 find /tmp/my-claude/upstream/agency-agents/engineering -name '*.md' -exec cp {} ~/.claude/agents/ \;
 
@@ -103,7 +104,7 @@ done
 cp -r /tmp/my-claude/upstream/ecc/skills/* ~/.claude/skills/
 cp -r /tmp/my-claude/upstream/omc/skills/* ~/.claude/skills/
 
-# ── gstack (sprint-process harness with 27 skills) ──
+# ── gstack (sprint-process harness with 36 skills) ──
 GSTACK_DIR="$HOME/.claude/skills/gstack"
 if [ -d "$GSTACK_DIR/.git" ]; then
   (cd "$GSTACK_DIR" && git pull --ff-only 2>/dev/null || true)
@@ -129,6 +130,13 @@ fi
 # Auto-upgrade config
 mkdir -p "$HOME/.gstack"
 echo '{"auto_upgrade":true}' > "$HOME/.gstack/config.json"
+
+# ── Superpowers (1 agent, 14 skills) ──
+cp /tmp/my-claude/upstream/superpowers/agents/*.md ~/.claude/agents/ 2>/dev/null || true
+cp -r /tmp/my-claude/upstream/superpowers/skills/* ~/.claude/skills/ 2>/dev/null || true
+
+# ── Core skills (self-owned) ──
+cp -r /tmp/my-claude/skills/core/* ~/.claude/skills/ 2>/dev/null || true
 
 # Rules, hooks
 cp -r /tmp/my-claude/upstream/ecc/rules/* ~/.claude/rules/ 2>/dev/null || true
@@ -191,7 +199,7 @@ After installation, activate domain-specific agent packs:
 
 ```bash
 # Activate specific packs (symlinks agents to ~/.claude/agents/)
-bash install.sh --with-packs marketing,testing,sales
+bash install.sh --with-packs=marketing,testing,sales
 
 # Available packs: academic, design, game-development, marketing,
 # paid-media, product, project-management, sales, spatial-computing,
@@ -253,7 +261,7 @@ Expected:
 - Core agents: 55+ (no domain agents in core)
 - Agent packs: 136+
 - Plugin skills: 200+
-- Rules: 87
+- Rules: 89
 - Anthropic skills: 2 key skills (pdf, docx)
 - Manifest: 300+ entries
 - Duplicates: 0 (should be 0)
