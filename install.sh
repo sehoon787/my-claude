@@ -256,6 +256,11 @@ if [ "$SKIP_ECC" = "0" ]; then
   fi
 fi
 
+# ── 1c-post. Self-owned rules (override ECC rules if same name) ──
+if [ -d "$SCRIPT_DIR/rules" ]; then
+  cp -r "$SCRIPT_DIR"/rules/* "$HOME/.claude/rules/" 2>/dev/null || true
+fi
+
 # ── 1d. OMC upstream ──
 if [ "$SKIP_OMC" = "0" ]; then
   echo "  [omc] Installing oh-my-claudecode..."
