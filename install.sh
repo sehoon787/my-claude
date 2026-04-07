@@ -33,7 +33,6 @@ SKIP_ECC=0
 SKIP_OMC=0
 SKIP_GSTACK=0
 SKIP_SUPERPOWERS=0
-SELF_ONLY=0
 for arg in "$@"; do
   case "$arg" in
     --with-packs=*) WITH_PACKS="${arg#*=}" ;;
@@ -42,7 +41,7 @@ for arg in "$@"; do
     --skip-omc)        SKIP_OMC=1 ;;
     --skip-gstack)     SKIP_GSTACK=1 ;;
     --skip-superpowers) SKIP_SUPERPOWERS=1 ;;
-    --self-only)       SELF_ONLY=1; SKIP_AGENCY=1; SKIP_ECC=1; SKIP_OMC=1; SKIP_GSTACK=1; SKIP_SUPERPOWERS=1 ;;
+    --self-only)       SKIP_AGENCY=1; SKIP_ECC=1; SKIP_OMC=1; SKIP_GSTACK=1; SKIP_SUPERPOWERS=1 ;;
     -h|--help)
       cat <<'EOF'
 Usage:

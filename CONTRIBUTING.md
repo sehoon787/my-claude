@@ -8,24 +8,25 @@ Thank you for contributing. This guide covers how to author agents and skills, m
 
 ```
 agents/
-  core/          # Reference material (boss.md, agent-teams-reference.md)
-  omc/           # Core OMC agents — always loaded
-  omo/           # OMO agents — always loaded
-  agency/
-    engineering/ # Core engineering agents — always loaded
-    {category}/  # Domain agent packs — on-demand via symlink
+  core/                   # Self-owned (boss.md, agent-teams-reference.md)
+  omo/                    # Self-owned OMO agents — always loaded
+upstream/                 # Git submodules (upstream sources)
+  agency-agents/          # Domain agent specialists (MD agents)
+  ecc/                    # everything-claude-code (skills)
+  omc/                    # oh-my-claudecode (agents + skills)
+  gstack/                 # gstack (sprint-process skills)
+  superpowers/            # superpowers (agent + skills)
 skills/
-  ecc/           # everything-claude-code skills
-  omc/           # oh-my-claudecode skills
+  core/                   # Self-owned skills
 ```
 
 **3-Tier Architecture**
 
 | Tier | Paths | Load Behavior |
 |------|-------|---------------|
-| Core | `agents/omc/`, `agents/omo/`, `agents/agency/engineering/` | Always loaded |
-| Agent Packs | `agents/agency/{domain}/` | On-demand via symlink |
-| Docs | `agents/agency/strategy/` | Reference only — never parsed as agents |
+| Core | `agents/core/`, `agents/omo/`, `upstream/omc/agents/`, `upstream/agency-agents/engineering/` | Always loaded |
+| Agent Packs | `upstream/agency-agents/{domain}/` | On-demand via symlink at install |
+| Docs | `upstream/agency-agents/strategy/` | Reference only — never parsed as agents |
 
 ---
 
@@ -63,8 +64,8 @@ model: claude-sonnet-4-6
 
 ### File Location
 
-- Core/infrastructure agents: `agents/omc/` or `agents/omo/`
-- Domain agents: `agents/agency/{category}/{name}.md`
+- Core/infrastructure agents: `agents/core/` or `agents/omo/`
+- Domain agents: `upstream/agency-agents/{category}/{name}.md` (via submodule)
 - File name must match the `name` field: `security-reviewer.md` for `name: security-reviewer`
 
 ### Body Structure
@@ -129,7 +130,7 @@ description: One-sentence description of when to invoke this skill.
 skills/{source}/{skill-name}/SKILL.md
 ```
 
-Where `{source}` is the upstream origin (e.g., `omc`, `ecc`).
+Where `{source}` is the upstream origin (e.g., `core`) or installed from submodules at `upstream/`.
 
 ---
 

@@ -65,24 +65,16 @@ if [ "$_needs_regen" -eq 1 ]; then
 
   _agents_json="["
   _first_agent=1
-  for _f in "$HOME/.claude/agents/"*.md "$HOME/.claude/agents/core/"*.md "$HOME/.claude/agents/omo/"*.md "$HOME/.claude/agents/omc/"*.md "$HOME/.claude/agents/agency/"**/*.md .claude/agents/*.md; do
+  for _f in "$HOME/.claude/agents/"*.md .claude/agents/*.md; do
     [ -f "$_f" ] || continue
     case "$_f" in "$HOME/.claude/agents/"*) _scope="global" ;; *) _scope="project" ;; esac
-    # Determine tier from path
-    case "$_f" in
-      */agents/core/*) _tier="core" ;;
-      */agents/omo/*)  _tier="omo" ;;
-      */agents/omc/*)  _tier="omc" ;;
-      */agents/agency/*) _tier="agency" ;;
-      *) _tier="" ;;
-    esac
     _name=$(sed -n '/^---/,/^---/p' "$_f" 2>/dev/null | grep '^name:' | head -1 | sed 's/^name:[[:space:]]*//' | tr -d '"'"'"'')
     _desc=$(sed -n '/^---/,/^---/p' "$_f" 2>/dev/null | grep '^description:' | head -1 | sed 's/^description:[[:space:]]*//' | tr -d '"'"'"'')
     _model=$(sed -n '/^---/,/^---/p' "$_f" 2>/dev/null | grep '^model:' | head -1 | sed 's/^model:[[:space:]]*//' | tr -d '"'"'"'')
     [ -z "$_name" ] && _name=$(basename "$_f" .md)
     [ -z "$_model" ] && _model=""
     if [ "$_first_agent" -eq 1 ]; then _first_agent=0; else _agents_json="${_agents_json},"; fi
-    _agents_json="${_agents_json}{\"name\":\"${_name}\",\"description\":\"${_desc}\",\"model\":\"${_model}\",\"scope\":\"${_scope}\",\"tier\":\"${_tier}\"}"
+    _agents_json="${_agents_json}{\"name\":\"${_name}\",\"description\":\"${_desc}\",\"model\":\"${_model}\",\"scope\":\"${_scope}\"}"
   done
   _agents_json="${_agents_json}]"
   _skills_json="["

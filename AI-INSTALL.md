@@ -71,8 +71,12 @@ find /tmp/my-claude/upstream/agency-agents/engineering -name '*.md' -exec cp {} 
 # ── Domain agent-packs (on-demand) ──
 for dir in academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing; do
   mkdir -p ~/.claude/agent-packs/$dir
-  find /tmp/my-claude/agents/agency/$dir -name '*.md' -exec cp {} ~/.claude/agent-packs/$dir/ \;
+  find /tmp/my-claude/upstream/agency-agents/$dir -name '*.md' -exec cp {} ~/.claude/agent-packs/$dir/ \; 2>/dev/null || true
 done
+# game-development may contain subdirectories; use find to flatten
+if [ -d /tmp/my-claude/upstream/agency-agents/game-development ]; then
+  find /tmp/my-claude/upstream/agency-agents/game-development -name '*.md' -exec cp {} ~/.claude/agent-packs/game-development/ \;
+fi
 
 # ── Dedup: remove pack entries that duplicate core agents ──
 for f in ~/.claude/agents/*.md; do
@@ -83,7 +87,7 @@ done
 # ── Strategy docs ──
 mkdir -p ~/.claude/docs/nexus
 cp /tmp/my-claude/agents/core/agent-teams-reference.md ~/.claude/docs/nexus/
-find /tmp/my-claude/agents/agency/strategy -name '*.md' -exec cp {} ~/.claude/docs/nexus/ \;
+find /tmp/my-claude/upstream/agency-agents/strategy -name '*.md' -exec cp {} ~/.claude/docs/nexus/ \; 2>/dev/null || true
 
 # ── Skills (pre-clean file/symlink conflicts, then copy) ──
 for src in /tmp/my-claude/upstream/ecc/skills/*/; do
@@ -127,7 +131,7 @@ mkdir -p "$HOME/.gstack"
 echo '{"auto_upgrade":true}' > "$HOME/.gstack/config.json"
 
 # Rules, hooks
-cp -r /tmp/my-claude/rules/* ~/.claude/rules/
+cp -r /tmp/my-claude/upstream/ecc/rules/* ~/.claude/rules/ 2>/dev/null || true
 cp /tmp/my-claude/hooks/hooks.json ~/.claude/hooks/
 cp /tmp/my-claude/hooks/session-start.sh ~/.claude/hooks/
 
@@ -146,15 +150,15 @@ node /tmp/my-claude/scripts/merge-settings.js
   find /tmp/my-claude/upstream/omc/agents -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
   find /tmp/my-claude/upstream/agency-agents/engineering -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
   for pack in academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing; do
-    find /tmp/my-claude/agents/agency/$pack -name '*.md' -exec sh -c 'echo "agent-packs/'"$pack"'/$(basename "$1")"' _ {} \; 2>/dev/null || true
+    find /tmp/my-claude/upstream/agency-agents/$pack -name '*.md' -exec sh -c 'echo "agent-packs/'"$pack"'/$(basename "$1")"' _ {} \; 2>/dev/null || true
   done
   find /tmp/my-claude/upstream/ecc/skills -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
   find /tmp/my-claude/upstream/omc/skills -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
-  find /tmp/my-claude/rules -name '*.md' | while read -r f; do echo "rules/${f#/tmp/my-claude/rules/}"; done
+  find /tmp/my-claude/upstream/ecc/rules -name '*.md' | while read -r f; do echo "rules/${f#/tmp/my-claude/upstream/ecc/rules/}"; done 2>/dev/null || true
   echo "hooks/hooks.json"
   echo "hooks/session-start.sh"
   echo "docs/nexus/agent-teams-reference.md"
-  find /tmp/my-claude/agents/agency/strategy -name '*.md' -exec sh -c 'echo "docs/nexus/$(basename "$1")"' _ {} \;
+  find /tmp/my-claude/upstream/agency-agents/strategy -name '*.md' -exec sh -c 'echo "docs/nexus/$(basename "$1")"' _ {} \;
 } | sort -u > ~/.claude/.my-claude-manifest
 
 # Record installed version
@@ -239,7 +243,7 @@ echo "Rules:            $(find ~/.claude/rules -name '*.md' 2>/dev/null | wc -l)
 echo "Anthropic skills: $(ls -d ~/.claude/skills/pdf ~/.claude/skills/docx 2>/dev/null | wc -l) key skills"
 echo "Manifest:         $(wc -l < ~/.claude/.my-claude-manifest 2>/dev/null || echo 'MISSING') entries"
 echo "Duplicates:       $(find ~/.claude/agents ~/.claude/agent-packs -name '*.md' -exec basename {} \; | sort | uniq -d | wc -l | tr -d ' ') (should be 0)"
-echo "gstack:           $(test -d ~/.claude/skills/gstack/.git && echo 'OK' || echo 'MISSING')"
+echo "gstack:           $(find ~/.claude/skills -path '*/gstack/SKILL.md' 2>/dev/null | head -1 | grep -q . && echo 'OK' || echo 'MISSING')"
 echo "omc:              $(command -v omc >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "Version:          $(cat ~/.claude/.my-claude-version 2>/dev/null || echo 'unknown')"

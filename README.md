@@ -316,7 +316,7 @@ Activate a pack: `ln -s ~/.claude/agent-packs/<pack>/*.md ~/.claude/agents/`
 | everything-claude-code (ECC) | 180+ | tdd-workflow, coding-standards, frontend-patterns, backend-patterns, autopilot, ralph, security-review, continuous-learning |
 | oh-my-claudecode (OMC) | 36 | plan, team, trace, deep-dive, blueprint, ultrawork, sciomc, omc-setup |
 | superpowers | 14 | brainstorming, systematic-debugging, test-driven-development, subagent-driven-development, writing-plans, executing-plans, dispatching-parallel-agents, using-git-worktrees, requesting-code-review, receiving-code-review, verification-before-completion, finishing-a-development-branch, writing-skills, using-superpowers |
-| my-claude Core | 2 | boss-advanced, omc-reference |
+| my-claude Core | 2 | boss-advanced, gstack-sprint |
 | gstack (runtime) | 36 | /qa, /review, /ship, /cso, /investigate, /design-review, /office-hours, /autoplan |
 
 **Installed separately via install.sh:**
@@ -611,7 +611,7 @@ OMC and omo have agent pairs with overlapping functionality. Keep both and choos
 
 **OMC-exclusive agents (14):** analyst, architect, code-simplifier, critic, debugger, designer, document-specialist, executor, git-master, qa-tester, scientist, test-engineer, verifier, writer
 
-For a detailed analysis, see the [Agent Overlap Analysis in SETUP.md](./SETUP.md#11-agent-overlap-analysis-omc-vs-omo).
+For a detailed analysis, see the [Agent Overlap Analysis in SETUP.md](./SETUP.md#13-agent-overlap-analysis-omc-vs-omo).
 
 ---
 
@@ -623,14 +623,14 @@ Issues and PRs are welcome. When adding a new agent, add a `.md` file to the `ag
 
 ## Bundled Upstream Versions
 
-Linked via git submodules. See `upstream/SOURCES.json` for exact SHAs.
+Linked via git submodules. Pinned commits are tracked natively by `.gitmodules`.
 
 | Source | Synced SHA | Tag | Date | Diff |
 |--------|-----------|-----|------|------|
-| [agency-agents](https://github.com/msitarzewski/agency-agents) | `6254154` | — | 2026-03-18 | [compare](https://github.com/msitarzewski/agency-agents/compare/6254154...HEAD) |
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `fce4513` | — | 2026-03-18 | [compare](https://github.com/affaan-m/everything-claude-code/compare/fce4513...HEAD) |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `7d07356` | v4.8.2 | 2026-03-18 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/7d07356...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | — | — | — | [compare](https://github.com/garrytan/gstack/compare/HEAD...HEAD) |
+| [agency-agents](https://github.com/msitarzewski/agency-agents) | `4feb0cd` | — | 2026-04-07 | [compare](https://github.com/msitarzewski/agency-agents/compare/4feb0cd...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `7dfdbe0` | — | 2026-04-07 | [compare](https://github.com/affaan-m/everything-claude-code/compare/7dfdbe0...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `2487d38` | v4.10.2 | 2026-04-07 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/2487d38...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `03973c2` | — | 2026-04-07 | [compare](https://github.com/garrytan/gstack/compare/03973c2...HEAD) |
 | [superpowers](https://github.com/obra/superpowers) | `b7a8f76` | v5.0.7 | 2026-04-06 | [compare](https://github.com/obra/superpowers/compare/b7a8f76...HEAD) |
 
 ---

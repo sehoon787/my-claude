@@ -509,18 +509,18 @@ git clone https://github.com/sehoon787/my-claude.git ~/my-claude
 mkdir -p ~/.claude/agents ~/.claude/agent-packs ~/.claude/docs/nexus
 
 # Core agents (always loaded)
-cp agents/core/boss.md agents/omo/*.md agents/omc/*.md ~/.claude/agents/
-cp agents/agency/engineering/*.md ~/.claude/agents/
+cp agents/core/boss.md agents/omo/*.md upstream/omc/agents/*.md ~/.claude/agents/
+cp upstream/agency-agents/engineering/*.md ~/.claude/agents/
 
 # Domain agents (on-demand, not auto-loaded)
 for dir in academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing; do
   mkdir -p ~/.claude/agent-packs/$dir
-  find agents/agency/$dir -name '*.md' -exec cp {} ~/.claude/agent-packs/$dir/ \;
+  find upstream/agency-agents/$dir -name '*.md' -exec cp {} ~/.claude/agent-packs/$dir/ \; 2>/dev/null || true
 done
 
 # Strategy docs (reference material)
 cp agents/core/agent-teams-reference.md ~/.claude/docs/nexus/
-find agents/agency/strategy -name '*.md' -exec cp {} ~/.claude/docs/nexus/ \;
+find upstream/agency-agents/strategy -name '*.md' -exec cp {} ~/.claude/docs/nexus/ \; 2>/dev/null || true
 
 # MCP servers (if not already installed via Section 6b)
 claude mcp add --transport http --scope user context7 "https://mcp.context7.com/mcp"
@@ -1238,7 +1238,7 @@ Boss acts as the Agent Teams leader, enabling teammate-to-teammate direct commun
    ```
 2. Boss auto-detects collaborative tasks and routes to `/team` skill
 3. Manual invocation: `/team 3:executor "task description"`
-4. Detailed setup: see `skills/omc/omc-setup/phases/03-integrations.md`
+4. Detailed setup: see `upstream/omc/skills/omc-setup/phases/03-integrations.md`
 
 ---
 

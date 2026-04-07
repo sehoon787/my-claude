@@ -342,23 +342,23 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 
 ### Scenario: Route to agency engineering agent
 **Input**: "Review my Rust code for ownership issues"
-**Expected**: Boss routes to `agents/agency/engineering/rust-reviewer.md` or similar Rust specialist
+**Expected**: Boss routes to `rust-reviewer` agent (flat in `~/.claude/agents/`)
 **Verify**: Agent description matches Rust expertise
 
 ### Scenario: Route to OMC agent
 **Input**: "Trace the root cause of this production error"
-**Expected**: Boss routes to `agents/omc/tracer.md`
+**Expected**: Boss routes to `tracer` agent (flat in `~/.claude/agents/`)
 **Verify**: Agent description mentions causal tracing
 
 ### Scenario: Name collision resolution
 **Input**: "Do a code review"
 **Expected**: Boss selects based on description specificity, not filename
-**Verify**: Both `agents/omc/code-reviewer.md` and `agents/agency/engineering/code-reviewer.md` are candidates; Boss picks the most relevant one
+**Verify**: All `code-reviewer` agents are flat in `~/.claude/agents/`; Boss picks the most relevant one by description match
 
 ### Scenario: Plugin-scoped agent discovery
 **Input**: "Show me all available agents"
-**Expected**: Boss reports 13 agents (55 core + -42 packs) from the plugin bundle
-**Verify**: Count includes all three subdirectories
+**Expected**: Boss reports 200+ agents (55+ core + domain packs) from the plugin bundle
+**Verify**: Count includes all installed agents
 
 ---
 
@@ -366,7 +366,7 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 
 ### Scenario: Agent tier priority — OMC over Agency
 **Input**: "Do a code review"
-**Expected**: Boss selects `agents/omc/code-reviewer.md` (tier 3) over `agents/agency/engineering/Code Reviewer.md` (tier 4)
+**Expected**: Boss selects the omc-tier `code-reviewer` (tier 3) over the agency-tier `Code Reviewer` (tier 4); all agents are flat in `~/.claude/agents/`
 **Verify**: Tier priority core(1) > omo(2) > omc(3) > agency(4) applied
 
 ### Scenario: Agency agent cost optimization — haiku for advisory

@@ -15,14 +15,14 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-200%2B-blue)
 ![Skills](https://img.shields.io/badge/skills-200%2B-purple)
-![Rules](https://img.shields.io/badge/rules-64-orange)
+![Rules](https://img.shields.io/badge/rules-87-orange)
 ![MCP](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-7-red)
-![Auto Sync](https://img.shields.io/badge/upstream_sync-weekly-brightgreen)
+![Auto Sync](https://img.shields.io/badge/upstream-submodules-brightgreen)
 
 Harnais d'agents tout-en-un pour Claude Code — un seul plugin, 200+ agents prêts à l'emploi.
 
-**Boss** détecte automatiquement tous les agents, skills et outils MCP au démarrage, puis route chaque tâche vers le bon spécialiste. Quatre dépôts upstream MIT intégrés et synchronisés chaque semaine via CI.
+**Boss** détecte automatiquement tous les agents, skills et outils MCP au démarrage, puis route chaque tâche vers le bon spécialiste. Cinq dépôts upstream MIT intégrés et connectés via git submodules.
 
 <p align="center">
   <img src="../../assets/demo.svg" alt="my-claude demo" width="700">
@@ -64,7 +64,7 @@ rm -rf /tmp/my-claude
 git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && bash /tmp/my-claude/install.sh && rm -rf /tmp/my-claude
 ```
 
-> **Note** : `install.sh` configure Boss automatiquement comme agent par défaut. Pour l'installation via plugin (Option 1), exécutez la commande de configuration dans [AI-INSTALL.md](AI-INSTALL.md).
+> **Note** : `install.sh` configure Boss automatiquement comme agent par défaut. Pour l'installation via plugin (Option 1), exécutez la commande de configuration dans [AI-INSTALL.md](../../AI-INSTALL.md).
 >
 > **Agent Packs** : Les agents spécialistes de domaine (Marketing, Vente, Développement de jeux, etc.) sont installés dans `~/.claude/agent-packs/` et peuvent être activés en créant un lien symbolique vers `~/.claude/agents/` si nécessaire.
 
@@ -109,15 +109,15 @@ Lisez la sortie complète et exécutez chaque étape dans l'ordre. Utilisez `cur
 
 ### Bundle tout-en-un
 - L'installation via plugin fournit immédiatement **200+ agents, 200+ skills et règles**
-- Regroupe 4 sources upstream MIT (agency-agents, everything-claude-code, oh-my-claudecode, gstack)
-- La CI auto-sync hebdomadaire maintient le contenu groupé à jour avec l'upstream
+- Regroupe 5 sources upstream MIT (agency-agents, everything-claude-code, oh-my-claudecode, gstack, superpowers)
+- Les git submodules maintiennent le contenu groupé synchronisé avec l'upstream
 - Le `install.sh` d'accompagnement ajoute les outils npm et les Anthropic Skills propriétaires
 
 ---
 
 ## Agents Cœur + OMO
 
-**Boss** est le seul agent original de my-claude. Les 9 restants sont des [agents OMO](https://github.com/code-yeongyu/oh-my-openagent) que Boss utilise comme sous-orchestrateurs et spécialistes. Le plugin regroupe **52 agents cœur** (Cœur 2 + OMO 9 + Engineering 23 + OMC 19) qui se chargent toujours dans `~/.claude/agents/`, plus **133 packs d'agents de domaine** dans `~/.claude/agent-packs/` pouvant être activés à la demande. Boss sélectionne le meilleur spécialiste parmi tous les agents actifs via la correspondance de capacités Priority 2. Voir [Composants installés](#composants-installés) ci-dessous.
+**Boss** est le seul agent original de my-claude. Les 9 restants sont des [agents OMO](https://github.com/code-yeongyu/oh-my-openagent) que Boss utilise comme sous-orchestrateurs et spécialistes. Le plugin regroupe **56 agents cœur** (my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1) qui se chargent toujours dans `~/.claude/agents/`, plus **136 packs d'agents de domaine** dans `~/.claude/agent-packs/` pouvant être activés à la demande. Boss sélectionne le meilleur spécialiste parmi tous les agents actifs via la correspondance de capacités Priority 2. Voir [Composants installés](#composants-installés) ci-dessous.
 
 | Agent | Source | Modèle | Rôle |
 |---------|--------|------|------|
@@ -170,10 +170,10 @@ Suivre SETUP.md configure les éléments suivants :
 
 | Catégorie | Nombre | Source | Inclus dans |
 |------|------|------|------|
-| Agents cœur | 55 | Cœur 2 + OMO 9 + Engineering 23 + OMC 19 | Plugin |
+| Agents cœur | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | Plugin |
 | Agent Packs | 136 | 12 catégories de domaine (Marketing, Développement de jeux, Vente, etc.) | Plugin |
-| Skills | 200+ | ECC 135 + OMC 31 + Core 2 + gstack 31 (runtime) | Plugin + install.sh |
-| Règles | 200+ | ECC (Common 9 + 8 langages × 5) | Plugin |
+| Skills | 200+ | ECC 180+ + OMC 36 + Core 2 + gstack 36 (runtime) + Superpowers 14 | Plugin + install.sh |
+| Règles | 87 | ECC (common + 14 language dirs) | Plugin |
 | Serveurs MCP | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 7 | my-claude (protocole Boss + SessionStart) | Plugin |
 | Anthropic Skills | 14+ | Anthropic Official | install.sh |
@@ -227,7 +227,7 @@ Suivre SETUP.md configure les éléments suivants :
 <details>
 <summary>Agency Agents (172) — Personas spécialistes métier en 14 catégories (tous modèle : claude-sonnet-4-6)</summary>
 
-**Engineering (23)**
+**Engineering (26)**
 
 | Agent | Rôle |
 |---------|------|
@@ -333,7 +333,7 @@ Suivre SETUP.md configure les éléments suivants :
 </details>
 
 <details>
-<summary>Règles (64) — ECC Coding Rules</summary>
+<summary>Règles (87) — ECC Coding Rules</summary>
 
 **Common (9)** — Appliquées à tous les projets
 
@@ -475,6 +475,10 @@ Une bibliothèque de 164 personas d'agents spécialistes métier. Fournit des pe
 
 Un harnais de processus sprint par Garry Tan avec 27 skills. Fournit des tests QA basés sur navigateur (`/qa`), une revue de code avec détection de dérive de portée (`/review`), un audit de sécurité (`/cso`), et un workflow de déploiement complet Plan→Review→QA→Ship. Inclut un démon Playwright compilé pour les tests en navigateur réel.
 
+### 8. [Superpowers](https://github.com/obra/superpowers)
+
+Collection de workflows de développement d'agents par Jesse Vincent (14 skills, 1 agent). Fournit brainstorming, rédaction de plans, développement piloté par les tests, débogage systématique, développement piloté par sous-agents, exécution de plans, dispatch d'agents parallèles, utilisation de git worktrees, demande/réception de revue de code, vérification avant complétion, finalisation de branches de développement, création de skills et utilisation de superpowers.
+
 ---
 
 ## Comment fonctionne Boss
@@ -607,11 +611,11 @@ OMC et omo ont des paires d'agents avec des fonctionnalités qui se chevauchent.
 | Révision de code | code-reviewer | Momus | OMC : révision ciblée, omo : inclut la détection d'AI slop |
 | Exploration | explore | Explore | Utilisez celui qui appartient à la plateforme actuelle |
 
-**Agents exclusifs omo (6) :** Sisyphus, Sisyphus-Junior, Hephaestus, Oracle, Multimodal-Looker, Librarian
+**Agents exclusifs omo (5) :** Sisyphus, Hephaestus, Oracle, Multimodal-Looker, Librarian
 
 **Agents exclusifs OMC (14) :** analyst, architect, code-simplifier, critic, debugger, designer, document-specialist, executor, git-master, qa-tester, scientist, test-engineer, verifier, writer
 
-Pour une analyse détaillée, consultez [Agent Overlap Analysis in SETUP.md](./SETUP.md#11-agent-overlap-analysis-omc-vs-omo).
+Pour une analyse détaillée, consultez [Agent Overlap Analysis in SETUP.md](../../SETUP.md#11-agent-overlap-analysis-omc-vs-omo).
 
 ---
 
@@ -623,14 +627,15 @@ Les issues et les PRs sont les bienvenus. Si vous ajoutez un nouvel agent, ajout
 
 ## Versions upstream regroupées
 
-Mises à jour hebdomadaires par [CI Auto-Sync](.github/workflows/sync-upstream.yml). Voir `upstream/SOURCES.json` pour les SHA exacts.
+Connectés via git submodules. Les SHA exacts sont suivis dans `.gitmodules`.
 
 | Source | SHA synchronisé | Tag | Date | Diff |
 |--------|-----------|-----|------|------|
-| [agency-agents](https://github.com/msitarzewski/agency-agents) | `6254154` | — | 2026-03-18 | [compare](https://github.com/msitarzewski/agency-agents/compare/6254154...HEAD) |
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `fce4513` | — | 2026-03-18 | [compare](https://github.com/affaan-m/everything-claude-code/compare/fce4513...HEAD) |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `7d07356` | v4.8.2 | 2026-03-18 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/7d07356...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | — | — | — | [compare](https://github.com/garrytan/gstack/compare/HEAD...HEAD) |
+| [agency-agents](https://github.com/msitarzewski/agency-agents) | `4feb0cd` | — | 2026-04-07 | [compare](https://github.com/msitarzewski/agency-agents/compare/4feb0cd...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `7dfdbe0` | — | 2026-04-07 | [compare](https://github.com/affaan-m/everything-claude-code/compare/7dfdbe0...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `2487d38` | v4.10.2 | 2026-04-07 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/2487d38...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `03973c2` | — | 2026-04-07 | [compare](https://github.com/garrytan/gstack/compare/03973c2...HEAD) |
+| [superpowers](https://github.com/obra/superpowers) | `b7a8f76` | v5.0.7 | 2026-04-07 | [compare](https://github.com/obra/superpowers/compare/b7a8f76...HEAD) |
 
 ---
 
@@ -645,6 +650,7 @@ Ce référentiel repose sur le travail des projets open source suivants :
 - [anthropic/skills](https://github.com/anthropics/skills) — Anthropic
 - [agency-agents](https://github.com/msitarzewski/agency-agents) — msitarzewski
 - [gstack](https://github.com/garrytan/gstack) — garrytan
+- [superpowers](https://github.com/obra/superpowers) — Jesse Vincent
 
 ---
 
