@@ -84,8 +84,8 @@ If the scan fails or returns empty results, proceed gracefully with whatever is 
 | Knowledge gap — new codebase, unfamiliar library | `codebase-onboarding`, `sciomc` |
 | Strategic decision — architecture tradeoffs | `ccg`, `architecture-decision-records` |
 | Content creation — docs, specs, RFCs | `doc-coauthoring` |
-| end-to-end 기능 구현 — Build/Mid-sized intent | `gstack-sprint` |
-| 프로젝트 착수/초기 기획 — 아이디어 구체화 필요 | `/office-hours`, `deep-interview` |
+| end-to-end feature implementation — Build/Mid-sized intent | `gstack-sprint` |
+| Project kickoff/initial planning — idea needs fleshing out | `/office-hours`, `deep-interview` |
 
 Propose at most once. If the user declines, proceed with direct execution. Never auto-execute a skill.
 
@@ -95,32 +95,32 @@ Propose at most once. If the user declines, proceed with direct execution. Never
 
 ### Priority 0: gstack Preferred Match
 
-gstack 스킬이 Capability Registry에 있으면 해당 영역에서 gstack을 최우선 사용.
-역제안(Counter-Proposal)에서도 gstack 스킬을 우선 추천.
+When gstack skills are in the Capability Registry, use gstack as the top priority in those areas.
+Also recommend gstack skills first in Counter-Proposals.
 
-| 영역 | gstack 스킬 | 조건 |
+| Area | gstack Skill | Condition |
 |------|-------------|------|
-| 코드 리뷰 | /review | PR/diff 리뷰 |
-| QA/테스트 | /qa, /qa-only | 웹앱 QA |
-| 디버깅 | /investigate | 버그 근본원인 조사 |
-| 벤치마크 | /benchmark | 성능 측정 |
-| 보안 감사 | /cso | 보안 감사/위협 모델링 |
-| 배포 | /ship, /land-and-deploy | 테스트→PR→배포 |
-| 모니터링 | /canary | 배포 후 카나리 |
-| 안전장치 | /guard, /careful, /freeze | 파괴적 명령 차단 |
-| 디자인 | /design-review, /design-consultation | 비주얼 QA/디자인 시스템 |
-| 계획 리뷰 | /plan-ceo-review, /plan-eng-review, /autoplan | 계획 비평 |
-| 문서 | /document-release | 배포 후 문서 업데이트 |
-| 아이디어 | /office-hours | 아이디어 검증 |
-| 회고 | /retro | 주간 회고 |
+| Code review | /review | PR/diff review |
+| QA/testing | /qa, /qa-only | Web app QA |
+| Debugging | /investigate | Bug root-cause investigation |
+| Benchmark | /benchmark | Performance measurement |
+| Security audit | /cso | Security audit/threat modeling |
+| Deployment | /ship, /land-and-deploy | Test→PR→deploy |
+| Monitoring | /canary | Post-deploy canary |
+| Safety guard | /guard, /careful, /freeze | Block destructive commands |
+| Design | /design-review, /design-consultation | Visual QA/design system |
+| Plan review | /plan-ceo-review, /plan-eng-review, /autoplan | Plan critique |
+| Documentation | /document-release | Post-deploy doc update |
+| Ideas | /office-hours | Idea validation |
+| Retrospective | /retro | Weekly retrospective |
 
-gstack 미설치 시 P1-P4 폴백으로 자연스럽게 전환.
+When gstack is not installed, transition naturally to P1-P4 fallback.
 
 ### Priority 1: Skill Match
 
 Scan all discovered skill `description` fields from Phase 0. If a skill's description clearly covers the task, it is a candidate. If multiple match, prefer the most specific. If both a skill and an agent match, apply Skill vs Agent Conflict Resolution — see `boss-advanced` skill for the scoring table and special cases.
 
-**Common keyword → skill mappings**: "tdd"/"TDD" → `tdd-workflow`, "autopilot" → `autopilot`, "ralph" → `ralph`, "deslop" → `ai-slop-cleaner`, "review"/"코드리뷰" → gstack `/review`, "QA"/"qa" → gstack `/qa`, "배포"/"ship"/"deploy" → gstack `/ship`, "보안"/"security audit" → gstack `/cso`, "디버그"/"investigate" → gstack `/investigate`, "sprint"/"스프린트"/"end-to-end"/"e2e 구현" → `gstack-sprint`
+**Common keyword → skill mappings**: "tdd"/"TDD" → `tdd-workflow`, "autopilot" → `autopilot`, "ralph" → `ralph`, "deslop" → `ai-slop-cleaner`, "review"/"code review" → gstack `/review`, "QA"/"qa" → gstack `/qa`, "deploy"/"ship" → gstack `/ship`, "security"/"security audit" → gstack `/cso`, "debug"/"investigate" → gstack `/investigate`, "sprint"/"end-to-end"/"e2e implementation" → `gstack-sprint`
 
 ### Priority 2: Specialist Agent Match
 
@@ -164,43 +164,43 @@ Brief routing summary:
 
 ### gstack 3-Phase Sprint Workflow
 
-기능 구현이나 배포 워크플로우를 구성할 때, 3단계 구조로 실행한다.
+When composing a feature implementation or deployment workflow, execute in a 3-phase structure.
 
 ```
-Phase 1: 설계 (대화)  →  Phase 2: 실행 (자율)  →  Phase 3: 검수 (대화)
-   사용자 결정              자율 실행               사용자 확인
+Phase 1: Design (conversation)  →  Phase 2: Execute (autonomous)  →  Phase 3: Review (conversation)
+      User decides                    Autonomous execution                User confirms
 ```
 
-**Phase 1: 설계 (대화/상호작용)**
-- `/office-hours` 또는 `/plan-ceo-review` (상황에 따라 Boss가 선택)
-- `/plan-eng-review` (필수)
-- AskUserQuestion으로 모든 핵심 결정 확인
-- 사용자가 설계 완료를 확인하면 Phase 2로 전환
+**Phase 1: Design (conversation/interaction)**
+- `/office-hours` or `/plan-ceo-review` (Boss chooses based on situation)
+- `/plan-eng-review` (mandatory)
+- Confirm all key decisions via AskUserQuestion
+- Transition to Phase 2 once user confirms design is complete
 
-**Phase 2: 실행 (자율/자동화)**
-- 항상 ralph로 실행 (ralph 내부에서 규모에 따라 전략 자동 선택)
-- ralph Step 7a: gstack `/review` 시도 (실패 시 skip하고 7b 진행)
-- ralph Step 7b: architect/critic (기존 동작 — 항상 실행)
-- 각 단계 실패 시 수정 후 재시도
+**Phase 2: Execute (autonomous/automated)**
+- Always execute via ralph (ralph automatically selects strategy based on scale internally)
+- ralph Step 7a: attempt gstack `/review` (skip and proceed to 7b on failure)
+- ralph Step 7b: architect/critic (existing behavior — always runs)
+- On failure at any step, fix and retry
 
-**Phase 3: 검수 (대화/개선)**
-- design doc를 disk에서 재로드 (`~/.gstack/projects/` 경로)
-- 구현 결과를 설계 문서와 대조 검토
-- AskUserQuestion으로 개선/승인 결정
-- 개선 필요 → Phase 2 재진입
-- 승인 → `/ship` 또는 수동 커밋
-- 선택적 후속: `/land-and-deploy` → `/canary` → `/document-release` → `/retro`
+**Phase 3: Review (conversation/improvement)**
+- Reload design doc from disk (`~/.gstack/projects/` path)
+- Compare implementation results against the design document
+- AskUserQuestion for improvement/approval decision
+- Improvement needed → re-enter Phase 2
+- Approved → `/ship` or manual commit
+- Optional follow-up: `/land-and-deploy` → `/canary` → `/document-release` → `/retro`
 
-**Boss 규칙:** end-to-end 요청 시 `Skill(skill: "gstack-sprint")`을 호출한다. gstack-sprint 스킬이 이 3-Phase 워크플로우를 관리한다. gstack-sprint 미설치 시 위의 프롬프트 지침을 직접 따른다.
+**Boss rule:** For end-to-end requests, invoke `Skill(skill: "gstack-sprint")`. The gstack-sprint skill manages this 3-Phase workflow. When gstack-sprint is not installed, follow the prompt instructions above directly.
 
-**gstack 스킬 참조 테이블:**
+**gstack skill reference table:**
 
-| 단계 | 스킬 | 설명 |
+| Phase | Skill | Description |
 |------|------|------|
-| Plan | `/plan-ceo-review` → `/plan-eng-review` | CEO+엔지니어링 리뷰. `/autoplan`으로 자동화 가능 |
-| Review | `/review` | 코드 리뷰 — 범위이탈 탐지, 적대적 리뷰, 계획 항목 완료 체크 |
-| QA | `/qa https://...` | 브라우저 QA + 자동 수정 루프 |
-| Ship | `/ship` | 테스트→커밋→PR. 리뷰 준비도 대시보드 포함 |
+| Plan | `/plan-ceo-review` → `/plan-eng-review` | CEO + engineering review. Can be automated with `/autoplan` |
+| Review | `/review` | Code review — scope-drift detection, adversarial review, plan-item completion check |
+| QA | `/qa https://...` | Browser QA + auto-fix loop |
+| Ship | `/ship` | Test→commit→PR. Includes review-readiness dashboard |
 
 ### Priority 4: General-Purpose Fallback
 

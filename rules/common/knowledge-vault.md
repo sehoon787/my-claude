@@ -10,6 +10,7 @@ Every project maintains a `.knowledge/` directory as a persistent, Obsidian-comp
 - Architecture/design decisions → `.knowledge/decisions/<descriptive-name>.md`
 - Non-obvious solutions, gotchas, patterns → `.knowledge/learnings/<descriptive-name>.md`
 - Important agent execution results → `.knowledge/agents/<date>-<agent-name>.md`
+- Reference materials, web findings, factual data → `.knowledge/references/<descriptive-name>.md`
 
 ## Session End
 - Write session summary to `.knowledge/sessions/<YYYY-MM-DD>-<topic>.md`
