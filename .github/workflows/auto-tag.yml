@@ -4,6 +4,7 @@ on:
     branches: [main]
 permissions:
   contents: write
+  pull-requests: write
 jobs:
   tag-and-release:
     runs-on: ubuntu-latest
@@ -69,12 +70,16 @@ jobs:
           gh release create "$NEW_TAG" \
             --title "$NEW_TAG" \
             --generate-notes
-      - name: Bump plugin.json version
+      - name: Bump plugin.json version via PR
         if: steps.bump.outputs.level != 'none'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
+          BRANCH="auto/bump-v${VERSION}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
           cd .claude-plugin
           node -e "
             const fs = require('fs');
@@ -86,5 +91,10 @@ jobs:
           git add .claude-plugin/plugin.json
           if ! git diff --cached --quiet; then
             git commit -m "chore: bump plugin version to $VERSION [skip ci]"
-            git push origin main
+            git push -u origin "$BRANCH"
+            gh pr create \
+              --title "chore: bump plugin version to $VERSION" \
+              --body "Auto-generated version bump from release v${VERSION}." \
+              --base main
+            gh pr merge "$BRANCH" --auto --squash --delete-branch
           fi
