@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <title>The Maestro Owl — my-claude (favicon)</title>
+
+  <!-- Simplified face only: head + eyes + tufts, readable at 32px -->
+  <g id="owl-claude-favicon">
+
+    <!-- Head: fills most of the canvas -->
+    <rect x="3" y="5" width="26" height="25" rx="7" ry="7" fill="#d97757"/>
+
+    <!-- Facial disc: subtle oval -->
+    <ellipse cx="16" cy="17" rx="10" ry="9" fill="#c86845" opacity="0.35"/>
+
+    <!-- Brow tufts: sharp upward points -->
+    <polygon points="10,6 8,1 13,4" fill="#b85a3a"/>
+    <polygon points="22,6 24,1 19,4" fill="#b85a3a"/>
+
+    <!-- Left eye sclera -->
+    <circle cx="11" cy="16" r="5.5" fill="#faf7f4"/>
+    <!-- Left eye iris -->
+    <circle cx="11" cy="16" r="3.8" fill="#e8a087"/>
+    <!-- Left eye pupil -->
+    <circle cx="11" cy="16" r="2" fill="#2d1f17"/>
+    <!-- Left eye highlight -->
+    <circle cx="12.2" cy="14.8" r="0.9" fill="#faf7f4" opacity="0.9"/>
+
+    <!-- Right eye sclera -->
+    <circle cx="21" cy="16" r="5.5" fill="#faf7f4"/>
+    <!-- Right eye iris -->
+    <circle cx="21" cy="16" r="3.8" fill="#e8a087"/>
+    <!-- Right eye pupil -->
+    <circle cx="21" cy="16" r="2" fill="#2d1f17"/>
+    <!-- Right eye highlight -->
+    <circle cx="22.2" cy="14.8" r="0.9" fill="#faf7f4" opacity="0.9"/>
+
+    <!-- Beak: tiny downward triangle -->
+    <polygon points="16,22 14,25 18,25" fill="#b85a3a"/>
+
+  </g>
+</svg>
