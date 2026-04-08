@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
-  <title>The Maestro Owl — my-codex (dark)</title>
+  <title>The Maestro Owl — my-claude (dark)</title>
 
   <defs>
-    <filter id="glow-purple-cxd" x="-50%" y="-50%" width="200%" height="200%">
+    <filter id="glow-purple-d" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="1.8" result="blur"/>
       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
 
-  <g id="owl-codex-dark">
+  <g id="owl-claude-dark">
 
     <!-- Obsidian orbital graph — brighter for dark backgrounds -->
     <g id="orbitals">
@@ -24,7 +24,7 @@
       <line x1="100" y1="10" x2="62" y2="16" stroke="#a78bfa" stroke-width="0.5" opacity="0.45"/>
       <line x1="100" y1="10" x2="138" y2="16" stroke="#a78bfa" stroke-width="0.5" opacity="0.45"/>
     </g>
-    <g id="orbital-nodes" filter="url(#glow-purple-cxd)">
+    <g id="orbital-nodes" filter="url(#glow-purple-d)">
       <circle cx="28" cy="55" r="3" fill="#a78bfa" opacity="0.85"/>
       <circle cx="18" cy="80" r="2" fill="#c4b5fd" opacity="0.75"/>
       <circle cx="30" cy="105" r="2.5" fill="#a78bfa" opacity="0.8"/>
@@ -36,60 +36,60 @@
       <circle cx="138" cy="16" r="1.8" fill="#7c3aed" opacity="0.7"/>
     </g>
 
-    <!-- Body: 15% lighter teal — #34d399 -->
-    <path id="body" d="M72 132 Q62 150 66 174 Q100 184 134 174 Q138 150 128 132 Z" fill="#34d399"/>
+    <!-- Body: 15% lighter — #e08868 -->
+    <path id="body" d="M72 132 Q62 150 66 174 Q100 184 134 174 Q138 150 128 132 Z" fill="#e08868"/>
 
-    <!-- Wings: lighter accent #10b981 -->
-    <path id="wing-left" d="M72 132 L60 128 L42 148 L48 158 L66 150 L72 138 Z" fill="#10b981"/>
-    <path id="wing-right" d="M128 132 L140 126 L158 136 L156 148 L138 146 L128 138 Z" fill="#10b981"/>
+    <!-- Wings: lighter accent #d07050 -->
+    <path id="wing-left" d="M72 132 L60 128 L42 148 L48 158 L66 150 L72 138 Z" fill="#d07050"/>
+    <path id="wing-right" d="M128 132 L140 126 L158 136 L156 148 L138 146 L128 138 Z" fill="#d07050"/>
 
     <!-- Baton -->
     <g id="baton">
-      <line x1="155" y1="132" x2="178" y2="110" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
-      <circle cx="178" cy="110" r="4.5" fill="#10b981"/>
-      <circle cx="178" cy="110" r="2.5" fill="#a7f3d0"/>
+      <line x1="155" y1="132" x2="178" y2="110" stroke="#d07050" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="178" cy="110" r="4.5" fill="#d07050"/>
+      <circle cx="178" cy="110" r="2.5" fill="#f0b89a"/>
     </g>
 
     <!-- Feet -->
-    <g id="feet" fill="#10b981">
+    <g id="feet" fill="#d07050">
       <rect x="82" y="176" width="14" height="7" rx="3.5"/>
       <rect x="104" y="176" width="14" height="7" rx="3.5"/>
     </g>
 
-    <!-- Head: ellipse, 15% lighter #34d399 -->
-    <ellipse id="head" cx="100" cy="78" rx="56" ry="52" fill="#34d399"/>
+    <!-- Head: squircle (rounded rect) — 15% lighter #e08868 -->
+    <rect id="head" x="46" y="28" width="108" height="108" rx="42" ry="42" fill="#e08868"/>
 
     <!-- Facial disc -->
-    <ellipse id="facial-disc" cx="100" cy="82" rx="44" ry="38" fill="#059669" opacity="0.35"/>
+    <ellipse id="facial-disc" cx="100" cy="82" rx="44" ry="38" fill="#d87a55" opacity="0.35"/>
 
     <!-- Brow tufts -->
-    <g id="brow-tufts" fill="#10b981">
-      <polygon points="76,32 66,12 80,20 84,30"/>
-      <polygon points="124,32 134,12 120,20 116,30"/>
+    <g id="brow-tufts" fill="#d07050">
+      <polygon points="74,30 66,10 78,18 82,28"/>
+      <polygon points="126,30 134,10 122,18 118,28"/>
     </g>
 
-    <!-- Eyes: pupil lighter for dark bg contrast -->
+    <!-- Eyes -->
     <g id="eyes">
-      <circle cx="80" cy="82" r="24" fill="#f4faf7"/>
-      <circle cx="80" cy="82" r="16" fill="#a7f3d0"/>
-      <circle cx="80" cy="82" r="12" fill="#34d399" opacity="0.4"/>
-      <circle cx="80" cy="82" r="8" fill="#022c22"/>
-      <circle cx="85" cy="77" r="3.5" fill="#f4faf7" opacity="0.9"/>
-      <circle cx="77" cy="87" r="1.5" fill="#f4faf7" opacity="0.45"/>
+      <circle cx="80" cy="82" r="24" fill="#faf7f4"/>
+      <circle cx="80" cy="82" r="16" fill="#f0b89a"/>
+      <circle cx="80" cy="82" r="12" fill="#e08868" opacity="0.4"/>
+      <circle cx="80" cy="82" r="8" fill="#1a0f0a"/>
+      <circle cx="85" cy="77" r="3.5" fill="#faf7f4" opacity="0.9"/>
+      <circle cx="77" cy="87" r="1.5" fill="#faf7f4" opacity="0.45"/>
 
-      <circle cx="120" cy="82" r="24" fill="#f4faf7"/>
-      <circle cx="120" cy="82" r="16" fill="#a7f3d0"/>
-      <circle cx="120" cy="82" r="12" fill="#34d399" opacity="0.4"/>
-      <circle cx="120" cy="82" r="8" fill="#022c22"/>
-      <circle cx="125" cy="77" r="3.5" fill="#f4faf7" opacity="0.9"/>
-      <circle cx="117" cy="87" r="1.5" fill="#f4faf7" opacity="0.45"/>
+      <circle cx="120" cy="82" r="24" fill="#faf7f4"/>
+      <circle cx="120" cy="82" r="16" fill="#f0b89a"/>
+      <circle cx="120" cy="82" r="12" fill="#e08868" opacity="0.4"/>
+      <circle cx="120" cy="82" r="8" fill="#1a0f0a"/>
+      <circle cx="125" cy="77" r="3.5" fill="#faf7f4" opacity="0.9"/>
+      <circle cx="117" cy="87" r="1.5" fill="#faf7f4" opacity="0.45"/>
     </g>
 
     <!-- Beak -->
-    <polygon id="beak" points="100,100 94,109 106,109" fill="#10b981"/>
+    <polygon id="beak" points="100,100 94,109 106,109" fill="#d07050"/>
 
     <!-- Chest chevrons -->
-    <g id="chest-chevrons" fill="none" stroke="#a7f3d0" stroke-linecap="square" stroke-linejoin="miter">
+    <g id="chest-chevrons" fill="none" stroke="#f0b89a" stroke-linecap="square" stroke-linejoin="miter">
       <polyline points="90,143 100,135 110,143" stroke-width="3"/>
       <polyline points="86,152 100,142 114,152" stroke-width="2.5"/>
       <polyline points="82,161 100,149 118,161" stroke-width="2"/>

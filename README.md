@@ -21,7 +21,7 @@
 Boss auto-discovers every agent, skill, and MCP tool at runtime,<br>
 then routes your task to the right specialist. No config files. No boilerplate.
 
-<img src="./logo/owl-claude-icon.svg" alt="The Maestro Owl — my-claude" width="180">
+<img src="./assets/owl-claude-social.svg" alt="The Maestro Owl — my-claude" width="700">
 
 </div>
 

@@ -61,6 +61,10 @@ section{padding:80px 0}
 .inst-box:hover{border-color:var(--primary)}
 .inst-box .copy-hint{font-size:.7rem;color:var(--text2);font-family:'Inter',sans-serif;white-space:nowrap;flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;transition:border-color .2s}
 .inst-box:hover .copy-hint{border-color:var(--primary)}
+.project-switch{display:flex;justify-content:center;gap:8px;margin-bottom:12px}
+.ps-item{padding:6px 16px;border-radius:20px;font-size:.82rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all .2s}
+.ps-item.active{background:var(--primary);color:#fff}
+.ps-item:hover:not(.active){color:var(--text);background:var(--card)}
 
 /* Section headings */
 .st{font-size:clamp(1.6rem,4vw,2.2rem);font-weight:700;text-align:center;margin-bottom:12px}
@@ -220,20 +224,25 @@ section{padding:80px 0}
 <section class="hero" id="hero">
 <div class="hero-dots"></div>
 <div class="container" style="position:relative;z-index:1">
+<div class="project-switch">
+  <span class="ps-item active">Claude Code</span>
+  <a href="https://sehoon787.github.io/my-codex/" class="ps-item" style="border:1px solid rgba(16,185,129,.25)">Codex CLI</a>
+</div>
   <h1>my-claude</h1>
   <img src="../logo/owl-claude-dark.svg" alt="The Maestro Owl" width="280" style="margin:16px auto 8px;display:block;filter:drop-shadow(0 0 24px rgba(217,119,87,.2))">
   <p class="tagline"><span class="lang" data-en="All-in-one agent harness for Claude Code" data-ko="Claude Code를 위한 올인원 에이전트 하네스"></span></p>
   <div class="badges">
-    <span class="badge"><em>200+</em>&nbsp;<span class="lang" data-en="agents" data-ko="에이전트"></span></span>
-    <span class="badge"><em>200+</em>&nbsp;<span class="lang" data-en="skills" data-ko="스킬"></span></span>
-    <span class="badge"><em>87</em>&nbsp;<span class="lang" data-en="rules" data-ko="규칙"></span></span>
+    <span class="badge"><em>200+</em>&nbsp;agents</span>
+    <span class="badge"><em>200+</em>&nbsp;skills</span>
+    <span class="badge"><em>87</em>&nbsp;rules</span>
     <span class="badge"><em>3</em>&nbsp;MCP</span>
-    <span class="badge"><em>7</em>&nbsp;<span class="lang" data-en="hooks" data-ko="훅"></span></span>
+    <span class="badge"><em>7</em>&nbsp;hooks</span>
   </div>
   <div class="inst-box" onclick="copyHero(this)" role="button" tabindex="0">
     <span class="copy-hint"><span class="lang" data-en="click to copy" data-ko="클릭하여 복사"></span></span>
     <span style="color:var(--text2)">$</span> git clone https://github.com/sehoon787/my-claude.git && bash my-claude/install.sh
   </div>
+  <div style="margin:28px 0 16px"><img src="../assets/owl-claude-icon.svg" alt="The Maestro Owl" width="140" style="filter:drop-shadow(0 0 24px rgba(217,119,87,.25))"></div>
   <div class="cta-row">
     <a href="https://github.com/sehoon787/my-claude" class="cta"><span class="lang" data-en="View on GitHub" data-ko="GitHub에서 보기"></span></a>
     <a href="#install" class="cta secondary"><span class="lang" data-en="Install Guide" data-ko="설치 가이드"></span></a>
