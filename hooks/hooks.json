@@ -40,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"const fs=require('fs');const d='.knowledge/agents';if(fs.existsSync('.knowledge/INDEX.md')){fs.mkdirSync(d,{recursive:true});const j=JSON.parse(fs.readFileSync(0,'utf8'));const r=j.tool_result||{};const i=j.tool_input||{};const e={ts:new Date().toISOString(),agent:i.name||i.description||'unknown',model:i.model||'default',duration_ms:r.duration_ms||null};fs.appendFileSync(d+'/agent-log.jsonl',JSON.stringify(e)+'\\n')}\"",
+            "command": "node -e \"const fs=require('fs');const d='.knowledge/agents';if(fs.existsSync('.knowledge/INDEX.md')){fs.mkdirSync(d,{recursive:true});const j=JSON.parse(fs.readFileSync(0,'utf8'));const e={ts:new Date().toISOString(),agent_id:j.agent_id||'unknown',agent_type:j.agent_type||'unknown'};fs.appendFileSync(d+'/agent-log.jsonl',JSON.stringify(e)+'\\n')}\"",
             "timeout": 5000
           },
           {
