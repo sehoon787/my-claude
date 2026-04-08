@@ -90,7 +90,7 @@ jobs:
           cd ..
           git add .claude-plugin/plugin.json
           if ! git diff --cached --quiet; then
-            git commit -m "chore: bump plugin version to $VERSION [skip ci]"
+            git commit -m "chore: bump plugin version to $VERSION"
             git push -u origin "$BRANCH"
             gh pr create \
               --title "chore: bump plugin version to $VERSION" \
