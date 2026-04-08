@@ -5,6 +5,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 jobs:
   tag-and-release:
     runs-on: ubuntu-latest
@@ -97,4 +98,7 @@ jobs:
               --body "Auto-generated version bump from release v${VERSION}." \
               --base main
             gh pr merge "$BRANCH" --auto --squash --delete-branch
+            # GITHUB_TOKEN events don't trigger other workflows (anti-loop).
+            # workflow_dispatch is the exception — trigger CI explicitly.
+            gh workflow run ci.yml --ref "$BRANCH" || true
           fi
