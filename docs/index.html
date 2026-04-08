@@ -61,6 +61,10 @@ section{padding:80px 0}
 .inst-box:hover{border-color:var(--primary)}
 .inst-box .copy-hint{font-size:.7rem;color:var(--text2);font-family:'Inter',sans-serif;white-space:nowrap;flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;transition:border-color .2s}
 .inst-box:hover .copy-hint{border-color:var(--primary)}
+.inst-tabs{display:flex;justify-content:center;gap:6px;margin:16px auto 0;max-width:600px}
+.inst-tab{padding:6px 18px;border-radius:8px 8px 0 0;border:1px solid rgba(255,255,255,.08);border-bottom:none;background:transparent;color:var(--text2);font-size:.76rem;font-family:'JetBrains Mono',monospace;cursor:pointer;transition:all .2s}
+.inst-tab.active{background:#0c0e14;color:var(--text);border-color:rgba(255,255,255,.08)}
+.inst-tab:hover:not(.active){color:var(--text)}
 .project-switch{display:flex;justify-content:center;gap:8px;margin-bottom:12px}
 .ps-item{padding:6px 16px;border-radius:20px;font-size:.82rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all .2s}
 .ps-item.active{background:var(--primary);color:#fff}
@@ -229,7 +233,6 @@ section{padding:80px 0}
   <a href="https://sehoon787.github.io/my-codex/" class="ps-item" style="border:1px solid rgba(16,185,129,.25)">Codex CLI</a>
 </div>
   <h1>my-claude</h1>
-  <img src="../logo/owl-claude-dark.svg" alt="The Maestro Owl" width="280" style="margin:16px auto 8px;display:block;filter:drop-shadow(0 0 24px rgba(217,119,87,.2))">
   <p class="tagline"><span class="lang" data-en="All-in-one agent harness for Claude Code" data-ko="Claude Code를 위한 올인원 에이전트 하네스"></span></p>
   <div class="badges">
     <span class="badge"><em>200+</em>&nbsp;agents</span>
@@ -238,11 +241,19 @@ section{padding:80px 0}
     <span class="badge"><em>3</em>&nbsp;MCP</span>
     <span class="badge"><em>7</em>&nbsp;hooks</span>
   </div>
-  <div class="inst-box" onclick="copyHero(this)" role="button" tabindex="0">
-    <span class="copy-hint"><span class="lang" data-en="click to copy" data-ko="클릭하여 복사"></span></span>
-    <span style="color:var(--text2)">$</span> git clone https://github.com/sehoon787/my-claude.git && bash my-claude/install.sh
+  <div class="inst-tabs">
+    <button class="inst-tab active" onclick="switchInst(this,'human')">Human</button>
+    <button class="inst-tab" onclick="switchInst(this,'ai')">AI Agent</button>
   </div>
-  <div style="margin:28px 0 16px"><img src="../assets/owl-claude-icon.svg" alt="The Maestro Owl" width="140" style="filter:drop-shadow(0 0 24px rgba(217,119,87,.25))"></div>
+  <div class="inst-box" id="inst-human" onclick="copyHero(this)" role="button" tabindex="0">
+    <span class="copy-hint"><span class="lang" data-en="click to copy" data-ko="클릭하여 복사"></span></span>
+    <span style="color:var(--text2)">$</span> git clone https://github.com/sehoon787/my-claude.git &amp;&amp; bash my-claude/install.sh
+  </div>
+  <div class="inst-box" id="inst-ai" onclick="copyHero(this)" role="button" tabindex="0" style="display:none">
+    <span class="copy-hint"><span class="lang" data-en="click to copy" data-ko="클릭하여 복사"></span></span>
+    <span style="color:var(--text2)">$</span> curl -fsSL https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
+  </div>
+  <div style="margin:28px 0 16px"><img src="https://raw.githubusercontent.com/sehoon787/my-claude/main/assets/owl-claude-icon.svg" alt="The Maestro Owl" width="140" style="filter:drop-shadow(0 0 24px rgba(217,119,87,.25))"></div>
   <div class="cta-row">
     <a href="https://github.com/sehoon787/my-claude" class="cta"><span class="lang" data-en="View on GitHub" data-ko="GitHub에서 보기"></span></a>
     <a href="#install" class="cta secondary"><span class="lang" data-en="Install Guide" data-ko="설치 가이드"></span></a>
@@ -636,6 +647,12 @@ function copyInst(btn){
   const pre=btn.parentElement.querySelector('pre');
   navigator.clipboard.writeText(pre.textContent.trim());
   btn.textContent='copied!';setTimeout(()=>btn.textContent='copy',1500);
+}
+function switchInst(btn,mode){
+  btn.parentElement.querySelectorAll('.inst-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('inst-human').style.display=mode==='human'?'':'none';
+  document.getElementById('inst-ai').style.display=mode==='ai'?'':'none';
 }
 function copyHero(el){
   const txt=el.textContent.replace('click to copy','').replace('클릭하여 복사','').replace('$','').trim();
