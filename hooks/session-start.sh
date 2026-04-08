@@ -106,7 +106,7 @@ fi
 
 # 6. Knowledge Vault Auto-Create + Context
 _kv_msg=""
-_kv_dir=".knowledge"
+_kv_dir=".briefing"
 if [ ! -f "$_kv_dir/INDEX.md" ]; then
   mkdir -p "$_kv_dir/sessions" "$_kv_dir/decisions" "$_kv_dir/learnings" "$_kv_dir/agents" "$_kv_dir/references"
   _proj_name=$(basename "$(pwd)")
@@ -136,18 +136,18 @@ Project knowledge base. Auto-created by SessionStart hook.
 - [[agents/]] — Agent execution logs
 - [[references/]] — Reference materials
 KVEOF
-  if [ -f ".gitignore" ] && ! grep -q '\.knowledge/' ".gitignore" 2>/dev/null; then
-    echo '.knowledge/' >> ".gitignore"
+  if [ -f ".gitignore" ] && ! grep -q '\.briefing/' ".gitignore" 2>/dev/null; then
+    echo '.briefing/' >> ".gitignore"
   elif [ ! -f ".gitignore" ]; then
-    echo '.knowledge/' > ".gitignore"
+    echo '.briefing/' > ".gitignore"
   fi
-  _kv_msg="[KnowledgeVault] Auto-created .knowledge/ structure. Log decisions, learnings, sessions per rules/common/knowledge-vault.md."
+  _kv_msg="[KnowledgeVault] Auto-created .briefing/ structure. Log decisions, learnings, sessions per rules/common/knowledge-vault.md."
 else
   _kv_recent=$(grep -E '^\- \[\[' "$_kv_dir/INDEX.md" 2>/dev/null | head -5 | tr '\n' '; ')
   if [ -n "$_kv_recent" ]; then
-    _kv_msg="[KnowledgeVault] .knowledge/INDEX.md loaded. Recent: ${_kv_recent}Log decisions→.knowledge/decisions/, learnings→.knowledge/learnings/, sessions→.knowledge/sessions/, agent logs→.knowledge/agents/."
+    _kv_msg="[KnowledgeVault] .briefing/INDEX.md loaded. Recent: ${_kv_recent}Log decisions→.briefing/decisions/, learnings→.briefing/learnings/, sessions→.briefing/sessions/, agent logs→.briefing/agents/."
   else
-    _kv_msg="[KnowledgeVault] .knowledge/INDEX.md exists. Log decisions/learnings/sessions per rules/common/knowledge-vault.md."
+    _kv_msg="[KnowledgeVault] .briefing/INDEX.md exists. Log decisions/learnings/sessions per rules/common/knowledge-vault.md."
   fi
 fi
 

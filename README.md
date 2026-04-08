@@ -349,10 +349,10 @@ ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
 
 ## <img src="https://obsidian.md/images/obsidian-logo-gradient.svg" width="24" height="24" align="center"/> Knowledge Vault
 
-my-claude includes an Obsidian-compatible knowledge management system. Every project maintains a `.knowledge/` directory as a persistent memory base.
+my-claude includes an Obsidian-compatible knowledge management system. Every project maintains a `.briefing/` directory as a persistent memory base.
 
 ```
-.knowledge/
+.briefing/
 ├── INDEX.md              ← Project context, recent decisions
 ├── sessions/             ← Session summaries (YYYY-MM-DD-topic.md)
 ├── decisions/            ← Architecture & design decisions
@@ -369,9 +369,9 @@ my-claude includes an Obsidian-compatible knowledge management system. Every pro
 
 ### Using with Obsidian
 
-Open your project's `.knowledge/` folder as an [Obsidian](https://obsidian.md) vault:
+Open your project's `.briefing/` folder as an [Obsidian](https://obsidian.md) vault:
 
-1. Open Obsidian → **Open folder as vault** → select `.knowledge/`
+1. Open Obsidian → **Open folder as vault** → select `.briefing/`
 2. Notes appear in the graph view, linked by `[[wiki-links]]`
 3. YAML frontmatter provides searchable tags and metadata
 4. Timeline of decisions and learnings builds automatically over sessions
@@ -420,7 +420,7 @@ Features built specifically for this project, beyond what upstream sources provi
 | **3-Phase Sprint** | Design (interactive) → Execute (autonomous via ralph) → Review (interactive vs design doc) |
 | **Agent Tier Priority** | core > omo > omc > agency deduplication. Most specialized agent wins. |
 | **Agency Cost Optimization** | Haiku for advisory, Sonnet for implementation — automatic model routing for 172 domain agents |
-| **Knowledge Vault** | Obsidian-compatible `.knowledge/` directory with sessions, decisions, learnings, references |
+| **Knowledge Vault** | Obsidian-compatible `.briefing/` directory with sessions, decisions, learnings, references |
 | **Agent Telemetry** | PostToolUse hook logs agent usage to `agent-usage.jsonl` |
 | **Smart Packs** | Project-type detection recommends relevant agent packs at session start |
 | **CI SHA Pre-check** | Upstream sync skips unchanged sources via `git ls-remote` SHA comparison |

@@ -281,10 +281,10 @@ curl -fsSL https://bun.sh/install | bash && bash install.sh
 
 ## 7. Knowledge Vault
 
-my-claude includes an Obsidian-compatible knowledge management system. Every project maintains a `.knowledge/` directory as persistent memory across sessions.
+my-claude includes an Obsidian-compatible knowledge management system. Every project maintains a `.briefing/` directory as persistent memory across sessions.
 
 ```
-.knowledge/
+.briefing/
 ├── INDEX.md              ← Project context and open questions
 ├── sessions/             ← Per-session summaries (YYYY-MM-DD-topic.md)
 ├── decisions/            ← Architecture and design decisions
@@ -293,7 +293,7 @@ my-claude includes an Obsidian-compatible knowledge management system. Every pro
 └── agents/               ← Important agent execution logs
 ```
 
-Boss reads `INDEX.md` at session start, writes notes during work, and updates the index at session end. All notes use YAML frontmatter (`date`, `type`, `tags`, `related`). Open `.knowledge/` as an Obsidian vault for graph view. Add it to `.gitignore` to keep it local.
+Boss reads `INDEX.md` at session start, writes notes during work, and updates the index at session end. All notes use YAML frontmatter (`date`, `type`, `tags`, `related`). Open `.briefing/` as an Obsidian vault for graph view. Add it to `.gitignore` to keep it local.
 
 ---
 
