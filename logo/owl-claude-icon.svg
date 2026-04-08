@@ -1,28 +1,48 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
   <title>The Maestro Owl — my-claude</title>
 
+  <defs>
+    <!-- Purple glow filter for orbital nodes -->
+    <filter id="glow-purple" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
   <g id="owl-claude">
 
-    <!-- Constellation dots (varied sizes, behind owl) -->
-    <g id="constellation" fill="#d97757" opacity="0.5">
-      <circle cx="22" cy="52" r="3"/>
-      <circle cx="14" cy="76" r="1.8"/>
-      <circle cx="32" cy="90" r="2.4"/>
-      <circle cx="178" cy="50" r="3"/>
-      <circle cx="186" cy="74" r="1.8"/>
-      <circle cx="168" cy="88" r="2.4"/>
-      <circle cx="100" cy="10" r="2"/>
-      <circle cx="42" cy="30" r="1.4"/>
-      <circle cx="158" cy="28" r="1.4"/>
+    <!-- Obsidian orbital graph — arcs orbiting the head -->
+    <g id="orbitals" opacity="0.55">
+      <!-- Outer orbital arc, left side -->
+      <path d="M 38,40 Q 18,78 34,118" stroke="#7c3aed" stroke-width="0.8" fill="none" opacity="0.5"/>
+      <!-- Outer orbital arc, right side -->
+      <path d="M 162,40 Q 182,78 166,118" stroke="#7c3aed" stroke-width="0.8" fill="none" opacity="0.5"/>
+      <!-- Upper orbital arc -->
+      <path d="M 55,20 Q 100,8 145,20" stroke="#a78bfa" stroke-width="0.7" fill="none" opacity="0.45"/>
+      <!-- Inner connecting lines (graph edges) -->
+      <line x1="28" y1="55" x2="18" y2="80" stroke="#7c3aed" stroke-width="0.6" opacity="0.4"/>
+      <line x1="18" y1="80" x2="30" y2="105" stroke="#7c3aed" stroke-width="0.6" opacity="0.4"/>
+      <line x1="172" y1="55" x2="182" y2="80" stroke="#7c3aed" stroke-width="0.6" opacity="0.4"/>
+      <line x1="182" y1="80" x2="170" y2="105" stroke="#7c3aed" stroke-width="0.6" opacity="0.4"/>
+      <line x1="62" y1="16" x2="28" y2="55" stroke="#a78bfa" stroke-width="0.5" opacity="0.35"/>
+      <line x1="138" y1="16" x2="172" y2="55" stroke="#a78bfa" stroke-width="0.5" opacity="0.35"/>
+      <line x1="100" y1="10" x2="62" y2="16" stroke="#a78bfa" stroke-width="0.5" opacity="0.35"/>
+      <line x1="100" y1="10" x2="138" y2="16" stroke="#a78bfa" stroke-width="0.5" opacity="0.35"/>
     </g>
-    <!-- Constellation connecting lines -->
-    <g stroke="#d97757" stroke-width="0.7" opacity="0.25" fill="none">
-      <line x1="22" y1="52" x2="14" y2="76"/>
-      <line x1="14" y1="76" x2="32" y2="90"/>
-      <line x1="178" y1="50" x2="186" y2="74"/>
-      <line x1="186" y1="74" x2="168" y2="88"/>
-      <line x1="100" y1="10" x2="42" y2="30"/>
-      <line x1="100" y1="10" x2="158" y2="28"/>
+    <!-- Orbital gem nodes -->
+    <g id="orbital-nodes" filter="url(#glow-purple)">
+      <!-- Left cluster -->
+      <circle cx="28" cy="55" r="3" fill="#7c3aed" opacity="0.7"/>
+      <circle cx="18" cy="80" r="2" fill="#a78bfa" opacity="0.6"/>
+      <circle cx="30" cy="105" r="2.5" fill="#7c3aed" opacity="0.65"/>
+      <!-- Right cluster -->
+      <circle cx="172" cy="55" r="3" fill="#7c3aed" opacity="0.7"/>
+      <circle cx="182" cy="80" r="2" fill="#a78bfa" opacity="0.6"/>
+      <circle cx="170" cy="105" r="2.5" fill="#7c3aed" opacity="0.65"/>
+      <!-- Top cluster -->
+      <circle cx="100" cy="10" r="2.5" fill="#a78bfa" opacity="0.6"/>
+      <circle cx="62" cy="16" r="1.8" fill="#6d28d9" opacity="0.55"/>
+      <circle cx="138" cy="16" r="1.8" fill="#6d28d9" opacity="0.55"/>
     </g>
 
     <!-- Body: compact stubby rounded shape -->
@@ -37,7 +57,6 @@
     <!-- Baton: integrated with right wing tip -->
     <g id="baton">
       <line x1="155" y1="132" x2="178" y2="110" stroke="#b85a3a" stroke-width="3" stroke-linecap="round"/>
-      <!-- Baton handle cap -->
       <circle cx="178" cy="110" r="4.5" fill="#b85a3a"/>
       <circle cx="178" cy="110" r="2.5" fill="#e8a087"/>
     </g>
@@ -48,18 +67,18 @@
       <rect x="104" y="176" width="14" height="7" rx="3.5"/>
     </g>
 
-    <!-- Head: larger squircle, shifted up -->
-    <rect id="head" x="46" y="28" width="108" height="108" rx="34" ry="34" fill="#d97757"/>
+    <!-- Head: proper ellipse for natural rounded owl head -->
+    <ellipse id="head" cx="100" cy="78" rx="56" ry="52" fill="#d97757"/>
 
     <!-- Facial disc: slightly darker oval surrounding eye area -->
     <ellipse id="facial-disc" cx="100" cy="82" rx="44" ry="38" fill="#c86845" opacity="0.35"/>
 
-    <!-- Brow tufts: sharper crown-like pentagons -->
+    <!-- Brow tufts: sharper crown-like pentagons, repositioned for ellipse head -->
     <g id="brow-tufts" fill="#b85a3a">
-      <!-- Left tuft: angular pointing up-left -->
-      <polygon points="74,30 66,10 78,18 82,28"/>
-      <!-- Right tuft: angular pointing up-right -->
-      <polygon points="126,30 134,10 122,18 118,28"/>
+      <!-- Left tuft -->
+      <polygon points="76,32 66,12 80,20 84,30"/>
+      <!-- Right tuft -->
+      <polygon points="124,32 134,12 120,20 116,30"/>
     </g>
 
     <!-- Eyes: dominant, large -->
