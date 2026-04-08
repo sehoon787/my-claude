@@ -102,8 +102,13 @@ elif [ "$MODE" = "installed" ]; then
   SUPERSEDE_ERRORS=0
   for skill in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
     if [ -d "$HOME/.claude/skills/$skill" ]; then
-      echo "FAIL: ~/.claude/skills/$skill should have been removed (superseded by gstack)"
-      SUPERSEDE_ERRORS=$((SUPERSEDE_ERRORS + 1))
+      # If the SKILL.md references gstack, this is the gstack replacement — not a stale ECC copy
+      if grep -qi "gstack" "$HOME/.claude/skills/$skill/SKILL.md" 2>/dev/null; then
+        echo "OK: ~/.claude/skills/$skill is gstack's own skill (expected)"
+      else
+        echo "FAIL: ~/.claude/skills/$skill should have been removed (superseded by gstack)"
+        SUPERSEDE_ERRORS=$((SUPERSEDE_ERRORS + 1))
+      fi
     fi
   done
   [ "$SUPERSEDE_ERRORS" -eq 0 ] && echo "OK: All 7 ECC skills correctly superseded" || ERRORS=$((ERRORS + SUPERSEDE_ERRORS))
