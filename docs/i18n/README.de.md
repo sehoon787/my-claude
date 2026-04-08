@@ -172,7 +172,7 @@ Das Befolgen von SETUP.md konfiguriert Folgendes:
 |------|------|------|------|
 | Kern-Agenten | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | Plugin |
 | Agent Packs | 136 | 12 Domain-Kategorien (Marketing, Spieleentwicklung, Verkauf, etc.) | Plugin |
-| Skills | 200+ | ECC 180+ + OMC 36 + Core 3 + gstack 36 (Laufzeit) + Superpowers 14 | Plugin + install.sh |
+| Skills | 200+ | ECC 180+ + OMC 36 + Core 3 + gstack 40 (Laufzeit) + Superpowers 14 | Plugin + install.sh |
 | Regeln | 87 | ECC (common + 14 language dirs) | Plugin |
 | MCP-Server | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 7 | my-claude (Boss-Protokoll + SessionStart) | Plugin |
@@ -449,7 +449,7 @@ Jedes Sprachenverzeichnis enthält: coding-style.md, hooks.md, patterns.md, secu
 
 ### 1. [Oh My Claude Code (OMC)](https://github.com/Yeachan-Heo/oh-my-claudecode)
 
-Ein Agent-Harness für Claude Code. 18 Spezialisten-Agenten (Architect, Debugger, Code Reviewer, Security Reviewer, etc.) teilen die Arbeit nach Rolle auf, und magische Schlüsselwörter wie `autopilot:` aktivieren automatische parallele Ausführung.
+Ein Agent-Harness für Claude Code. 19 Spezialisten-Agenten (Architect, Debugger, Code Reviewer, Security Reviewer, etc.) teilen die Arbeit nach Rolle auf, und magische Schlüsselwörter wie `autopilot:` aktivieren automatische parallele Ausführung.
 
 ### 2. [Oh My OpenAgent (omo)](https://github.com/code-yeongyu/oh-my-openagent)
 
@@ -473,7 +473,7 @@ Eine Bibliothek von 164 Business-Spezialisten-Agent-Personas. Bietet Spezialiste
 
 ### 7. [gstack](https://github.com/garrytan/gstack)
 
-Ein Sprint-Prozess-Harness von Garry Tan mit 27 Skills. Bietet browserbasiertes QA-Testing (`/qa`), Code-Review mit Scope-Drift-Erkennung (`/review`), Sicherheitsaudit (`/cso`) und einen vollständigen Plan→Review→QA→Ship-Deployment-Workflow. Enthält einen kompilierten Playwright-Browser-Daemon für Echtbrowser-Tests.
+Ein Sprint-Prozess-Harness von Garry Tan mit 40 Skills. Bietet browserbasiertes QA-Testing (`/qa`), Code-Review mit Scope-Drift-Erkennung (`/review`), Sicherheitsaudit (`/cso`) und einen vollständigen Plan→Review→QA→Ship-Deployment-Workflow. Enthält einen kompilierten Playwright-Browser-Daemon für Echtbrowser-Tests.
 
 ### 8. [Superpowers](https://github.com/obra/superpowers)
 

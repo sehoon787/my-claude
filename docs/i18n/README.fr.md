@@ -172,7 +172,7 @@ Suivre SETUP.md configure les éléments suivants :
 |------|------|------|------|
 | Agents cœur | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | Plugin |
 | Agent Packs | 136 | 12 catégories de domaine (Marketing, Développement de jeux, Vente, etc.) | Plugin |
-| Skills | 200+ | ECC 180+ + OMC 36 + Core 3 + gstack 36 (runtime) + Superpowers 14 | Plugin + install.sh |
+| Skills | 200+ | ECC 180+ + OMC 36 + Core 3 + gstack 40 (runtime) + Superpowers 14 | Plugin + install.sh |
 | Règles | 87 | ECC (common + 14 language dirs) | Plugin |
 | Serveurs MCP | 3 | Context7, Exa, grep.app | Plugin |
 | Hooks | 7 | my-claude (protocole Boss + SessionStart) | Plugin |
@@ -449,7 +449,7 @@ Chaque répertoire de langage contient : coding-style.md, hooks.md, patterns.md,
 
 ### 1. [Oh My Claude Code (OMC)](https://github.com/Yeachan-Heo/oh-my-claudecode)
 
-Un harnais d'agents pour Claude Code. 18 agents spécialistes (Architect, Debugger, Code Reviewer, Security Reviewer, etc.) se répartissent le travail par rôle, et des mots-clés magiques comme `autopilot:` déclenchent automatiquement une exécution parallèle.
+Un harnais d'agents pour Claude Code. 19 agents spécialistes (Architect, Debugger, Code Reviewer, Security Reviewer, etc.) se répartissent le travail par rôle, et des mots-clés magiques comme `autopilot:` déclenchent automatiquement une exécution parallèle.
 
 ### 2. [Oh My OpenAgent (omo)](https://github.com/code-yeongyu/oh-my-openagent)
 
@@ -473,7 +473,7 @@ Une bibliothèque de 164 personas d'agents spécialistes métier. Fournit des pe
 
 ### 7. [gstack](https://github.com/garrytan/gstack)
 
-Un harnais de processus sprint par Garry Tan avec 27 skills. Fournit des tests QA basés sur navigateur (`/qa`), une revue de code avec détection de dérive de portée (`/review`), un audit de sécurité (`/cso`), et un workflow de déploiement complet Plan→Review→QA→Ship. Inclut un démon Playwright compilé pour les tests en navigateur réel.
+Un harnais de processus sprint par Garry Tan avec 40 skills. Fournit des tests QA basés sur navigateur (`/qa`), une revue de code avec détection de dérive de portée (`/review`), un audit de sécurité (`/cso`), et un workflow de déploiement complet Plan→Review→QA→Ship. Inclut un démon Playwright compilé pour les tests en navigateur réel.
 
 ### 8. [Superpowers](https://github.com/obra/superpowers)
 

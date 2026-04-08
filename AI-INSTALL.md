@@ -26,7 +26,7 @@ The plugin records its version automatically. To check: `cat ~/.claude/.my-claud
 This installs:
 - 56 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 26 engineering
 - 136 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
-- 200+ skills (180+ ECC + 36 OMC + 3 Core + 36 gstack)
+- 200+ skills (180+ ECC + 36 OMC + 3 Core + 40 gstack)
   Note: gstack skills are installed separately in Step 2.
 - 89 rules
 - 7 behavioral hooks (SessionStart, PreToolUse, PostToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop)
@@ -104,7 +104,7 @@ done
 cp -r /tmp/my-claude/upstream/ecc/skills/* ~/.claude/skills/
 cp -r /tmp/my-claude/upstream/omc/skills/* ~/.claude/skills/
 
-# ── gstack (sprint-process harness with 36 skills) ──
+# ── gstack (sprint-process harness with 40 skills) ──
 GSTACK_DIR="$HOME/.claude/skills/gstack"
 if [ -d "$GSTACK_DIR/.git" ]; then
   (cd "$GSTACK_DIR" && git pull --ff-only 2>/dev/null || true)
@@ -191,7 +191,7 @@ This installs:
 - omo CLI (`oh-my-opencode`)
 - ast-grep + comment-checker
 - Karpathy coding guidelines (appended to CLAUDE.md)
-- gstack sprint-process harness (27 skills — code review, QA, debugging, security, deployment)
+- gstack sprint-process harness (40 skills — code review, QA, debugging, security, deployment)
 
 ### Activating Agent Packs
 
@@ -261,7 +261,7 @@ Expected:
 - Core agents: 55+ (no domain agents in core)
 - Agent packs: 136+
 - Plugin skills: 200+
-- Rules: 89
+- Rules: 90
 - Anthropic skills: 2 key skills (pdf, docx)
 - Manifest: 300+ entries
 - Duplicates: 0 (should be 0)

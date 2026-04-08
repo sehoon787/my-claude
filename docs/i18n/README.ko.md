@@ -175,7 +175,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 |------|------|------|------|
 | 코어 에이전트 | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | 플러그인 |
 | 에이전트 팩 | 136 | 12개 도메인 카테고리 (마케팅, 게임 개발, 영업 등) | 플러그인 |
-| 스킬 | 200+ | ECC 180+ + OMC 36 + Core 3 + gstack 36 (런타임) + Superpowers 14 | 플러그인 + install.sh |
+| 스킬 | 200+ | ECC 180+ + OMC 36 + Core 3 + gstack 40 (런타임) + Superpowers 14 | 플러그인 + install.sh |
 | 룰 | 87 | ECC (common + 14 language dirs) | 플러그인 |
 | MCP 서버 | 3 | Context7, Exa, grep.app | 플러그인 |
 | 훅 | 7 | my-claude (Boss 프로토콜 + SessionStart) | 플러그인 |
@@ -310,8 +310,8 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 | everything-claude-code (ECC) | 180+ | tdd-workflow, coding-standards, frontend-patterns, backend-patterns, autopilot, ralph, security-review, continuous-learning |
 | oh-my-claudecode (OMC) | 36 | plan, team, trace, deep-dive, blueprint, ultrawork, sciomc, omc-setup |
 | superpowers | 14 | brainstorming, systematic-debugging, test-driven-development, subagent-driven-development, writing-plans, executing-plans, dispatching-parallel-agents, using-git-worktrees, requesting-code-review, receiving-code-review, verification-before-completion, finishing-a-development-branch, writing-skills, using-superpowers |
-| my-claude Core | 2 | boss-advanced, omc-reference |
-| gstack (런타임) | 36 | /qa, /review, /ship, /cso, /investigate, /design-review, /office-hours, /autoplan |
+| my-claude Core | 3 | boss-advanced, gstack-sprint, knowledge-vault |
+| gstack (런타임) | 40 | /qa, /review, /ship, /cso, /investigate, /design-review, /office-hours, /autoplan |
 
 **install.sh로 별도 설치:**
 
@@ -439,7 +439,7 @@ Each language directory contains: coding-style.md, hooks.md, patterns.md, securi
 
 ### 1. [Oh My Claude Code (OMC)](https://github.com/Yeachan-Heo/oh-my-claudecode)
 
-Claude Code 전용 에이전트 하네스 플러그인. 18개의 전문 에이전트(아키텍트, 디버거, 코드리뷰어, 보안검토자 등)가 역할별로 분업하며, `autopilot:` 같은 매직 키워드로 자동 병렬 실행을 활성화합니다.
+Claude Code 전용 에이전트 하네스 플러그인. 19개의 전문 에이전트(아키텍트, 디버거, 코드리뷰어, 보안검토자 등)가 역할별로 분업하며, `autopilot:` 같은 매직 키워드로 자동 병렬 실행을 활성화합니다.
 
 ### 2. [Oh My OpenAgent (omo)](https://github.com/code-yeongyu/oh-my-openagent)
 
@@ -463,7 +463,7 @@ Anthropic이 직접 제공하는 공식 에이전트 스킬 레포지토리. PDF
 
 ### 7. [gstack](https://github.com/garrytan/gstack)
 
-Garry Tan의 스프린트 프로세스 하네스(27개 스킬). 브라우저 기반 QA 테스트(`/qa`), 범위이탈 감지 코드 리뷰(`/review`), 보안 감사(`/cso`), Plan→Review→QA→Ship 배포 워크플로우를 제공합니다. 실 브라우저 테스트를 위한 컴파일된 Playwright 브라우저 데몬 포함.
+Garry Tan의 스프린트 프로세스 하네스(40개 스킬). 브라우저 기반 QA 테스트(`/qa`), 범위이탈 감지 코드 리뷰(`/review`), 보안 감사(`/cso`), Plan→Review→QA→Ship 배포 워크플로우를 제공합니다. 실 브라우저 테스트를 위한 컴파일된 Playwright 브라우저 데몬 포함.
 
 ### 8. [Superpowers](https://github.com/obra/superpowers)
 

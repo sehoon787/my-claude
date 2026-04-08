@@ -172,7 +172,7 @@ rm ~/.claude/agents/<agent-name>.md
 |------|------|------|------|
 | 核心代理 | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | 插件 |
 | 代理包 | 136 | 12 个领域类别（营销、游戏开发、销售等） | 插件 |
-| 技能 | 200+ | ECC 180+ + OMC 36 + Core 3 + gstack 36（运行时）+ Superpowers 14 | 插件 + install.sh |
+| 技能 | 200+ | ECC 180+ + OMC 36 + Core 3 + gstack 40（运行时）+ Superpowers 14 | 插件 + install.sh |
 | 规则 | 87 | ECC（common + 14 language dirs） | 插件 |
 | MCP 服务器 | 3 | Context7、Exa、grep.app | 插件 |
 | 钩子 | 7 | my-claude（Boss 协议 + SessionStart） | 插件 |
@@ -448,7 +448,7 @@ rm ~/.claude/agents/<agent-name>.md
 
 ### 1. [Oh My Claude Code (OMC)](https://github.com/Yeachan-Heo/oh-my-claudecode)
 
-一个专门用于 Claude Code 的智能体治具。18 个专家代理（架构师、调试器、代码审查员、安全审查员等）按角色分工，像 `autopilot:` 这样的魔法关键字激活自动并行执行。
+一个专门用于 Claude Code 的智能体治具。19 个专家代理（架构师、调试器、代码审查员、安全审查员等）按角色分工，像 `autopilot:` 这样的魔法关键字激活自动并行执行。
 
 ### 2. [Oh My OpenAgent (omo)](https://github.com/code-yeongyu/oh-my-openagent)
 
@@ -472,7 +472,7 @@ Andrej Karpathy 提出的 4 个 AI 编码行为指南（编码前思考、优先
 
 ### 7. [gstack](https://github.com/garrytan/gstack)
 
-Garry Tan 的冲刺流程工具（27 个技能）。提供基于浏览器的 QA 测试（`/qa`）、带范围偏移检测的代码审查（`/review`）、安全审计（`/cso`）以及完整的 Plan→Review→QA→Ship 部署工作流。包含编译的 Playwright 浏览器守护进程用于真实浏览器测试。
+Garry Tan 的冲刺流程工具（40 个技能）。提供基于浏览器的 QA 测试（`/qa`）、带范围偏移检测的代码审查（`/review`）、安全审计（`/cso`）以及完整的 Plan→Review→QA→Ship 部署工作流。包含编译的 Playwright 浏览器守护进程用于真实浏览器测试。
 
 ### 8. [Superpowers](https://github.com/obra/superpowers)
 
