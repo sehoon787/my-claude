@@ -104,10 +104,45 @@ EOF
     && REGISTRY_STATUS="regenerated" || REGISTRY_STATUS="failed"
 fi
 
-# 6. Knowledge Vault Context
+# 6. Knowledge Vault Auto-Create + Context
 _kv_msg=""
-if [ -f ".knowledge/INDEX.md" ]; then
-  _kv_recent=$(grep -E '^\- \[\[' ".knowledge/INDEX.md" 2>/dev/null | head -5 | tr '\n' '; ')
+_kv_dir=".knowledge"
+if [ ! -f "$_kv_dir/INDEX.md" ]; then
+  mkdir -p "$_kv_dir/sessions" "$_kv_dir/decisions" "$_kv_dir/learnings" "$_kv_dir/agents" "$_kv_dir/references"
+  _proj_name=$(basename "$(pwd)")
+  cat > "$_kv_dir/INDEX.md" <<KVEOF
+---
+date: $(date +%Y-%m-%d)
+type: index
+tags: [project, index]
+---
+
+# ${_proj_name} Knowledge Base
+
+## Overview
+Project knowledge base. Auto-created by SessionStart hook.
+
+## Recent Decisions
+
+## Recent Sessions
+
+## Open Questions
+
+## Key Links
+- [[sessions/]] — Session logs
+- [[decisions/]] — Architecture decisions
+- [[learnings/]] — Patterns and solutions
+- [[agents/]] — Agent execution logs
+- [[references/]] — Reference materials
+KVEOF
+  if [ -f ".gitignore" ] && ! grep -q '\.knowledge/' ".gitignore" 2>/dev/null; then
+    echo '.knowledge/' >> ".gitignore"
+  elif [ ! -f ".gitignore" ]; then
+    echo '.knowledge/' > ".gitignore"
+  fi
+  _kv_msg="[KnowledgeVault] Auto-created .knowledge/ structure. Log decisions, learnings, sessions per rules/common/knowledge-vault.md."
+else
+  _kv_recent=$(grep -E '^\- \[\[' "$_kv_dir/INDEX.md" 2>/dev/null | head -5 | tr '\n' '; ')
   if [ -n "$_kv_recent" ]; then
     _kv_msg="[KnowledgeVault] .knowledge/INDEX.md loaded. Recent: ${_kv_recent}Log decisions→.knowledge/decisions/, learnings→.knowledge/learnings/, sessions→.knowledge/sessions/, agent logs→.knowledge/agents/."
   else

@@ -40,7 +40,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"console.log(JSON.stringify({hookSpecificOutput:{additionalContext:'VERIFICATION REQUIRED: Subagent finished. Before proceeding: (1) Read the changed files yourself, (2) Run lsp_diagnostics or tests to verify, (3) Only then mark the task complete. Do NOT trust subagent claims without independent verification. If the agent produced significant results (architecture decisions, complex debugging, or research findings), log a summary to .knowledge/agents/<date>-<agent-name>.md with YAML frontmatter (date, type: agent-log, tags).'}})\"",
+            "command": "node -e \"const fs=require('fs');const d='.knowledge/agents';if(fs.existsSync('.knowledge/INDEX.md')){fs.mkdirSync(d,{recursive:true});const j=JSON.parse(fs.readFileSync(0,'utf8'));const r=j.tool_result||{};const i=j.tool_input||{};const e={ts:new Date().toISOString(),agent:i.name||i.description||'unknown',model:i.model||'default',duration_ms:r.duration_ms||null};fs.appendFileSync(d+'/agent-log.jsonl',JSON.stringify(e)+'\\n')}\"",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "node -e \"console.log(JSON.stringify({hookSpecificOutput:{additionalContext:'VERIFICATION REQUIRED: Subagent finished. (1) Read changed files yourself, (2) Run tests/diagnostics to verify, (3) Only then mark task complete. Agent execution auto-logged to .knowledge/agents/agent-log.jsonl.'}}))\"",
             "timeout": 5000
           }
         ]
@@ -73,7 +78,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"if(require('fs').existsSync('.knowledge/INDEX.md')){console.log(JSON.stringify({hookSpecificOutput:{additionalContext:'[KnowledgeVault] Before ending session: if meaningful work was done (code changes, architecture decisions, or learnings discovered), write a session summary to .knowledge/sessions/<YYYY-MM-DD>-<topic>.md and update .knowledge/INDEX.md if new decisions or learnings were added.'}}))}\"",
+            "command": "node -e \"const fs=require('fs');const p='.knowledge';if(!fs.existsSync(p+'/INDEX.md')){process.exit(0)}const today=new Date().toISOString().slice(0,10);const sDir=p+'/sessions';const hasLog=fs.existsSync(sDir)&&fs.readdirSync(sDir).some(f=>f.startsWith(today));const agentLog=p+'/agents/agent-log.jsonl';const hasWork=fs.existsSync(agentLog)&&fs.readFileSync(agentLog,'utf8').split('\\n').filter(l=>l.trim()).some(l=>{try{return JSON.parse(l).ts&&JSON.parse(l).ts.startsWith(today)}catch{return false}});if(hasWork&&!hasLog){console.log(JSON.stringify({decision:'block',reason:'Meaningful work detected (agent executions today) but no session log in .knowledge/sessions/'+today+'-*.md. Write a session summary before ending.'}));process.exit(0)}console.log(JSON.stringify({decision:'allow'}))\"",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "node -e \"if(require('fs').existsSync('.knowledge/INDEX.md')){console.log(JSON.stringify({hookSpecificOutput:{additionalContext:'[KnowledgeVault] MANDATORY: Write session summary to .knowledge/sessions/YYYY-MM-DD-topic.md. Update INDEX.md if new decisions or learnings were added. This is enforced — session will be blocked without it.'}}))}\"",
             "timeout": 3000
           },
           {
