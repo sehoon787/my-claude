@@ -21,7 +21,7 @@
 Boss auto-discovers every agent, skill, and MCP tool at runtime,<br>
 then routes your task to the right specialist. No config files. No boilerplate.
 
-<img src="./assets/demo.svg" alt="my-claude demo" width="700">
+<img src="./logo/owl-claude.svg" alt="The Maestro Owl — my-claude" width="500">
 
 </div>
 
@@ -327,19 +327,19 @@ ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
 
 | Server | Purpose | Cost |
 |--------|---------|------|
-| [Context7](https://mcp.context7.com) | Real-time library documentation | Free |
-| [Exa](https://mcp.exa.ai) | Semantic web search | Free 1k req/month |
-| [grep.app](https://mcp.grep.app) | GitHub code search | Free |
+| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://mcp.context7.com) | Real-time library documentation | Free |
+| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://mcp.exa.ai) | Semantic web search | Free 1k req/month |
+| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://mcp.grep.app) | GitHub code search | Free |
 
 **Behavioral Hooks**
 
 | Hook | Event | Behavior |
 |------|-------|----------|
-| Session Setup | SessionStart | Auto-detects and installs missing tools |
+| Session Setup | SessionStart | Auto-detects missing tools + injects Knowledge Vault context |
 | Delegation Guard | PreToolUse | Blocks Boss from directly modifying files |
 | Agent Telemetry | PostToolUse | Logs agent usage to `agent-usage.jsonl` |
-| Subagent Verifier | SubagentStop | Forces independent verification |
-| Completion Check | Stop | Confirms all tasks verified before exit |
+| Subagent Verifier | SubagentStop | Forces independent verification + logs to Knowledge Vault |
+| Completion Check | Stop | Confirms tasks verified + prompts session summary |
 | Teammate Idle Guide | TeammateIdle | Prompts leader on idle teammates |
 | Task Quality Gate | TaskCompleted | Verifies deliverable quality |
 
@@ -347,7 +347,7 @@ ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
 
 ---
 
-## Knowledge Vault
+## <img src="https://obsidian.md/images/obsidian-logo-gradient.svg" width="24" height="24" align="center"/> Knowledge Vault
 
 my-claude includes an Obsidian-compatible knowledge management system. Every project maintains a `.knowledge/` directory as a persistent memory base.
 
@@ -386,14 +386,14 @@ my-claude bundles content from 5 MIT-licensed upstream repositories via git subm
 
 | # | Source | What It Provides |
 |---|--------|-----------------|
-| 1 | **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 19 specialist agents + 36 skills. Claude Code multi-agent harness with autopilot, ralph, team orchestration. |
-| 2 | **[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — code-yeongyu | 9 OMO agents (Sisyphus, Atlas, Oracle, etc.). Multi-platform agent harness bridging Claude, GPT, Gemini. |
-| 3 | **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** — affaan-m | 180+ skills + 87 rules across 14 languages. Comprehensive dev framework with TDD, security, and coding standards. |
-| 4 | **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 26 engineering agents (always loaded) + 136 domain agent-packs across 12 categories. |
-| 5 | **[gstack](https://github.com/garrytan/gstack)** — garrytan | 40 skills for code review, QA, security audit, deployment. Includes Playwright browser daemon. |
-| 6 | **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 14 skills + 1 agent covering brainstorming, TDD, parallel agents, and code review. |
-| 7 | **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | 14+ official skills for PDF, DOCX, PPTX, XLSX, and MCP builder. |
-| 8 | **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 AI coding behavioral guidelines (Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution). |
+| 1 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 19 specialist agents + 36 skills. Claude Code multi-agent harness with autopilot, ralph, team orchestration. |
+| 2 | <img src="https://github.com/code-yeongyu.png?size=32" width="20" height="20" align="center"/> **[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — code-yeongyu | 9 OMO agents (Sisyphus, Atlas, Oracle, etc.). Multi-platform agent harness bridging Claude, GPT, Gemini. |
+| 3 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** — affaan-m | 180+ skills + 87 rules across 14 languages. Comprehensive dev framework with TDD, security, and coding standards. |
+| 4 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 26 engineering agents (always loaded) + 136 domain agent-packs across 12 categories. |
+| 5 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | 40 skills for code review, QA, security audit, deployment. Includes Playwright browser daemon. |
+| 6 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 14 skills + 1 agent covering brainstorming, TDD, parallel agents, and code review. |
+| 7 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | 14+ official skills for PDF, DOCX, PPTX, XLSX, and MCP builder. |
+| 8 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 AI coding behavioral guidelines (Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution). |
 
 ---
 
