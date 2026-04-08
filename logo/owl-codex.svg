@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" width="600" height="200">
+  <title>The Maestro Owl — my-codex</title>
+
+  <!-- Background: transparent -->
+
+  <g id="owl-codex">
+
+    <!-- === OWL CHARACTER (left side, centered in 200x200 zone) === -->
+    <g id="owl" transform="translate(0,0)">
+
+      <!-- Constellation dots (orbiting, behind owl) -->
+      <g id="constellation" fill="#d4ede0" opacity="0.85">
+        <circle cx="28" cy="58" r="2.5"/>
+        <circle cx="18" cy="80" r="1.8"/>
+        <circle cx="35" cy="95" r="2"/>
+        <circle cx="172" cy="55" r="2.5"/>
+        <circle cx="182" cy="78" r="1.8"/>
+        <circle cx="165" cy="93" r="2"/>
+        <circle cx="100" cy="14" r="2"/>
+      </g>
+      <!-- Constellation connecting lines (subtle) -->
+      <g stroke="#d4ede0" stroke-width="0.6" opacity="0.4" fill="none">
+        <line x1="28" y1="58" x2="18" y2="80"/>
+        <line x1="18" y1="80" x2="35" y2="95"/>
+        <line x1="172" y1="55" x2="182" y2="78"/>
+        <line x1="182" y1="78" x2="165" y2="93"/>
+      </g>
+
+      <!-- Body: tapered shape wider at shoulders, narrow at bottom -->
+      <path d="M68 130 Q60 148 65 175 Q100 185 135 175 Q140 148 132 130 Z" fill="#10a37f"/>
+
+      <!-- Wings -->
+      <!-- Left wing -->
+      <path d="M68 130 Q52 135 40 155 Q55 160 70 152 L72 135 Z" fill="#0b7a5e"/>
+      <!-- Right wing — slightly raised, holding baton -->
+      <path d="M132 130 Q148 125 162 140 Q150 150 135 148 L130 133 Z" fill="#0b7a5e"/>
+
+      <!-- Conductor's baton (right wing extended) -->
+      <line x1="150" y1="128" x2="175" y2="108" stroke="#0b7a5e" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="176" cy="107" r="3.5" fill="#0b7a5e"/>
+
+      <!-- Head: wide rounded rectangle -->
+      <rect x="52" y="45" width="96" height="90" rx="28" ry="28" fill="#10a37f"/>
+
+      <!-- Brow tufts: angular triangles above the eyes -->
+      <g fill="#0b7a5e">
+        <polygon points="76,46 70,26 84,40"/>
+        <polygon points="124,46 130,26 116,40"/>
+      </g>
+
+      <!-- Eyes: large circles — the dominant feature -->
+      <!-- Left eye -->
+      <circle cx="82" cy="88" r="22" fill="#f4faf7"/>
+      <circle cx="82" cy="88" r="15" fill="#6ec6a7"/>
+      <circle cx="82" cy="88" r="8" fill="#0d2118"/>
+      <circle cx="86" cy="83" r="3" fill="#f4faf7" opacity="0.7"/>
+      <!-- Right eye -->
+      <circle cx="118" cy="88" r="22" fill="#f4faf7"/>
+      <circle cx="118" cy="88" r="15" fill="#6ec6a7"/>
+      <circle cx="118" cy="88" r="8" fill="#0d2118"/>
+      <circle cx="122" cy="83" r="3" fill="#f4faf7" opacity="0.7"/>
+
+      <!-- Beak -->
+      <polygon points="100,106 95,114 100,118 105,114" fill="#0b7a5e"/>
+
+      <!-- Chest crystal/chevron pattern -->
+      <g fill="none" stroke="#6ec6a7" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="88,143 100,135 112,143" stroke-width="2.5"/>
+        <polyline points="85,151 100,141 115,151" stroke-width="2.2"/>
+        <polyline points="82,159 100,148 118,159" stroke-width="2"/>
+        <polyline points="79,167 100,155 121,167" stroke-width="1.8"/>
+      </g>
+
+    </g>
+
+    <!-- === WORDMARK (right side) === -->
+    <g id="wordmark" transform="translate(210, 0)">
+
+      <!-- Vertical separator line -->
+      <line x1="0" y1="65" x2="0" y2="135" stroke="#10a37f" stroke-width="1.5" opacity="0.5"/>
+
+      <!-- "my-codex" text -->
+      <text
+        x="24"
+        y="115"
+        font-family="'JetBrains Mono', 'SF Mono', 'Fira Code', monospace"
+        font-size="42"
+        font-weight="600"
+        letter-spacing="-1"
+        fill="#0d2118"
+      >
+        <!-- "my-" at opacity 0.5 -->
+        <tspan opacity="0.5">my-</tspan><tspan>codex</tspan>
+      </text>
+
+      <!-- Subtitle: The Maestro Owl -->
+      <text
+        x="25"
+        y="138"
+        font-family="'JetBrains Mono', 'SF Mono', 'Fira Code', monospace"
+        font-size="11"
+        font-weight="400"
+        letter-spacing="2"
+        fill="#0d2118"
+        opacity="0.4"
+      >THE MAESTRO OWL</text>
+
+    </g>
+
+  </g>
+</svg>

@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <title>The Maestro Owl — my-claude</title>
+
+  <!-- Background: transparent -->
+
+  <g id="owl-claude">
+
+    <!-- Constellation dots (orbiting, behind owl) -->
+    <g id="constellation" fill="#f5e6d3" opacity="0.85">
+      <circle cx="28" cy="58" r="2.5"/>
+      <circle cx="18" cy="80" r="1.8"/>
+      <circle cx="35" cy="95" r="2"/>
+      <circle cx="172" cy="55" r="2.5"/>
+      <circle cx="182" cy="78" r="1.8"/>
+      <circle cx="165" cy="93" r="2"/>
+      <circle cx="100" cy="14" r="2"/>
+    </g>
+    <!-- Constellation connecting lines (subtle) -->
+    <g stroke="#f5e6d3" stroke-width="0.6" opacity="0.4" fill="none">
+      <line x1="28" y1="58" x2="18" y2="80"/>
+      <line x1="18" y1="80" x2="35" y2="95"/>
+      <line x1="172" y1="55" x2="182" y2="78"/>
+      <line x1="182" y1="78" x2="165" y2="93"/>
+    </g>
+
+    <!-- Body: tapered shape wider at shoulders, narrow at bottom -->
+    <g id="body">
+      <path d="M68 130 Q60 148 65 175 Q100 185 135 175 Q140 148 132 130 Z" fill="#d97757"/>
+    </g>
+
+    <!-- Wings: left and right angled shapes -->
+    <g id="wings">
+      <!-- Left wing -->
+      <path d="M68 130 Q52 135 40 155 Q55 160 70 152 L72 135 Z" fill="#b85a3a"/>
+      <!-- Right wing — slightly raised, holding baton -->
+      <path d="M132 130 Q148 125 162 140 Q150 150 135 148 L130 133 Z" fill="#b85a3a"/>
+    </g>
+
+    <!-- Conductor's baton (right wing extended) -->
+    <g id="baton">
+      <!-- Baton stick -->
+      <line x1="150" y1="128" x2="175" y2="108" stroke="#b85a3a" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Baton tip circle -->
+      <circle cx="176" cy="107" r="3.5" fill="#b85a3a"/>
+    </g>
+
+    <!-- Head: wide rounded rectangle (squircle-ish) -->
+    <rect id="head" x="52" y="45" width="96" height="90" rx="28" ry="28" fill="#d97757"/>
+
+    <!-- Brow tufts: angular triangles above the eyes, echoing crown points -->
+    <g id="brow-tufts" fill="#b85a3a">
+      <!-- Left tuft -->
+      <polygon points="76,46 70,26 84,40"/>
+      <!-- Right tuft -->
+      <polygon points="124,46 130,26 116,40"/>
+    </g>
+
+    <!-- Eyes: large circles — the dominant feature -->
+    <g id="eyes">
+      <!-- Left eye outer (white/cream) -->
+      <circle cx="82" cy="88" r="22" fill="#faf7f4"/>
+      <!-- Left eye iris ring -->
+      <circle cx="82" cy="88" r="15" fill="#e8a087"/>
+      <!-- Left eye pupil -->
+      <circle cx="82" cy="88" r="8" fill="#2d1f17"/>
+      <!-- Left eye highlight -->
+      <circle cx="86" cy="83" r="3" fill="#faf7f4" opacity="0.7"/>
+
+      <!-- Right eye outer (white/cream) -->
+      <circle cx="118" cy="88" r="22" fill="#faf7f4"/>
+      <!-- Right eye iris ring -->
+      <circle cx="118" cy="88" r="15" fill="#e8a087"/>
+      <!-- Right eye pupil -->
+      <circle cx="118" cy="88" r="8" fill="#2d1f17"/>
+      <!-- Right eye highlight -->
+      <circle cx="122" cy="83" r="3" fill="#faf7f4" opacity="0.7"/>
+    </g>
+
+    <!-- Beak: small diamond/rhombus shape between eyes -->
+    <polygon id="beak" points="100,106 95,114 100,118 105,114" fill="#b85a3a"/>
+
+    <!-- Chest crystal/chevron pattern (3-4 nested V-shapes) -->
+    <g id="chest-chevrons" fill="none" stroke="#e8a087" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="88,143 100,135 112,143" stroke-width="2.5"/>
+      <polyline points="85,151 100,141 115,151" stroke-width="2.2"/>
+      <polyline points="82,159 100,148 118,159" stroke-width="2"/>
+      <polyline points="79,167 100,155 121,167" stroke-width="1.8"/>
+    </g>
+
+  </g>
+</svg>
