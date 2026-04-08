@@ -104,6 +104,17 @@ EOF
     && REGISTRY_STATUS="regenerated" || REGISTRY_STATUS="failed"
 fi
 
+# 6. Knowledge Vault Context
+_kv_msg=""
+if [ -f ".knowledge/INDEX.md" ]; then
+  _kv_recent=$(grep -E '^\- \[\[' ".knowledge/INDEX.md" 2>/dev/null | head -5 | tr '\n' '; ')
+  if [ -n "$_kv_recent" ]; then
+    _kv_msg="[KnowledgeVault] .knowledge/INDEX.md loaded. Recent: ${_kv_recent}Log decisions→.knowledge/decisions/, learnings→.knowledge/learnings/, sessions→.knowledge/sessions/, agent logs→.knowledge/agents/."
+  else
+    _kv_msg="[KnowledgeVault] .knowledge/INDEX.md exists. Log decisions/learnings/sessions per rules/common/knowledge-vault.md."
+  fi
+fi
+
 # Return results as additionalContext
 MSG=""
 if [ ${#INSTALLED[@]} -gt 0 ]; then
@@ -114,6 +125,7 @@ if [ ${#MISSING[@]} -gt 0 ]; then
 fi
 
 MSG="${MSG}[SessionStart] Registry cache: ${REGISTRY_STATUS}."
+[ -n "$_kv_msg" ] && MSG="${MSG} ${_kv_msg}"
 if [ -n "$MSG" ]; then
   echo "{\"hookSpecificOutput\":{\"additionalContext\":\"$MSG\"}}"
 fi

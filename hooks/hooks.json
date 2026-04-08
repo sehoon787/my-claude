@@ -40,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"console.log(JSON.stringify({hookSpecificOutput:{additionalContext:'VERIFICATION REQUIRED: Subagent finished. Before proceeding: (1) Read the changed files yourself, (2) Run lsp_diagnostics or tests to verify, (3) Only then mark the task complete. Do NOT trust subagent claims without independent verification.'}})\"",
+            "command": "node -e \"console.log(JSON.stringify({hookSpecificOutput:{additionalContext:'VERIFICATION REQUIRED: Subagent finished. Before proceeding: (1) Read the changed files yourself, (2) Run lsp_diagnostics or tests to verify, (3) Only then mark the task complete. Do NOT trust subagent claims without independent verification. If the agent produced significant results (architecture decisions, complex debugging, or research findings), log a summary to .knowledge/agents/<date>-<agent-name>.md with YAML frontmatter (date, type: agent-log, tags).'}})\"",
             "timeout": 5000
           }
         ]
@@ -71,6 +71,11 @@
     "Stop": [
       {
         "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"if(require('fs').existsSync('.knowledge/INDEX.md')){console.log(JSON.stringify({hookSpecificOutput:{additionalContext:'[KnowledgeVault] Before ending session: if meaningful work was done (code changes, architecture decisions, or learnings discovered), write a session summary to .knowledge/sessions/<YYYY-MM-DD>-<topic>.md and update .knowledge/INDEX.md if new decisions or learnings were added.'}}))}\"",
+            "timeout": 3000
+          },
           {
             "type": "prompt",
             "prompt": "Review the assistant's last response ONLY. Return {\"ok\":false,\"reason\":\"...\"} ONLY if: (1) the assistant launched agents THIS TURN and never checked results, or (2) the user asked for a commit and the assistant made changes but didn't commit. Do NOT flag incomplete just because a plan file exists. Return {\"ok\":true} if the assistant answered a question, confirmed work done, or completed all requested changes."
