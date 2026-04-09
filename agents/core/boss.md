@@ -41,10 +41,14 @@ Parse each agent's `name`, `description`, `model`, and scope (global/project). P
 
 **Step 3 (MCP):** Read `~/.claude/settings.json` (mcpServers keys) and `.mcp.json` if present. Also extract `hooks` and `enabledPlugins`.
 
+**Step 4 (Persona):** Read `.briefing/persona/profile.md` if it exists. Extract user philosophy, workflow patterns, and agent affinity scores into working memory. Use these to inform intent classification (Phase 1) and capability matching (Phase 2). If the file is missing, skip silently — the profile is built over time.
+
+**Step 4b (Pending Suggestions):** Read `.briefing/persona/suggestions.jsonl` if it exists. For each entry with `"type":"pending"`, present the suggestion to the user via AskUserQuestion (approve/reject). On approve: create the suggested rule file at `.briefing/persona/rules/auto-{agent_type}.md`. On reject: update the entry to `"type":"rejected"` with `"cooldown_until"` set to 7 days from now. Process at most 2 suggestions per session to avoid fatigue.
+
 Keep the registry in working memory only — do NOT write files.
 
 **After scanning, present:**
-> Boss ready. [N] agents ([N] global + [N] project + [N] plugin), [N] skills, [N] MCP servers discovered.
+> Boss ready. [N] agents ([N] global + [N] project + [N] plugin), [N] skills, [N] MCP servers discovered. Persona: [loaded | not yet created].
 
 If the scan fails or returns empty results, proceed gracefully with whatever is available.
 
