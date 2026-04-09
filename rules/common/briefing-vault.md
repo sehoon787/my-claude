@@ -1,4 +1,4 @@
-# Knowledge Vault
+# Briefing Vault
 
 Every project maintains a `.briefing/` directory as a persistent, Obsidian-compatible knowledge base.
 

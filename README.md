@@ -315,7 +315,7 @@ ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 36 | plan, team, trace, deep-dive, blueprint, ultrawork |
 | [gstack](https://github.com/garrytan/gstack) | 40 | /qa, /review, /ship, /cso, /investigate, /office-hours |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming, systematic-debugging, TDD, parallel-agents |
-| [my-claude Core](https://github.com/sehoon787/my-claude) | 3 | boss-advanced, gstack-sprint, knowledge-vault |
+| [my-claude Core](https://github.com/sehoon787/my-claude) | 3 | boss-advanced, gstack-sprint, briefing-vault |
 | [Anthropic Official](https://github.com/anthropics/skills) | 14+ | pdf, docx, pptx, xlsx, canvas-design, mcp-builder |
 
 </details>
@@ -335,10 +335,10 @@ ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
 
 | Hook | Event | Behavior |
 |------|-------|----------|
-| Session Setup | SessionStart | Auto-detects missing tools + injects Knowledge Vault context |
+| Session Setup | SessionStart | Auto-detects missing tools + injects Briefing Vault context |
 | Delegation Guard | PreToolUse | Blocks Boss from directly modifying files |
 | Agent Telemetry | PostToolUse | Logs agent usage to `agent-usage.jsonl` |
-| Subagent Verifier | SubagentStop | Forces independent verification + logs to Knowledge Vault |
+| Subagent Verifier | SubagentStop | Forces independent verification + logs to Briefing Vault |
 | Completion Check | Stop | Confirms tasks verified + prompts session summary |
 | Teammate Idle Guide | TeammateIdle | Prompts leader on idle teammates |
 | Task Quality Gate | TaskCompleted | Verifies deliverable quality |
@@ -347,7 +347,7 @@ ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
 
 ---
 
-## <img src="https://obsidian.md/images/obsidian-logo-gradient.svg" width="24" height="24" align="center"/> Knowledge Vault
+## <img src="https://obsidian.md/images/obsidian-logo-gradient.svg" width="24" height="24" align="center"/> Briefing Vault
 
 my-claude includes an Obsidian-compatible knowledge management system. Every project maintains a `.briefing/` directory as a persistent memory base.
 
@@ -420,7 +420,7 @@ Features built specifically for this project, beyond what upstream sources provi
 | **3-Phase Sprint** | Design (interactive) → Execute (autonomous via ralph) → Review (interactive vs design doc) |
 | **Agent Tier Priority** | core > omo > omc > agency deduplication. Most specialized agent wins. |
 | **Agency Cost Optimization** | Haiku for advisory, Sonnet for implementation — automatic model routing for 172 domain agents |
-| **Knowledge Vault** | Obsidian-compatible `.briefing/` directory with sessions, decisions, learnings, references |
+| **Briefing Vault** | Obsidian-compatible `.briefing/` directory with sessions, decisions, learnings, references |
 | **Agent Telemetry** | PostToolUse hook logs agent usage to `agent-usage.jsonl` |
 | **Smart Packs** | Project-type detection recommends relevant agent packs at session start |
 | **CI SHA Pre-check** | Upstream sync skips unchanged sources via `git ls-remote` SHA comparison |

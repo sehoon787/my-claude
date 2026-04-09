@@ -310,7 +310,7 @@ SETUP.md를 따라 설치하면 다음이 구성됩니다:
 | everything-claude-code (ECC) | 180+ | tdd-workflow, coding-standards, frontend-patterns, backend-patterns, autopilot, ralph, security-review, continuous-learning |
 | oh-my-claudecode (OMC) | 36 | plan, team, trace, deep-dive, blueprint, ultrawork, sciomc, omc-setup |
 | superpowers | 14 | brainstorming, systematic-debugging, test-driven-development, subagent-driven-development, writing-plans, executing-plans, dispatching-parallel-agents, using-git-worktrees, requesting-code-review, receiving-code-review, verification-before-completion, finishing-a-development-branch, writing-skills, using-superpowers |
-| my-claude Core | 3 | boss-advanced, gstack-sprint, knowledge-vault |
+| my-claude Core | 3 | boss-advanced, gstack-sprint, briefing-vault |
 | gstack (런타임) | 40 | /qa, /review, /ship, /cso, /investigate, /design-review, /office-hours, /autoplan |
 
 **install.sh로 별도 설치:**

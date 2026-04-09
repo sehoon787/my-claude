@@ -12,7 +12,7 @@
 4. [Companion Tools](#4-companion-tools)
 5. [Agent Packs](#5-agent-packs)
 6. [gstack Sprint Process](#6-gstack-sprint-process)
-7. [Knowledge Vault](#7-knowledge-vault)
+7. [Briefing Vault](#7-briefing-vault)
 8. [Verify Installation](#8-verify-installation)
 9. [Updating](#9-updating)
 10. [Troubleshooting](#10-troubleshooting)
@@ -279,7 +279,7 @@ curl -fsSL https://bun.sh/install | bash && bash install.sh
 
 ---
 
-## 7. Knowledge Vault
+## 7. Briefing Vault
 
 my-claude includes an Obsidian-compatible knowledge management system. Every project maintains a `.briefing/` directory as persistent memory across sessions.
 

@@ -104,7 +104,7 @@ EOF
     && REGISTRY_STATUS="regenerated" || REGISTRY_STATUS="failed"
 fi
 
-# 6. Knowledge Vault Auto-Create + Context
+# 6. Briefing Vault Auto-Create + Context
 _kv_msg=""
 _kv_dir=".briefing"
 if [ ! -f "$_kv_dir/INDEX.md" ]; then
@@ -141,13 +141,13 @@ KVEOF
   elif [ ! -f ".gitignore" ]; then
     echo '.briefing/' > ".gitignore"
   fi
-  _kv_msg="[KnowledgeVault] Auto-created .briefing/ structure. Log decisions, learnings, sessions per rules/common/knowledge-vault.md."
+  _kv_msg="[BriefingVault] Auto-created .briefing/ structure. Log decisions, learnings, sessions per rules/common/briefing-vault.md."
 else
   _kv_recent=$(grep -E '^\- \[\[' "$_kv_dir/INDEX.md" 2>/dev/null | head -5 | tr '\n' '; ')
   if [ -n "$_kv_recent" ]; then
-    _kv_msg="[KnowledgeVault] .briefing/INDEX.md loaded. Recent: ${_kv_recent}Log decisions→.briefing/decisions/, learnings→.briefing/learnings/, sessions→.briefing/sessions/, agent logs→.briefing/agents/."
+    _kv_msg="[BriefingVault] .briefing/INDEX.md loaded. Recent: ${_kv_recent}Log decisions→.briefing/decisions/, learnings→.briefing/learnings/, sessions→.briefing/sessions/, agent logs→.briefing/agents/."
   else
-    _kv_msg="[KnowledgeVault] .briefing/INDEX.md exists. Log decisions/learnings/sessions per rules/common/knowledge-vault.md."
+    _kv_msg="[BriefingVault] .briefing/INDEX.md exists. Log decisions/learnings/sessions per rules/common/briefing-vault.md."
   fi
 fi
 
