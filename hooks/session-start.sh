@@ -151,6 +151,54 @@ else
   fi
 fi
 
+# 7. Persona: Pending Suggestions Notification
+_sug_file="$_kv_dir/persona/suggestions.jsonl"
+if [ -f "$_sug_file" ]; then
+  _pending_count=0
+  while IFS= read -r _line; do
+    case "$_line" in *'"type":"pending"'*|*'"type": "pending"'*) _pending_count=$((_pending_count + 1)) ;; esac
+  done < "$_sug_file"
+  if [ "$_pending_count" -gt 0 ]; then
+    _kv_msg="${_kv_msg} [BriefingVault] ${_pending_count} pending persona suggestion(s). Run: node hooks/persona-rule.js list"
+  fi
+fi
+
+# 8. Persona: Active Rules Summary
+_rules_dir="$_kv_dir/persona/rules"
+if [ -d "$_rules_dir" ]; then
+  _rule_names=""
+  for _rf in "$_rules_dir"/*.md; do
+    [ -f "$_rf" ] || continue
+    _rname=$(basename "$_rf" .md)
+    if [ -z "$_rule_names" ]; then
+      _rule_names="$_rname"
+    else
+      _rule_names="$_rule_names, $_rname"
+    fi
+  done
+  if [ -n "$_rule_names" ]; then
+    _kv_msg="${_kv_msg} [BriefingVault] Active persona rules: ${_rule_names}"
+  fi
+fi
+
+# 9. Persona: Active Skills Summary
+_skills_dir="$_kv_dir/persona/skills"
+if [ -d "$_skills_dir" ]; then
+  _skill_names=""
+  for _sf in "$_skills_dir"/*.md; do
+    [ -f "$_sf" ] || continue
+    _sname=$(basename "$_sf" .md)
+    if [ -z "$_skill_names" ]; then
+      _skill_names="$_sname"
+    else
+      _skill_names="$_skill_names, $_sname"
+    fi
+  done
+  if [ -n "$_skill_names" ]; then
+    _kv_msg="${_kv_msg} [BriefingVault] Active persona skills: ${_skill_names}"
+  fi
+fi
+
 # Return results as additionalContext
 MSG=""
 if [ ${#INSTALLED[@]} -gt 0 ]; then
