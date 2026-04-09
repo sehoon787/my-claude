@@ -72,11 +72,11 @@ var entries7d = logEntries.filter(function(e) {
 // Compute Agent Affinity (30-day rolling)
 var affinityCounts = {};
 for (var i = 0; i < entries30d.length; i++) {
-  var agentType = entries30d[i].agent_type;
+  var agentType = entries30d[i].agent_type || entries30d[i].agent;
   if (!agentType) continue;
   affinityCounts[agentType] = (affinityCounts[agentType] || 0) + 1;
 }
-var total30d = entries30d.filter(function(e) { return !!e.agent_type; }).length;
+var total30d = entries30d.filter(function(e) { return !!(e.agent_type || e.agent); }).length;
 
 var affinityList = Object.keys(affinityCounts).map(function(t) {
   return { type: t, count: affinityCounts[t] };
@@ -87,7 +87,7 @@ affinityList = affinityList.slice(0, 10);
 // Detect Patterns (7-day rolling)
 var pattern7d = {};
 for (var i = 0; i < entries7d.length; i++) {
-  var agentType = entries7d[i].agent_type;
+  var agentType = entries7d[i].agent_type || entries7d[i].agent;
   if (!agentType) continue;
   pattern7d[agentType] = (pattern7d[agentType] || 0) + 1;
 }
