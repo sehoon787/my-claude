@@ -429,7 +429,6 @@ echo "[2/6] Installing hooks..."
 mkdir -p "$HOME/.claude/hooks"
 cp "$SCRIPT_DIR/hooks/hooks.json"      "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/session-start.sh" "$HOME/.claude/hooks/"
-echo "  NOTE: hooks.json uses \${CLAUDE_PLUGIN_ROOT}. If not using plugin, update script paths manually."
 echo "  Hooks installed"
 
 # ── 3. MCP servers ──
