@@ -104,6 +104,42 @@ EOF
     && REGISTRY_STATUS="regenerated" || REGISTRY_STATUS="failed"
 fi
 
+# 5b. .knowledge → .briefing migration (one-time, backward compat)
+if [ -d ".knowledge" ]; then
+  if [ ! -d ".briefing" ]; then
+    # Simple rename
+    mv ".knowledge" ".briefing"
+    mkdir -p ".briefing/persona/rules" ".briefing/persona/skills"
+    # Add language field to INDEX.md if missing
+    if [ -f ".briefing/INDEX.md" ] && ! grep -q '^language:' ".briefing/INDEX.md"; then
+      sed -i '/^type:/a language: en' ".briefing/INDEX.md" 2>/dev/null || true
+    fi
+    # Update .gitignore
+    if [ -f ".gitignore" ]; then
+      sed -i '/^\.knowledge\//d' ".gitignore" 2>/dev/null || true
+      grep -q '\.briefing/' ".gitignore" 2>/dev/null || echo '.briefing/' >> ".gitignore"
+    fi
+  else
+    # Both exist — merge unique files from .knowledge into .briefing, then remove
+    for _subdir in sessions decisions learnings agents references; do
+      if [ -d ".knowledge/$_subdir" ]; then
+        mkdir -p ".briefing/$_subdir"
+        for _file in ".knowledge/$_subdir"/*; do
+          [ -f "$_file" ] || continue
+          _bname=$(basename "$_file")
+          [ ! -f ".briefing/$_subdir/$_bname" ] && cp "$_file" ".briefing/$_subdir/$_bname"
+        done
+      fi
+    done
+    rm -rf ".knowledge"
+    mkdir -p ".briefing/persona/rules" ".briefing/persona/skills"
+    if [ -f ".gitignore" ]; then
+      sed -i '/^\.knowledge\//d' ".gitignore" 2>/dev/null || true
+      grep -q '\.briefing/' ".gitignore" 2>/dev/null || echo '.briefing/' >> ".gitignore"
+    fi
+  fi
+fi
+
 # 6. Briefing Vault Auto-Create + Context
 _kv_msg=""
 _kv_dir=".briefing"
@@ -199,6 +235,25 @@ if [ -d "$_skills_dir" ]; then
   fi
 fi
 
+# 10. Version Freshness Check (once per day, non-blocking)
+_update_msg=""
+_vc_stamp="$HOME/.claude/.my-claude-update-check"
+_vc_today=$(date +%Y-%m-%d)
+_vc_last=""
+[ -f "$_vc_stamp" ] && _vc_last=$(head -1 "$_vc_stamp" 2>/dev/null)
+if [ "$_vc_today" != "$_vc_last" ]; then
+  _vc_installed_sha=""
+  [ -f "$HOME/.claude/.my-claude-installed-sha" ] && _vc_installed_sha=$(cat "$HOME/.claude/.my-claude-installed-sha" 2>/dev/null)
+  if [ -n "$_vc_installed_sha" ]; then
+    _vc_remote_sha=$(git ls-remote https://github.com/sehoon787/my-claude.git HEAD 2>/dev/null | cut -f1 | head -c 12)
+    if [ -n "$_vc_remote_sha" ] && [ "${_vc_installed_sha}" != "${_vc_remote_sha}" ]; then
+      _vc_current=$(cat "$HOME/.claude/.my-claude-version" 2>/dev/null || echo "unknown")
+      _update_msg="[UpdateCheck] my-claude update available (installed: v${_vc_current}). Run: cd <my-claude-repo> && bash install.sh"
+    fi
+    echo "$_vc_today" > "$_vc_stamp" 2>/dev/null || true
+  fi
+fi
+
 # Return results as additionalContext
 MSG=""
 if [ ${#INSTALLED[@]} -gt 0 ]; then
@@ -210,6 +265,7 @@ fi
 
 MSG="${MSG}[SessionStart] Registry cache: ${REGISTRY_STATUS}."
 [ -n "$_kv_msg" ] && MSG="${MSG} ${_kv_msg}"
+[ -n "$_update_msg" ] && MSG="${MSG} ${_update_msg}"
 if [ -n "$MSG" ]; then
   echo "{\"hookSpecificOutput\":{\"additionalContext\":\"$MSG\"}}"
 fi

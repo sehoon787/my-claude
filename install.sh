@@ -554,5 +554,6 @@ echo "  teammateMode:     $TEAMMATE_MODE"
 echo ""
 # Record installed version
 echo "$INSTALLING_VERSION" > "$HOME/.claude/.my-claude-version"
+git -C "$SCRIPT_DIR" rev-parse --short=12 HEAD 2>/dev/null > "$HOME/.claude/.my-claude-installed-sha" || true
 
 echo "=== Install complete ==="
