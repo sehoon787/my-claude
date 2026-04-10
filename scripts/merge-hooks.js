@@ -16,20 +16,6 @@ const settings = fs.existsSync(settingsPath)
   ? JSON.parse(fs.readFileSync(settingsPath, 'utf8'))
   : {};
 
-// Skip hook merging when plugin is active (plugin loads hooks directly)
-const pluginKey = 'my-claude@my-claude';
-if (settings.enabledPlugins && settings.enabledPlugins[pluginKey]) {
-  // Remove stale hooks from settings.json to prevent duplicate execution
-  if (settings.hooks) {
-    delete settings.hooks;
-    fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n');
-    console.log('  plugin active — removed stale hooks from settings.json');
-  } else {
-    console.log('  plugin active — hooks managed by plugin, skipping merge');
-  }
-  process.exit(0);
-}
-
 const srcHooks = JSON.parse(fs.readFileSync(hooksJsonPath, 'utf8')).hooks || {};
 settings.hooks = settings.hooks || {};
 
