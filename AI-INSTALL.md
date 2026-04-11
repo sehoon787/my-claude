@@ -38,7 +38,10 @@ This installs:
 
 ```bash
 # If plugin install is not available:
-git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude
+# Resolve the latest release tag so manual installs match published releases.
+# Falls back to 'main' when the API is unreachable or rate-limited.
+LATEST=$(curl -s https://api.github.com/repos/sehoon787/my-claude/releases/latest | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+git clone --depth 1 --branch "${LATEST:-main}" https://github.com/sehoon787/my-claude.git /tmp/my-claude
 git -C /tmp/my-claude submodule update --init --depth 1
 mkdir -p ~/.claude/agents ~/.claude/agent-packs ~/.claude/skills ~/.claude/rules ~/.claude/hooks ~/.claude/docs/nexus
 
@@ -180,8 +183,9 @@ Note: Manual install now includes hooks configuration. The `scripts/merge-hooks.
 ## Step 2: Install companion tools
 
 ```bash
-# Clone and run the companion installer
-git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude
+# Clone and run the companion installer (pinned to the latest release tag)
+LATEST=$(curl -s https://api.github.com/repos/sehoon787/my-claude/releases/latest | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+git clone --depth 1 --branch "${LATEST:-main}" https://github.com/sehoon787/my-claude.git /tmp/my-claude
 bash /tmp/my-claude/install.sh
 rm -rf /tmp/my-claude
 ```
