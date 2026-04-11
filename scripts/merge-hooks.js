@@ -1,6 +1,6 @@
 // Usage: node scripts/merge-hooks.js <hooks-json-path>
 // Merges hooks from hooks.json into ~/.claude/settings.json
-// Resolves ${CLAUDE_PLUGIN_ROOT}/hooks to ~/.claude/hooks
+// Resolves ${CLAUDE_PLUGIN_ROOT}/{hooks,scripts} to ~/.claude/{hooks,scripts}
 const fs = require('fs');
 const path = require('path');
 const home = process.env.HOME || process.env.USERPROFILE;
@@ -19,10 +19,12 @@ const settings = fs.existsSync(settingsPath)
 const srcHooks = JSON.parse(fs.readFileSync(hooksJsonPath, 'utf8')).hooks || {};
 settings.hooks = settings.hooks || {};
 
-// Resolve ${CLAUDE_PLUGIN_ROOT}/hooks → ~/.claude/hooks (forward slashes)
+// Resolve ${CLAUDE_PLUGIN_ROOT}/<subdir> → ~/.claude/<subdir> (forward slashes)
 const hooksDir = path.join(home, '.claude', 'hooks').replace(/\\/g, '/');
+const scriptsDir = path.join(home, '.claude', 'scripts').replace(/\\/g, '/');
 let rawHooks = JSON.stringify(srcHooks);
 rawHooks = rawHooks.replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/hooks/g, hooksDir);
+rawHooks = rawHooks.replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/scripts/g, scriptsDir);
 const resolvedHooks = JSON.parse(rawHooks);
 
 for (const [event, entries] of Object.entries(resolvedHooks)) {

@@ -429,6 +429,8 @@ echo "[2/6] Installing hooks..."
 mkdir -p "$HOME/.claude/hooks"
 cp "$SCRIPT_DIR/hooks/hooks.json"      "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/session-start.sh" "$HOME/.claude/hooks/"
+mkdir -p "$HOME/.claude/scripts"
+cp "$SCRIPT_DIR/scripts/validate-hooks.js" "$HOME/.claude/scripts/"
 echo "  Hooks installed"
 
 # ── 3. MCP servers ──
