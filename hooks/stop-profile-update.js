@@ -600,4 +600,44 @@ try {
   process.stderr.write('stop-profile-update: failed to write decision draft: ' + e.message + '\n');
 }
 
+// --- INDEX.md auto-update ---
+try {
+  var indexPath = path.join(BRIEFING_DIR, 'INDEX.md');
+  if (fs.existsSync(indexPath)) {
+    var indexContent = fs.readFileSync(indexPath, 'utf8');
+
+    // Helper: list recent files from a subdir
+    function recentFiles(subdir, limit) {
+      var dir = path.join(BRIEFING_DIR, subdir);
+      if (!fs.existsSync(dir)) return [];
+      return fs.readdirSync(dir)
+        .filter(function(f) { return f.endsWith('.md') && f !== '.gitkeep'; })
+        .sort()
+        .reverse()
+        .slice(0, limit)
+        .map(function(f) { return '- [[' + subdir + '/' + f.replace('.md', '') + ']]'; });
+    }
+
+    var sections = {
+      'Recent Sessions': recentFiles('sessions', 5),
+      'Recent Decisions': recentFiles('decisions', 5),
+      'Recent Learnings': recentFiles('learnings', 3)
+    };
+
+    Object.keys(sections).forEach(function(heading) {
+      var lines = sections[heading];
+      if (lines.length === 0) return;
+      var pattern = new RegExp('(## ' + heading + '\\n)([\\s\\S]*?)(?=\\n## |$)');
+      var replacement = '$1' + lines.join('\n') + '\n\n';
+      if (pattern.test(indexContent)) {
+        indexContent = indexContent.replace(pattern, replacement);
+      }
+    });
+
+    fs.writeFileSync(indexPath, indexContent);
+  }
+} catch (e) {
+  process.stderr.write('INDEX.md update failed: ' + e.message + '\n');
+}
+
 process.exit(0);
