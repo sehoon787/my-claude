@@ -72,11 +72,14 @@ var entries7d = logEntries.filter(function(e) {
 // Compute Agent Affinity (30-day rolling)
 var affinityCounts = {};
 for (var i = 0; i < entries30d.length; i++) {
-  var agentType = entries30d[i].agent_type || entries30d[i].agent;
-  if (!agentType) continue;
+  var agentType = entries30d[i].agent_type || entries30d[i].agent || 'unknown';
+  if (agentType === 'unknown') {
+    agentType = entries30d[i].name || entries30d[i].description || 'unknown';
+  }
+  if (!agentType || agentType === 'unknown') continue;
   affinityCounts[agentType] = (affinityCounts[agentType] || 0) + 1;
 }
-var total30d = entries30d.filter(function(e) { return !!(e.agent_type || e.agent); }).length;
+var total30d = Object.keys(affinityCounts).reduce(function(sum, k) { return sum + affinityCounts[k]; }, 0);
 
 var affinityList = Object.keys(affinityCounts).map(function(t) {
   return { type: t, count: affinityCounts[t] };
@@ -87,8 +90,11 @@ affinityList = affinityList.slice(0, 10);
 // Detect Patterns (7-day rolling)
 var pattern7d = {};
 for (var i = 0; i < entries7d.length; i++) {
-  var agentType = entries7d[i].agent_type || entries7d[i].agent;
-  if (!agentType) continue;
+  var agentType = entries7d[i].agent_type || entries7d[i].agent || 'unknown';
+  if (agentType === 'unknown') {
+    agentType = entries7d[i].name || entries7d[i].description || 'unknown';
+  }
+  if (!agentType || agentType === 'unknown') continue;
   pattern7d[agentType] = (pattern7d[agentType] || 0) + 1;
 }
 
@@ -119,6 +125,7 @@ for (var i = 0; i < patternTypes.length; i++) {
   var agentType = patternTypes[i];
   var count = pattern7d[agentType];
   if (count < 3) continue;
+  if (agentType === 'unknown' || agentType === 'stop' || agentType === 'throttled-update') continue;
 
   // Check cooldown, pending, or already accepted
   var hasCooldown = false;
@@ -187,8 +194,28 @@ try {
   process.stderr.write('stop-profile-update: failed to read profile: ' + e.message + '\n');
 }
 
-// Increment session_count
-sessionCount += 1;
+// Increment session_count (idempotent: only once per session)
+var shouldIncrement = true;
+try {
+  var sessionIdFile = path.join(BRIEFING_DIR, '.session-start-head');
+  var lastCountedFile = path.join(BRIEFING_DIR, '.last-counted-session');
+  if (fs.existsSync(sessionIdFile)) {
+    var currentSessionId = fs.readFileSync(sessionIdFile, 'utf8').trim();
+    if (fs.existsSync(lastCountedFile)) {
+      var lastCounted = fs.readFileSync(lastCountedFile, 'utf8').trim();
+      if (lastCounted === currentSessionId) {
+        shouldIncrement = false;
+      }
+    }
+    if (shouldIncrement) {
+      fs.writeFileSync(lastCountedFile, currentSessionId);
+    }
+  }
+} catch (e) {}
+
+if (shouldIncrement) {
+  sessionCount += 1;
+}
 
 // Philosophy Diff (every 5 sessions)
 var newHistoryEntry = '';
@@ -231,6 +258,18 @@ var mostActive = affinityList.length > 0 ? affinityList[0].type : 'none';
 // Date string
 var todayStr = now.toISOString().slice(0, 10);
 
+// Build Philosophy string from actual affinity data
+var philosophyContent = '(insufficient data)';
+if (affinityList.length >= 2 && total30d >= 10) {
+  var topAgent = affinityList[0].type;
+  var topPct = Math.round(affinityList[0].count / total30d * 100);
+  var style = topPct > 40 ? 'heavily ' + topAgent + '-driven' :
+              topPct > 25 ? topAgent + '-preferred with balanced delegation' :
+              'balanced multi-agent orchestration';
+  philosophyContent = 'Workflow style: ' + style + ' (' + total30d + ' calls over 30d).\n' +
+    'Primary tools: ' + affinityList.slice(0, 3).map(function(a) { return a.type; }).join(', ') + '.';
+}
+
 // Build profile.md content
 var profileContent = '---\n' +
   'date: ' + todayStr + '\n' +
@@ -241,7 +280,7 @@ var profileContent = '---\n' +
   '# User Profile\n' +
   '\n' +
   '## Philosophy\n' +
-  '(auto-populated after pattern analysis)\n' +
+  philosophyContent + '\n' +
   '\n' +
   '## Workflow Patterns\n' +
   '- Total agent calls (30d): ' + total30d + '\n' +
