@@ -16,7 +16,7 @@ if (!fs.existsSync(INDEX_FILE)) {
   process.exit(0);
 }
 
-// Check work counter — only enforce if meaningful work was done
+// Check session activity — enforce if ANY meaningful activity happened
 var workCounter = 0;
 try {
   var wcPath = path.join(BRIEFING_DIR, '.work-counter');
@@ -25,8 +25,32 @@ try {
   }
 } catch (e) {}
 
-// Threshold: only enforce if >= 3 file edits
-if (workCounter < 3) {
+// Check agent-log for today's entries
+var hasAgentActivity = false;
+try {
+  var agentLogPath = path.join(BRIEFING_DIR, 'agents', 'agent-log.jsonl');
+  if (fs.existsSync(agentLogPath)) {
+    var logStat = fs.statSync(agentLogPath);
+    if (logStat.mtime.toISOString().slice(0, 10) === todayStr) {
+      hasAgentActivity = true;
+    }
+  }
+} catch (e) {}
+
+// Check if user sent messages (profile-update-counter exists and modified today)
+var hasUserMessages = false;
+try {
+  var pucPath = path.join(BRIEFING_DIR, '.profile-update-counter');
+  if (fs.existsSync(pucPath)) {
+    var pucStat = fs.statSync(pucPath);
+    if (pucStat.mtime.toISOString().slice(0, 10) === todayStr) {
+      hasUserMessages = true;
+    }
+  }
+} catch (e) {}
+
+// Skip only if NO activity at all (empty session)
+if (workCounter === 0 && !hasAgentActivity && !hasUserMessages) {
   process.exit(0);
 }
 
