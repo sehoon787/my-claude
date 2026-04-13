@@ -147,6 +147,8 @@ if [ ! -f "$_kv_dir/INDEX.md" ]; then
   mkdir -p "$_kv_dir/sessions" "$_kv_dir/decisions" "$_kv_dir/learnings" "$_kv_dir/agents" "$_kv_dir/references" "$_kv_dir/persona/rules" "$_kv_dir/persona/skills"
   # Save git HEAD for session-specific diff at Stop
   git rev-parse HEAD 2>/dev/null > "$_kv_dir/.session-start-head" || true
+  # Reset session-specific counters
+  echo "0" > "$_kv_dir/.session-message-count" 2>/dev/null || true
   _proj_name=$(basename "$(pwd)")
   cat > "$_kv_dir/INDEX.md" <<KVEOF
 ---
@@ -183,6 +185,8 @@ KVEOF
 else
   # Save git HEAD for session-specific diff at Stop
   git rev-parse HEAD 2>/dev/null > "$_kv_dir/.session-start-head" || true
+  # Reset session-specific counters
+  echo "0" > "$_kv_dir/.session-message-count" 2>/dev/null || true
   # Add language field to INDEX.md if missing
   if ! grep -q '^language:' "$_kv_dir/INDEX.md" 2>/dev/null; then
     sed -i '/^type:/a language: en' "$_kv_dir/INDEX.md" 2>/dev/null || true
