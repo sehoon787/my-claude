@@ -533,9 +533,7 @@ fi
   done
   find "$HOME/.claude/skills" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
   find "$HOME/.claude/rules" -name '*.md' | while read -r f; do echo "rules/${f#$HOME/.claude/rules/}"; done 2>/dev/null || true
-  echo "hooks/hooks.json"
-  echo "hooks/session-start.sh"
-  echo "docs/nexus/agent-teams-reference.md"
+  find "$HOME/.claude/hooks" -type f | while read -r f; do echo "hooks/$(basename "$f")"; done
   find "$HOME/.claude/docs/nexus" -name '*.md' -exec sh -c 'echo "docs/nexus/$(basename "$1")"' _ {} \; 2>/dev/null || true
 } | sort -u > "$HOME/.claude/.my-claude-manifest"
 echo "  Manifest saved ($(wc -l < "$HOME/.claude/.my-claude-manifest") entries)"

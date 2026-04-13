@@ -36,178 +36,42 @@ This installs:
 
 ## Step 1b: Manual install (if plugin unavailable)
 
+`install.sh` is the single source of truth for installation. It handles everything:
+agents, skills, rules, hooks, MCP servers, companion tools (omc, omo, ast-grep),
+gstack, Anthropic skills, Karpathy guidelines, and manifest generation.
+
 ```bash
-# If plugin install is not available:
 # Resolve the latest release tag so manual installs match published releases.
 # Falls back to 'main' when the API is unreachable or rate-limited.
 LATEST=$(curl -s https://api.github.com/repos/sehoon787/my-claude/releases/latest | grep '"tag_name"' | head -1 | cut -d'"' -f4)
 git clone --depth 1 --branch "${LATEST:-main}" https://github.com/sehoon787/my-claude.git /tmp/my-claude
 git -C /tmp/my-claude submodule update --init --depth 1
-mkdir -p ~/.claude/agents ~/.claude/agent-packs ~/.claude/skills ~/.claude/rules ~/.claude/hooks ~/.claude/docs/nexus
-
-# ── Manifest-based cleanup (safe upgrade: only removes my-claude's own files) ──
-if [ -f "$HOME/.claude/.my-claude-manifest" ]; then
-  echo "Cleaning previous my-claude install via manifest..."
-  while IFS= read -r rel_path; do
-    [ -f "$HOME/.claude/$rel_path" ] && rm -f "$HOME/.claude/$rel_path"
-  done < "$HOME/.claude/.my-claude-manifest"
-  find "$HOME/.claude/agent-packs" -type d -empty -delete 2>/dev/null || true
-fi
-
-# ── Legacy cleanup (zsh-safe, for installs before manifest was introduced) ──
-for prefix in marketing- sales- paid- academic- design- support- testing- specialized- product- project-management- game- godot- unity- unreal- roblox- xr- phase- scenario-; do
-  find "$HOME/.claude/agents" -maxdepth 1 -name "${prefix}*.md" -delete 2>/dev/null || true
-done
-
-# Remove stale agent-pack directories not in current version
-EXPECTED_PACKS="academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing"
-for dir in "$HOME/.claude/agent-packs"/*/; do
-  [ ! -d "$dir" ] && continue
-  dirname=$(basename "$dir")
-  echo " $EXPECTED_PACKS " | grep -q " $dirname " || rm -rf "$dir"
-done
-
-# ── Core agents (always loaded) ──
-find /tmp/my-claude/agents/core -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec cp {} ~/.claude/agents/ \;
-cp /tmp/my-claude/agents/omo/*.md ~/.claude/agents/
-cp /tmp/my-claude/upstream/omc/agents/*.md ~/.claude/agents/
-find /tmp/my-claude/upstream/agency-agents/engineering -name '*.md' -exec cp {} ~/.claude/agents/ \;
-
-# ── Domain agent-packs (on-demand) ──
-for dir in academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing; do
-  mkdir -p ~/.claude/agent-packs/$dir
-  find /tmp/my-claude/upstream/agency-agents/$dir -name '*.md' -exec cp {} ~/.claude/agent-packs/$dir/ \; 2>/dev/null || true
-done
-# game-development may contain subdirectories; use find to flatten
-if [ -d /tmp/my-claude/upstream/agency-agents/game-development ]; then
-  find /tmp/my-claude/upstream/agency-agents/game-development -name '*.md' -exec cp {} ~/.claude/agent-packs/game-development/ \;
-fi
-
-# ── Dedup: remove pack entries that duplicate core agents ──
-for f in ~/.claude/agents/*.md; do
-  [ ! -f "$f" ] && continue
-  find ~/.claude/agent-packs -name "$(basename "$f")" -delete 2>/dev/null || true
-done
-
-# ── Strategy docs ──
-mkdir -p ~/.claude/docs/nexus
-cp /tmp/my-claude/agents/core/agent-teams-reference.md ~/.claude/docs/nexus/
-find /tmp/my-claude/upstream/agency-agents/strategy -name '*.md' -exec cp {} ~/.claude/docs/nexus/ \; 2>/dev/null || true
-
-# ── Skills (pre-clean file/symlink conflicts, then copy) ──
-for src in /tmp/my-claude/upstream/ecc/skills/*/; do
-  [ ! -d "$src" ] && continue
-  target="$HOME/.claude/skills/$(basename "$src")"
-  { [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; } && rm -f "$target"
-done
-for src in /tmp/my-claude/upstream/omc/skills/*/; do
-  [ ! -d "$src" ] && continue
-  target="$HOME/.claude/skills/$(basename "$src")"
-  { [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; } && rm -f "$target"
-done
-cp -r /tmp/my-claude/upstream/ecc/skills/* ~/.claude/skills/
-cp -r /tmp/my-claude/upstream/omc/skills/* ~/.claude/skills/
-
-# ── gstack (sprint-process harness with 40 skills) ──
-GSTACK_DIR="$HOME/.claude/skills/gstack"
-if [ -d "$GSTACK_DIR/.git" ]; then
-  (cd "$GSTACK_DIR" && git pull --ff-only 2>/dev/null || true)
-else
-  git clone --depth 1 https://github.com/garrytan/gstack.git "$GSTACK_DIR" 2>/dev/null || true
-fi
-# Remove ECC skills superseded by gstack
-for skill in benchmark canary-watch safety-guard browser-qa verification-loop security-review design-system; do
-  target="$HOME/.claude/skills/$skill"
-  if [ -L "$target" ]; then
-    link_dest=$(readlink "$target")
-    case "$link_dest" in *gstack*) continue ;; esac
-    rm -f "$target"
-  elif [ -d "$target" ]; then
-    rm -rf "$target"
-  fi
-done
-# Run gstack setup if bun is available
-if [ -d "$GSTACK_DIR" ] && command -v bun >/dev/null 2>&1 && [ -f "$GSTACK_DIR/setup" ]; then
-  (cd "$GSTACK_DIR" && bun install 2>/dev/null && ./setup --host claude 2>/dev/null || true)
-  git -C "$GSTACK_DIR" checkout -- '*/SKILL.md' 'SKILL.md' 2>/dev/null || true
-fi
-# Auto-upgrade config
-mkdir -p "$HOME/.gstack"
-echo '{"auto_upgrade":true}' > "$HOME/.gstack/config.json"
-
-# ── Superpowers (1 agent, 14 skills) ──
-cp /tmp/my-claude/upstream/superpowers/agents/*.md ~/.claude/agents/ 2>/dev/null || true
-cp -r /tmp/my-claude/upstream/superpowers/skills/* ~/.claude/skills/ 2>/dev/null || true
-
-# ── Core skills (self-owned) ──
-cp -r /tmp/my-claude/skills/core/* ~/.claude/skills/ 2>/dev/null || true
-
-# Rules, hooks
-cp -r /tmp/my-claude/upstream/ecc/rules/* ~/.claude/rules/ 2>/dev/null || true
-cp /tmp/my-claude/hooks/hooks.json ~/.claude/hooks/
-cp /tmp/my-claude/hooks/session-start.sh ~/.claude/hooks/
-
-# MCP servers
-claude mcp add --transport http --scope user context7 "https://mcp.context7.com/mcp"
-claude mcp add --transport http --scope user exa "https://mcp.exa.ai/mcp?tools=web_search_exa"
-claude mcp add --transport http --scope user grep_app "https://mcp.grep.app"
-
-# Merge hooks + settings
-node /tmp/my-claude/scripts/merge-hooks.js ~/.claude/hooks/hooks.json
-node /tmp/my-claude/scripts/merge-settings.js
-
-# ── Generate manifest from SOURCE (only tracks my-claude's own files, not user content) ──
-{
-  find /tmp/my-claude/agents/core -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
-  find /tmp/my-claude/agents/omo -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
-  find /tmp/my-claude/upstream/omc/agents -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
-  find /tmp/my-claude/upstream/agency-agents/engineering -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
-  find /tmp/my-claude/upstream/superpowers/agents -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \; 2>/dev/null || true
-  for pack in academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing; do
-    find /tmp/my-claude/upstream/agency-agents/$pack -name '*.md' -exec sh -c 'echo "agent-packs/'"$pack"'/$(basename "$1")"' _ {} \; 2>/dev/null || true
-  done
-  find /tmp/my-claude/upstream/ecc/skills -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
-  find /tmp/my-claude/upstream/omc/skills -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
-  find /tmp/my-claude/skills/core -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \; 2>/dev/null || true
-  find /tmp/my-claude/upstream/ecc/rules -name '*.md' | while read -r f; do echo "rules/${f#/tmp/my-claude/upstream/ecc/rules/}"; done 2>/dev/null || true
-  echo "hooks/hooks.json"
-  echo "hooks/session-start.sh"
-  echo "docs/nexus/agent-teams-reference.md"
-  find /tmp/my-claude/upstream/agency-agents/strategy -name '*.md' -exec sh -c 'echo "docs/nexus/$(basename "$1")"' _ {} \;
-} | sort -u > ~/.claude/.my-claude-manifest
-
-# Record installed version
-node /tmp/my-claude/scripts/get-version.js /tmp/my-claude/.claude-plugin/plugin.json > ~/.claude/.my-claude-version
-rm -rf /tmp/my-claude
-```
-
-Note: Manual install now includes hooks configuration. The `scripts/merge-hooks.js` resolves paths for both macOS and Windows.
-
-## Step 2: Install companion tools
-
-```bash
-# Clone and run the companion installer (pinned to the latest release tag)
-LATEST=$(curl -s https://api.github.com/repos/sehoon787/my-claude/releases/latest | grep '"tag_name"' | head -1 | cut -d'"' -f4)
-git clone --depth 1 --branch "${LATEST:-main}" https://github.com/sehoon787/my-claude.git /tmp/my-claude
 bash /tmp/my-claude/install.sh
 rm -rf /tmp/my-claude
 ```
 
-This installs:
-- Anthropic Official Skills (proprietary — cannot be bundled)
-- OMC CLI (`oh-my-claude-sisyphus`)
-- omo CLI (`oh-my-opencode`)
-- ast-grep + comment-checker
-- Karpathy coding guidelines (appended to CLAUDE.md)
-- gstack sprint-process harness (40 skills — code review, QA, debugging, security, deployment)
+This installs everything in one step:
+- 56 core agents + 136 domain agent-packs
+- 200+ skills (ECC + OMC + Core + gstack + Superpowers)
+- 89 rules, 7 hooks
+- 3 MCP servers (Context7, Exa, grep.app)
+- Companion tools: OMC CLI, omo CLI, ast-grep
+- Anthropic Official Skills (pdf, docx)
+- Karpathy coding guidelines
+- gstack sprint-process harness (40 skills)
+- Boss meta-orchestrator as default agent
 
 ### Activating Agent Packs
 
 After installation, activate domain-specific agent packs:
 
 ```bash
-# Activate specific packs (symlinks agents to ~/.claude/agents/)
-bash install.sh --with-packs=marketing,testing,sales
+# Re-run install.sh with --with-packs flag
+LATEST=$(curl -s https://api.github.com/repos/sehoon787/my-claude/releases/latest | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+git clone --depth 1 --branch "${LATEST:-main}" https://github.com/sehoon787/my-claude.git /tmp/my-claude
+git -C /tmp/my-claude submodule update --init --depth 1
+bash /tmp/my-claude/install.sh --with-packs=marketing,testing,sales
+rm -rf /tmp/my-claude
 
 # Available packs: academic, design, game-development, marketing,
 # paid-media, product, project-management, sales, spatial-computing,
