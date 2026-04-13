@@ -118,6 +118,9 @@ init_upstream() {
   local name="$1" url="$2"
   local submod_path="$SCRIPT_DIR/upstream/$name"
   if [ -d "$submod_path/.git" ] || [ -f "$submod_path/.git" ]; then
+    # Update existing submodule/clone to latest
+    git -C "$submod_path" fetch --depth 1 origin main 2>/dev/null \
+      && git -C "$submod_path" checkout FETCH_HEAD 2>/dev/null || true
     UPSTREAM_DIR="$submod_path"
     return 0
   fi
