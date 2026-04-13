@@ -71,6 +71,14 @@ jobs:
           gh release create "$NEW_TAG" \
             --title "$NEW_TAG" \
             --generate-notes
+      - name: Close stale auto-bump PRs
+        if: steps.bump.outputs.level != 'none'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr list --state open --head "auto/bump-" --json number,headRefName -q '.[].number' | while read -r num; do
+            gh pr close "$num" --comment "Superseded by v${{ steps.version.outputs.version }}" --delete-branch || true
+          done
       - name: Bump plugin.json version via PR
         if: steps.bump.outputs.level != 'none'
         env:
