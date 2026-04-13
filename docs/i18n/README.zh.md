@@ -358,8 +358,7 @@ ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
 │   ├── YYYY-MM-DD-<topic>.md        ← AI-written session summary (enforced)
 │   └── YYYY-MM-DD-auto.md           ← Auto-generated scaffold (git diff, agent stats)
 ├── decisions/
-│   ├── YYYY-MM-DD-<decision>.md     ← AI-written decision record
-│   └── YYYY-MM-DD-auto.md           ← Auto-generated scaffold (commits, files)
+│   └── YYYY-MM-DD-<decision>.md     ← AI-written decision record (enforced)
 ├── learnings/
 │   ├── YYYY-MM-DD-<pattern>.md      ← AI-written learning note
 │   └── YYYY-MM-DD-auto-session.md   ← Auto-generated scaffold (agents, files)
@@ -375,28 +374,17 @@ ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
     └── skills/                      ← Accepted persona skills
 ```
 
-### 自动化生命周期
+### 子 Vault
 
-| 阶段 | Hook 事件 | 发生的事情 |
-|-------|-----------|-------------|
-| **会话开始** | `SessionStart` | 创建 `.briefing/` 结构，保存 git HEAD 哈希用于会话专属差异 |
-| **工作期间** | `PostToolUse` Edit/Write | 追踪文件编辑次数；达到 5 次警告，达到 15 次且未写决策 / 学习时阻止 |
-| **工作期间** | `PostToolUse` WebSearch/WebFetch | 自动将 URL 收集到 `references/auto-links.md` |
-| **工作期间** | `SubagentStop` | 将 Agent 执行记录到 `agents/agent-log.jsonl` |
-| **工作期间** | `UserPromptSubmit`（每 5 次） | 节流更新个性化档案 |
-| **会话结束** | `Stop`（第 1 个 hook） | 自动生成脚手架：`sessions/auto.md`、`learnings/auto-session.md`、`decisions/auto.md`、`persona/profile.md` |
-| **会话结束** | `Stop`（第 2 个 hook） | 若文件编辑 ≥ 3 次则**强制** AI 撰写会话摘要——以模板阻止会话结束 |
-
-### 自动生成 vs AI 撰写
-
-| 类型 | 文件模式 | 创建者 | 内容 |
-|------|-------------|-----------|---------|
-| **自动脚手架** | `*-auto.md`、`*-auto-session.md` | Stop hook（Node.js） | Git 差异统计、Agent 使用情况、提交列表——仅数据 |
-| **AI 摘要** | `YYYY-MM-DD-<topic>.md` | 会话中的 AI | 有意义的分析，包含上下文、代码引用、理由 |
-| **遥测** | `agent-log.jsonl`、`auto-links.md` | Hook 脚本 | 仅追加的结构化日志 |
-| **个性化** | `profile.md`、`suggestions.jsonl` | Stop hook | 基于使用的 Agent 偏好和路由建议 |
-
-自动脚手架作为 AI 撰写正式摘要的**参考数据**。强制 hook 在阻止会话结束时提供脚手架内容和结构化模板。
+| 路径 | 说明 |
+|------|------|
+| `INDEX.md` | 项目概览，含最近决策和学习的链接。首次会话自动创建，定期刷新。 |
+| `sessions/` | **会话摘要。** `*-auto.md` — 含 git diff 统计和 Agent 计数的脚手架。`<topic>.md` — 由 hook 强制的 AI 撰写摘要。 |
+| `decisions/` | **架构和设计决策**，含理由。AI 撰写，工作期间强制。 |
+| `learnings/` | **模式、注意事项、非显而易见的解决方案。** `*-auto-session.md` — 文件列表脚手架。`<topic>.md` — AI 撰写。 |
+| `references/` | **网络调研 URL。** `auto-links.md` — 从 WebSearch/WebFetch 调用自动收集。 |
+| `agents/` | **Agent 遥测。** `agent-log.jsonl` — 每次调用日志。`YYYY-MM-DD-summary.md` — 每日使用汇总。 |
+| `persona/` | **用户工作风格档案。** `profile.md` — 工具偏好统计。`suggestions.jsonl` — 路由建议。`rules/`、`skills/` — 已接受的偏好。 |
 
 ### 会话专属差异
 

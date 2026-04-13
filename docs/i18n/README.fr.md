@@ -368,8 +368,7 @@ Mémoire persistante compatible Obsidian. Chaque projet maintient un répertoire
 │   ├── YYYY-MM-DD-<topic>.md        ← Résumé de session écrit par l'IA (obligatoire)
 │   └── YYYY-MM-DD-auto.md           ← Scaffold auto-généré (diff git, stats d'agents)
 ├── decisions/
-│   ├── YYYY-MM-DD-<decision>.md     ← Décision écrite par l'IA
-│   └── YYYY-MM-DD-auto.md           ← Scaffold auto-généré (commits, fichiers)
+│   └── YYYY-MM-DD-<decision>.md     ← Décision écrite par l'IA (obligatoire)
 ├── learnings/
 │   ├── YYYY-MM-DD-<pattern>.md      ← Note d'apprentissage écrite par l'IA
 │   └── YYYY-MM-DD-auto-session.md   ← Scaffold auto-généré (agents, fichiers)
@@ -385,28 +384,17 @@ Mémoire persistante compatible Obsidian. Chaque projet maintient un répertoire
     └── skills/                      ← Skills persona acceptés
 ```
 
-### Cycle d'automatisation
+### Sous-Vaults
 
-| Phase | Événement Hook | Ce qui se passe |
-|-------|-----------|-------------|
-| **Début de session** | `SessionStart` | Crée la structure `.briefing/`, enregistre le hash git HEAD pour les diffs de session |
-| **Pendant le travail** | `PostToolUse` Edit/Write | Compte les éditions de fichiers ; alerte à 5, bloque à 15 si aucune décision/apprentissage écrit |
-| **Pendant le travail** | `PostToolUse` WebSearch/WebFetch | Collecte automatiquement les URLs dans `references/auto-links.md` |
-| **Pendant le travail** | `SubagentStop` | Enregistre l'exécution de l'agent dans `agents/agent-log.jsonl` |
-| **Pendant le travail** | `UserPromptSubmit` (tous les 5) | Mise à jour limitée du profil persona |
-| **Fin de session** | `Stop` (1er hook) | Auto-génère les scaffolds : `sessions/auto.md`, `learnings/auto-session.md`, `decisions/auto.md`, `persona/profile.md` |
-| **Fin de session** | `Stop` (2e hook) | **Oblige** un résumé de session écrit par l'IA si ≥ 3 éditions de fichiers — bloque la fin de session avec un modèle |
-
-### Auto-généré vs Écrit par l'IA
-
-| Type | Modèle de fichier | Créé par | Contenu |
-|------|-------------|-----------|---------|
-| **Scaffold auto** | `*-auto.md`, `*-auto-session.md` | Hook Stop (Node.js) | Statistiques diff git, utilisation des agents, liste des commits — données uniquement |
-| **Résumé IA** | `YYYY-MM-DD-<topic>.md` | IA pendant la session | Analyse pertinente avec contexte, références code, justification |
-| **Télémétrie** | `agent-log.jsonl`, `auto-links.md` | Scripts hook | Journaux structurés en ajout seul |
-| **Persona** | `profile.md`, `suggestions.jsonl` | Hook Stop | Affinité d'agents basée sur l'utilisation et suggestions de routage |
-
-Les scaffolds auto servent de **données de référence** pour que l'IA rédige des résumés appropriés. Le hook d'application fournit le contenu du scaffold + un modèle structuré lors du blocage de fin de session.
+| Chemin | Description |
+|--------|-------------|
+| `INDEX.md` | Vue d'ensemble du projet avec liens vers les décisions et apprentissages récents. Créé automatiquement à la première session, rafraîchi périodiquement. |
+| `sessions/` | **Résumés de session.** `*-auto.md` — scaffold avec stats diff git et comptage d'agents. `<topic>.md` — résumé écrit par l'IA, imposé par les hooks. |
+| `decisions/` | **Décisions d'architecture et de conception** avec justification. Écrites par l'IA, imposées pendant le travail. |
+| `learnings/` | **Patterns, pièges, solutions non évidentes.** `*-auto-session.md` — scaffold avec listes de fichiers. `<topic>.md` — écrit par l'IA. |
+| `references/` | **URLs de recherche web.** `auto-links.md` — collectées automatiquement lors des appels WebSearch/WebFetch. |
+| `agents/` | **Télémétrie des agents.** `agent-log.jsonl` — log par appel. `YYYY-MM-DD-summary.md` — récapitulatif quotidien d'utilisation. |
+| `persona/` | **Profil de style de travail.** `profile.md` — statistiques d'affinité d'outils. `suggestions.jsonl` — recommandations de routage. `rules/`, `skills/` — préférences acceptées. |
 
 ### Diffs spécifiques à la session
 

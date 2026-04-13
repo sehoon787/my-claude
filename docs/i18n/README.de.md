@@ -358,8 +358,7 @@ Obsidian-kompatibler persistenter Speicher. Jedes Projekt pflegt ein `.briefing/
 │   ├── YYYY-MM-DD-<topic>.md        ← AI-written session summary (enforced)
 │   └── YYYY-MM-DD-auto.md           ← Auto-generated scaffold (git diff, agent stats)
 ├── decisions/
-│   ├── YYYY-MM-DD-<decision>.md     ← AI-written decision record
-│   └── YYYY-MM-DD-auto.md           ← Auto-generated scaffold (commits, files)
+│   └── YYYY-MM-DD-<decision>.md     ← AI-written decision record (enforced)
 ├── learnings/
 │   ├── YYYY-MM-DD-<pattern>.md      ← AI-written learning note
 │   └── YYYY-MM-DD-auto-session.md   ← Auto-generated scaffold (agents, files)
@@ -375,28 +374,17 @@ Obsidian-kompatibler persistenter Speicher. Jedes Projekt pflegt ein `.briefing/
     └── skills/                      ← Accepted persona skills
 ```
 
-### Automatisierungs-Lebenszyklus
+### Sub-Vaults
 
-| Phase | Hook-Ereignis | Was passiert |
-|-------|--------------|--------------|
-| **Sitzungsstart** | `SessionStart` | Erstellt `.briefing/`-Struktur, speichert git-HEAD-Hash für sitzungsspezifische Diffs |
-| **Während der Arbeit** | `PostToolUse` Edit/Write | Verfolgt die Anzahl der Dateibearbeitungen; warnt bei 5, sperrt bei 15, wenn keine Entscheidungen/Lernnotizen geschrieben wurden |
-| **Während der Arbeit** | `PostToolUse` WebSearch/WebFetch | Sammelt URLs automatisch in `references/auto-links.md` |
-| **Während der Arbeit** | `SubagentStop` | Protokolliert Agentenausführung in `agents/agent-log.jsonl` |
-| **Während der Arbeit** | `UserPromptSubmit` (every 5th) | Gedrosseltes Persona-Profil-Update |
-| **Sitzungsende** | `Stop` (1. Hook) | Generiert automatisch Gerüste: `sessions/auto.md`, `learnings/auto-session.md`, `decisions/auto.md`, `persona/profile.md` |
-| **Sitzungsende** | `Stop` (2. Hook) | **Erzwingt** KI-erstellte Sitzungszusammenfassung bei ≥ 3 Dateibearbeitungen — blockiert Sitzungsende mit Vorlage |
-
-### Automatisch generiert vs. KI-erstellt
-
-| Typ | Dateimuster | Erstellt von | Inhalt |
-|-----|-------------|-------------|--------|
-| **Auto-Gerüst** | `*-auto.md`, `*-auto-session.md` | Stop hook (Node.js) | Git-Diff-Statistiken, Agentennutzung, Commit-Liste — nur Daten |
-| **KI-Zusammenfassung** | `YYYY-MM-DD-<topic>.md` | KI während der Sitzung | Aussagekräftige Analyse mit Kontext, Code-Referenzen, Begründung |
-| **Telemetrie** | `agent-log.jsonl`, `auto-links.md` | Hook-Skripte | Nur-Anhänge-strukturierte Protokolle |
-| **Persona** | `profile.md`, `suggestions.jsonl` | Stop hook | Nutzungsbasierte Agenten-Affinität und Routing-Vorschläge |
-
-Auto-Gerüste dienen als **Referenzdaten** für die KI zum Verfassen angemessener Zusammenfassungen. Der Durchsetzungs-Hook stellt den Gerüstinhalt + eine strukturierte Vorlage bereit, wenn das Sitzungsende blockiert wird.
+| Pfad | Beschreibung |
+|------|-------------|
+| `INDEX.md` | Projektübersicht mit Links zu aktuellen Entscheidungen und Lernnotizen. Wird bei der ersten Sitzung automatisch erstellt, periodisch aktualisiert. |
+| `sessions/` | **Sitzungszusammenfassungen.** `*-auto.md` — Gerüst mit Git-Diff-Statistiken und Agentenzahlen. `<topic>.md` — KI-erstellte Zusammenfassung, durch Hooks erzwungen. |
+| `decisions/` | **Architektur- und Designentscheidungen** mit Begründung. KI-erstellt, während der Arbeit erzwungen. |
+| `learnings/` | **Muster, Stolperfallen, nicht offensichtliche Lösungen.** `*-auto-session.md` — Gerüst mit Dateilisten. `<topic>.md` — KI-erstellt. |
+| `references/` | **Web-Recherche-URLs.** `auto-links.md` — automatisch gesammelt bei WebSearch/WebFetch-Aufrufen. |
+| `agents/` | **Agenten-Telemetrie.** `agent-log.jsonl` — Protokoll pro Aufruf. `YYYY-MM-DD-summary.md` — tägliche Nutzungsübersicht. |
+| `persona/` | **Arbeitsstil-Profil.** `profile.md` — Tool-Affinitätsstatistiken. `suggestions.jsonl` — Routing-Vorschläge. `rules/`, `skills/` — akzeptierte Präferenzen. |
 
 ### Sitzungsspezifische Diffs
 
