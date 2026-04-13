@@ -159,13 +159,16 @@ node /tmp/my-claude/scripts/merge-settings.js
 # ── Generate manifest from SOURCE (only tracks my-claude's own files, not user content) ──
 {
   find /tmp/my-claude/agents/core -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
+  find /tmp/my-claude/agents/omo -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
   find /tmp/my-claude/upstream/omc/agents -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
   find /tmp/my-claude/upstream/agency-agents/engineering -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
+  find /tmp/my-claude/upstream/superpowers/agents -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \; 2>/dev/null || true
   for pack in academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing; do
     find /tmp/my-claude/upstream/agency-agents/$pack -name '*.md' -exec sh -c 'echo "agent-packs/'"$pack"'/$(basename "$1")"' _ {} \; 2>/dev/null || true
   done
   find /tmp/my-claude/upstream/ecc/skills -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
   find /tmp/my-claude/upstream/omc/skills -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
+  find /tmp/my-claude/skills/core -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \; 2>/dev/null || true
   find /tmp/my-claude/upstream/ecc/rules -name '*.md' | while read -r f; do echo "rules/${f#/tmp/my-claude/upstream/ecc/rules/}"; done 2>/dev/null || true
   echo "hooks/hooks.json"
   echo "hooks/session-start.sh"
