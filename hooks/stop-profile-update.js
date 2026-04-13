@@ -606,14 +606,15 @@ try {
   if (fs.existsSync(indexPath)) {
     var indexContent = fs.readFileSync(indexPath, 'utf8');
 
-    // Helper: list recent files from a subdir
+    // Helper: list recent files from a subdir (date-prefixed first, newest on top)
     function recentFiles(subdir, limit) {
       var dir = path.join(BRIEFING_DIR, subdir);
       if (!fs.existsSync(dir)) return [];
-      return fs.readdirSync(dir)
-        .filter(function(f) { return f.endsWith('.md') && f !== '.gitkeep'; })
-        .sort()
-        .reverse()
+      var files = fs.readdirSync(dir)
+        .filter(function(f) { return f.endsWith('.md') && f !== '.gitkeep'; });
+      var dated = files.filter(function(f) { return /^\d{4}-\d{2}-\d{2}/.test(f); }).sort().reverse();
+      var undated = files.filter(function(f) { return !/^\d{4}-\d{2}-\d{2}/.test(f); }).sort();
+      return dated.concat(undated)
         .slice(0, limit)
         .map(function(f) { return '- [[' + subdir + '/' + f.replace('.md', '') + ']]'; });
     }
