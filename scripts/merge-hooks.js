@@ -25,6 +25,8 @@ const scriptsDir = path.join(home, '.claude', 'scripts').replace(/\\/g, '/');
 let rawHooks = JSON.stringify(srcHooks);
 rawHooks = rawHooks.replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/hooks/g, hooksDir);
 rawHooks = rawHooks.replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/scripts/g, scriptsDir);
+rawHooks = rawHooks.replace(/\$HOME\/\.claude\/hooks/g, hooksDir);
+rawHooks = rawHooks.replace(/\$HOME\/\.claude\/scripts/g, scriptsDir);
 const resolvedHooks = JSON.parse(rawHooks);
 
 for (const [event, entries] of Object.entries(resolvedHooks)) {
