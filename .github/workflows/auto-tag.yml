@@ -113,5 +113,5 @@ jobs:
               -f state=success \
               -f context=validate \
               -f description="Validated inline by auto-tag workflow"
-            gh pr merge "$BRANCH" --auto --squash --delete-branch
+            gh pr merge "$BRANCH" --auto --squash --delete-branch || gh pr merge "$BRANCH" --squash --delete-branch
           fi
