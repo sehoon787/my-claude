@@ -299,17 +299,9 @@ try {
   var SESSIONS_DIR = path.join(BRIEFING_DIR, 'sessions');
   fs.mkdirSync(SESSIONS_DIR, { recursive: true });
 
-  // Skip if a session file for today already exists (AI wrote one)
-  var sessionFiles = fs.readdirSync(SESSIONS_DIR);
-  var sessionExistsToday = false;
-  for (var i = 0; i < sessionFiles.length; i++) {
-    if (sessionFiles[i].slice(0, 10) === todayStr && sessionFiles[i].indexOf('-auto') === -1) {
-      sessionExistsToday = true;
-      break;
-    }
-  }
-
-  if (!sessionExistsToday) {
+  // Always refresh the auto session file with current data.
+  // Manual session files (without '-auto') coexist as the primary record.
+  {
     // Read work counter
     var workCounter = 0;
     try {
