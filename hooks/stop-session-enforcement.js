@@ -156,10 +156,10 @@ if (hasProperSummary) {
 
   var learningOutput = {
     decision: 'block',
-    reason: learningLang === 'ko' || learningLang === 'kr'
+    reason: (learningLang === 'ko' || learningLang === 'kr'
       ? '학습 기록 미작성 (' + workCounter + '개 파일 수정됨). .briefing/learnings/' + todayStr + '-<topic>.md를 작성하세요.'
-      : 'No learning entry written (' + workCounter + ' files edited). Write .briefing/learnings/' + todayStr + '-<topic>.md.',
-    hookSpecificOutput: { additionalContext: learningTemplate }
+      : 'No learning entry written (' + workCounter + ' files edited). Write .briefing/learnings/' + todayStr + '-<topic>.md.')
+      + '\n\n' + learningTemplate
   };
 
   process.stdout.write(JSON.stringify(learningOutput) + '\n');
@@ -215,10 +215,10 @@ if (scaffold) {
 
 var output = {
   decision: 'block',
-  reason: lang === 'ko' || lang === 'kr'
+  reason: (lang === 'ko' || lang === 'kr'
     ? '세션 요약 미작성 (' + workCounter + '개 파일 수정됨). .briefing/sessions/' + todayStr + '-<topic>.md를 작성하세요.'
-    : 'No session summary written (' + workCounter + ' files edited). Write .briefing/sessions/' + todayStr + '-<topic>.md.',
-  hookSpecificOutput: { additionalContext: template }
+    : 'No session summary written (' + workCounter + ' files edited). Write .briefing/sessions/' + todayStr + '-<topic>.md.')
+    + '\n\n' + template
 };
 
 process.stdout.write(JSON.stringify(output) + '\n');
