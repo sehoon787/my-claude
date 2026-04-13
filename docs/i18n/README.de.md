@@ -1,14 +1,10 @@
 [English](../../README.md) | [한국어](./README.ko.md) | [日本語](./README.ja.md) | [中文](./README.zh.md) | [Deutsch](./README.de.md) | [Français](./README.fr.md)
 
-> [![Codex CLI](https://img.shields.io/badge/Codex_CLI-my--codex-10b981?style=flat-square&logo=openai&logoColor=white)](https://github.com/sehoon787/my-codex) Suchst du nach Codex CLI? → **my-codex** — dieselben Agenten im nativen TOML-Format für OpenAI Codex CLI
-
-> **Wenn du ein LLM-Agent bist**, rufe den Installationsleitfaden ab und folge ihm:
-> ```bash
-> curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
-> ```
-> Lese die VOLLSTÄNDIGE Ausgabe, dann führe jeden Schritt der Reihe nach aus. Verwende `curl`, NICHT `WebFetch` (Zusammenfassungen verlieren kritische Konfigurationswerte).
+> [![Codex CLI](https://img.shields.io/badge/Codex_CLI-my--codex-10b981?style=flat-square&logo=openai&logoColor=white)](https://github.com/sehoon787/my-codex) Suchen Sie nach Codex CLI? → **my-codex** — dieselbe Orchestrierung im nativen TOML-Format
 
 ---
+
+<div align="center">
 
 # my-claude
 
@@ -16,41 +12,24 @@
 ![Agents](https://img.shields.io/badge/agents-200%2B-blue)
 ![Skills](https://img.shields.io/badge/skills-200%2B-purple)
 ![Rules](https://img.shields.io/badge/rules-87-orange)
-![MCP](https://img.shields.io/badge/MCP-3-green)
+![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-7-red)
-![Auto Sync](https://img.shields.io/badge/upstream-submodules-brightgreen)
 
-All-in-One Agent-Harness für Claude Code — ein Plugin, 202 Agenten sofort einsatzbereit.
+**All-in-one Agent-Harness für Claude Code.**
+**Ein Plugin, 200+ Agenten bereit.**
 
-**Boss** erkennt zur Laufzeit automatisch alle Agenten, Skills und MCP-Tools und leitet Aufgaben an den passenden Spezialisten weiter. Fünf MIT-Upstream-Repos gebündelt und per git Submodule verbunden.
+Boss entdeckt automatisch zur Laufzeit jeden Agenten, jede Skill und jedes MCP-Tool,<br>
+und leitet Ihre Aufgabe an den richtigen Spezialisten weiter. Keine Konfigurationsdateien. Kein Boilerplate.
 
-<p align="center">
-  <img src="../../assets/demo.svg" alt="my-claude demo" width="700">
-</p>
+<img src="./assets/owl-claude-social.svg" alt="The Maestro Owl — my-claude" width="700">
+
+</div>
 
 ---
 
-## Kernprinzipien
+## Installation
 
-| Prinzip | Beschreibung |
-|-----------|-------------|
-| **Leadership** | Boss orchestriert, implementiert nie. Führt Teams mit Peer-to-Peer-Kommunikation, dynamischer Zusammensetzung und Dateieigentümer-Protokollen |
-| **Discovery** | Laufzeit-Fähigkeits-Matching — keine hartcodierten Routing-Tabellen. Jeder Agent, jede Skill und jeder MCP-Server werden bei Sessionstart automatisch erkannt |
-| **Verification** | Vertraue, aber überprüfe. Jedes Subagenten-Ergebnis wird unabhängig überprüft, bevor es akzeptiert wird |
-
-## Schnellstart
-
-### Wenn du ein Mensch bist
-
-**Option 1: Installation über Claude Code Plugin**
-
-```bash
-# Innerhalb einer Claude Code Session:
-/plugin marketplace add sehoon787/my-claude
-/plugin install my-claude@my-claude
-```
-
-Dann installiere begleitende Tools (npm-Pakete + Anthropic Skills):
+### Für Menschen
 
 ```bash
 git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude
@@ -58,602 +37,450 @@ bash /tmp/my-claude/install.sh
 rm -rf /tmp/my-claude
 ```
 
-**Option 2: Automatisiertes Skript**
+Oder installieren Sie es zunächst als Claude Code-Plugin und führen Sie dann das begleitende Installationsprogramm aus:
 
 ```bash
-git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && bash /tmp/my-claude/install.sh && rm -rf /tmp/my-claude
+# Inside a Claude Code session:
+/plugin marketplace add sehoon787/my-claude
+/plugin install my-claude@my-claude
+
+# Then install companion tools:
+git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude
+bash /tmp/my-claude/install.sh
+rm -rf /tmp/my-claude
 ```
 
-> **Hinweis**: `install.sh` setzt Boss automatisch als Standard-Agent. Für Plugin-Installation (Option 1) führe den Setup-Befehl in [AI-INSTALL.md](../../AI-INSTALL.md) aus.
->
-> **Agent Packs**: Domain-Spezialisten-Agenten (Marketing, Verkauf, Spieleentwicklung, etc.) werden in `~/.claude/agent-packs/` installiert und können durch Symlink-Erstellung zu `~/.claude/agents/` aktiviert werden, wenn nötig.
-
-**Option 3: Manuelle Installation**
-
-```bash
-git clone https://github.com/sehoon787/my-claude.git
-```
-
-Folge dann den Anweisungen in `SETUP.md`, um die Dateien zu kopieren.
-
-### Wenn du ein LLM-Agent bist
-
-Rufe den KI-Installationsleitfaden ab und führe jeden Schritt aus:
+### Für KI-Agenten
 
 ```bash
 curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 ```
 
-Lese die vollständige Ausgabe und führe jeden Schritt der Reihe nach aus. Verwende `curl`, nicht `WebFetch`. Für menschenlesbare Schritt-für-Schritt-Anleitung siehe `SETUP.md`.
+Lesen Sie die VOLLSTÄNDIGE Ausgabe, und führen Sie dann jeden Schritt der Reihe nach aus. Verwenden Sie `curl`, NICHT `WebFetch`.
 
 ---
 
-## Hauptfunktionen
+## Wie Boss funktioniert
 
-### Multi-Agent-Harness
-- **Boss Dynamischer Meta-Orchestrator**: Entdeckt alle installierten Agenten, Skills und MCP-Server zur Laufzeit automatisch — leitet Aufgaben über 3D-Konfliktauflösung (Scope/Tiefe×2/Interaktivität) weiter. Bearbeitet mittelgroße Aufgaben direkt (P3a) ohne Sub-Orchestrator-Overhead
-- **Agent Teams Direct Leadership**: Boss kann Agent Teams direkt führen (Priority 3c-DIRECT) mit Peer-to-Peer-Teamkommunikation, Dateieigentümer-Protokoll und Review-Chain-Mustern für Qualitätssicherung
-- **Sub-Orchestrators (P3b)**: Wenn Aufgaben zu komplex für direkte Bearbeitung sind, delegiert Boss an Sisyphus (Planung+Verifizierung), Atlas (Task-Koordination) oder Hephaestus (autonome Ausführung) — nur für komplexe mehrstufige Workflows, nicht für jede Anfrage
-- **Skill vs Agent Konfliktauflösung**: Gewichtete 3-dimensionale Bewertung (Scope, Tiefe×2, Interaktivität) bestimmt, ob eine Skill oder ein Agent für jede Aufgabe verwendet werden soll — keine hartcodierten Routing-Tabellen
-- **Modell-optimiertes Routing**: Wählt automatisch Opus (hohe Komplexität) / Sonnet (Implementierung) / Haiku (Erkundung) basierend auf Aufgabenkomplexität
+Boss ist der Meta-Orchestrator im Kern von my-claude. Er schreibt niemals Code — er entdeckt, klassifiziert, ordnet zu, delegiert und verifiziert.
 
-### Laufzeit-Verhaltenskorrektur
-- **Delegation Guard** (PreToolUse): Erzwingt Sub-Agent-Delegation, wenn der Orchestrator versucht, Dateien direkt zu ändern
-- **Subagent Verifier** (SubagentStop): Erzwingt unabhängige Verifizierung nach Subagenten-Abschluss
-- **Completion Check** (Stop): Bestätigt, dass alle Aufgaben abgeschlossen und verifiziert sind, bevor die Session beendet wird
-
-### Externe Wissensintegration (MCP)
-- **Context7**: Ruft offizielle Bibliotheks-Dokumentation in Echtzeit ab
-- **Exa**: Semantische Websuche (1.000 kostenlose Anfragen pro Monat)
-- **grep.app**: GitHub Open-Source-Code-Suche
-
-### All-in-One Bundle
-- Plugin-Installation bietet sofort **200+ Agenten, 200+ Skills und Regeln**
-- Bündelt 5 MIT-Upstream-Quellen (agency-agents, everything-claude-code, oh-my-claudecode, gstack, superpowers)
-- Git Submodule halten gebündelte Inhalte mit Upstream synchronisiert
-- Begleitendes `install.sh` fügt npm-Tools und proprietäre Anthropic Skills hinzu
-
----
-
-## Kern- + OMO-Agenten
-
-**Boss** ist der einzige my-claude Original-Agent. Die verbleibenden 9 sind [OMO-Agenten](https://github.com/code-yeongyu/oh-my-openagent), die Boss als Sub-Orchestrators und Spezialisten nutzt. Das Plugin bündelt **56 Kern-Agenten** (my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1), die immer in `~/.claude/agents/` geladen werden, plus **136 Domain-Agent-Packs** in `~/.claude/agent-packs/`, die bei Bedarf aktiviert werden können. Boss wählt den besten entsprechenden Spezialisten aus allen aktiven Agenten über Priority 2 Fähigkeits-Matching. Siehe [Installierte Komponenten](#installierte-komponenten) unten.
-
-| Agent | Quelle | Modell | Rolle |
-|---------|--------|------|------|
-| **Boss** | my-claude | Opus | Dynamischer Meta-Orchestrator. Entdeckt alle installierten Agenten/Skills/MCP zur Laufzeit automatisch und leitet an optimalen Spezialisten weiter |
-| **Sisyphus** | OMO | Opus | Sub-Orchestrator. Verwaltet komplexe mehrstufige Workflows mit Intent-Klassifizierung und Verifizierung |
-| **Hephaestus** | OMO | Opus | Autonomer Deep Worker. Führt autonome Erkundungs → Plan → Ausführungs → Verifizierungs-Zyklen durch |
-| **Metis** | OMO | Opus | Pre-Execution Intent-Analyse. Strukturiert Anfragen vor der Ausführung, um KI-Slop zu verhindern |
-| **Atlas** | OMO | Opus | Master Task Orchestrator. Zerlegt und koordiniert komplexe Aufgaben mit einem 4-stufigen QA-Zyklus |
-| **Oracle** | OMO | Opus | Strategischer technischer Berater. Analysiert im schreibgeschützten Modus ohne Code-Modifizierung und bietet Anleitung |
-| **Momus** | OMO | Opus | Task-Plan-Reviewer. Überprüft Pläne aus einer genehmigungsgerichteten Perspektive. Schreibgeschützt |
-| **Prometheus** | OMO | Opus | Interview-basierter Planungs-Berater. Klärt Anforderungen durch Gespräch |
-| **Librarian** | OMO | Sonnet | Open-Source-Dokumentations-Recherche-Agent mit MCP |
-| **Multimodal-Looker** | OMO | Sonnet | Visueller Analyse-Agent. Analysiert Bilder/Screenshots. Schreibgeschützt |
-
----
-
-## Agent Packs (Domain-Spezialisten)
-
-Domain-Spezialisten-Agenten werden in `~/.claude/agent-packs/` installiert und werden standardmäßig **nicht** geladen. Aktiviere ein Pack durch Symlink-Erstellung in `~/.claude/agents/`:
-
-```bash
-# Aktiviere ein einzelnes Pack
-ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
-
-# Deaktiviere
-rm ~/.claude/agents/<agent-name>.md
+```
+User Request
+     │
+     ▼
+┌─────────────────────────────────────────────┐
+│  Phase 0 · DISCOVERY                        │
+│  Scan agents, skills, MCP, hooks at runtime │
+│  → Build live capability registry           │
+└──────────────────────┬──────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────┐
+│  Phase 1 · INTENT GATE                      │
+│  Classify: trivial | build | refactor |     │
+│  mid-sized | architecture | research | ...  │
+│  → Counter-propose skill if better fit      │
+└──────────────────────┬──────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────┐
+│  Phase 2 · CAPABILITY MATCHING              │
+│  P0: gstack skill (if installed)            │
+│  P1: Exact skill match                      │
+│  P2: Specialist agent (200+)               │
+│  P3: Multi-agent orchestration              │
+│  P4: General-purpose fallback               │
+└──────────────────────┬──────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────┐
+│  Phase 3 · DELEGATION                       │
+│  6-section structured prompt to specialist  │
+│  TASK / OUTCOME / TOOLS / DO / DON'T / CTX  │
+└──────────────────────┬──────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────┐
+│  Phase 4 · VERIFICATION                     │
+│  Read changed files independently           │
+│  Run tests, lint, build                     │
+│  Cross-reference with original intent       │
+│  → Retry up to 3× on failure               │
+└─────────────────────────────────────────────┘
 ```
 
-| Pack | Anzahl | Beispiele |
-|------|-------|---------|
-| marketing | 27 | Douyin, Xiaohongshu, WeChat OA, TikTok |
-| gamedev | 19 | Unity, Unreal, Godot, Roblox |
-| engineering-domain | 8 | Mobile, Solidity, Embedded, Feishu |
-| sales | 9 | SDR, Account Executive, Revenue Ops |
-| specialized | 10+ | Legal, Finance, Healthcare, Education |
-| design | 8 | Brand, UI, UX, Visual Storytelling |
-| testing | 8 | API, Accessibility, Performance, E2E |
-| product | 5 | Sprint, Feedback, Trend Research |
-| paid-media | 7 | Google Ads, Meta Ads, Programmatic |
-| project-mgmt | 5 | Scrum, Kanban, Risk Management |
-| academic | 5 | Research, Literature Review, Citation |
-| support | 6 | Customer Success, Escalation, Triage |
-| spatial-computing | 3 | ARKit, visionOS, Spatial Audio |
+### Prioritäts-Routing
+
+Boss leitet jede Anfrage durch eine Prioritätskette, bis die beste Übereinstimmung gefunden wird:
+
+| Priorität | Übereinstimmungstyp | Wann | Beispiel |
+|:---------:|---------------------|------|----------|
+| **P1** | Skill-Treffer | Aufgabe entspricht einer eigenständigen Skill | `"merge PDFs"` → pdf skill |
+| **P2** | Spezialist-Agent | Domänenspezifischer Agent vorhanden | `"security audit"` → Security Engineer |
+| **P3a** | Boss direkt | 2–4 unabhängige Agenten | `"fix 3 bugs"` → parallel spawn |
+| **P3b** | Sub-Orchestrator | Komplexer mehrstufiger Workflow | `"refactor + test"` → Sisyphus |
+| **P3c** | Agent Teams | Peer-to-Peer-Kommunikation erforderlich | `"implement + review"` → Review Chain |
+| **P4** | Fallback | Kein Spezialist gefunden | `"explain this"` → general agent |
+
+### Modell-Routing
+
+| Komplexität | Modell | Verwendet für |
+|-------------|--------|---------------|
+| Tiefgehende Analyse, Architektur | Opus | Boss, Oracle, Sisyphus |
+| Standardimplementierung | Sonnet | executor, debugger, security-reviewer |
+| Schnelle Suche, Erkundung | Haiku | explore, einfache Beratung |
+
+### 3-Phasen-Sprint-Workflow
+
+Für die Ende-zu-Ende-Funktionsimplementierung orchestriert Boss einen strukturierten Sprint:
+
+```
+Phase 1: DESIGN         Phase 2: EXECUTE        Phase 3: REVIEW
+(interactive)            (autonomous)             (interactive)
+─────────────────────   ─────────────────────   ─────────────────────
+User decides scope      ralph runs execution    Compare vs design doc
+Engineering review      Auto code review        Present comparison table
+Confirm "design done"   Architect verification  User: approve / improve
+```
 
 ---
 
-## Installierte Komponenten
+## Architektur
 
-Das Befolgen von SETUP.md konfiguriert Folgendes:
+```
+┌─────────────────────────────────────────────────────┐
+│                    User Request                       │
+└───────────────────────┬─────────────────────────────┘
+                        ▼
+┌─────────────────────────────────────────────────────┐
+│  Boss · Meta-Orchestrator (Opus)                      │
+│  Discovery → Classification → Matching → Delegation  │
+└──┬──────────┬──────────┬──────────┬─────────────────┘
+   │          │          │          │
+   ▼          ▼          ▼          ▼
+┌──────┐ ┌────────┐ ┌────────┐ ┌────────┐
+│ P3a  │ │  P3b   │ │  P3c   │ │  P1/P2 │
+│Direct│ │Sub-orch│ │ Agent  │ │ Skill/ │
+│2-4   │ │Sisyphus│ │ Teams  │ │ Agent  │
+│agents│ │Atlas   │ │  P2P   │ │ Direct │
+└──────┘ │Hephaes│ └────────┘ └────────┘
+         └────────┘
+┌─────────────────────────────────────────────────────┐
+│  Behavioral Layer                                     │
+│  Karpathy Guidelines · ECC Rules (87) · Hooks (7)    │
+├─────────────────────────────────────────────────────┤
+│  Specialist Agents (200+)                             │
+│  OMO 9 · OMC 19 · Agency Eng. 26 · Superpowers 1    │
+│  + 136 domain packs (on-demand)                       │
+├─────────────────────────────────────────────────────┤
+│  Skills (200+)                                        │
+│  ECC 180+ · OMC 36 · gstack 40 · Superpowers 14     │
+│  + Core 3 · Anthropic 14+                             │
+├─────────────────────────────────────────────────────┤
+│  MCP Layer                                            │
+│  Context7 · Exa · grep.app                            │
+└─────────────────────────────────────────────────────┘
+```
 
-| Kategorie | Anzahl | Quelle | Gebündelt |
-|------|------|------|------|
-| Kern-Agenten | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | Plugin |
-| Agent Packs | 136 | 12 Domain-Kategorien (Marketing, Spieleentwicklung, Verkauf, etc.) | Plugin |
-| Skills | 200+ | ECC 180+ + OMC 36 + Core 3 + gstack 40 (Laufzeit) + Superpowers 14 | Plugin + install.sh |
-| Regeln | 87 | ECC (common + 14 language dirs) | Plugin |
-| MCP-Server | 3 | Context7, Exa, grep.app | Plugin |
-| Hooks | 7 | my-claude (Boss-Protokoll + SessionStart) | Plugin |
-| Anthropic Skills | 14+ | Anthropic Official | install.sh |
-| CLI Tools | 3 | omc, omo, ast-grep | install.sh |
+---
+
+## Was enthalten ist
+
+| Kategorie | Anzahl | Quelle |
+|-----------|-------:|--------|
+| **Kern-Agenten** (immer geladen) | 56 | Boss 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 |
+| **Agenten-Packs** (on-demand) | 136 | 12 Domänenkategorien aus agency-agents |
+| **Skills** | 200+ | ECC 180+ · OMC 36 · gstack 40 · Superpowers 14 · Core 3 |
+| **Anthropic Skills** | 14+ | PDF, DOCX, PPTX, XLSX, MCP builder |
+| **Regeln** | 87 | ECC common + 14 Sprachverzeichnisse |
+| **MCP-Server** | 3 | Context7, Exa, grep.app |
+| **Hooks** | 7 | Delegationswächter, Telemetrie, Verifikation |
+| **CLI-Tools** | 3 | omc, omo, ast-grep |
 
 <details>
-<summary>Kern- + OMO-Agenten (10) — Boss Meta-Orchestrator + omo Agenten</summary>
+<summary><strong>Kern-Agent — Boss Meta-Orchestrator (1)</strong></summary>
 
-| Agent | Modell | Typ | Rolle | Schreibgeschützt |
-|---------|------|------|------|-----------|
-| Boss | Opus | Meta-Orchestrator | Laufzeit-Erkennung aller Agenten/Skills/MCP → Fähigkeits-Matching → optimales Routing | Ja |
-| Sisyphus | Opus | Sub-Orchestrator | Intent-Klassifizierung → Spezialisten-Agent-Delegation → unabhängige Verifizierung. Schreibt Code nicht direkt | Nein |
-| Hephaestus | Opus | Autonome Ausführung | Führt autonome Erkundungs → Plan → Ausführungs → Verifizierungs-Zyklen durch. Vervollständigt Aufgaben ohne Erlaubnis zu fragen | Nein |
-| Metis | Opus | Analyse | Benutzer-Intent-Analyse, Ambiguitäts-Erkennung, KI-Slop-Verhinderung | Ja |
-| Atlas | Opus | Orchestrator | Task-Delegation + 4-stufige QA-Verifizierung. Schreibt Code nicht direkt | Nein |
-| Oracle | Opus | Advisory | Strategische technische Beratung. Architektur- und Debugging-Beratung | Ja |
-| Momus | Opus | Review | Überprüft Task-Plan-Machbarkeit. Genehmigungsvorgeneigt | Ja |
-| Prometheus | Opus | Planning | Interview-basierte detaillierte Planung. Schreibt nur .md-Dateien | Teilweise |
-| Librarian | Sonnet | Research | Open-Source-Dokumentations-Suche mit MCP | Ja |
-| Multimodal-Looker | Sonnet | Visuelle Analyse | Analysiert Bilder/Screenshots/Diagramme | Ja |
+| Agent | Modell | Rolle | Quelle |
+|-------|--------|-------|--------|
+| Boss | Opus | Dynamische Laufzeitentdeckung → Fähigkeitsabgleich → optimales Routing. Schreibt niemals Code. | my-claude |
 
 </details>
 
 <details>
-<summary>OMC-Agenten (19) — Oh My Claude Code Spezialisten-Agenten</summary>
+<summary><strong>OMO-Agenten — Sub-Orchestratoren und Spezialisten (9)</strong></summary>
 
-| Agent | Rolle |
-|---------|------|
-| analyst | Vor-Analyse — Verstehe die Situation vor der Planung |
-| architect | Systemdesign und Architektur-Entscheidungen |
-| code-reviewer | Fokussierte Code-Review |
-| code-simplifier | Code-Vereinfachung und Bereinigung |
-| critic | Kritische Analyse, alternative Vorschläge |
-| debugger | Fokussiertes Debugging |
-| designer | UI/UX-Design-Anleitung |
-| document-specialist | Dokumentations-Schreiben und Verwaltung |
-| executor | Task-Ausführung |
-| explore | Codebase-Erkundung |
-| git-master | Git-Workflow-Verwaltung |
-| planner | Schnelle Planung |
-| qa-tester | Qualitätssicherungs-Tests |
-| scientist | Forschung und Experimentation |
-| security-reviewer | Sicherheits-Review |
-| test-engineer | Test-Schreiben und Wartung |
-| tracer | Ausführungs-Tracing und Analyse |
-| verifier | Finale Verifizierung |
-| writer | Inhalts- und Dokumentations-Schreiben |
+| Agent | Modell | Rolle | Quelle |
+|-------|--------|-------|--------|
+| Sisyphus | Opus | Absichtsklassifizierung → Spezialistendelegation → Verifikation | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
+| Hephaestus | Opus | Autonom erkunden → planen → ausführen → verifizieren | oh-my-openagent |
+| Atlas | Opus | Aufgabenzerlegung + 4-stufige QA-Verifikation | oh-my-openagent |
+| Oracle | Opus | Strategische technische Beratung (nur lesend) | oh-my-openagent |
+| Metis | Opus | Absichtsanalyse, Mehrdeutigkeitserkennung | oh-my-openagent |
+| Momus | Opus | Überprüfung der Planumsetzbarkeit | oh-my-openagent |
+| Prometheus | Opus | Interviewbasierte detaillierte Planung | oh-my-openagent |
+| Librarian | Sonnet | Open-Source-Dokumentationssuche über MCP | oh-my-openagent |
+| Multimodal-Looker | Sonnet | Bild-/Screenshot-/Diagrammanalyse | oh-my-openagent |
 
 </details>
 
 <details>
-<summary>Agency-Agenten (172) — Business-Spezialisten-Personas in 14 Kategorien (alle Modell: claude-sonnet-4-6)</summary>
+<summary><strong>OMC-Agenten — Spezialistenmitarbeiter (19)</strong></summary>
 
-**Engineering (26)**
-
-| Agent | Rolle |
-|---------|------|
-| ai-engineer | KI/ML-Engineering |
-| autonomous-optimization-architect | Autonome Optimierungs-Architektur |
-| backend-architect | Backend-Architektur |
-| code-reviewer | Code-Review |
-| data-engineer | Data Engineering |
-| database-optimizer | Datenbank-Optimierung |
-| devops-automator | DevOps-Automatisierung |
-| embedded-firmware-engineer | Embedded-Firmware |
-| feishu-integration-developer | Feishu-Integrations-Entwicklung |
-| frontend-developer | Frontend-Entwicklung |
-| git-workflow-master | Git-Workflow |
-| incident-response-commander | Incident-Response |
-| mobile-app-builder | Mobile-App-Entwicklung |
-| rapid-prototyper | Schnelle Prototypisierung |
-| security-engineer | Sicherheits-Engineering |
-| senior-developer | Senior-Entwicklung |
-| software-architect | Software-Architektur |
-| solidity-smart-contract-engineer | Solidity Smart Contracts |
-| sre | Site Reliability Engineering |
-| technical-writer | Technisches Dokumentations-Schreiben |
-| threat-detection-engineer | Threat-Detection-Engineering |
-| wechat-mini-program-developer | WeChat-Mini-Programm-Entwicklung |
-
-**Testing (8)**
-
-| Agent | Rolle |
-|---------|------|
-| accessibility-auditor | Accessibility-Audit |
-| api-tester | API-Tests |
-| evidence-collector | Test-Evidence-Sammlung |
-| performance-benchmarker | Performance-Benchmarking |
-| reality-checker | Realitäts-Überprüfung |
-| test-results-analyzer | Test-Ergebnis-Analyse |
-| tool-evaluator | Tool-Bewertung |
-| workflow-optimizer | Workflow-Optimierung |
-
-**Design (8)**
-
-| Agent | Rolle |
-|---------|------|
-| brand-guardian | Marken-Richtlinien-Durchsetzung |
-| image-prompt-engineer | Image-Prompt-Engineering |
-| inclusive-visuals-specialist | Inklusive visuelle Gestaltung |
-| ui-designer | UI-Design |
-| ux-architect | UX-Architektur |
-| ux-researcher | UX-Forschung |
-| visual-storyteller | Visuelles Storytelling |
-| whimsy-injector | Einspritzen von Spaß und Verspieltheit |
-
-**Product (4)**
-
-| Agent | Rolle |
-|---------|------|
-| behavioral-nudge-engine | Behavioral-Nudge-Design |
-| feedback-synthesizer | Feedback-Synthese |
-| sprint-prioritizer | Sprint-Priorisierung |
-| trend-researcher | Trend-Forschung |
+| Agent | Rolle | Quelle |
+|-------|-------|--------|
+| analyst | Voranalyse vor der Planung | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) |
+| architect | Systemdesign und Architektur | oh-my-claudecode |
+| code-reviewer | Fokussierter Code-Review | oh-my-claudecode |
+| code-simplifier | Code-Vereinfachung und -Bereinigung | oh-my-claudecode |
+| critic | Kritische Analyse, alternative Vorschläge | oh-my-claudecode |
+| debugger | Fokussiertes Debugging | oh-my-claudecode |
+| designer | UI/UX-Design-Anleitung | oh-my-claudecode |
+| document-specialist | Dokumentationserstellung | oh-my-claudecode |
+| executor | Aufgabenausführung | oh-my-claudecode |
+| explore | Codebasis-Erkundung | oh-my-claudecode |
+| git-master | Git-Workflow-Verwaltung | oh-my-claudecode |
+| planner | Schnelle Planung | oh-my-claudecode |
+| qa-tester | Qualitätssicherungstests | oh-my-claudecode |
+| scientist | Forschung und Experimente | oh-my-claudecode |
+| security-reviewer | Sicherheitsüberprüfung | oh-my-claudecode |
+| test-engineer | Test-Erstellung und -Pflege | oh-my-claudecode |
+| tracer | Ausführungs-Tracing und Analyse | oh-my-claudecode |
+| verifier | Abschließende Verifikation | oh-my-claudecode |
+| writer | Inhalte und Dokumentation | oh-my-claudecode |
 
 </details>
 
 <details>
-<summary>Skills (33) — Anthropic Official + ECC</summary>
+<summary><strong>Agency Engineering — Immer geladene Spezialisten (26)</strong></summary>
 
-| Skill | Quelle | Beschreibung |
-|------|------|------|
-| algorithmic-art | Anthropic | Generative Kunst basierend auf p5.js |
-| backend-patterns | ECC | Backend-Architektur-Muster |
-| brand-guidelines | Anthropic | Anwendung des Anthropic-Markenstils |
-| canvas-design | Anthropic | PNG/PDF-Visuelles Design |
-| claude-api | Anthropic | Erstelle Apps mit der Claude API/SDK |
-| clickhouse-io | ECC | ClickHouse-Abfrage-Optimierung |
-| coding-standards | ECC | TypeScript/React-Coding-Standards |
-| continuous-learning | ECC | Automatische Muster-Extraktion aus Sessions |
-| continuous-learning-v2 | ECC | Instinkt-basiertes Lern-System |
-| doc-coauthoring | Anthropic | Dokument-Co-Authoring-Workflow |
-| docx | Anthropic | Word-Dokument-Erstellung/Bearbeitung |
-| eval-harness | ECC | Evaluations-getriebene Entwicklung (EDD) |
-| frontend-design | Anthropic | Frontend-UI-Design |
-| frontend-patterns | ECC | React/Next.js-Muster |
-| internal-comms | Anthropic | Interne Kommunikations-Schreiben |
-| iterative-retrieval | ECC | Inkrementelle Context-Abrufung |
-| karpathy-guidelines | Anthropic | Karpathy-KI-Coding-Richtlinien |
-| learned | ECC | Gelernte Muster-Repository |
-| mcp-builder | Anthropic | MCP-Server-Entwicklungs-Anleitung |
-| pdf | Anthropic | PDF-Lesezugriff/Zusammenführung/Teilen/OCR |
-| postgres-patterns | ECC | PostgreSQL-Optimierung |
-| pptx | Anthropic | PowerPoint-Erstellung/Bearbeitung |
-| project-guidelines-example | Anthropic | Projekt-Richtlinien-Beispiel |
-| security-review | ECC | Sicherheits-Checkliste |
-| skill-creator | Anthropic | Meta-Skill zur Erstellung benutzerdefinierter Skills |
-| slack-gif-creator | Anthropic | GIF-Erstellung für Slack |
-| strategic-compact | ECC | Strategische Context-Kompression |
-| tdd-workflow | ECC | TDD-Workflow-Durchsetzung |
-| theme-factory | Anthropic | Anwendung von Themen auf Artifacts |
-| verification-loop | Anthropic | Verifizierungs-Loop |
-| web-artifacts-builder | Anthropic | Erstellung von zusammengesetzten Web-Artifacts |
-| webapp-testing | Anthropic | Playwright-Web-App-Tests |
-| xlsx | Anthropic | Excel-Datei-Erstellung/Bearbeitung |
+| Agent | Rolle | Quelle |
+|-------|-------|--------|
+| AI Engineer | KI/ML-Engineering | [agency-agents](https://github.com/msitarzewski/agency-agents) |
+| Backend Architect | Backend-Architektur | agency-agents |
+| CMS Developer | CMS-Entwicklung | agency-agents |
+| Code Reviewer | Code-Review | agency-agents |
+| Data Engineer | Datentechnik | agency-agents |
+| Database Optimizer | Datenbankoptimierung | agency-agents |
+| DevOps Automator | DevOps-Automatisierung | agency-agents |
+| Embedded Firmware Engineer | Eingebettete Firmware | agency-agents |
+| Frontend Developer | Frontend-Entwicklung | agency-agents |
+| Git Workflow Master | Git-Workflow | agency-agents |
+| Incident Response Commander | Incident Response | agency-agents |
+| Mobile App Builder | Mobile Apps | agency-agents |
+| Rapid Prototyper | Schnelles Prototyping | agency-agents |
+| Security Engineer | Sicherheitstechnik | agency-agents |
+| Senior Developer | Senior-Entwicklung | agency-agents |
+| Software Architect | Software-Architektur | agency-agents |
+| SRE | Site Reliability | agency-agents |
+| Technical Writer | Technische Dokumentation | agency-agents |
+| AI Data Remediation Engineer | Selbstheilende Datenpipelines | agency-agents |
+| Autonomous Optimization Architect | API-Performance-Governance | agency-agents |
+| Email Intelligence Engineer | E-Mail-Datenextraktion | agency-agents |
+| Feishu Integration Developer | Feishu/Lark-Plattform | agency-agents |
+| Filament Optimization Specialist | Filament PHP-Optimierung | agency-agents |
+| Solidity Smart Contract Engineer | EVM Smart Contracts | agency-agents |
+| Threat Detection Engineer | SIEM & Bedrohungsjagd | agency-agents |
+| WeChat Mini Program Developer | WeChat 小程序 | agency-agents |
 
 </details>
 
 <details>
-<summary>Regeln (87) — ECC Coding Rules</summary>
+<summary><strong>Agenten-Packs — On-demand-Domänenspezialisten (136)</strong></summary>
 
-**Common (9)** — Angewendet auf alle Projekte
+Installiert in `~/.claude/agent-packs/`. Durch Symlink aktivieren:
 
-| Regel | Beschreibung |
-|----|------|
-| agents.md | Verhaltensrichtlinien für Agenten |
-| coding-style.md | Coding-Stil |
-| development-workflow.md | Entwicklungs-Workflow |
-| git-workflow.md | Git-Workflow |
-| hooks.md | Hook-Nutzungsrichtlinien |
-| patterns.md | Design-Muster |
-| performance.md | Performance-Optimierung |
-| security.md | Sicherheitsrichtlinien |
-| testing.md | Test-Richtlinien |
+```bash
+ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
+```
 
-**TypeScript (5)** — Nur TypeScript-Projekte
-
-| Regel | Beschreibung |
-|----|------|
-| coding-style.md | TS-Coding-Stil |
-| hooks.md | TS-Hook-Muster |
-| patterns.md | TS-Design-Muster |
-| security.md | TS-Sicherheitsrichtlinien |
-| testing.md | TS-Test-Richtlinien |
-
-**Andere Sprachen (je 5 Regeln)** — C++, Go, Kotlin, Perl, PHP, Python, Swift
-
-Jedes Sprachenverzeichnis enthält: coding-style.md, hooks.md, patterns.md, security.md, testing.md
+| Pack | Anzahl | Beispiele | Quelle |
+|------|-------:|-----------|--------|
+| marketing | 29 | Douyin, Xiaohongshu, TikTok, SEO | [agency-agents](https://github.com/msitarzewski/agency-agents) |
+| specialized | 28 | Legal, Finance, Healthcare, MCP Builder | agency-agents |
+| game-development | 20 | Unity, Unreal, Godot, Roblox | agency-agents |
+| design | 8 | Brand, UI, UX, Visual Storytelling | agency-agents |
+| testing | 8 | API, Accessibility, Performance | agency-agents |
+| sales | 8 | Deal Strategy, Pipeline Analysis | agency-agents |
+| paid-media | 7 | Google Ads, Meta Ads, Programmatic | agency-agents |
+| project-management | 6 | Scrum, Kanban, Risk Management | agency-agents |
+| spatial-computing | 6 | visionOS, WebXR, Metal | agency-agents |
+| support | 6 | Analytics, Infrastructure, Legal | agency-agents |
+| academic | 5 | Anthropologist, Historian, Psychologist | agency-agents |
+| product | 5 | Product Manager, Sprint, Feedback | agency-agents |
 
 </details>
 
 <details>
-<summary>MCP-Server (3) + Verhaltenskorrektur-Hooks (7)</summary>
+<summary><strong>Skills — 200+ aus 6 Quellen</strong></summary>
+
+| Quelle | Anzahl | Wichtige Skills |
+|--------|-------:|-----------------|
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 180+ | tdd-workflow, autopilot, ralph, security-review, coding-standards |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 36 | plan, team, trace, deep-dive, blueprint, ultrawork |
+| [gstack](https://github.com/garrytan/gstack) | 40 | /qa, /review, /ship, /cso, /investigate, /office-hours |
+| [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming, systematic-debugging, TDD, parallel-agents |
+| [my-claude Core](https://github.com/sehoon787/my-claude) | 3 | boss-advanced, gstack-sprint, briefing-vault |
+| [Anthropic Official](https://github.com/anthropics/skills) | 14+ | pdf, docx, pptx, xlsx, canvas-design, mcp-builder |
+
+</details>
+
+<details>
+<summary><strong>MCP-Server (3) + Hooks (7)</strong></summary>
 
 **MCP-Server**
 
-| Server | URL | Zweck | Kosten |
-|------|-----|------|------|
-| Context7 | mcp.context7.com | Echtzeit-Bibliotheks-Dokumentations-Lookup | Kostenlos (höhere Limits mit Schlüssel-Registrierung) |
-| Exa | mcp.exa.ai | Semantische Websuche | Kostenlos 1k Anfragen/Monat |
-| grep.app | mcp.grep.app | Open-Source-GitHub-Code-Suche | Kostenlos |
+| Server | Zweck | Kosten |
+|--------|-------|--------|
+| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://mcp.context7.com) | Echtzeit-Bibliotheksdokumentation | Kostenlos |
+| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://mcp.exa.ai) | Semantische Websuche | Kostenlos 1k Anfragen/Monat |
+| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://mcp.grep.app) | GitHub-Code-Suche | Kostenlos |
 
-**Verhaltenskorrektur-Hooks**
+**Verhaltens-Hooks**
 
-| Hook | Event | Verhalten |
-|----|--------|------|
-| Session Setup | SessionStart | Erkennt automatisch und installiert fehlende begleitende Tools (omc, omo, ast-grep, Anthropic Skills) |
-| Delegation Guard | PreToolUse (Edit/Write) | Erinnert Boss, an einen Sub-Agent zu delegieren, wenn versucht wird, Dateien direkt zu ändern |
-| Subagent Verifier | SubagentStop | Erzwingt unabhängige Verifizierung nach Sub-Agent-Abschluss |
-| Completion Check | Stop | Bestätigt, dass alle Aufgaben abgeschlossen und verifiziert sind, bevor Session-Beendigung erlaubt wird |
-| Teammate Idle Guide | TeammateIdle | Erinnert Anführer, die TaskList zu überprüfen und Abschaltungs- oder nächste Anweisungen zu senden, wenn ein Teammate untätig wird |
-| Task Quality Gate | TaskCompleted | Erinnert Anführer, die Existenz des Lieferumfangs zu verifizieren und die Qualität zu überprüfen, bevor abgeschlossene Aufgaben akzeptiert werden |
+| Hook | Ereignis | Verhalten |
+|------|----------|-----------|
+| Session Setup | SessionStart | Erkennt automatisch fehlende Tools + injiziert Briefing Vault-Kontext |
+| Delegation Guard | PreToolUse | Verhindert, dass Boss Dateien direkt ändert |
+| Agent Telemetry | PostToolUse | Protokolliert Agentennutzung in `agent-usage.jsonl` |
+| Subagent Verifier | SubagentStop | Erzwingt unabhängige Verifikation + Protokollierung in Briefing Vault |
+| Completion Check | Stop | Bestätigt verifizierte Aufgaben + fordert Sitzungszusammenfassung an |
+| Teammate Idle Guide | TeammateIdle | Benachrichtigt Teamleiter über inaktive Teammitglieder |
+| Task Quality Gate | TaskCompleted | Prüft die Qualität des Lieferergebnisses |
 
 </details>
 
 ---
 
-## Vollständige Architektur
+## <img src="https://obsidian.md/images/obsidian-logo-gradient.svg" width="24" height="24" align="center"/> Briefing Vault
+
+Obsidian-kompatibler persistenter Speicher. Jedes Projekt pflegt ein `.briefing/`-Verzeichnis, das sich über Sitzungen hinweg automatisch befüllt.
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    User Request                          │
-└─────────────────────┬───────────────────────────────────┘
-                      ↓
-┌─────────────────────────────────────────────────────────┐
-│  [Boss] Dynamic Meta-Orchestrator                       │
-│  Runtime Discovery → Capability Matching → Routing      │
-│  (agents, skills, MCP servers, hooks — all discovered)  │
-└──┬──────────┬──────────┬──────────┬──────────┬──────────┘
-   ↓          ↓          ↓          ↓          ↓
-┌──────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
-│  P1  │ │   P2   │ │  P3a   │ │  P3b   │ │  P3c   │
-│Skill │ │Special-│ │ Direct │ │Sub-orc-│ │ Agent  │
-│Match │ │ist     │ │Parallel│ │hestrat-│ │ Teams  │
-│      │ │Agent   │ │ (2-4)  │ │ors     │ │  P2P   │
-│      │ │(200+)  │ │        │ │Sisyphus│ │        │
-└──────┘ └────────┘ └────────┘ │ Atlas  │ └────────┘
-                                │Hephaes-│
-                                │ tus    │
-                                └────────┘
-┌─────────────────────────────────────────────────────────┐
-│  Karpathy Guidelines (behavioral guidelines, always on) │
-│  ECC Rules (language-specific coding rules, always on)  │
-│  Hooks: PreToolUse / SubagentStop / Stop                │
-└─────────────────────┬───────────────────────────────────┘
-                      ↓
-┌─────────────────────────────────────────────────────────┐
-│  Specialist Agent Layer                                 │
-│    ├── OMC Agents (executor, debugger, test-engineer)   │
-│    ├── Agency Agents (UX architect, security auditor)   │
-│    ├── ECC Commands (/tdd, /code-review, /build-fix)    │
-│    └── Anthropic Skills (pdf, docx, mcp-builder)        │
-└─────────────────────┬───────────────────────────────────┘
-                      ↓
-┌─────────────────────────────────────────────────────────┐
-│  MCP Server Layer                                       │
-│    ├── Context7 (real-time library documentation)       │
-│    ├── Exa (semantic web search)                        │
-│    └── grep.app (open-source code search)               │
-└─────────────────────────────────────────────────────────┘
-
-    ┌─────────────────────────────────────────────────────┐
-    │ omo Bridge (when using OpenCode)                    │
-    │  claude-code-agent-loader: loads ~/.claude/agents/*.md│
-    │  claude-code-plugin-loader: loads CC plugins        │
-    │  → Both OMC + omo agents available in OpenCode      │
-    └─────────────────────────────────────────────────────┘
+.briefing/
+├── INDEX.md                          ← Project context (auto-created once)
+├── sessions/
+│   ├── YYYY-MM-DD-<topic>.md        ← AI-written session summary (enforced)
+│   └── YYYY-MM-DD-auto.md           ← Auto-generated scaffold (git diff, agent stats)
+├── decisions/
+│   ├── YYYY-MM-DD-<decision>.md     ← AI-written decision record
+│   └── YYYY-MM-DD-auto.md           ← Auto-generated scaffold (commits, files)
+├── learnings/
+│   ├── YYYY-MM-DD-<pattern>.md      ← AI-written learning note
+│   └── YYYY-MM-DD-auto-session.md   ← Auto-generated scaffold (agents, files)
+├── references/
+│   └── auto-links.md                ← Auto-collected URLs from web searches
+├── agents/
+│   ├── agent-log.jsonl              ← Subagent execution telemetry
+│   └── YYYY-MM-DD-summary.md        ← Daily agent usage breakdown
+└── persona/
+    ├── profile.md                   ← Agent affinity stats (auto-updated)
+    ├── suggestions.jsonl            ← Routing suggestions (auto-generated)
+    ├── rules/                       ← Accepted routing preferences
+    └── skills/                      ← Accepted persona skills
 ```
+
+### Automatisierungs-Lebenszyklus
+
+| Phase | Hook-Ereignis | Was passiert |
+|-------|--------------|--------------|
+| **Sitzungsstart** | `SessionStart` | Erstellt `.briefing/`-Struktur, speichert git-HEAD-Hash für sitzungsspezifische Diffs |
+| **Während der Arbeit** | `PostToolUse` Edit/Write | Verfolgt die Anzahl der Dateibearbeitungen; warnt bei 5, sperrt bei 15, wenn keine Entscheidungen/Lernnotizen geschrieben wurden |
+| **Während der Arbeit** | `PostToolUse` WebSearch/WebFetch | Sammelt URLs automatisch in `references/auto-links.md` |
+| **Während der Arbeit** | `SubagentStop` | Protokolliert Agentenausführung in `agents/agent-log.jsonl` |
+| **Während der Arbeit** | `UserPromptSubmit` (every 5th) | Gedrosseltes Persona-Profil-Update |
+| **Sitzungsende** | `Stop` (1. Hook) | Generiert automatisch Gerüste: `sessions/auto.md`, `learnings/auto-session.md`, `decisions/auto.md`, `persona/profile.md` |
+| **Sitzungsende** | `Stop` (2. Hook) | **Erzwingt** KI-erstellte Sitzungszusammenfassung bei ≥ 3 Dateibearbeitungen — blockiert Sitzungsende mit Vorlage |
+
+### Automatisch generiert vs. KI-erstellt
+
+| Typ | Dateimuster | Erstellt von | Inhalt |
+|-----|-------------|-------------|--------|
+| **Auto-Gerüst** | `*-auto.md`, `*-auto-session.md` | Stop hook (Node.js) | Git-Diff-Statistiken, Agentennutzung, Commit-Liste — nur Daten |
+| **KI-Zusammenfassung** | `YYYY-MM-DD-<topic>.md` | KI während der Sitzung | Aussagekräftige Analyse mit Kontext, Code-Referenzen, Begründung |
+| **Telemetrie** | `agent-log.jsonl`, `auto-links.md` | Hook-Skripte | Nur-Anhänge-strukturierte Protokolle |
+| **Persona** | `profile.md`, `suggestions.jsonl` | Stop hook | Nutzungsbasierte Agenten-Affinität und Routing-Vorschläge |
+
+Auto-Gerüste dienen als **Referenzdaten** für die KI zum Verfassen angemessener Zusammenfassungen. Der Durchsetzungs-Hook stellt den Gerüstinhalt + eine strukturierte Vorlage bereit, wenn das Sitzungsende blockiert wird.
+
+### Sitzungsspezifische Diffs
+
+Beim Sitzungsstart wird der aktuelle git-HEAD in `.briefing/.session-start-head` gespeichert. Am Sitzungsende werden Diffs relativ zu diesem gespeicherten Punkt berechnet — es werden nur Änderungen aus der aktuellen Sitzung angezeigt, keine angesammelten nicht committeten Änderungen aus vorherigen Sitzungen.
+
+### Verwendung mit Obsidian
+
+1. Öffnen Sie Obsidian → **Ordner als Vault öffnen** → `.briefing/` auswählen
+2. Notizen erscheinen in der Graphansicht, verknüpft durch `[[wiki-links]]`
+3. YAML-Frontmatter (`date`, `type`, `tags`) ermöglicht strukturierte Suche
+4. Eine Zeitleiste von Entscheidungen und Lernnotizen entsteht automatisch über Sitzungen hinweg
 
 ---
 
-## Verwendete Open-Source-Tools
+## Upstream Open-Source-Quellen
 
-### 1. [Oh My Claude Code (OMC)](https://github.com/Yeachan-Heo/oh-my-claudecode)
+my-claude bündelt Inhalte aus 5 MIT-lizenzierten Upstream-Repositories über git-Submodule:
 
-Ein Agent-Harness für Claude Code. 19 Spezialisten-Agenten (Architect, Debugger, Code Reviewer, Security Reviewer, etc.) teilen die Arbeit nach Rolle auf, und magische Schlüsselwörter wie `autopilot:` aktivieren automatische parallele Ausführung.
-
-### 2. [Oh My OpenAgent (omo)](https://github.com/code-yeongyu/oh-my-openagent)
-
-Ein Multi-Plattform-Agent-Harness. Verbindung zum Claude Code-Ökosystem über `claude-code-agent-loader` und `claude-code-plugin-loader`. Leitet automatisch über 8 Anbieter (Claude, GPT, Gemini, etc.) nach Kategorie weiter. Die 9 Agenten in diesem Repository sind Anpassungen von omo-Agenten im Claude Code Standalone .md-Format.
-
-### 3. [Andrej Karpathy Skills](https://github.com/forrestchang/andrej-karpathy-skills)
-
-Die 4 KI-Coding-Verhaltensleitlinien von Andrej Karpathy (Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution). In CLAUDE.md enthalten und immer in allen Sessions aktiv.
-
-### 4. [Everything Claude Code (ECC)](https://github.com/affaan-m/everything-claude-code)
-
-Ein umfassendes Framework mit 67 Skills + 17 Agenten + 45 Befehlen + sprachspezifischen Regeln. Automatisiert wiederholte Entwicklungsmuster mit Schrägstrich-Befehlen wie `/tdd`, `/plan`, `/code-review` und `/build-fix`.
-
-### 5. [Anthropic Official Skills](https://github.com/anthropics/skills)
-
-Das offizielle Agenten-Skills-Repository direkt von Anthropic bereitgestellt. Ermöglicht spezialisierte Aufgaben wie PDF-Analyse, Word/Excel/PowerPoint-Dokument-Manipulation und MCP-Server-Erstellung.
-
-### 6. [Agency Agents](https://github.com/msitarzewski/agency-agents)
-
-Eine Bibliothek von 164 Business-Spezialisten-Agent-Personas. Bietet Spezialisten-Perspektiven in Business-Kontexten über technische Rollen hinaus — UX-Architekten, Data Engineers, Security Auditors, QA-Manager und mehr.
-
-### 7. [gstack](https://github.com/garrytan/gstack)
-
-Ein Sprint-Prozess-Harness von Garry Tan mit 40 Skills. Bietet browserbasiertes QA-Testing (`/qa`), Code-Review mit Scope-Drift-Erkennung (`/review`), Sicherheitsaudit (`/cso`) und einen vollständigen Plan→Review→QA→Ship-Deployment-Workflow. Enthält einen kompilierten Playwright-Browser-Daemon für Echtbrowser-Tests.
-
-### 8. [Superpowers](https://github.com/obra/superpowers)
-
-Jesse Vincents Sammlung von Agenten-Entwicklungs-Workflows (14 Skills, 1 Agent). Bietet Brainstorming, Pläne schreiben, testgetriebene Entwicklung, systematisches Debugging, Subagent-gesteuerte Entwicklung, Planausführung, paralleles Agent-Dispatching, git Worktree-Nutzung, Code-Review-Anfrage/-Empfang, Verifizierung vor Abschluss, Entwicklungs-Branch-Abschluss, Skill-Erstellung und Superpowers-Nutzungs-Skills.
+| # | Quelle | Was bereitgestellt wird |
+|---|--------|------------------------|
+| 1 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 19 Spezialisten-Agenten + 36 Skills. Claude Code Multi-Agent-Harness mit autopilot, ralph und Team-Orchestrierung. |
+| 2 | <img src="https://github.com/code-yeongyu.png?size=32" width="20" height="20" align="center"/> **[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — code-yeongyu | 9 OMO-Agenten (Sisyphus, Atlas, Oracle usw.). Multi-Plattform-Agent-Harness, der Claude, GPT und Gemini verbindet. |
+| 3 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** — affaan-m | 180+ Skills + 87 Regeln in 14 Sprachen. Umfassendes Entwicklungsframework mit TDD, Sicherheit und Coding-Standards. |
+| 4 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 26 Engineering-Agenten (immer geladen) + 136 Domänen-Agenten-Packs in 12 Kategorien. |
+| 5 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | 40 Skills für Code-Review, QA, Sicherheits-Audit und Deployment. Enthält Playwright-Browser-Daemon. |
+| 6 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 14 Skills + 1 Agent zu Brainstorming, TDD, parallelen Agenten und Code-Review. |
+| 7 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | 14+ offizielle Skills für PDF, DOCX, PPTX, XLSX und MCP builder. |
+| 8 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 KI-Coding-Verhaltensrichtlinien (Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution). |
 
 ---
 
-## So funktioniert Boss
+## GitHub Actions
 
-### Harness vs Orchestrator vs Agent
-
-| Konzept | Rolle | Analogie | Beispiele |
-|---------|------|---------|---------|
-| **Harness** | Laufzeit-Plattform, die Agenten ausführt — verwaltet Lebenszyklus, Tools, Berechtigungen | Betriebssystem | Claude Code, omo |
-| **Orchestrator** | Spezieller Agent, der andere Agenten koordiniert — klassifiziert Intent, delegiert, verifiziert. Implementiert nie direkt | Dirigent | Boss, Sisyphus, Atlas |
-| **Agent** | Ausführungseinheit, die tatsächliche Arbeit in einer spezifischen Domäne ausführt — schreibt Code, analysiert, überprüft | Musiker | debugger, executor, security-reviewer |
-
-```
-Harness (Claude Code)
- └─ Boss (Meta-Orchestrator)         — discovers all, routes optimally
-     ├─ Skill invocation              — pdf, docx, tdd-workflow, etc.
-     ├─ Direct agent delegation       — debugger, security-reviewer, etc.
-     ├─ Sisyphus (Sub-Orchestrator)   — complex workflow management
-     │   ├─ Metis → intent analysis
-     │   ├─ Prometheus → planning
-     │   └─ Hephaestus → autonomous execution
-     └─ Atlas (Sub-Orchestrator)      — task decomposition + QA cycles
-```
-
-### Delegations-Mechanismus (4-Priority Routing)
-
-Boss leitet jede Anfrage durch eine 4-stufige Priority-Kette weiter:
-
-| Priorität | Übereinstimmungstyp | Wenn | Beispiel |
-|----------|-----------|------|---------|
-| **1** | Exakte Skill-Übereinstimmung | Aufgabe wird einer in sich geschlossenen Skill zugeordnet | "PDFs zusammenführen" → `Skill("pdf")` |
-| **2** | Spezialisten-Agent-Übereinstimmung | Domänenspezifischer Agent existiert | "Sicherheits-Audit" → `Agent("Security Engineer")` |
-| **3a** | Direkte Orchestrierung | 2-4 unabhängige Agenten | "3 Fehler beheben" → Boss parallel |
-| **3b** | Sub-Orchestrator-Delegation | Komplexer mehrstufiger Workflow | "Refaktorisieren + Tests" → Sisyphus |
-| **3c** | Agent Teams (direkte Führung) | Peer-to-Peer-Kommunikation benötigt | "Implementieren + überprüfen" → Review Chain |
-| **4** | Allgemeiner Fallback | Keine Spezialisten-Übereinstimmung | "Erklären Sie dies" → `Agent(model="sonnet")` |
-
-Jede Delegation beinhaltet einen **6-Abschnitt strukturierten Prompt**: AUFGABE, ERWARTETES ERGEBNIS, ERFORDERLICHE TOOLS, MUSS GETAN, MUSS NICHT GETAN, KONTEXT.
-
-### Delegations-Beispiele
-
-#### Subagent vs Agent Teams
-
-| | Subagent (P2/P3a/P3b) | Agent Teams (P3c) |
-|---|---|---|
-| **Befehl** | `Agent(prompt="...")` | `SendMessage(to: "agent", ...)` |
-| **Kommunikation** | Boss → Agent → Boss | Boss ↔ Agent ↔ Agent |
-| **Lebensdauer** | Endet bei Abschluss | Bleibt bestehen bis TeamDelete |
-| **Sichtbarkeit** | Nur Boss-Log | tmux Pane oder Shift+↓ |
-| **Kosten** | Niedrig | Hoch (separate Claude Session pro Teammate) |
-
-**P2 — Einzelner Spezialisten-Agent:**
-```
-$ claude "analyze auth module for security vulnerabilities"
-
-[Boss] Phase 0: Scanning... 200+ agents, 200+ skills ready.
-[Boss] Phase 1: Intent → Security Analysis | Priority: P2
-[Boss] Phase 2: Matched → security-reviewer (sonnet)
-[Boss] Agent(description="security review", model="sonnet", prompt="
-  TASK: Analyze src/auth/ for OWASP Top 10 vulnerabilities.
-  MUST DO: Check SQL injection, XSS, CSRF.
-  MUST NOT: Modify any files.
-")
-       ↓ result returned
-[Boss] Phase 4: Reading report... 2 critical, 1 medium confirmed. ✓
-```
-
-**P3a — Boss Direct Parallel:**
-```
-$ claude "refactor auth and write tests"
-
-[Boss] Phase 1: Multi-step → P3a Direct Orchestration
-[Boss] Spawning 2 agents in parallel:
-  Agent(description="executor refactoring", model="sonnet", run_in_background=true)
-  Agent(description="test-engineer tests", model="sonnet", run_in_background=true)
-       ↓ both results returned
-[Boss] Phase 4: Verifying refactored files... ✓
-[Boss] Phase 4: Running tests... 12/12 passed. ✓
-```
-
-**P3c — Agent Teams:**
-```
-$ claude "implement payment module with review"
-
-[Boss] Phase 1: Needs inter-agent communication → P3c Agent Teams
-[Boss] TeamCreate → 2 teammates spawned (tmux split-pane)
-[Boss] TaskCreate("Implement payment", assignee="executor")
-[Boss] TaskCreate("Review payment", assignee="code-reviewer")
-[Boss] SendMessage(to: "executor", "Implement src/payment/ using Stripe SDK")
-
-  ┌─ executor (tmux pane 1) ──────────────────┐
-  │ Working on src/payment/...                  │
-  │ SendMessage(to: "code-reviewer",            │
-  │   "Implementation done, review src/payment/")│
-  └─────────────────────────────────────────────┘
-  ┌─ code-reviewer (tmux pane 2) ─────────────┐
-  │ Reviewing src/payment/checkout.ts...        │
-  │ SendMessage(to: "executor",                 │
-  │   "Line 42: missing error handling")        │
-  └─────────────────────────────────────────────┘
-  ┌─ executor ──────────────────────────────────┐
-  │ Fixed. TaskUpdate(status: "completed")      │
-  └─────────────────────────────────────────────┘
-
-[Boss] All tasks completed → TeamDelete
-```
-
-Detaillierte Agent-Kompatibilitäts-Matrix und Team-Kommunikations-Muster finden Sie in [Agent Teams Reference](agents/core/agent-teams-reference.md).
-
-### Scope Discovery (Global + Project)
-
-Boss entdeckt Komponenten aus **zwei Scopes**, die zur Laufzeit zusammengeführt werden:
-
-| Scope | Agenten | Skills | MCP-Server |
-|-------|--------|--------|-------------|
-| **Global** | `~/.claude/agents/*.md` | `~/.claude/skills/` | `~/.claude/settings.json` |
-| **Project** | `.claude/agents/*.md` | `.claude/skills/` | `.mcp.json` |
-
-Wenn Sie `claude` in einem Projektverzeichnis ausführen, sieht Boss sowohl globale als auch projektebenen-Komponenten. Projektebenen-Agenten mit demselben Namen wie globale haben Vorrang (projektspezifische Anpassung).
+| Workflow | Auslöser | Zweck |
+|----------|----------|-------|
+| **CI** | push, PR | Validiert JSON-Konfigurationen, Agent-Frontmatter, Skill-Existenz, Upstream-Dateianzahlen |
+| **Update Upstream** | wöchentlich / manuell | Führt `git submodule update --remote` aus und erstellt einen Auto-Merge-PR |
+| **Auto Tag** | push to main | Liest die `plugin.json`-Version und erstellt ein git-Tag, wenn neu |
+| **Pages** | push to main | Deployt `docs/index.html` auf GitHub Pages |
+| **CLA** | PR | Prüfung des Contributor License Agreement |
+| **Lint Workflows** | push, PR | Validiert die YAML-Syntax der GitHub Actions-Workflows |
 
 ---
 
-## Agent Overlap Guide
+## my-claude Originals
 
-OMC und omo haben Agent-Paare mit überlappender Funktionalität. Behalte beide und wähle basierend auf der Situation.
+Funktionen, die speziell für dieses Projekt entwickelt wurden und über das hinausgehen, was Upstream-Quellen bieten:
 
-| Funktion | OMC | omo | Auswahlkriterien |
-|------|-----|-----|-----------|
-| Planung | planner | Prometheus | Schnelle Aufgaben → OMC Planner, komplexe Projekte → omo Triad (Metis → Prometheus → Momus) |
-| Code Review | code-reviewer | Momus | OMC: fokussierte Review, omo: beinhaltet KI-Slop-Erkennung |
-| Erkundung | explore | Explore | Verwende, welcher zur aktuellen Plattform gehört |
-
-**omo-exklusive Agenten (5):** Sisyphus, Hephaestus, Oracle, Multimodal-Looker, Librarian
-
-**OMC-exklusive Agenten (14):** analyst, architect, code-simplifier, critic, debugger, designer, document-specialist, executor, git-master, qa-tester, scientist, test-engineer, verifier, writer
-
-Für eine detaillierte Analyse siehe [Agent Overlap Analysis in SETUP.md](../../SETUP.md#11-agent-overlap-analysis-omc-vs-omo).
-
----
-
-## Beitragen
-
-Issues und PRs sind willkommen. Wenn Sie einen neuen Agent hinzufügen, fügen Sie eine `.md`-Datei zum `agents/`-Verzeichnis hinzu und aktualisieren Sie die Agent-Liste in `SETUP.md`.
+| Funktion | Beschreibung |
+|----------|-------------|
+| **Boss Meta-Orchestrator** | Dynamische Fähigkeitsentdeckung → Absichtsklassifizierung → 5-Prioritäten-Routing → Delegation → Verifikation |
+| **3-Phasen-Sprint** | Design (interaktiv) → Ausführung (autonom über ralph) → Review (interaktiv vs. Design-Dokument) |
+| **Agenten-Tier-Priorität** | core > omo > omc > agency-Deduplizierung. Der speziellste Agent gewinnt. |
+| **Agency-Kostenoptimierung** | Haiku für Beratung, Sonnet für Implementierung — automatisches Modell-Routing für 172 Domänen-Agenten |
+| **Briefing Vault** | Obsidian-kompatibles `.briefing/`-Verzeichnis mit Sitzungen, Entscheidungen, Lernnotizen und Referenzen |
+| **Agenten-Telemetrie** | PostToolUse-Hook protokolliert Agentennutzung in `agent-usage.jsonl` |
+| **Smart Packs** | Projekttypenerkennung empfiehlt relevante Agenten-Packs beim Sitzungsstart |
+| **CI SHA-Vorprüfung** | Upstream-Sync überspringt unveränderte Quellen per `git ls-remote`-SHA-Vergleich |
+| **Agenten-Duplikatserkennung** | Normalisierter Namensvergleich erkennt Duplikate über Upstream-Quellen hinweg |
 
 ---
 
 ## Gebündelte Upstream-Versionen
 
-Per git Submodule verbunden. Genaue SHAs werden in `.gitmodules` verfolgt.
+Über git-Submodule verknüpft. Festgelegte Commits werden nativ von `.gitmodules` verfolgt.
 
-| Quelle | Synced SHA | Tag | Datum | Diff |
-|--------|-----------|-----|------|------|
-| [agency-agents](https://github.com/msitarzewski/agency-agents) | `4feb0cd` | — | 2026-04-07 | [compare](https://github.com/msitarzewski/agency-agents/compare/4feb0cd...HEAD) |
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `7dfdbe0` | — | 2026-04-07 | [compare](https://github.com/affaan-m/everything-claude-code/compare/7dfdbe0...HEAD) |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `2487d38` | v4.10.2 | 2026-04-07 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/2487d38...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | `03973c2` | — | 2026-04-07 | [compare](https://github.com/garrytan/gstack/compare/03973c2...HEAD) |
-| [superpowers](https://github.com/obra/superpowers) | `b7a8f76` | v5.0.7 | 2026-04-07 | [compare](https://github.com/obra/superpowers/compare/b7a8f76...HEAD) |
+| Quelle | SHA | Datum | Diff |
+|--------|-----|-------|------|
+| [agency-agents](https://github.com/msitarzewski/agency-agents) | `4feb0cd` | 2026-04-07 | [compare](https://github.com/msitarzewski/agency-agents/compare/4feb0cd...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `7dfdbe0` | 2026-04-07 | [compare](https://github.com/affaan-m/everything-claude-code/compare/7dfdbe0...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `2487d38` | 2026-04-07 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/2487d38...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `03973c2` | 2026-04-07 | [compare](https://github.com/garrytan/gstack/compare/03973c2...HEAD) |
+| [superpowers](https://github.com/obra/superpowers) | `b7a8f76` | 2026-04-06 | [compare](https://github.com/obra/superpowers/compare/b7a8f76...HEAD) |
 
 ---
+
+## Mitwirken
+
+Issues und PRs sind willkommen. Wenn Sie einen neuen Agenten hinzufügen, fügen Sie eine `.md`-Datei zu `agents/core/` oder `agents/omo/` hinzu und aktualisieren Sie `SETUP.md`.
 
 ## Danksagungen
 
-Dieses Repository basiert auf der Arbeit der folgenden Open-Source-Projekte:
-
-- [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) — Yeachan Heo
-- [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) — code-yeongyu
-- [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) — forrestchang
-- [everything-claude-code](https://github.com/affaan-m/everything-claude-code) — affaan-m
-- [anthropic/skills](https://github.com/anthropics/skills) — Anthropic
-- [agency-agents](https://github.com/msitarzewski/agency-agents) — msitarzewski
-- [gstack](https://github.com/garrytan/gstack) — garrytan
-- [superpowers](https://github.com/obra/superpowers) — Jesse Vincent
-
----
+Aufgebaut auf der Arbeit von: [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) (Yeachan Heo), [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) (code-yeongyu), [everything-claude-code](https://github.com/affaan-m/everything-claude-code) (affaan-m), [agency-agents](https://github.com/msitarzewski/agency-agents) (msitarzewski), [gstack](https://github.com/garrytan/gstack) (garrytan), [superpowers](https://github.com/obra/superpowers) (Jesse Vincent), [anthropic/skills](https://github.com/anthropics/skills) (Anthropic), [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) (forrestchang).
 
 ## Lizenz
 
-MIT-Lizenz. Siehe die [LICENSE](./LICENSE)-Datei für Details.
+MIT-Lizenz. Weitere Informationen finden Sie in der Datei [LICENSE](./LICENSE).

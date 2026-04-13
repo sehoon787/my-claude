@@ -1,14 +1,10 @@
 [English](../../README.md) | [한국어](./README.ko.md) | [日本語](./README.ja.md) | [中文](./README.zh.md) | [Deutsch](./README.de.md) | [Français](./README.fr.md)
 
-> [![Codex CLI](https://img.shields.io/badge/Codex_CLI-my--codex-10b981?style=flat-square&logo=openai&logoColor=white)](https://github.com/sehoon787/my-codex) Codex CLI를 찾으시나요? → **my-codex** — 동일한 에이전트를 OpenAI Codex CLI용 네이티브 TOML 형식으로
-
-> **LLM 에이전트라면** 설치 가이드를 fetch하고 각 단계를 실행하세요:
-> ```bash
-> curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
-> ```
-> 전체 출력을 읽고 각 단계를 순서대로 실행하세요. `WebFetch`가 아닌 `curl`을 사용하세요 (요약하면 설정값이 누락됩니다).
+> [![Codex CLI](https://img.shields.io/badge/Codex_CLI-my--codex-10b981?style=flat-square&logo=openai&logoColor=white)](https://github.com/sehoon787/my-codex) Codex CLI를 찾으시나요? → **my-codex** — 네이티브 TOML 형식으로 제공하는 동일한 오케스트레이션
 
 ---
+
+<div align="center">
 
 # my-claude
 
@@ -16,41 +12,24 @@
 ![Agents](https://img.shields.io/badge/agents-200%2B-blue)
 ![Skills](https://img.shields.io/badge/skills-200%2B-purple)
 ![Rules](https://img.shields.io/badge/rules-87-orange)
-![MCP](https://img.shields.io/badge/MCP-3-green)
+![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-7-red)
-![Auto Sync](https://img.shields.io/badge/upstream-submodules-brightgreen)
 
-Claude Code를 위한 올인원 에이전트 하네스 — 플러그인 하나로 203개 에이전트를 바로 사용.
+**Claude Code를 위한 올인원 에이전트 하네스.**
+**플러그인 하나로 200개 이상의 에이전트가 준비됩니다.**
 
-**Boss**가 런타임에 모든 에이전트, 스킬, MCP 툴을 자동 감지하고 최적의 전문가에게 작업을 라우팅합니다. 5개의 MIT 업스트림 레포를 번들하여 git 서브모듈로 연결.
+Boss가 런타임에 모든 에이전트, 스킬, MCP 도구를 자동으로 탐색하고,<br>
+작업을 적합한 전문가에게 라우팅합니다. 설정 파일도, 보일러플레이트도 없습니다.
 
-<p align="center">
-  <img src="../../assets/demo.svg" alt="my-claude 데모" width="700">
-</p>
+<img src="../../assets/owl-claude-social.svg" alt="The Maestro Owl — my-claude" width="700">
+
+</div>
 
 ---
 
-## 핵심 원칙
+## 설치
 
-| 원칙 | 설명 |
-|------|------|
-| **Leadership** | Boss는 오케스트레이터이지 구현자가 아니다. peer-to-peer 통신, 유동적 팀 구성, 파일 소유권 프로토콜로 팀을 이끈다 |
-| **Discovery** | 런타임 능력 매칭 — 하드코딩된 라우팅 테이블 없음. 모든 에이전트, 스킬, MCP 서버를 세션 시작 시 자동 발견 |
-| **Verification** | 신뢰하되 검증한다. 모든 서브에이전트 결과를 수락 전 독립적으로 확인 |
-
-## 빠른 시작
-
-### 사람이라면
-
-**방법 1: Claude Code 플러그인으로 설치**
-
-```bash
-# Claude Code 세션 내에서:
-/plugin marketplace add sehoon787/my-claude
-/plugin install my-claude@my-claude
-```
-
-그 다음 컴패니언 도구 설치 (npm 패키지 + Anthropic 스킬):
+### 사람을 위한 설치
 
 ```bash
 git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude
@@ -58,588 +37,450 @@ bash /tmp/my-claude/install.sh
 rm -rf /tmp/my-claude
 ```
 
-**방법 2: 자동 스크립트**
+또는 Claude Code 플러그인으로 먼저 설치한 후 동반 인스톨러를 실행하세요:
 
 ```bash
-git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude && bash /tmp/my-claude/install.sh && rm -rf /tmp/my-claude
+# Claude Code 세션 내에서:
+/plugin marketplace add sehoon787/my-claude
+/plugin install my-claude@my-claude
+
+# 그런 다음 동반 도구 설치:
+git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude
+bash /tmp/my-claude/install.sh
+rm -rf /tmp/my-claude
 ```
 
-> **참고**: `install.sh`는 Boss를 기본 에이전트로 자동 설정합니다. 플러그인 설치(방법 1) 시에는 [AI-INSTALL.md](../../AI-INSTALL.md)의 설정 명령어를 실행하세요.
->
-> **에이전트 팩**: 도메인 전문 에이전트(마케팅, 영업, 게임 개발 등)는 `~/.claude/agent-packs/`에 설치됩니다. 필요 시 `~/.claude/agents/`에 심링크를 생성하여 활성화할 수 있습니다.
-
-**방법 3: 수동 설치**
-
-```bash
-git clone https://github.com/sehoon787/my-claude.git
-```
-
-이후 `SETUP.md`의 지침에 따라 파일을 복사하세요.
-
-### LLM 에이전트라면
-
-AI 설치 가이드를 fetch하고 각 단계를 실행하세요:
+### AI 에이전트를 위한 설치
 
 ```bash
 curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 ```
 
-전체 출력을 읽고 각 단계를 순서대로 실행. `WebFetch`가 아닌 `curl` 사용. 수동 설치 가이드는 `SETUP.md` 참조.
+전체 출력을 읽은 후, 각 단계를 순서대로 실행하세요. `WebFetch`가 아닌 `curl`을 사용하세요.
 
 ---
 
-## 주요 기능
+## Boss의 작동 방식
 
-### 멀티에이전트 하네스
-- **Boss 동적 메타 오케스트레이터**: 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지 — 3D 충돌 해결(Scope/Depth×2/Interactivity)로 최적 라우팅. 중간 규모 작업은 서브 오케스트레이터 없이 직접 조율(P3a)
-- **서브 오케스트레이터 (P3b)**: 직접 처리하기 너무 복잡한 작업은 Boss가 Sisyphus(계획+검증), Atlas(태스크 조율), Hephaestus(자율 실행)에 위임 — 복잡한 멀티스텝 워크플로우 전용이며 모든 요청을 거치지 않음
-- **Skill vs Agent 충돌 해결**: 가중 3차원 스코어링(Scope, Depth×2, Interactivity)으로 각 작업에 Skill/Agent 여부를 판단 — 하드코딩 라우팅 테이블 없음
-- **모델 최적화 라우팅**: 작업 복잡도에 따라 Opus(고난도) / Sonnet(구현) / Haiku(탐색) 자동 선택
+Boss는 my-claude의 핵심에 있는 메타 오케스트레이터입니다. 코드를 직접 작성하지 않고, 탐색하고 분류하고 매칭하고 위임하고 검증합니다.
 
-### 런타임 행동 교정
-- **Delegation Guard** (PreToolUse): 오케스트레이터가 직접 파일 수정 시도 시 서브에이전트 위임을 강제
-- **Subagent Verifier** (SubagentStop): 서브에이전트 작업 완료 후 독립 검증을 강제
-- **Completion Check** (Stop): 모든 태스크가 완료·검증되었는지 확인 후 세션 종료 허용
-
-### 외부 지식 연동 (MCP)
-- **Context7**: 라이브러리 공식 문서를 실시간으로 조회
-- **Exa**: 의미 기반 웹 검색 (월 1,000건 무료)
-- **grep.app**: GitHub 오픈소스 코드 검색
-
-### 통합 생태계
-- 플러그인 하나로 **200+ 에이전트, 200+ 스킬, 룰**을 한 환경에 구성
-- 8개 오픈소스 도구(OMC, omo, ECC, Anthropic Skills, Agency, Karpathy, gstack, superpowers)를 하나로 통합
-
----
-
-## Core 에이전트
-
-**Boss**만 my-claude 고유 에이전트입니다 — 런타임에 설치된 모든 에이전트, 스킬, MCP 서버를 자동 감지하는 동적 메타 오케스트레이터입니다. (`agent-teams-reference`는 Agent Teams 패턴의 참조 문서이며, 실행 가능한 에이전트가 아닙니다.)
-
-| 에이전트 | 출처 | 모델 | 역할 |
-|---------|------|------|------|
-| **Boss** | my-claude | Opus | 동적 메타 오케스트레이터. 런타임에 모든 에이전트/스킬/MCP를 자동 감지하고 최적의 전문가에게 라우팅 |
-
-## OMO 에이전트
-
-Boss가 서브 오케스트레이터 및 전문가로 사용하는 [Oh My OpenAgent](https://github.com/code-yeongyu/oh-my-openagent)의 9개 에이전트입니다. 플러그인은 **56개 코어 에이전트** (my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1)를 `~/.claude/agents/`에 항상 로드하며, **136개 도메인 에이전트 팩**은 `~/.claude/agent-packs/`에 설치되어 필요 시 활성화할 수 있습니다. Boss는 Priority 2 능력 매칭으로 활성화된 전체 에이전트 풀에서 최적의 전문가를 선택합니다. 전체 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
-
-| 에이전트 | 출처 | 모델 | 역할 |
-|---------|------|------|------|
-| **Sisyphus** | OMO | Opus | 서브 오케스트레이터. 의도 분류와 검증 프로토콜로 복잡한 멀티스텝 워크플로우 관리 |
-| **Hephaestus** | OMO | Opus | 자율 딥 워커. 탐색 → 계획 → 실행 → 검증 사이클을 자율적으로 수행 |
-| **Metis** | OMO | Opus | 사전 의도 분석. AI-slop 방지를 위해 요청을 실행 전에 구조화 |
-| **Atlas** | OMO | Opus | 마스터 태스크 오케스트레이터. 4단계 QA 사이클로 복잡한 작업을 분해 및 조율 |
-| **Oracle** | OMO | Opus | 전략적 기술 자문가. 코드를 변경하지 않고 read-only로 분석하여 방향 제시 |
-| **Momus** | OMO | Opus | 작업 계획 검토자. 승인 편향적 관점에서 계획을 검토. read-only |
-| **Prometheus** | OMO | Opus | 인터뷰 기반 계획 수립 컨설턴트. 대화를 통해 요구사항을 명확화 |
-| **Librarian** | OMO | Sonnet | MCP를 활용한 오픈소스 문서 연구 에이전트 |
-| **Multimodal-Looker** | OMO | Sonnet | 시각 분석 에이전트. 이미지/스크린샷을 분석. read-only |
-
----
-
-## 에이전트 팩 (도메인 전문가)
-
-도메인 전문 에이전트는 `~/.claude/agent-packs/`에 설치되며 기본적으로 로드되지 **않습니다**. 심링크로 활성화하세요:
-
-```bash
-# 팩 활성화
-ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
-
-# 비활성화
-rm ~/.claude/agents/<agent-name>.md
+```
+사용자 요청
+     │
+     ▼
+┌─────────────────────────────────────────────┐
+│  Phase 0 · DISCOVERY                        │
+│  Scan agents, skills, MCP, hooks at runtime │
+│  → Build live capability registry           │
+└──────────────────────┬──────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────┐
+│  Phase 1 · INTENT GATE                      │
+│  Classify: trivial | build | refactor |     │
+│  mid-sized | architecture | research | ...  │
+│  → Counter-propose skill if better fit      │
+└──────────────────────┬──────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────┐
+│  Phase 2 · CAPABILITY MATCHING              │
+│  P0: gstack skill (if installed)            │
+│  P1: Exact skill match                      │
+│  P2: Specialist agent (200+)               │
+│  P3: Multi-agent orchestration              │
+│  P4: General-purpose fallback               │
+└──────────────────────┬──────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────┐
+│  Phase 3 · DELEGATION                       │
+│  6-section structured prompt to specialist  │
+│  TASK / OUTCOME / TOOLS / DO / DON'T / CTX  │
+└──────────────────────┬──────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────┐
+│  Phase 4 · VERIFICATION                     │
+│  Read changed files independently           │
+│  Run tests, lint, build                     │
+│  Cross-reference with original intent       │
+│  → Retry up to 3× on failure               │
+└─────────────────────────────────────────────┘
 ```
 
-| 팩 | 개수 | 예시 |
-|----|------|------|
-| marketing | 29 | 더우인, 샤오홍슈, WeChat OA, TikTok, SEO |
-| specialized | 28 | 법률, 금융, 헬스케어, 교육, MCP Builder |
-| game-development | 20 | Unity, Unreal, Godot, Roblox, Blender, Narrative |
-| design | 8 | 브랜드, UI, UX, 시각적 스토리텔링 |
-| testing | 8 | API, 접근성, 성능, E2E |
-| sales | 8 | 딜 전략, 디스커버리, 파이프라인 분석 |
-| paid-media | 7 | Google Ads, Meta Ads, 프로그래매틱 |
-| project-management | 6 | 스크럼, 칸반, 리스크 관리 |
-| spatial-computing | 6 | visionOS, ARKit, WebXR, Metal |
-| support | 6 | 고객 성공, 에스컬레이션, 트리아지 |
-| academic | 5 | 연구, 문헌 검토, 인용 |
-| product | 5 | 프로덕트 매니저, 스프린트, 피드백, 트렌드 |
+### 우선순위 라우팅
+
+Boss는 가장 적합한 매칭을 찾을 때까지 모든 요청을 우선순위 체인을 통해 순차적으로 처리합니다:
+
+| 우선순위 | 매칭 유형 | 조건 | 예시 |
+|:--------:|-----------|------|---------|
+| **P1** | 스킬 매칭 | 작업이 독립적인 스킬에 해당 | `"merge PDFs"` → pdf 스킬 |
+| **P2** | 전문가 에이전트 | 도메인별 에이전트 존재 | `"security audit"` → Security Engineer |
+| **P3a** | Boss 직접 | 독립적인 에이전트 2~4개 | `"fix 3 bugs"` → 병렬 스폰 |
+| **P3b** | 서브 오케스트레이터 | 복잡한 다단계 워크플로 | `"refactor + test"` → Sisyphus |
+| **P3c** | 에이전트 팀 | P2P 통신이 필요한 경우 | `"implement + review"` → Review Chain |
+| **P4** | 폴백 | 전문가 매칭 없음 | `"explain this"` → 범용 에이전트 |
+
+### 모델 라우팅
+
+| 복잡도 | 모델 | 사용 대상 |
+|-----------|-------|----------|
+| 심층 분석, 아키텍처 | Opus | Boss, Oracle, Sisyphus |
+| 표준 구현 | Sonnet | executor, debugger, security-reviewer |
+| 빠른 조회, 탐색 | Haiku | explore, 간단한 자문 |
+
+### 3단계 스프린트 워크플로
+
+엔드투엔드 기능 구현을 위해 Boss는 구조화된 스프린트를 오케스트레이션합니다:
+
+```
+Phase 1: DESIGN         Phase 2: EXECUTE        Phase 3: REVIEW
+(interactive)            (autonomous)             (interactive)
+─────────────────────   ─────────────────────   ─────────────────────
+User decides scope      ralph runs execution    Compare vs design doc
+Engineering review      Auto code review        Present comparison table
+Confirm "design done"   Architect verification  User: approve / improve
+```
 
 ---
 
-## 설치 후 전체 구성 요소
+## 아키텍처
 
-SETUP.md를 따라 설치하면 다음이 구성됩니다:
+```
+┌─────────────────────────────────────────────────────┐
+│                    User Request                       │
+└───────────────────────┬─────────────────────────────┘
+                        ▼
+┌─────────────────────────────────────────────────────┐
+│  Boss · Meta-Orchestrator (Opus)                      │
+│  Discovery → Classification → Matching → Delegation  │
+└──┬──────────┬──────────┬──────────┬─────────────────┘
+   │          │          │          │
+   ▼          ▼          ▼          ▼
+┌──────┐ ┌────────┐ ┌────────┐ ┌────────┐
+│ P3a  │ │  P3b   │ │  P3c   │ │  P1/P2 │
+│Direct│ │Sub-orch│ │ Agent  │ │ Skill/ │
+│2-4   │ │Sisyphus│ │ Teams  │ │ Agent  │
+│agents│ │Atlas   │ │  P2P   │ │ Direct │
+└──────┘ │Hephaes│ └────────┘ └────────┘
+         └────────┘
+┌─────────────────────────────────────────────────────┐
+│  Behavioral Layer                                     │
+│  Karpathy Guidelines · ECC Rules (87) · Hooks (7)    │
+├─────────────────────────────────────────────────────┤
+│  Specialist Agents (200+)                             │
+│  OMO 9 · OMC 19 · Agency Eng. 26 · Superpowers 1    │
+│  + 136 domain packs (on-demand)                       │
+├─────────────────────────────────────────────────────┤
+│  Skills (200+)                                        │
+│  ECC 180+ · OMC 36 · gstack 40 · Superpowers 14     │
+│  + Core 3 · Anthropic 14+                             │
+├─────────────────────────────────────────────────────┤
+│  MCP Layer                                            │
+│  Context7 · Exa · grep.app                            │
+└─────────────────────────────────────────────────────┘
+```
 
-| 카테고리 | 개수 | 출처 | 번들 |
-|------|------|------|------|
-| 코어 에이전트 | 56 | my-claude 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 | 플러그인 |
-| 에이전트 팩 | 136 | 12개 도메인 카테고리 (마케팅, 게임 개발, 영업 등) | 플러그인 |
-| 스킬 | 200+ | ECC 180+ + OMC 36 + Core 3 + gstack 40 (런타임) + Superpowers 14 | 플러그인 + install.sh |
-| 룰 | 87 | ECC (common + 14 language dirs) | 플러그인 |
-| MCP 서버 | 3 | Context7, Exa, grep.app | 플러그인 |
-| 훅 | 7 | my-claude (Boss 프로토콜 + SessionStart) | 플러그인 |
-| Anthropic 스킬 | 14+ | Anthropic 공식 | install.sh |
-| CLI 도구 | 3 | omc, omo, ast-grep | install.sh |
+---
+
+## 구성 요소
+
+| 카테고리 | 수량 | 출처 |
+|----------|------:|--------|
+| **핵심 에이전트** (항상 로드됨) | 56 | Boss 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 |
+| **에이전트 팩** (온디맨드) | 136 | agency-agents의 12개 도메인 카테고리 |
+| **스킬** | 200+ | ECC 180+ · OMC 36 · gstack 40 · Superpowers 14 · Core 3 |
+| **Anthropic 스킬** | 14+ | PDF, DOCX, PPTX, XLSX, MCP builder |
+| **규칙** | 87 | ECC common + 14개 언어 디렉터리 |
+| **MCP 서버** | 3 | Context7, Exa, grep.app |
+| **훅** | 7 | 위임 가드, 텔레메트리, 검증 |
+| **CLI 도구** | 3 | omc, omo, ast-grep |
 
 <details>
-<summary>Core 에이전트 (1개) — Boss 메타 오케스트레이터</summary>
+<summary><strong>핵심 에이전트 — Boss 메타 오케스트레이터 (1)</strong></summary>
 
-| 에이전트 | 모델 | 유형 | 역할 | Read-only |
-|---------|------|------|------|-----------|
-| Boss | Opus | 메타 오케스트레이터 | 런타임에 모든 에이전트/스킬/MCP 동적 감지 → 능력 매칭 → 최적 라우팅 | Yes |
-
-참고: `agent-teams-reference`는 Agent Teams 패턴의 참조 문서이며, 실행 가능한 에이전트가 아닙니다.
+| 에이전트 | 모델 | 역할 | 출처 |
+|-------|-------|------|--------|
+| Boss | Opus | 동적 런타임 탐색 → 역량 매칭 → 최적 라우팅. 코드를 직접 작성하지 않습니다. | my-claude |
 
 </details>
 
 <details>
-<summary>OMO 에이전트 (9개) — Oh My OpenAgent 서브 오케스트레이터 및 전문가</summary>
+<summary><strong>OMO 에이전트 — 서브 오케스트레이터 및 전문가 (9)</strong></summary>
 
-| 에이전트 | 모델 | 유형 | 역할 | Read-only |
-|---------|------|------|------|-----------|
-| Sisyphus | Opus | 서브 오케스트레이터 | 의도 분류 → 전문 에이전트 위임 → 독립 검증. 직접 코드 작성 안 함 | No |
-| Hephaestus | Opus | 자율 실행 | 탐색→계획→실행→검증 자율 수행. 허락 없이 작업 완료 | No |
-| Metis | Opus | 분석 | 사용자 의도 분석, 모호성 감지, AI-slop 방지 | Yes |
-| Atlas | Opus | 오케스트레이터 | 태스크 위임 + 4단계 QA 검증. 직접 코드 작성 안 함 | No |
-| Oracle | Opus | 자문 | 전략적 기술 자문. 아키텍처, 디버깅 컨설팅 | Yes |
-| Momus | Opus | 검토 | 작업 계획 실행 가능성 검토. 승인 편향 | Yes |
-| Prometheus | Opus | 계획 | 인터뷰 기반 상세 계획 수립. .md 파일만 작성 | Partial |
-| Librarian | Sonnet | 연구 | MCP 활용 오픈소스 문서 검색 | Yes |
-| Multimodal-Looker | Sonnet | 시각 분석 | 이미지/스크린샷/다이어그램 분석 | Yes |
-
-</details>
-
-<details>
-<summary>OMC 에이전트 (19개) — Oh My Claude Code 전문 에이전트</summary>
-
-| 에이전트 | 역할 |
-|---------|------|
-| analyst | 사전 분석 — 계획 수립 전 상황 파악 |
-| architect | 시스템 설계 및 아키텍처 결정 |
-| code-reviewer | 집중 코드 리뷰 |
-| code-simplifier | 코드 간소화 및 정리 |
-| critic | 비판적 분석, 대안 제시 |
-| debugger | 집중 디버깅 |
-| designer | UI/UX 디자인 가이드 |
-| document-specialist | 문서 작성 및 관리 |
-| executor | 태스크 실행 |
-| explore | 코드베이스 탐색 |
-| git-master | Git 워크플로우 관리 |
-| planner | 빠른 계획 수립 |
-| qa-tester | 품질 보증 테스트 |
-| scientist | 연구 및 실험 |
-| security-reviewer | 보안 리뷰 |
-| test-engineer | 테스트 작성 및 유지보수 |
-| tracer | 실행 추적 및 분석 |
-| verifier | 최종 검증 |
-| writer | 콘텐츠 및 문서 작성 |
+| 에이전트 | 모델 | 역할 | 출처 |
+|-------|-------|------|--------|
+| Sisyphus | Opus | 의도 분류 → 전문가 위임 → 검증 | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
+| Hephaestus | Opus | 자율적 탐색 → 계획 → 실행 → 검증 | oh-my-openagent |
+| Atlas | Opus | 작업 분해 + 4단계 QA 검증 | oh-my-openagent |
+| Oracle | Opus | 전략적 기술 컨설팅 (읽기 전용) | oh-my-openagent |
+| Metis | Opus | 의도 분석, 모호성 탐지 | oh-my-openagent |
+| Momus | Opus | 계획 실현 가능성 검토 | oh-my-openagent |
+| Prometheus | Opus | 인터뷰 기반 세부 계획 수립 | oh-my-openagent |
+| Librarian | Sonnet | MCP를 통한 오픈소스 문서 검색 | oh-my-openagent |
+| Multimodal-Looker | Sonnet | 이미지/스크린샷/다이어그램 분석 | oh-my-openagent |
 
 </details>
 
 <details>
-<summary>Agency Engineering 에이전트 (26개) — agency-agents의 항상 로드되는 엔지니어링 전문가</summary>
+<summary><strong>OMC 에이전트 — 전문가 작업자 (19)</strong></summary>
 
-| 에이전트 | 역할 |
-|---------|------|
-| ai-data-remediation-engineer | AI 데이터 정제 |
-| ai-engineer | AI/ML 엔지니어링 |
-| autonomous-optimization-architect | 자율 최적화 아키텍처 |
-| backend-architect | 백엔드 아키텍처 |
-| cms-developer | CMS 개발 |
-| code-reviewer | 코드 리뷰 |
-| data-engineer | 데이터 엔지니어링 |
-| database-optimizer | 데이터베이스 최적화 |
-| devops-automator | DevOps 자동화 |
-| email-intelligence-engineer | 이메일 인텔리전스 |
-| embedded-firmware-engineer | 임베디드 펌웨어 |
-| feishu-integration-developer | Feishu 통합 개발 |
-| filament-optimization-specialist | 필라멘트 최적화 |
-| frontend-developer | 프론트엔드 개발 |
-| git-workflow-master | Git 워크플로우 |
-| incident-response-commander | 장애 대응 |
-| mobile-app-builder | 모바일 앱 빌드 |
-| rapid-prototyper | 빠른 프로토타이핑 |
-| security-engineer | 보안 엔지니어링 |
-| senior-developer | 시니어 개발 |
-| software-architect | 소프트웨어 아키텍처 |
-| solidity-smart-contract-engineer | Solidity 스마트 컨트랙트 |
-| sre | Site Reliability Engineering |
-| technical-writer | 기술 문서 작성 |
-| threat-detection-engineer | 위협 탐지 엔지니어링 |
-| wechat-mini-program-developer | WeChat 미니 프로그램 개발 |
+| 에이전트 | 역할 | 출처 |
+|-------|------|--------|
+| analyst | 계획 전 사전 분석 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) |
+| architect | 시스템 설계 및 아키텍처 | oh-my-claudecode |
+| code-reviewer | 집중적인 코드 리뷰 | oh-my-claudecode |
+| code-simplifier | 코드 단순화 및 정리 | oh-my-claudecode |
+| critic | 비판적 분석, 대안 제안 | oh-my-claudecode |
+| debugger | 집중적인 디버깅 | oh-my-claudecode |
+| designer | UI/UX 디자인 가이드 | oh-my-claudecode |
+| document-specialist | 문서 작성 | oh-my-claudecode |
+| executor | 작업 실행 | oh-my-claudecode |
+| explore | 코드베이스 탐색 | oh-my-claudecode |
+| git-master | Git 워크플로 관리 | oh-my-claudecode |
+| planner | 신속한 계획 수립 | oh-my-claudecode |
+| qa-tester | 품질 보증 테스팅 | oh-my-claudecode |
+| scientist | 연구 및 실험 | oh-my-claudecode |
+| security-reviewer | 보안 리뷰 | oh-my-claudecode |
+| test-engineer | 테스트 작성 및 유지 관리 | oh-my-claudecode |
+| tracer | 실행 추적 및 분석 | oh-my-claudecode |
+| verifier | 최종 검증 | oh-my-claudecode |
+| writer | 콘텐츠 및 문서 작성 | oh-my-claudecode |
 
 </details>
 
 <details>
-<summary>Superpowers 에이전트 (1개) — superpowers의 코드 리뷰 에이전트</summary>
+<summary><strong>Agency Engineering — 항상 로드되는 전문가 (26)</strong></summary>
 
-| 에이전트 | 모델 | 역할 |
-|---------|------|------|
-| superpowers-code-reviewer | Sonnet | 정확성, 에러 처리, 성능, 보안, 테스트, 가독성, 유지보수성을 포괄하는 철저한 코드 리뷰 |
-
-</details>
-
-<details>
-<summary>Agency 에이전트 팩 (136개) — agency-agents의 온디맨드 도메인 전문가 (12개 카테고리)</summary>
-
-| 팩 | 개수 | 예시 |
-|----|------|------|
-| marketing | 29 | 더우인, 샤오홍슈, WeChat OA, TikTok, SEO |
-| specialized | 28 | 법률, 금융, 헬스케어, 교육, MCP Builder |
-| game-development | 20 | Unity, Unreal, Godot, Roblox, Blender, Narrative |
-| design | 8 | 브랜드, UI, UX, 시각적 스토리텔링 |
-| testing | 8 | API, 접근성, 성능, E2E |
-| sales | 8 | 딜 전략, 디스커버리, 파이프라인 분석 |
-| paid-media | 7 | Google Ads, Meta Ads, 프로그래매틱 |
-| project-management | 6 | 스크럼, 칸반, 리스크 관리 |
-| spatial-computing | 6 | visionOS, ARKit, WebXR, Metal |
-| support | 6 | 분석, 금융, 인프라, 법률 |
-| academic | 5 | 인류학자, 지리학자, 역사학자, 서사학자, 심리학자 |
-| product | 5 | 프로덕트 매니저, 스프린트, 피드백, 트렌드, 행동 넛지 |
-
-팩 활성화: `ln -s ~/.claude/agent-packs/<pack>/*.md ~/.claude/agents/`
-
-</details>
-
-<details>
-<summary>스킬 (200+) — 업스트림 출처별</summary>
-
-| 출처 | 개수 | 주요 스킬 |
-|------|------|----------|
-| everything-claude-code (ECC) | 180+ | tdd-workflow, coding-standards, frontend-patterns, backend-patterns, autopilot, ralph, security-review, continuous-learning |
-| oh-my-claudecode (OMC) | 36 | plan, team, trace, deep-dive, blueprint, ultrawork, sciomc, omc-setup |
-| superpowers | 14 | brainstorming, systematic-debugging, test-driven-development, subagent-driven-development, writing-plans, executing-plans, dispatching-parallel-agents, using-git-worktrees, requesting-code-review, receiving-code-review, verification-before-completion, finishing-a-development-branch, writing-skills, using-superpowers |
-| my-claude Core | 3 | boss-advanced, gstack-sprint, briefing-vault |
-| gstack (런타임) | 40 | /qa, /review, /ship, /cso, /investigate, /design-review, /office-hours, /autoplan |
-
-**install.sh로 별도 설치:**
-
-| 출처 | 개수 | 주요 스킬 |
-|------|------|----------|
-| Anthropic Official | 14+ | pdf, docx, pptx, xlsx, canvas-design, mcp-builder, skill-creator |
+| 에이전트 | 역할 | 출처 |
+|-------|------|--------|
+| AI Engineer | AI/ML 엔지니어링 | [agency-agents](https://github.com/msitarzewski/agency-agents) |
+| Backend Architect | 백엔드 아키텍처 | agency-agents |
+| CMS Developer | CMS 개발 | agency-agents |
+| Code Reviewer | 코드 리뷰 | agency-agents |
+| Data Engineer | 데이터 엔지니어링 | agency-agents |
+| Database Optimizer | 데이터베이스 최적화 | agency-agents |
+| DevOps Automator | DevOps 자동화 | agency-agents |
+| Embedded Firmware Engineer | 임베디드 펌웨어 | agency-agents |
+| Frontend Developer | 프론트엔드 개발 | agency-agents |
+| Git Workflow Master | Git 워크플로 | agency-agents |
+| Incident Response Commander | 인시던트 대응 | agency-agents |
+| Mobile App Builder | 모바일 앱 | agency-agents |
+| Rapid Prototyper | 빠른 프로토타이핑 | agency-agents |
+| Security Engineer | 보안 엔지니어링 | agency-agents |
+| Senior Developer | 시니어 개발 | agency-agents |
+| Software Architect | 소프트웨어 아키텍처 | agency-agents |
+| SRE | 사이트 신뢰성 | agency-agents |
+| Technical Writer | 기술 문서 | agency-agents |
+| AI Data Remediation Engineer | 자가 복구 데이터 파이프라인 | agency-agents |
+| Autonomous Optimization Architect | API 성능 거버넌스 | agency-agents |
+| Email Intelligence Engineer | 이메일 데이터 추출 | agency-agents |
+| Feishu Integration Developer | Feishu/Lark 플랫폼 | agency-agents |
+| Filament Optimization Specialist | Filament PHP 최적화 | agency-agents |
+| Solidity Smart Contract Engineer | EVM 스마트 컨트랙트 | agency-agents |
+| Threat Detection Engineer | SIEM 및 위협 헌팅 | agency-agents |
+| WeChat Mini Program Developer | WeChat 小程序 | agency-agents |
 
 </details>
 
 <details>
-<summary>룰 (87) — ECC 코딩 규칙</summary>
+<summary><strong>에이전트 팩 — 온디맨드 도메인 전문가 (136)</strong></summary>
 
-**Common (9개)** — 모든 프로젝트에 적용
+`~/.claude/agent-packs/`에 설치됩니다. 심볼릭 링크로 활성화:
 
-| 룰 | 설명 |
-|----|------|
-| agents.md | 에이전트 행동 규칙 |
-| coding-style.md | 코딩 스타일 |
-| development-workflow.md | 개발 워크플로우 |
-| git-workflow.md | Git 워크플로우 |
-| hooks.md | 훅 사용 규칙 |
-| patterns.md | 디자인 패턴 |
-| performance.md | 성능 최적화 |
-| security.md | 보안 규칙 |
-| testing.md | 테스트 규칙 |
+```bash
+ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
+```
 
-**TypeScript (5개)** — TypeScript 프로젝트 전용
-
-| 룰 | 설명 |
-|----|------|
-| coding-style.md | TS 코딩 스타일 |
-| hooks.md | TS 훅 패턴 |
-| patterns.md | TS 디자인 패턴 |
-| security.md | TS 보안 규칙 |
-| testing.md | TS 테스트 규칙 |
-
-**Other Languages (5 rules each)** — C++, Go, Kotlin, Perl, PHP, Python, Swift
-
-Each language directory contains: coding-style.md, hooks.md, patterns.md, security.md, testing.md
+| 팩 | 수량 | 예시 | 출처 |
+|------|------:|---------|--------|
+| marketing | 29 | Douyin, Xiaohongshu, TikTok, SEO | [agency-agents](https://github.com/msitarzewski/agency-agents) |
+| specialized | 28 | 법률, 금융, 헬스케어, MCP Builder | agency-agents |
+| game-development | 20 | Unity, Unreal, Godot, Roblox | agency-agents |
+| design | 8 | 브랜드, UI, UX, 비주얼 스토리텔링 | agency-agents |
+| testing | 8 | API, 접근성, 성능 | agency-agents |
+| sales | 8 | 딜 전략, 파이프라인 분석 | agency-agents |
+| paid-media | 7 | Google Ads, Meta Ads, 프로그래매틱 | agency-agents |
+| project-management | 6 | Scrum, Kanban, 리스크 관리 | agency-agents |
+| spatial-computing | 6 | visionOS, WebXR, Metal | agency-agents |
+| support | 6 | 분석, 인프라, 법률 | agency-agents |
+| academic | 5 | 인류학자, 역사학자, 심리학자 | agency-agents |
+| product | 5 | 프로덕트 매니저, 스프린트, 피드백 | agency-agents |
 
 </details>
 
 <details>
-<summary>MCP 서버 (3개) + 행동 교정 훅 (7개)</summary>
+<summary><strong>스킬 — 6개 출처에서 200개 이상</strong></summary>
+
+| 출처 | 수량 | 주요 스킬 |
+|--------|------:|------------|
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 180+ | tdd-workflow, autopilot, ralph, security-review, coding-standards |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 36 | plan, team, trace, deep-dive, blueprint, ultrawork |
+| [gstack](https://github.com/garrytan/gstack) | 40 | /qa, /review, /ship, /cso, /investigate, /office-hours |
+| [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming, systematic-debugging, TDD, parallel-agents |
+| [my-claude Core](https://github.com/sehoon787/my-claude) | 3 | boss-advanced, gstack-sprint, briefing-vault |
+| [Anthropic Official](https://github.com/anthropics/skills) | 14+ | pdf, docx, pptx, xlsx, canvas-design, mcp-builder |
+
+</details>
+
+<details>
+<summary><strong>MCP 서버 (3) + 훅 (7)</strong></summary>
 
 **MCP 서버**
 
-| 서버 | URL | 용도 | 비용 |
-|------|-----|------|------|
-| Context7 | mcp.context7.com | 라이브러리 문서 실시간 조회 | 무료 (키 등록 시 한도 증가) |
-| Exa | mcp.exa.ai | 의미 기반 웹 검색 | 무료 1k req/월 |
-| grep.app | mcp.grep.app | 오픈소스 GitHub 코드 검색 | 무료 |
+| 서버 | 목적 | 비용 |
+|--------|---------|------|
+| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://mcp.context7.com) | 실시간 라이브러리 문서 | 무료 |
+| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://mcp.exa.ai) | 시맨틱 웹 검색 | 월 1천 건 무료 |
+| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://mcp.grep.app) | GitHub 코드 검색 | 무료 |
 
-**행동 교정 훅**
+**동작 훅**
 
 | 훅 | 이벤트 | 동작 |
-|----|--------|------|
-| Session Setup | SessionStart | 누락된 컴패니언 도구(omc, omo, ast-grep, Anthropic 스킬) 자동 감지 및 설치 |
-| Delegation Guard | PreToolUse (Edit/Write) | Boss가 직접 파일 수정 시 서브에이전트 위임을 상기 |
-| Agent Telemetry | PostToolUse (Agent) | 에이전트 사용 이력을 `agent-usage.jsonl`에 자동 기록 |
-| Subagent Verifier | SubagentStop | 서브에이전트 완료 후 독립 검증 수행을 강제 |
-| Completion Check | Stop | 모든 태스크가 완료 및 검증되었는지 확인 후 세션 종료 허용 |
-| Teammate Idle Guide | TeammateIdle | 팀원이 유휴 상태일 때 리더에게 TaskList 확인 및 종료/다음 지시 전달을 상기 |
-| Task Quality Gate | TaskCompleted | 리더에게 산출물 존재 확인 및 품질 검증 후 완료 수락을 상기 |
+|------|-------|----------|
+| Session Setup | SessionStart | 누락된 도구 자동 감지 + Briefing Vault 컨텍스트 주입 |
+| Delegation Guard | PreToolUse | Boss가 파일을 직접 수정하지 못하도록 차단 |
+| Agent Telemetry | PostToolUse | 에이전트 사용 기록을 `agent-usage.jsonl`에 저장 |
+| Subagent Verifier | SubagentStop | 독립적인 검증 강제 + Briefing Vault에 기록 |
+| Completion Check | Stop | 작업 검증 확인 + 세션 요약 프롬프트 |
+| Teammate Idle Guide | TeammateIdle | 유휴 팀원에 대해 리더에게 알림 |
+| Task Quality Gate | TaskCompleted | 결과물 품질 검증 |
 
 </details>
 
 ---
 
-## 전체 아키텍처
+## <img src="https://obsidian.md/images/obsidian-logo-gradient.svg" width="24" height="24" align="center"/> Briefing Vault
+
+Obsidian 호환 영구 메모리입니다. 모든 프로젝트는 세션에 걸쳐 자동으로 채워지는 `.briefing/` 디렉터리를 유지합니다.
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    사용자 요청                            │
-└─────────────────────┬───────────────────────────────────┘
-                      ↓
-┌─────────────────────────────────────────────────────────┐
-│  [Boss] 동적 메타 오케스트레이터                           │
-│  런타임 감지 → 능력 매칭 → 최적 라우팅                     │
-│  (에이전트, 스킬, MCP 서버, 훅 — 모두 자동 감지)          │
-└──┬──────────┬──────────┬──────────┬──────────┬──────────┘
-   ↓          ↓          ↓          ↓          ↓
-┌──────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
-│  P1  │ │   P2   │ │  P3a   │ │  P3b   │ │  P3c   │
-│Skill │ │Special-│ │ Direct │ │Sub-orc-│ │ Agent  │
-│Match │ │ist     │ │Parallel│ │hestrat-│ │ Teams  │
-│      │ │Agent   │ │ (2-4)  │ │ors     │ │  P2P   │
-│      │ │(200+)  │ │        │ │Sisyphus│ │        │
-└──────┘ └────────┘ └────────┘ │ Atlas  │ └────────┘
-                                │Hephaes-│
-                                │ tus    │
-                                └────────┘
-┌─────────────────────────────────────────────────────────┐
-│  Karpathy Guidelines (행동 가이드라인, 항상 활성화)        │
-│  ECC Rules (언어별 코딩 룰, 항상 활성화)                  │
-│  Hooks: PreToolUse / SubagentStop / Stop                 │
-└─────────────────────┬───────────────────────────────────┘
-                      ↓
-┌─────────────────────────────────────────────────────────┐
-│  전문 에이전트 레이어                                     │
-│    ├── OMC 에이전트 (executor, debugger, test-engineer)  │
-│    ├── Agency 에이전트 (UX architect, security auditor)  │
-│    ├── ECC 커맨드 (/tdd, /code-review, /build-fix)      │
-│    └── Anthropic 스킬 (pdf, docx, mcp-builder)          │
-└─────────────────────┬───────────────────────────────────┘
-                      ↓
-┌─────────────────────────────────────────────────────────┐
-│  MCP 서버 레이어                                          │
-│    ├── Context7 (라이브러리 문서 실시간 조회)              │
-│    ├── Exa (의미 기반 웹 검색)                            │
-│    └── grep.app (오픈소스 코드 검색)                      │
-└─────────────────────────────────────────────────────────┘
-
-    ┌─────────────────────────────────────────────────────┐
-    │ omo 브릿지 (OpenCode 사용 시)                        │
-    │  claude-code-agent-loader: ~/.claude/agents/*.md 로드│
-    │  claude-code-plugin-loader: CC 플러그인 로드          │
-    │  → OpenCode에서 OMC + omo 에이전트 모두 사용 가능     │
-    └─────────────────────────────────────────────────────┘
+.briefing/
+├── INDEX.md                          ← 프로젝트 컨텍스트 (최초 자동 생성)
+├── sessions/
+│   ├── YYYY-MM-DD-<topic>.md        ← AI가 작성한 세션 요약 (강제)
+│   └── YYYY-MM-DD-auto.md           ← 자동 생성 스캐폴드 (git diff, 에이전트 통계)
+├── decisions/
+│   ├── YYYY-MM-DD-<decision>.md     ← AI가 작성한 의사결정 기록
+│   └── YYYY-MM-DD-auto.md           ← 자동 생성 스캐폴드 (커밋, 파일)
+├── learnings/
+│   ├── YYYY-MM-DD-<pattern>.md      ← AI가 작성한 학습 노트
+│   └── YYYY-MM-DD-auto-session.md   ← 자동 생성 스캐폴드 (에이전트, 파일)
+├── references/
+│   └── auto-links.md                ← 웹 검색에서 자동 수집된 URL
+├── agents/
+│   ├── agent-log.jsonl              ← 서브에이전트 실행 텔레메트리
+│   └── YYYY-MM-DD-summary.md        ← 일별 에이전트 사용 요약
+└── persona/
+    ├── profile.md                   ← 에이전트 친화도 통계 (자동 업데이트)
+    ├── suggestions.jsonl            ← 라우팅 제안 (자동 생성)
+    ├── rules/                       ← 승인된 라우팅 선호도
+    └── skills/                      ← 승인된 페르소나 스킬
 ```
+
+### 자동화 라이프사이클
+
+| 단계 | 훅 이벤트 | 동작 |
+|-------|-----------|-------------|
+| **세션 시작** | `SessionStart` | `.briefing/` 구조 생성, 세션별 diff를 위한 git HEAD 해시 저장 |
+| **작업 중** | `PostToolUse` Edit/Write | 파일 편집 횟수 추적; 5회에서 경고, 15회에서 decisions/learnings 미작성 시 차단 |
+| **작업 중** | `PostToolUse` WebSearch/WebFetch | URL을 `references/auto-links.md`에 자동 수집 |
+| **작업 중** | `SubagentStop` | 에이전트 실행을 `agents/agent-log.jsonl`에 기록 |
+| **작업 중** | `UserPromptSubmit` (매 5번째) | 제한된 페르소나 프로필 업데이트 |
+| **세션 종료** | `Stop` (1번째 훅) | 스캐폴드 자동 생성: `sessions/auto.md`, `learnings/auto-session.md`, `decisions/auto.md`, `persona/profile.md` |
+| **세션 종료** | `Stop` (2번째 훅) | 파일 편집 횟수 ≥ 3인 경우 AI 작성 세션 요약 **강제** — 템플릿으로 세션 종료 차단 |
+
+### 자동 생성 vs AI 작성
+
+| 유형 | 파일 패턴 | 생성 주체 | 내용 |
+|------|-------------|-----------|---------|
+| **자동 스캐폴드** | `*-auto.md`, `*-auto-session.md` | Stop 훅 (Node.js) | Git diff 통계, 에이전트 사용량, 커밋 목록 — 데이터만 |
+| **AI 요약** | `YYYY-MM-DD-<topic>.md` | 세션 중 AI | 컨텍스트, 코드 참조, 근거가 포함된 의미 있는 분석 |
+| **텔레메트리** | `agent-log.jsonl`, `auto-links.md` | 훅 스크립트 | 추가 전용 구조화 로그 |
+| **페르소나** | `profile.md`, `suggestions.jsonl` | Stop 훅 | 사용량 기반 에이전트 친화도 및 라우팅 제안 |
+
+자동 스캐폴드는 AI가 적절한 요약을 작성하기 위한 **참조 데이터** 역할을 합니다. 강제 훅은 세션 종료를 차단할 때 스캐폴드 내용과 구조화된 템플릿을 제공합니다.
+
+### 세션별 Diff
+
+세션 시작 시 현재 git HEAD를 `.briefing/.session-start-head`에 저장합니다. 세션 종료 시 이 저장된 시점을 기준으로 diff를 계산하여, 이전 세션의 미커밋 변경 사항이 아닌 현재 세션의 변경 사항만 표시합니다.
+
+### Obsidian과 함께 사용하기
+
+1. Obsidian 열기 → **폴더를 보관함으로 열기** → `.briefing/` 선택
+2. 노트가 그래프 뷰에 `[[wiki-links]]`로 연결되어 표시됩니다
+3. YAML 프론트매터(`date`, `type`, `tags`)로 구조화 검색이 가능합니다
+4. 의사결정과 학습의 타임라인이 세션에 걸쳐 자동으로 쌓입니다
 
 ---
 
-## 사용하는 오픈소스 도구
+## 업스트림 오픈소스 출처
 
-### 1. [Oh My Claude Code (OMC)](https://github.com/Yeachan-Heo/oh-my-claudecode)
+my-claude는 git 서브모듈을 통해 MIT 라이선스 업스트림 저장소 5개의 콘텐츠를 번들로 제공합니다:
 
-Claude Code 전용 에이전트 하네스 플러그인. 19개의 전문 에이전트(아키텍트, 디버거, 코드리뷰어, 보안검토자 등)가 역할별로 분업하며, `autopilot:` 같은 매직 키워드로 자동 병렬 실행을 활성화합니다.
-
-### 2. [Oh My OpenAgent (omo)](https://github.com/code-yeongyu/oh-my-openagent)
-
-멀티플랫폼 에이전트 하네스. `claude-code-agent-loader`와 `claude-code-plugin-loader`로 Claude Code 에코시스템과 브릿지됩니다. Claude, GPT, Gemini 등 8개 프로바이더를 카테고리별로 자동 라우팅합니다. 이 레포의 9개 에이전트는 omo 에이전트를 Claude Code standalone `.md` 형식으로 적응한 버전입니다.
-
-### 3. [Andrej Karpathy Skills](https://github.com/forrestchang/andrej-karpathy-skills)
-
-Andrej Karpathy가 제안한 AI 코딩 행동 가이드라인 4원칙(Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution). CLAUDE.md에 포함되어 모든 세션에서 항상 활성화됩니다.
-
-### 4. [Everything Claude Code (ECC)](https://github.com/affaan-m/everything-claude-code)
-
-67개 스킬 + 17개 에이전트 + 45개 커맨드 + 언어별 룰을 제공하는 종합 프레임워크. `/tdd`, `/plan`, `/code-review`, `/build-fix` 같은 슬래시 커맨드로 반복적인 개발 패턴을 자동화합니다.
-
-### 5. [Anthropic Official Skills](https://github.com/anthropics/skills)
-
-Anthropic이 직접 제공하는 공식 에이전트 스킬 레포지토리. PDF 파싱, Word/Excel/PowerPoint 문서 조작, MCP 서버 생성 등 전문 태스크를 가능하게 합니다.
-
-### 6. [Agency Agents](https://github.com/msitarzewski/agency-agents)
-
-164개의 비즈니스 전문 에이전트 페르소나 라이브러리. UX 아키텍트, 데이터 엔지니어, 보안 감사자, QA 매니저 등 기술 역할을 넘어 비즈니스 맥락의 전문 관점을 제공합니다.
-
-### 7. [gstack](https://github.com/garrytan/gstack)
-
-Garry Tan의 스프린트 프로세스 하네스(40개 스킬). 브라우저 기반 QA 테스트(`/qa`), 범위이탈 감지 코드 리뷰(`/review`), 보안 감사(`/cso`), Plan→Review→QA→Ship 배포 워크플로우를 제공합니다. 실 브라우저 테스트를 위한 컴파일된 Playwright 브라우저 데몬 포함.
-
-### 8. [Superpowers](https://github.com/obra/superpowers)
-
-Jesse Vincent의 에이전트 개발 워크플로우 컬렉션(14개 스킬, 1개 에이전트). 브레인스토밍, 계획 작성, 테스트 주도 개발, 체계적 디버깅, 서브에이전트 주도 개발, 계획 실행, 병렬 에이전트 디스패치, git worktree 활용, 코드 리뷰 요청/수신, 완료 전 검증, 개발 브랜치 마무리, 스킬 작성, superpowers 사용법 스킬을 제공합니다.
+| # | 출처 | 제공 내용 |
+|---|--------|-----------------|
+| 1 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 전문가 에이전트 19개 + 스킬 36개. autopilot, ralph, 팀 오케스트레이션을 갖춘 Claude Code 멀티 에이전트 하네스. |
+| 2 | <img src="https://github.com/code-yeongyu.png?size=32" width="20" height="20" align="center"/> **[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — code-yeongyu | OMO 에이전트 9개 (Sisyphus, Atlas, Oracle 등). Claude, GPT, Gemini를 연결하는 멀티 플랫폼 에이전트 하네스. |
+| 3 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** — affaan-m | 14개 언어에 걸친 스킬 180개 이상 + 규칙 87개. TDD, 보안, 코딩 표준을 갖춘 포괄적인 개발 프레임워크. |
+| 4 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 엔지니어링 에이전트 26개 (항상 로드) + 12개 카테고리에 걸친 도메인 에이전트 팩 136개. |
+| 5 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | 코드 리뷰, QA, 보안 감사, 배포를 위한 스킬 40개. Playwright 브라우저 데몬 포함. |
+| 6 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 브레인스토밍, TDD, 병렬 에이전트, 코드 리뷰를 다루는 스킬 14개 + 에이전트 1개. |
+| 7 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | PDF, DOCX, PPTX, XLSX, MCP builder를 위한 공식 스킬 14개 이상. |
+| 8 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | AI 코딩 행동 가이드라인 4가지 (코딩 전 생각하기, 단순함 우선, 외과적 변경, 목표 중심 실행). |
 
 ---
 
-## Boss 동작 방식
+## GitHub Actions
 
-### 하네스 vs 오케스트레이터 vs 에이전트
-
-| 개념 | 역할 | 비유 | 예시 |
-|------|------|------|------|
-| **하네스 (Harness)** | 에이전트를 실행하는 런타임 플랫폼 — 생명주기, 도구 접근, 권한 관리 | 운영체제 | Claude Code, omo |
-| **오케스트레이터 (Orchestrator)** | 다른 에이전트를 조율하는 특수 에이전트 — 의도 분류, 위임, 검증. 직접 구현하지 않음 | 지휘자 | Boss, Sisyphus, Atlas |
-| **에이전트 (Agent)** | 특정 도메인의 실제 작업을 수행하는 실행 단위 — 코드 작성, 분석, 리뷰 | 연주자 | debugger, executor, security-reviewer |
-
-```
-하네스 (Claude Code)
- └─ Boss (메타 오케스트레이터)       — 전체 환경 감지, 최적 라우팅
-     ├─ 스킬 직접 호출               — pdf, docx, tdd-workflow 등
-     ├─ 에이전트 직접 위임           — debugger, security-reviewer 등
-     ├─ Sisyphus (서브 오케스트레이터) — 복잡한 워크플로우 관리
-     │   ├─ Metis → 의도 분석
-     │   ├─ Prometheus → 계획 수립
-     │   └─ Hephaestus → 자율 실행
-     └─ Atlas (서브 오케스트레이터)   — 태스크 분해 + QA 사이클
-```
-
-### 위임 메커니즘 (4단계 우선순위 라우팅)
-
-Boss는 모든 요청을 4단계 우선순위 체인으로 라우팅합니다:
-
-| 우선순위 | 매칭 유형 | 조건 | 예시 |
-|----------|----------|------|------|
-| **1** | 스킬 정확 매칭 | 자체 완결형 스킬에 매핑 | "PDF 합쳐줘" → `Skill("pdf")` |
-| **2** | 전문 에이전트 매칭 | 도메인별 전문 에이전트 존재 | "보안 감사" → `Agent("Security Engineer")` |
-| **3** | 서브 오케스트레이터 위임 | 복잡한 멀티스텝 워크플로우 | "리팩토링 + 테스트" → Sisyphus |
-| **4** | 범용 폴백 | 전문가 매칭 없음 | "이거 설명해줘" → `Agent(model="sonnet")` |
-
-모든 위임에는 **6-Section 구조화 프롬프트**가 포함됩니다: TASK, EXPECTED OUTCOME, REQUIRED TOOLS, MUST DO, MUST NOT DO, CONTEXT.
-
-### 위임 예시
-
-#### Subagent vs Agent Teams
-
-| | Subagent (P2/P3a/P3b) | Agent Teams (P3c) |
-|---|---|---|
-| **명령 전달** | `Agent(prompt="...")` | `SendMessage(to: "agent", ...)` |
-| **통신 방향** | Boss → Agent → Boss | Boss ↔ Agent ↔ Agent |
-| **수명** | 완료 시 종료 | TeamDelete까지 유지 |
-| **확인 방법** | Boss 로그에서만 | tmux pane 또는 Shift+↓ |
-| **비용** | 낮음 | 높음 (teammate별 별도 Claude 세션) |
-
-**P2 — 단일 전문 에이전트:**
-```
-$ claude "analyze auth module for security vulnerabilities"
-
-[Boss] Phase 0: Scanning... 200+ agents, 200+ skills ready.
-[Boss] Phase 1: Intent → Security Analysis | Priority: P2
-[Boss] Phase 2: Matched → security-reviewer (sonnet)
-[Boss] Agent(description="security review", model="sonnet", prompt="
-  TASK: Analyze src/auth/ for OWASP Top 10 vulnerabilities.
-  MUST DO: Check SQL injection, XSS, CSRF.
-  MUST NOT: Modify any files.
-")
-       ↓ result returned
-[Boss] Phase 4: Reading report... 2 critical, 1 medium confirmed. ✓
-```
-
-**P3a — Boss 직접 병렬 실행:**
-```
-$ claude "refactor auth and write tests"
-
-[Boss] Phase 1: Multi-step → P3a Direct Orchestration
-[Boss] Spawning 2 agents in parallel:
-  Agent(description="executor refactoring", model="sonnet", run_in_background=true)
-  Agent(description="test-engineer tests", model="sonnet", run_in_background=true)
-       ↓ both results returned
-[Boss] Phase 4: Verifying refactored files... ✓
-[Boss] Phase 4: Running tests... 12/12 passed. ✓
-```
-
-**P3c — Agent Teams:**
-```
-$ claude "implement payment module with review"
-
-[Boss] Phase 1: Needs inter-agent communication → P3c Agent Teams
-[Boss] TeamCreate → 2 teammates spawned (tmux split-pane)
-[Boss] TaskCreate("Implement payment", assignee="executor")
-[Boss] TaskCreate("Review payment", assignee="code-reviewer")
-[Boss] SendMessage(to: "executor", "Implement src/payment/ using Stripe SDK")
-
-  ┌─ executor (tmux pane 1) ──────────────────┐
-  │ Working on src/payment/...                  │
-  │ SendMessage(to: "code-reviewer",            │
-  │   "Implementation done, review src/payment/")│
-  └─────────────────────────────────────────────┘
-  ┌─ code-reviewer (tmux pane 2) ─────────────┐
-  │ Reviewing src/payment/checkout.ts...        │
-  │ SendMessage(to: "executor",                 │
-  │   "Line 42: missing error handling")        │
-  └─────────────────────────────────────────────┘
-  ┌─ executor ──────────────────────────────────┐
-  │ Fixed. TaskUpdate(status: "completed")      │
-  └─────────────────────────────────────────────┘
-
-[Boss] All tasks completed → TeamDelete
-```
-
-### 스코프 디스커버리 (전역 + 프로젝트)
-
-Boss는 런타임에 **두 스코프**의 구성 요소를 병합하여 감지합니다:
-
-| 스코프 | 에이전트 | 스킬 | MCP 서버 |
-|--------|---------|------|----------|
-| **전역** | `~/.claude/agents/*.md` | `~/.claude/skills/` | `~/.claude/settings.json` |
-| **프로젝트** | `.claude/agents/*.md` | `.claude/skills/` | `.mcp.json` |
-
-프로젝트 디렉토리에서 `claude`를 실행하면, Boss가 전역과 프로젝트 레벨 구성 요소를 모두 감지합니다. 같은 이름의 에이전트는 프로젝트 버전이 우선됩니다 (프로젝트별 커스터마이징).
+| 워크플로 | 트리거 | 목적 |
+|----------|---------|---------|
+| **CI** | push, PR | JSON 설정, 에이전트 프론트매터, 스킬 존재 여부, 업스트림 파일 수 검증 |
+| **Update Upstream** | 주간 / 수동 | `git submodule update --remote` 실행 후 자동 병합 PR 생성 |
+| **Auto Tag** | main에 push | `plugin.json` 버전 읽고 신규 시 git 태그 생성 |
+| **Pages** | main에 push | `docs/index.html`을 GitHub Pages에 배포 |
+| **CLA** | PR | 기여자 라이선스 동의 확인 |
+| **Lint Workflows** | push, PR | GitHub Actions 워크플로 YAML 문법 검증 |
 
 ---
 
-## 에이전트 겹침 가이드
+## my-claude 오리지널
 
-OMC와 omo에는 기능이 겹치는 에이전트 쌍이 있습니다. 모두 유지하되 상황에 따라 선택합니다.
+업스트림 소스를 넘어 이 프로젝트를 위해 특별히 구축된 기능들:
 
-| 기능 | OMC | omo | 선택 기준 |
-|------|-----|-----|-----------|
-| 계획 | planner | Prometheus | 빠른 작업 → OMC planner, 복잡한 프로젝트 → omo Triad (Metis → Prometheus → Momus) |
-| 코드리뷰 | code-reviewer | Momus | OMC: 집중 리뷰, omo: AI-slop 감지 포함 |
-| 탐색 | explore | Explore | 현재 플랫폼의 것을 사용 |
-
-**omo 고유 에이전트 (5개):** Sisyphus, Hephaestus, Oracle, Multimodal-Looker, Librarian
-
-**OMC 고유 에이전트 (14개):** analyst, architect, code-simplifier, critic, debugger, designer, document-specialist, executor, git-master, qa-tester, scientist, test-engineer, verifier, writer
-
-자세한 분석은 [SETUP.md의 Agent Overlap Analysis](../../SETUP.md#11-agent-overlap-analysis-omc-vs-omo)를 참고하세요.
-
----
-
-## Contributing
-
-이슈 및 PR은 환영합니다. 새로운 에이전트를 추가할 경우 `agents/` 디렉토리에 `.md` 파일로 추가하고, `SETUP.md`의 에이전트 목록을 업데이트해 주세요.
+| 기능 | 설명 |
+|---------|-------------|
+| **Boss 메타 오케스트레이터** | 동적 역량 탐색 → 의도 분류 → 5단계 우선순위 라우팅 → 위임 → 검증 |
+| **3단계 스프린트** | 설계 (대화형) → 실행 (ralph를 통한 자율) → 리뷰 (설계 문서와 대화형 비교) |
+| **에이전트 티어 우선순위** | core > omo > omc > agency 중복 제거. 가장 특화된 에이전트가 선택됩니다. |
+| **Agency 비용 최적화** | 자문에는 Haiku, 구현에는 Sonnet — 172개 도메인 에이전트에 대한 자동 모델 라우팅 |
+| **Briefing Vault** | 세션, 의사결정, 학습, 참조를 포함하는 Obsidian 호환 `.briefing/` 디렉터리 |
+| **에이전트 텔레메트리** | PostToolUse 훅이 에이전트 사용량을 `agent-usage.jsonl`에 기록 |
+| **Smart Packs** | 프로젝트 유형 감지로 세션 시작 시 관련 에이전트 팩 추천 |
+| **CI SHA 사전 확인** | `git ls-remote` SHA 비교를 통해 변경 없는 소스의 업스트림 동기화 건너뛰기 |
+| **에이전트 중복 탐지** | 정규화된 이름 비교로 업스트림 소스 간 중복 포착 |
 
 ---
 
-## 번들 업스트림 버전
+## 번들된 업스트림 버전
 
-git 서브모듈로 연결. 정확한 SHA는 `.gitmodules`에서 추적.
+git 서브모듈을 통해 연결됩니다. 고정된 커밋은 `.gitmodules`에서 기본으로 추적됩니다.
 
-| 출처 | 동기화 SHA | 태그 | 날짜 | 비교 |
-|--------|-----------|-----|------|------|
-| [agency-agents](https://github.com/msitarzewski/agency-agents) | `4feb0cd` | — | 2026-04-07 | [compare](https://github.com/msitarzewski/agency-agents/compare/4feb0cd...HEAD) |
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `7dfdbe0` | — | 2026-04-07 | [compare](https://github.com/affaan-m/everything-claude-code/compare/7dfdbe0...HEAD) |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `2487d38` | v4.10.2 | 2026-04-07 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/2487d38...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | `03973c2` | — | 2026-04-07 | [compare](https://github.com/garrytan/gstack/compare/03973c2...HEAD) |
-| [superpowers](https://github.com/obra/superpowers) | `b7a8f76` | v5.0.7 | 2026-04-07 | [compare](https://github.com/obra/superpowers/compare/b7a8f76...HEAD) |
-
----
-
-## Credits
-
-이 레포지토리는 다음 오픈소스 프로젝트들의 작업에 기반합니다:
-
-- [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) — Yeachan Heo
-- [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) — code-yeongyu
-- [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) — forrestchang
-- [everything-claude-code](https://github.com/affaan-m/everything-claude-code) — affaan-m
-- [anthropic/skills](https://github.com/anthropics/skills) — Anthropic
-- [agency-agents](https://github.com/msitarzewski/agency-agents) — msitarzewski
-- [gstack](https://github.com/garrytan/gstack) — garrytan
-- [superpowers](https://github.com/obra/superpowers) — Jesse Vincent
+| 출처 | SHA | 날짜 | 비교 |
+|--------|-----|------|------|
+| [agency-agents](https://github.com/msitarzewski/agency-agents) | `4feb0cd` | 2026-04-07 | [compare](https://github.com/msitarzewski/agency-agents/compare/4feb0cd...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `7dfdbe0` | 2026-04-07 | [compare](https://github.com/affaan-m/everything-claude-code/compare/7dfdbe0...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `2487d38` | 2026-04-07 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/2487d38...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `03973c2` | 2026-04-07 | [compare](https://github.com/garrytan/gstack/compare/03973c2...HEAD) |
+| [superpowers](https://github.com/obra/superpowers) | `b7a8f76` | 2026-04-06 | [compare](https://github.com/obra/superpowers/compare/b7a8f76...HEAD) |
 
 ---
 
-## License
+## 기여
 
-MIT License. 자세한 내용은 [LICENSE](./LICENSE) 파일을 참고하세요.
+이슈와 PR을 환영합니다. 새 에이전트를 추가할 때는 `agents/core/` 또는 `agents/omo/`에 `.md` 파일을 추가하고 `SETUP.md`를 업데이트하세요.
+
+## 크레딧
+
+다음 작업을 기반으로 구축되었습니다: [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) (Yeachan Heo), [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) (code-yeongyu), [everything-claude-code](https://github.com/affaan-m/everything-claude-code) (affaan-m), [agency-agents](https://github.com/msitarzewski/agency-agents) (msitarzewski), [gstack](https://github.com/garrytan/gstack) (garrytan), [superpowers](https://github.com/obra/superpowers) (Jesse Vincent), [anthropic/skills](https://github.com/anthropics/skills) (Anthropic), [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) (forrestchang).
+
+## 라이선스
+
+MIT 라이선스. 자세한 내용은 [LICENSE](../../LICENSE) 파일을 참조하세요.
