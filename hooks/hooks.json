@@ -108,6 +108,12 @@
             "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/stop-profile-update.js",
             "timeout": 10000,
             "description": "Persona vault: auto-update profile.md, suggestions.jsonl, and agents/YYYY-MM-DD-summary.md (writes files only, no stdout)"
+          },
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/stop-session-enforcement.js",
+            "timeout": 5000,
+            "description": "BriefingVault: enforce meaningful session summary before session end (blocks if >= 3 edits and no summary)"
           }
         ]
       }
