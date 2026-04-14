@@ -461,6 +461,22 @@ fi
 echo "[4b] Merging hooks into settings.json..."
 node "$SCRIPT_DIR/scripts/merge-hooks.js" "$SCRIPT_DIR/hooks/hooks.json"
 
+# ── 4c. HUD (statusline) ──
+echo "[4c] Installing HUD statusline..."
+HUD_DIR="$HOME/.claude/hud"
+mkdir -p "$HUD_DIR/lib"
+if [ -f "$SCRIPT_DIR/upstream/omc/scripts/lib/hud-wrapper-template.txt" ]; then
+  cp "$SCRIPT_DIR/upstream/omc/scripts/lib/hud-wrapper-template.txt" "$HUD_DIR/omc-hud.mjs"
+  cp "$SCRIPT_DIR/upstream/omc/scripts/lib/config-dir.mjs" "$HUD_DIR/lib/config-dir.mjs"
+  # Remove legacy .js version if present
+  rm -f "$HUD_DIR/omc-hud.js" 2>/dev/null || true
+  # Make executable on Unix
+  chmod +x "$HUD_DIR/omc-hud.mjs" 2>/dev/null || true
+  echo "  HUD wrapper installed"
+else
+  echo "  WARNING: OMC upstream not found, skipping HUD (run with submodules initialized)"
+fi
+
 # ── 5. Companion tools ──
 
 # 5a. Anthropic Official Skills (proprietary — cannot be bundled)
@@ -553,6 +569,7 @@ echo "  omc:              $(command -v omc            >/dev/null 2>&1 && echo 'O
 echo "  omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  ast-grep:         $(command -v ast-grep       >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  tmux:             $(command -v tmux >/dev/null 2>&1 && echo "OK ($(tmux -V))" || echo 'NOT INSTALLED (in-process mode)')"
+echo "  hud:              $(test -f "$HOME/.claude/hud/omc-hud.mjs" && echo 'OK' || echo 'MISSING')"
 TEAMMATE_MODE=$(node -e "try{const h=process.env.HOME||process.env.USERPROFILE;console.log(JSON.parse(require('fs').readFileSync(h+'/.claude/settings.json','utf8')).teammateMode||'auto')}catch(e){console.log('auto')}")
 echo "  version:          v${INSTALLING_VERSION}"
 echo "  teammateMode:     $TEAMMATE_MODE"

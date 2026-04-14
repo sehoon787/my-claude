@@ -14,11 +14,11 @@ Only 2-3 steps are needed.
 /plugin install my-claude@my-claude
 ```
 
-After plugin install, configure Boss and MCP servers globally:
+After plugin install, configure Boss, MCP servers, and HUD globally:
 
 ```bash
-# Set Boss as default agent + register MCP servers globally (one-time setup)
-node -e "const fs=require('fs'),p=require('path'),f=p.join(require('os').homedir(),'.claude','settings.json');const s=fs.existsSync(f)?JSON.parse(fs.readFileSync(f,'utf8')):{};s.env={...s.env,CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:'1'};s.agent=s.agent||'boss';s.mcpServers={...s.mcpServers,context7:{type:'url',url:'https://mcp.context7.com/mcp'},exa:{type:'url',url:'https://mcp.exa.ai/mcp?tools=web_search_exa'},grep_app:{type:'url',url:'https://mcp.grep.app'}};fs.writeFileSync(f,JSON.stringify(s,null,2))"
+# Set Boss as default agent + register MCP servers + configure HUD statusline (one-time setup)
+node -e "const fs=require('fs'),p=require('path'),os=require('os'),f=p.join(os.homedir(),'.claude','settings.json');const s=fs.existsSync(f)?JSON.parse(fs.readFileSync(f,'utf8')):{};s.env={...s.env,CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:'1'};s.agent=s.agent||'boss';s.mcpServers={...s.mcpServers,context7:{type:'url',url:'https://mcp.context7.com/mcp'},exa:{type:'url',url:'https://mcp.exa.ai/mcp?tools=web_search_exa'},grep_app:{type:'url',url:'https://mcp.grep.app'}};if(!s.statusLine){const h=p.join(os.homedir(),'.claude','hud','omc-hud.mjs');if(fs.existsSync(h)){s.statusLine={type:'command',command:'node '+h.split(p.sep).join('/')}}}fs.writeFileSync(f,JSON.stringify(s,null,2))"
 ```
 
 The plugin records its version automatically. To check: `cat ~/.claude/.my-claude-version`
@@ -33,6 +33,7 @@ This installs:
   - The SessionStart hook auto-creates a `.briefing/` vault per-project (with `INDEX.md`) on first session. This provides persistent project context, decision logs, and session summaries.
 - 3 MCP servers globally (Context7, Exa, grep.app) — available in all projects
 - Boss meta-orchestrator as default agent
+- HUD statusline (via OMC wrapper — shows context usage, active agents, task progress)
 
 ## Step 1b: Manual install (if plugin unavailable)
 
@@ -60,6 +61,7 @@ This installs everything in one step:
 - Karpathy coding guidelines
 - gstack sprint-process harness (40 skills)
 - Boss meta-orchestrator as default agent
+- HUD statusline (context usage, active agents, task progress)
 
 ### Activating Agent Packs
 

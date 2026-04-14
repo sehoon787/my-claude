@@ -23,5 +23,18 @@ settings.mcpServers = Object.assign({}, settings.mcpServers, {
   grep_app: { type: 'url', url: 'https://mcp.grep.app' }
 });
 
+// HUD statusLine (only add if not already configured)
+if (!settings.statusLine) {
+  const hudPath = path.join(home, '.claude', 'hud', 'omc-hud.mjs');
+  if (fs.existsSync(hudPath)) {
+    // Use forward slashes for all platforms (bash executes the command)
+    const cmdPath = hudPath.split(path.sep).join('/');
+    settings.statusLine = {
+      type: 'command',
+      command: 'node ' + cmdPath
+    };
+  }
+}
+
 fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n');
 console.log('  settings.json merged');
