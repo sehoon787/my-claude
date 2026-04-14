@@ -4,6 +4,5 @@
   "version": "0.43.0",
   "author": {
     "name": "sehoon787"
-  },
-  "hooks": "./hooks/hooks.json"
+  }
 }
