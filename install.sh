@@ -268,17 +268,28 @@ fi
 if [ "$SKIP_OMC" = "0" ]; then
   echo "  [omc] Installing oh-my-claudecode..."
   if init_upstream "omc" "https://github.com/Yeachan-Heo/oh-my-claudecode"; then
-    # Pre-clean: resolve file/symlink vs directory conflicts for skills
-    for src in "$UPSTREAM_DIR"/skills/*/; do
-      [ ! -d "$src" ] && continue
-      name=$(basename "$src")
-      target="$HOME/.claude/skills/$name"
-      if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
-        rm -f "$target"
-      fi
-    done
-    find "$UPSTREAM_DIR/agents" -maxdepth 1 -name '*.md' -exec cp {} "$HOME/.claude/agents/" \;
-    cp -r "$UPSTREAM_DIR"/skills/* "$HOME/.claude/skills/"
+    # Check if OMC plugin is installed (provides agents/skills natively)
+    _omc_plugin_active=0
+    if [ -d "$HOME/.claude/plugins/cache/omc/oh-my-claudecode" ]; then
+      for _pv in "$HOME/.claude/plugins/cache/omc/oh-my-claudecode"/*/; do
+        [ -d "$_pv" ] && _omc_plugin_active=1 && break
+      done
+    fi
+    if [ "$_omc_plugin_active" = "1" ]; then
+      echo "  [omc] Plugin detected — skipping file copy (plugin provides agents/skills)"
+    else
+      # Pre-clean: resolve file/symlink vs directory conflicts for skills
+      for src in "$UPSTREAM_DIR"/skills/*/; do
+        [ ! -d "$src" ] && continue
+        name=$(basename "$src")
+        target="$HOME/.claude/skills/$name"
+        if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
+          rm -f "$target"
+        fi
+      done
+      find "$UPSTREAM_DIR/agents" -maxdepth 1 -name '*.md' -exec cp {} "$HOME/.claude/agents/" \;
+      cp -r "$UPSTREAM_DIR"/skills/* "$HOME/.claude/skills/"
+    fi
   else
     echo "  WARNING: OMC install failed"
   fi
@@ -425,6 +436,31 @@ for f in "$HOME/.claude/agents"/*.md; do
   find "$HOME/.claude/agent-packs" -name "$name" -delete 2>/dev/null || true
 done
 
+# Dedup: remove agents/skills that duplicate OMC plugin-provided content
+if [ -d "$HOME/.claude/plugins/cache/omc/oh-my-claudecode" ]; then
+  _omc_has_version=0
+  for _v in "$HOME/.claude/plugins/cache/omc/oh-my-claudecode"/*/; do
+    [ -d "$_v" ] && _omc_has_version=1 && break
+  done
+  if [ "$_omc_has_version" = "1" ]; then
+    echo "  Deduplicating OMC plugin-provided files..."
+    _omc_dedup_count=0
+    for _agent in architect.md document-specialist.md explore.md executor.md debugger.md planner.md analyst.md critic.md verifier.md test-engineer.md designer.md writer.md qa-tester.md scientist.md security-reviewer.md code-reviewer.md git-master.md code-simplifier.md; do
+      if [ -f "$HOME/.claude/agents/$_agent" ]; then
+        rm -f "$HOME/.claude/agents/$_agent"
+        _omc_dedup_count=$((_omc_dedup_count + 1))
+      fi
+    done
+    for _skill in ai-slop-cleaner ask autopilot cancel ccg configure-notifications deep-interview deepinit external-context hud learner mcp-setup omc-doctor omc-setup omc-teams plan project-session-manager ralph ralplan release sciomc setup skill team ultraqa ultrawork visual-verdict writer-memory; do
+      if [ -d "$HOME/.claude/skills/$_skill" ]; then
+        rm -rf "$HOME/.claude/skills/$_skill"
+        _omc_dedup_count=$((_omc_dedup_count + 1))
+      fi
+    done
+    [ "$_omc_dedup_count" -gt 0 ] && echo "  Removed $_omc_dedup_count plugin duplicates"
+  fi
+fi
+
 echo "  Plugin files installed"
 
 # ── 2. Hooks ──
@@ -511,9 +547,21 @@ else
   if command -v omc >/dev/null 2>&1 && [ "$_OMC_HUD_OK" = "false" ]; then
     echo "    OMC found but HUD missing (broken install), reinstalling..."
   fi
-  npm i -g oh-my-claude-sisyphus@4.8.2
+  npm i -g oh-my-claude-sisyphus@latest
   omc setup 2>/dev/null || true
   echo "    OMC installed"
+fi
+
+# Sync OMC npm package to plugin cache (HUD reads from cache first)
+_OMC_NPM_DIR="$(npm root -g 2>/dev/null)/oh-my-claude-sisyphus"
+_OMC_CACHE_BASE="$HOME/.claude/plugins/cache/omc/oh-my-claudecode"
+if [ -d "$_OMC_NPM_DIR/dist" ]; then
+  _OMC_VER="$(node -e "console.log(require('$_OMC_NPM_DIR/package.json').version)" 2>/dev/null || echo "")"
+  if [ -n "$_OMC_VER" ] && [ ! -d "$_OMC_CACHE_BASE/$_OMC_VER/dist" ]; then
+    echo "    Syncing OMC v$_OMC_VER to plugin cache..."
+    mkdir -p "$_OMC_CACHE_BASE/$_OMC_VER"
+    cp -r "$_OMC_NPM_DIR/"* "$_OMC_CACHE_BASE/$_OMC_VER/" 2>/dev/null || true
+  fi
 fi
 
 # 5c. omo CLI + dependencies (npm packages)
@@ -521,7 +569,7 @@ echo "  [5c] omo CLI..."
 if command -v oh-my-opencode >/dev/null 2>&1; then
   echo "    omo already installed"
 else
-  npm i -g oh-my-opencode@3.12.3
+  npm i -g oh-my-opencode@latest
   oh-my-opencode install --no-tui --claude=yes --openai=no --gemini=no --copilot=no 2>/dev/null || true
   echo "    omo installed"
 fi

@@ -21,13 +21,17 @@ if (!fs.existsSync(INDEX_FILE)) {
 
 var todayStr = new Date().toISOString().slice(0, 10);
 
+// State file helper
+var STATE_FILE = path.join(BRIEFING_DIR, 'state.json');
+function readState() {
+  try { return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')); } catch(e) { return {}; }
+}
+
 // --- Check session activity ---
+var _state = readState();
 var workCounter = 0;
 try {
-  var wcPath = path.join(BRIEFING_DIR, '.work-counter');
-  if (fs.existsSync(wcPath)) {
-    workCounter = parseInt(fs.readFileSync(wcPath, 'utf8').trim(), 10) || 0;
-  }
+  workCounter = parseInt(_state.workCounter, 10) || 0;
 } catch (e) {}
 
 var hasAgentActivity = false;
@@ -43,23 +47,17 @@ try {
 
 var hasUserMessages = false;
 try {
-  var pucPath = path.join(BRIEFING_DIR, '.profile-update-counter');
-  if (fs.existsSync(pucPath)) {
-    var pucStat = fs.statSync(pucPath);
-    if (pucStat.mtime.toISOString().slice(0, 10) === todayStr) {
-      hasUserMessages = true;
-    }
+  var profileUpdateCounter = parseInt(_state.profileUpdateCounter, 10) || 0;
+  if (profileUpdateCounter > 0) {
+    hasUserMessages = true;
   }
 } catch (e) {}
 
 var hasMessageCount = false;
 try {
-  var smcPath = path.join(BRIEFING_DIR, '.session-message-count');
-  if (fs.existsSync(smcPath)) {
-    var smcVal = parseInt(fs.readFileSync(smcPath, 'utf8').trim(), 10) || 0;
-    if (smcVal > 0) {
-      hasMessageCount = true;
-    }
+  var smcVal = parseInt(_state.sessionMessageCount, 10) || 0;
+  if (smcVal > 0) {
+    hasMessageCount = true;
   }
 } catch (e) {}
 

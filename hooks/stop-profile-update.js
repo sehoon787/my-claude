@@ -194,21 +194,29 @@ try {
   process.stderr.write('stop-profile-update: failed to read profile: ' + e.message + '\n');
 }
 
+// State file helpers
+var STATE_FILE = path.join(BRIEFING_DIR, 'state.json');
+function readState() {
+  try { return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')); } catch(e) { return {}; }
+}
+function writeState(updates) {
+  var s = readState();
+  Object.assign(s, updates);
+  fs.writeFileSync(STATE_FILE, JSON.stringify(s, null, 2));
+}
+
 // Increment session_count (idempotent: only once per session)
 var shouldIncrement = true;
 try {
-  var sessionIdFile = path.join(BRIEFING_DIR, '.session-start-head');
-  var lastCountedFile = path.join(BRIEFING_DIR, '.last-counted-session');
-  if (fs.existsSync(sessionIdFile)) {
-    var currentSessionId = fs.readFileSync(sessionIdFile, 'utf8').trim();
-    if (fs.existsSync(lastCountedFile)) {
-      var lastCounted = fs.readFileSync(lastCountedFile, 'utf8').trim();
-      if (lastCounted === currentSessionId) {
-        shouldIncrement = false;
-      }
+  var state = readState();
+  var currentSessionId = state.sessionStartHead || '';
+  if (currentSessionId) {
+    var lastCounted = state.lastCountedSession || '';
+    if (lastCounted === currentSessionId) {
+      shouldIncrement = false;
     }
     if (shouldIncrement) {
-      fs.writeFileSync(lastCountedFile, currentSessionId);
+      writeState({ lastCountedSession: currentSessionId });
     }
   }
 } catch (e) {}
@@ -339,6 +347,9 @@ try {
   if (fs.existsSync(indexPath)) {
     var indexContent = fs.readFileSync(indexPath, 'utf8');
 
+    // Update frontmatter date to today
+    indexContent = indexContent.replace(/^date:\s*\d{4}-\d{2}-\d{2}/m, 'date: ' + todayStr);
+
     // Helper: list recent files from a subdir (date-prefixed first, newest on top)
     function recentFiles(subdir, limit) {
       var dir = path.join(BRIEFING_DIR, subdir);
@@ -346,7 +357,12 @@ try {
       var files = fs.readdirSync(dir)
         .filter(function(f) { return f.endsWith('.md') && f !== '.gitkeep'; });
       var dated = files.filter(function(f) { return /^\d{4}-\d{2}-\d{2}/.test(f); }).sort().reverse();
-      var undated = files.filter(function(f) { return !/^\d{4}-\d{2}-\d{2}/.test(f); }).sort();
+      var undated = files.filter(function(f) { return !/^\d{4}-\d{2}-\d{2}/.test(f); })
+        .sort(function(a, b) {
+          try {
+            return fs.statSync(path.join(dir, b)).mtimeMs - fs.statSync(path.join(dir, a)).mtimeMs;
+          } catch (e) { return 0; }
+        });
       return dated.concat(undated)
         .slice(0, limit)
         .map(function(f) { return '- [[' + subdir + '/' + f.replace('.md', '') + ']]'; });

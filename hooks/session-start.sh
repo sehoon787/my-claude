@@ -145,10 +145,9 @@ _kv_msg=""
 _kv_dir=".briefing"
 if [ ! -f "$_kv_dir/INDEX.md" ]; then
   mkdir -p "$_kv_dir/sessions" "$_kv_dir/decisions" "$_kv_dir/learnings" "$_kv_dir/agents" "$_kv_dir/references" "$_kv_dir/persona/rules" "$_kv_dir/persona/skills"
-  # Save git HEAD for session-specific diff at Stop
-  git rev-parse HEAD 2>/dev/null > "$_kv_dir/.session-start-head" || true
-  # Reset session-specific counters
-  echo "0" > "$_kv_dir/.session-message-count" 2>/dev/null || true
+  # Save git HEAD and reset session counters in state.json
+  _head_sha=$(git rev-parse HEAD 2>/dev/null || echo "")
+  node -e "var f='$_kv_dir/state.json',s={};try{s=JSON.parse(require('fs').readFileSync(f,'utf8'))}catch(e){}Object.assign(s,{sessionStartHead:'$_head_sha',sessionMessageCount:0,workCounter:0,profileUpdateCounter:0,prevEntryCount:0});require('fs').writeFileSync(f,JSON.stringify(s,null,2))" 2>/dev/null || true
   _proj_name=$(basename "$(pwd)")
   cat > "$_kv_dir/INDEX.md" <<KVEOF
 ---
@@ -183,10 +182,24 @@ KVEOF
   fi
   _kv_msg="[BriefingVault] Auto-created .briefing/ structure. Log decisions, learnings, sessions per rules/common/briefing-vault.md."
 else
-  # Save git HEAD for session-specific diff at Stop
-  git rev-parse HEAD 2>/dev/null > "$_kv_dir/.session-start-head" || true
-  # Reset session-specific counters
-  echo "0" > "$_kv_dir/.session-message-count" 2>/dev/null || true
+  # Migrate old dot-files to state.json (one-time, backward compat)
+  if [ ! -f "$_kv_dir/state.json" ] && [ -f "$_kv_dir/.session-start-head" ]; then
+    node -e "
+      var fs=require('fs'),f='$_kv_dir/state.json',s={};
+      function r(p){try{return fs.readFileSync('$_kv_dir/'+p,'utf8').trim()}catch(e){return ''}}
+      s.sessionStartHead=r('.session-start-head');
+      s.lastCountedSession=r('.last-counted-session');
+      s.sessionMessageCount=parseInt(r('.session-message-count'))||0;
+      s.profileUpdateCounter=parseInt(r('.profile-update-counter'))||0;
+      s.workCounter=parseInt(r('.work-counter'))||0;
+      s.prevEntryCount=parseInt(r('.prev-entry-count'))||0;
+      fs.writeFileSync(f,JSON.stringify(s,null,2));
+      ['.session-start-head','.last-counted-session','.session-message-count','.profile-update-counter','.work-counter','.prev-entry-count'].forEach(function(p){try{fs.unlinkSync('$_kv_dir/'+p)}catch(e){}});
+    " 2>/dev/null || true
+  fi
+  # Save git HEAD and reset session counters in state.json
+  _head_sha=$(git rev-parse HEAD 2>/dev/null || echo "")
+  node -e "var f='$_kv_dir/state.json',s={};try{s=JSON.parse(require('fs').readFileSync(f,'utf8'))}catch(e){}Object.assign(s,{sessionStartHead:'$_head_sha',sessionMessageCount:0,workCounter:0,profileUpdateCounter:0,prevEntryCount:0});require('fs').writeFileSync(f,JSON.stringify(s,null,2))" 2>/dev/null || true
   # Add language field to INDEX.md if missing
   if ! grep -q '^language:' "$_kv_dir/INDEX.md" 2>/dev/null; then
     sed -i '/^type:/a language: en' "$_kv_dir/INDEX.md" 2>/dev/null || true
@@ -298,6 +311,17 @@ if [ "$_vc_today" != "$_vc_last" ]; then
           chmod +x "$HOME/.claude/hud/omc-hud.mjs" 2>/dev/null || true
         fi
 
+        # Sync OMC npm package to plugin cache (HUD reads from cache first)
+        _omc_npm="$(npm root -g 2>/dev/null)/oh-my-claude-sisyphus"
+        _omc_cache="$HOME/.claude/plugins/cache/omc/oh-my-claudecode"
+        if [ -d "$_omc_npm/dist" ]; then
+          _omc_v="$(node -e "console.log(require('$_omc_npm/package.json').version)" 2>/dev/null || echo "")"
+          if [ -n "$_omc_v" ] && [ ! -d "$_omc_cache/$_omc_v/dist" ]; then
+            mkdir -p "$_omc_cache/$_omc_v"
+            cp -r "$_omc_npm/"* "$_omc_cache/$_omc_v/" 2>/dev/null || true
+          fi
+        fi
+
         # Merge hooks into settings.json
         if [ -f "$_repo_dir/scripts/merge-hooks.js" ]; then
           node "$_repo_dir/scripts/merge-hooks.js" "$HOME/.claude/hooks/hooks.json" 2>/dev/null || true
@@ -337,5 +361,5 @@ MSG="${MSG}[SessionStart] Registry cache: ${REGISTRY_STATUS}."
 [ -n "$_kv_msg" ] && MSG="${MSG} ${_kv_msg}"
 [ -n "$_update_msg" ] && MSG="${MSG} ${_update_msg}"
 if [ -n "$MSG" ]; then
-  echo "{\"hookSpecificOutput\":{\"additionalContext\":\"$MSG\"}}"
+  echo "{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"$MSG\"}}"
 fi
