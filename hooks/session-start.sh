@@ -289,9 +289,23 @@ if [ "$_vc_today" != "$_vc_last" ]; then
           done
         fi
 
+        # Update HUD wrapper from upstream (if available)
+        _hud_src="$_repo_dir/upstream/omc/scripts/lib/hud-wrapper-template.txt"
+        if [ -f "$_hud_src" ]; then
+          mkdir -p "$HOME/.claude/hud/lib"
+          cp "$_hud_src" "$HOME/.claude/hud/omc-hud.mjs" 2>/dev/null || true
+          cp "$_repo_dir/upstream/omc/scripts/lib/config-dir.mjs" "$HOME/.claude/hud/lib/config-dir.mjs" 2>/dev/null || true
+          chmod +x "$HOME/.claude/hud/omc-hud.mjs" 2>/dev/null || true
+        fi
+
         # Merge hooks into settings.json
         if [ -f "$_repo_dir/scripts/merge-hooks.js" ]; then
           node "$_repo_dir/scripts/merge-hooks.js" "$HOME/.claude/hooks/hooks.json" 2>/dev/null || true
+        fi
+
+        # Refresh settings (boss default, statusLine, MCP)
+        if [ -f "$_repo_dir/scripts/merge-settings.js" ]; then
+          node "$_repo_dir/scripts/merge-settings.js" 2>/dev/null || true
         fi
 
         # Update installed SHA
