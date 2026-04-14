@@ -502,9 +502,15 @@ fi
 
 # 5b. OMC CLI (npm package)
 echo "  [5b] OMC CLI..."
-if command -v omc >/dev/null 2>&1; then
+_OMC_HUD_OK=false
+_OMC_PKG_HUD="$(npm root -g 2>/dev/null)/oh-my-claude-sisyphus/dist/hud/index.js"
+[ -f "$_OMC_PKG_HUD" ] && _OMC_HUD_OK=true
+if command -v omc >/dev/null 2>&1 && [ "$_OMC_HUD_OK" = "true" ]; then
   echo "    OMC already installed ($(omc --version 2>/dev/null || echo 'unknown'))"
 else
+  if command -v omc >/dev/null 2>&1 && [ "$_OMC_HUD_OK" = "false" ]; then
+    echo "    OMC found but HUD missing (broken install), reinstalling..."
+  fi
   npm i -g oh-my-claude-sisyphus@4.8.2
   omc setup 2>/dev/null || true
   echo "    OMC installed"
