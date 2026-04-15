@@ -109,7 +109,7 @@ if [ -d ".knowledge" ]; then
   if [ ! -d ".briefing" ]; then
     # Simple rename
     mv ".knowledge" ".briefing"
-    mkdir -p ".briefing/persona/rules" ".briefing/persona/skills"
+    mkdir -p ".briefing/persona/rules"
     # Add language field to INDEX.md if missing
     if [ -f ".briefing/INDEX.md" ] && ! grep -q '^language:' ".briefing/INDEX.md"; then
       sed -i '/^type:/a language: en' ".briefing/INDEX.md" 2>/dev/null || true
@@ -132,7 +132,7 @@ if [ -d ".knowledge" ]; then
       fi
     done
     rm -rf ".knowledge"
-    mkdir -p ".briefing/persona/rules" ".briefing/persona/skills"
+    mkdir -p ".briefing/persona/rules"
     if [ -f ".gitignore" ]; then
       sed -i '/^\.knowledge\//d' ".gitignore" 2>/dev/null || true
       grep -q '\.briefing/' ".gitignore" 2>/dev/null || echo '.briefing/' >> ".gitignore"
@@ -144,7 +144,7 @@ fi
 _kv_msg=""
 _kv_dir=".briefing"
 if [ ! -f "$_kv_dir/INDEX.md" ]; then
-  mkdir -p "$_kv_dir/sessions" "$_kv_dir/decisions" "$_kv_dir/learnings" "$_kv_dir/agents" "$_kv_dir/references" "$_kv_dir/persona/rules" "$_kv_dir/persona/skills"
+  mkdir -p "$_kv_dir/sessions" "$_kv_dir/decisions" "$_kv_dir/learnings" "$_kv_dir/agents" "$_kv_dir/references" "$_kv_dir/persona/rules"
   # Save git HEAD and reset session counters in state.json
   _head_sha=$(git rev-parse HEAD 2>/dev/null || echo "")
   node -e "var f='$_kv_dir/state.json',s={};try{s=JSON.parse(require('fs').readFileSync(f,'utf8'))}catch(e){}Object.assign(s,{sessionStartHead:'$_head_sha',sessionMessageCount:0,workCounter:0,profileUpdateCounter:0,prevEntryCount:0});require('fs').writeFileSync(f,JSON.stringify(s,null,2))" 2>/dev/null || true
@@ -242,23 +242,6 @@ if [ -d "$_rules_dir" ]; then
   fi
 fi
 
-# 9. Persona: Active Skills Summary
-_skills_dir="$_kv_dir/persona/skills"
-if [ -d "$_skills_dir" ]; then
-  _skill_names=""
-  for _sf in "$_skills_dir"/*.md; do
-    [ -f "$_sf" ] || continue
-    _sname=$(basename "$_sf" .md)
-    if [ -z "$_skill_names" ]; then
-      _skill_names="$_sname"
-    else
-      _skill_names="$_skill_names, $_sname"
-    fi
-  done
-  if [ -n "$_skill_names" ]; then
-    _kv_msg="${_kv_msg} [BriefingVault] Active persona skills: ${_skill_names}"
-  fi
-fi
 
 # 10. Version Freshness Check (once per day, non-blocking)
 _update_msg=""

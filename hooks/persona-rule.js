@@ -9,7 +9,8 @@ var BRIEFING_DIR = '.briefing';
 var PERSONA_DIR = path.join(BRIEFING_DIR, 'persona');
 var SUGGESTIONS_FILE = path.join(PERSONA_DIR, 'suggestions.jsonl');
 var RULES_DIR = path.join(PERSONA_DIR, 'rules');
-var SKILLS_DIR = path.join(PERSONA_DIR, 'skills');
+var HOME_DIR = process.env.HOME || process.env.USERPROFILE || '';
+var GLOBAL_RULES_DIR = path.join(HOME_DIR, '.claude', 'rules', 'persona');
 
 var args = process.argv.slice(2);
 var command = args[0] || '';
@@ -95,10 +96,27 @@ if (command === 'accept') {
       suggestions[i].accepted_at = new Date().toISOString();
       found = true;
 
-      // Generate rule file
-      var todayStr = new Date().toISOString().slice(0, 10);
       var count = suggestions[i].count || 0;
-      var ruleContent = '---\n' +
+
+      // Rule content for ~/.claude/rules/persona/ (concise, actionable)
+      var globalRuleContent = '# Agent Routing Preference: ' + agentType + '\n' +
+        '\n' +
+        'When choosing between agents for a task that matches `' + agentType + '`\'s capabilities,\n' +
+        'prefer delegating to `' + agentType + '` over generic alternatives.\n' +
+        '\n' +
+        'This preference was auto-generated from usage patterns (' + count + ' calls in 7 days).\n' +
+        'To remove: delete this file or run `node hooks/persona-rule.js reject ' + agentType + '`.\n';
+
+      try {
+        fs.mkdirSync(GLOBAL_RULES_DIR, { recursive: true });
+        fs.writeFileSync(path.join(GLOBAL_RULES_DIR, 'prefer-' + agentType + '.md'), globalRuleContent);
+      } catch (e) {
+        process.stderr.write('persona-rule: failed to write global rule file: ' + e.message + '\n');
+      }
+
+      // Local reference/log in .briefing/persona/rules/
+      var todayStr = new Date().toISOString().slice(0, 10);
+      var localRuleContent = '---\n' +
         'date: ' + todayStr + '\n' +
         'type: persona-rule\n' +
         'agent_type: ' + agentType + '\n' +
@@ -112,33 +130,9 @@ if (command === 'accept') {
 
       try {
         fs.mkdirSync(RULES_DIR, { recursive: true });
-        fs.writeFileSync(path.join(RULES_DIR, 'prefer-' + agentType + '.md'), ruleContent);
+        fs.writeFileSync(path.join(RULES_DIR, 'prefer-' + agentType + '.md'), localRuleContent);
       } catch (e) {
-        process.stderr.write('persona-rule: failed to write rule file: ' + e.message + '\n');
-      }
-
-      // Generate companion skill file
-      var skillContent = '---\n' +
-        'name: persona-' + agentType + '\n' +
-        'description: Auto-generated workflow preference for ' + agentType + ' based on usage patterns.\n' +
-        '---\n' +
-        '# Persona Skill: ' + agentType + '\n' +
-        '\n' +
-        '## When to Activate\n' +
-        'This skill activates when the task matches `' + agentType + '`\'s specialty.\n' +
-        '\n' +
-        '## Preferred Workflow\n' +
-        '- Prefer delegating to `' + agentType + '` agent\n' +
-        '- Based on observed usage: ' + count + ' calls in 7 days\n' +
-        '\n' +
-        '## Source\n' +
-        'Auto-generated from persona suggestion accepted on ' + todayStr + '.\n';
-
-      try {
-        fs.mkdirSync(SKILLS_DIR, { recursive: true });
-        fs.writeFileSync(path.join(SKILLS_DIR, agentType + '.md'), skillContent);
-      } catch (e) {
-        process.stderr.write('persona-rule: failed to write skill file: ' + e.message + '\n');
+        process.stderr.write('persona-rule: failed to write local rule file: ' + e.message + '\n');
       }
       break;
     }
@@ -148,7 +142,7 @@ if (command === 'accept') {
     process.exit(0);
   }
   writeSuggestions(suggestions);
-  process.stdout.write('Accepted: ' + agentType + '. Rule created at persona/rules/prefer-' + agentType + '.md, skill at persona/skills/' + agentType + '.md\n');
+  process.stdout.write('Accepted: ' + agentType + '. Rule created at:\n  - ~/.claude/rules/persona/prefer-' + agentType + '.md (active rule)\n  - .briefing/persona/rules/prefer-' + agentType + '.md (local log)\n');
   process.exit(0);
 }
 
@@ -162,22 +156,68 @@ if (command === 'reject') {
   var found = false;
   var cooldownDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
   for (var i = 0; i < suggestions.length; i++) {
-    if (suggestions[i].type === 'pending' && suggestions[i].agent_type === agentType) {
+    if ((suggestions[i].type === 'pending' || suggestions[i].type === 'accepted') && suggestions[i].agent_type === agentType) {
       suggestions[i].type = 'rejected';
       suggestions[i].cooldown_until = cooldownDate.toISOString();
       found = true;
       break;
     }
   }
-  if (!found) {
-    process.stdout.write('No pending suggestion found for agent_type: ' + agentType + '\n');
+
+  // Remove rule files from both paths (in case previously accepted)
+  var globalRulePath = path.join(GLOBAL_RULES_DIR, 'prefer-' + agentType + '.md');
+  var localRulePath = path.join(RULES_DIR, 'prefer-' + agentType + '.md');
+  var removedGlobal = false;
+  var removedLocal = false;
+  try { fs.unlinkSync(globalRulePath); removedGlobal = true; } catch (e) { /* not found is fine */ }
+  try { fs.unlinkSync(localRulePath); removedLocal = true; } catch (e) { /* not found is fine */ }
+
+  if (!found && !removedGlobal && !removedLocal) {
+    process.stdout.write('No pending/accepted suggestion found for agent_type: ' + agentType + '\n');
     process.exit(0);
   }
-  writeSuggestions(suggestions);
-  process.stdout.write('Rejected: ' + agentType + '. Cooldown until ' + cooldownDate.toISOString().slice(0, 10) + '\n');
+
+  if (found) {
+    writeSuggestions(suggestions);
+  }
+  var msg = 'Rejected: ' + agentType + '.';
+  if (found) msg += ' Cooldown until ' + cooldownDate.toISOString().slice(0, 10) + '.';
+  if (removedGlobal || removedLocal) msg += ' Rule files removed.';
+  process.stdout.write(msg + '\n');
+  process.exit(0);
+}
+
+// CLEAN command
+if (command === 'clean') {
+  var suggestions = readSuggestions();
+  var cleaned = 0;
+  var kept = [];
+  var now = Date.now();
+  var fourteenDays = 14 * 24 * 60 * 60 * 1000;
+  for (var i = 0; i < suggestions.length; i++) {
+    var s = suggestions[i];
+    if (s.type !== 'pending') {
+      kept.push(s);
+      continue;
+    }
+    // Remove unknown agent_type regardless of age
+    if (s.agent_type === 'unknown') {
+      cleaned++;
+      continue;
+    }
+    // Remove pending suggestions older than 14 days
+    var ts = s.ts ? new Date(s.ts).getTime() : 0;
+    if (ts > 0 && (now - ts) > fourteenDays) {
+      cleaned++;
+      continue;
+    }
+    kept.push(s);
+  }
+  writeSuggestions(kept);
+  process.stdout.write('Cleaned ' + cleaned + ' stale suggestion(s). ' + kept.length + ' remaining.\n');
   process.exit(0);
 }
 
 // Unknown command or no command
-process.stdout.write('Usage: persona-rule.js <list|accept|reject> [agent_type]\n');
+process.stdout.write('Usage: persona-rule.js <list|accept|reject|clean> [agent_type]\n');
 process.exit(0);
