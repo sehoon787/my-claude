@@ -20,7 +20,6 @@ if (!fs.existsSync(INDEX_FILE)) {
 // Ensure persona directories exist
 try {
   fs.mkdirSync(path.join(PERSONA_DIR, 'rules'), { recursive: true });
-  fs.mkdirSync(path.join(PERSONA_DIR, 'skills'), { recursive: true });
 } catch (e) {
   process.stderr.write('stop-profile-update: failed to create persona dirs: ' + e.message + '\n');
   process.exit(0);
