@@ -52,11 +52,7 @@ rm -rf /tmp/my-claude
 
 ### For AI Agents
 
-```bash
-curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
-```
-
-Read the FULL output, then execute each step in order. Use `curl`, NOT `WebFetch`.
+Read [AI-INSTALL.md](https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md) and follow every step.
 
 ---
 
