@@ -52,7 +52,9 @@ rm -rf /tmp/my-claude
 
 ### For AI Agents
 
-Read [AI-INSTALL.md](https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md) and follow every step.
+```
+Read https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md and follow every step.
+```
 
 ---
 
