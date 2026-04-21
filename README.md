@@ -337,9 +337,10 @@ ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
 | Delegation Guard | PreToolUse | Blocks Boss from directly modifying files |
 | Agent Telemetry | PostToolUse | Logs agent usage to `agent-usage.jsonl` |
 | Subagent Verifier | SubagentStop | Forces independent verification + logs to Briefing Vault |
-| Completion Check | Stop | Confirms tasks verified + prompts session summary |
+| Completion Check | Stop | Runs profile fallback + guards /boss-briefing execution |
 | Teammate Idle Guide | TeammateIdle | Prompts leader on idle teammates |
 | Task Quality Gate | TaskCompleted | Verifies deliverable quality |
+| Vault Reminder | UserPromptSubmit | Suggests /boss-briefing after 5+ messages |
 
 </details>
 
@@ -352,6 +353,7 @@ Obsidian-compatible persistent memory. Every project maintains a `.briefing/` di
 ```
 .briefing/
 ├── INDEX.md                          ← Project context (auto-created once)
+├── state.json                        ← Session metadata, counters, lastVaultSync (auto-managed)
 ├── sessions/
 │   ├── YYYY-MM-DD-<topic>.md        ← AI-written session summary (enforced)
 │   └── YYYY-MM-DD-auto.md           ← Auto-generated scaffold (git diff, agent stats)
@@ -368,25 +370,25 @@ Obsidian-compatible persistent memory. Every project maintains a `.briefing/` di
 └── persona/
     ├── profile.md                   ← Agent affinity stats (auto-updated)
     ├── suggestions.jsonl            ← Routing suggestions (auto-generated)
-    ├── rules/                       ← Accepted routing preferences
-    └── skills/                      ← Accepted persona skills
+    └── rules/                       ← Workflow pattern rules (workflow-*.md)
 ```
 
 ### Sub-Vaults
 
 | Path | Description |
 |------|-------------|
-| `INDEX.md` | Project overview with links to recent decisions and learnings. Auto-created on first session, refreshed periodically. |
-| `sessions/` | **Session summaries.** `*-auto.md` — scaffold with git diff stats and agent counts. `<topic>.md` — AI-written summary enforced by hooks. |
+| `INDEX.md` | Project overview with links to recent decisions and learnings. Auto-created on first session, refreshed by /boss-briefing or Stop hook fallback. |
+| `state.json` | Session metadata: counters (workCounter, messageCount), lastVaultSync timestamp, sessionStartHead. Auto-managed by hooks. |
+| `sessions/` | **Session summaries.** `*-auto.md` — scaffold with git diff stats and agent counts. `<topic>.md` — AI-written summary enforced by Stop hook guard. |
 | `decisions/` | **Architecture and design decisions** with rationale. AI-written, enforced during active work. |
 | `learnings/` | **Patterns, gotchas, non-obvious solutions.** `*-auto-session.md` — scaffold with file lists. `<topic>.md` — AI-written. |
 | `references/` | **Web research URLs.** `auto-links.md` — auto-collected from WebSearch/WebFetch calls. |
-| `agents/` | **Agent telemetry.** `agent-log.jsonl` — per-call log. `YYYY-MM-DD-summary.md` — daily usage breakdown. |
-| `persona/` | **User work style profile.** `profile.md` — tool affinity stats. `suggestions.jsonl` — routing recommendations. `rules/`, `skills/` — accepted preferences. |
+| `agents/` | **Agent telemetry.** `agent-log.jsonl` — per-call log with enriched fields `{ts, agent_type, phase, seq, task_hint}`. `YYYY-MM-DD-summary.md` — daily usage breakdown. |
+| `persona/` | **User work style profile.** `profile.md` — tool affinity stats. `suggestions.jsonl` — routing recommendations. Workflow sequence patterns in `rules/workflow-*.md`. Run /boss-briefing to analyze. |
 
 ### Session-Specific Diffs
 
-At session start, the current git HEAD is saved to `.briefing/.session-start-head`. At session end, diffs are calculated relative to this saved point — showing only changes from the current session, not accumulated uncommitted changes from previous sessions.
+At session start, the current git HEAD is saved to `state.json` (`sessionStartHead` field). For non-git projects, a `YYYY-MM-DD:cwd` identifier is used instead. At session end, diffs are calculated relative to this saved point — showing only changes from the current session, not accumulated uncommitted changes from previous sessions.
 
 ### Using with Obsidian
 
@@ -394,6 +396,17 @@ At session start, the current git HEAD is saved to `.briefing/.session-start-hea
 2. Notes appear in graph view, linked by `[[wiki-links]]`
 3. YAML frontmatter (`date`, `type`, `tags`) enables structured search
 4. Timeline of decisions and learnings builds automatically over sessions
+
+### /boss-briefing
+
+Run `/boss-briefing` during or at the end of a session to:
+- **Sync vault**: Update profile.md, INDEX.md, and agent summaries
+- **Detect workflow patterns**: Analyze temporal agent call sequences across sessions
+- **Recover from gaps**: Generate recovery summaries if days have passed since the last session
+- **Propose persona rules**: Suggest workflow-based routing preferences (not just frequency)
+- **Validate session notes**: Check that today's session has a proper summary
+
+The Stop hook checks whether `/boss-briefing` has run today. If not, it blocks session end with a reminder. The existing `stop-profile-update.js` continues to run as a fallback.
 
 ---
 

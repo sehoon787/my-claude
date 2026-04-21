@@ -147,7 +147,11 @@ if [ ! -f "$_kv_dir/INDEX.md" ]; then
   mkdir -p "$_kv_dir/sessions" "$_kv_dir/decisions" "$_kv_dir/learnings" "$_kv_dir/agents" "$_kv_dir/references" "$_kv_dir/persona/rules"
   # Save git HEAD and reset session counters in state.json
   _head_sha=$(git rev-parse HEAD 2>/dev/null || echo "")
-  node -e "var f='$_kv_dir/state.json',s={};try{s=JSON.parse(require('fs').readFileSync(f,'utf8'))}catch(e){}Object.assign(s,{sessionStartHead:'$_head_sha',sessionMessageCount:0,workCounter:0,profileUpdateCounter:0,prevEntryCount:0});require('fs').writeFileSync(f,JSON.stringify(s,null,2))" 2>/dev/null || true
+  _session_id="$_head_sha"
+  if [ -z "$_session_id" ]; then
+    _session_id="$(date +%Y-%m-%d):$(pwd)"
+  fi
+  node -e "var f='$_kv_dir/state.json',s={};try{s=JSON.parse(require('fs').readFileSync(f,'utf8'))}catch(e){}Object.assign(s,{date:'$(date +%Y-%m-%d)',sessionStartHead:'$_session_id',sessionMessageCount:0,workCounter:0,profileUpdateCounter:0,prevEntryCount:0,subagentSeq:0});require('fs').writeFileSync(f,JSON.stringify(s,null,2))" 2>/dev/null || true
   _proj_name=$(basename "$(pwd)")
   cat > "$_kv_dir/INDEX.md" <<KVEOF
 ---
@@ -197,9 +201,23 @@ else
       ['.session-start-head','.last-counted-session','.session-message-count','.profile-update-counter','.work-counter','.prev-entry-count'].forEach(function(p){try{fs.unlinkSync('$_kv_dir/'+p)}catch(e){}});
     " 2>/dev/null || true
   fi
+  # Gap detection: check previous session date
+  _prev_date=""
+  if [ -f "$_kv_dir/state.json" ]; then
+    _prev_date=$(node -e "try{var s=JSON.parse(require('fs').readFileSync('$_kv_dir/state.json','utf8'));console.log(s.date||'')}catch(e){}" 2>/dev/null)
+  fi
+  _today=$(date +%Y-%m-%d)
+  if [ -n "$_prev_date" ] && [ "$_prev_date" != "$_today" ]; then
+    _gap_msg="[BriefingVault] Previous session: ${_prev_date}. Run /boss-briefing for recovery."
+    _kv_msg="${_kv_msg} ${_gap_msg}"
+  fi
   # Save git HEAD and reset session counters in state.json
   _head_sha=$(git rev-parse HEAD 2>/dev/null || echo "")
-  node -e "var f='$_kv_dir/state.json',s={};try{s=JSON.parse(require('fs').readFileSync(f,'utf8'))}catch(e){}Object.assign(s,{sessionStartHead:'$_head_sha',sessionMessageCount:0,workCounter:0,profileUpdateCounter:0,prevEntryCount:0});require('fs').writeFileSync(f,JSON.stringify(s,null,2))" 2>/dev/null || true
+  _session_id="$_head_sha"
+  if [ -z "$_session_id" ]; then
+    _session_id="$(date +%Y-%m-%d):$(pwd)"
+  fi
+  node -e "var f='$_kv_dir/state.json',s={};try{s=JSON.parse(require('fs').readFileSync(f,'utf8'))}catch(e){}Object.assign(s,{date:'$_today',sessionStartHead:'$_session_id',sessionMessageCount:0,workCounter:0,profileUpdateCounter:0,prevEntryCount:0,subagentSeq:0});require('fs').writeFileSync(f,JSON.stringify(s,null,2))" 2>/dev/null || true
   # Add language field to INDEX.md if missing
   if ! grep -q '^language:' "$_kv_dir/INDEX.md" 2>/dev/null; then
     sed -i '/^type:/a language: en' "$_kv_dir/INDEX.md" 2>/dev/null || true
