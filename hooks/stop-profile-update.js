@@ -17,6 +17,16 @@ if (!fs.existsSync(INDEX_FILE)) {
   process.exit(0);
 }
 
+// Guard: if boss-briefing already ran today, skip profile overwrite
+var STATE_FILE_GUARD = path.join(BRIEFING_DIR, 'state.json');
+try {
+  var guardState = JSON.parse(fs.readFileSync(STATE_FILE_GUARD, 'utf8'));
+  var todayGuard = new Date().toISOString().slice(0, 10);
+  if (guardState.lastVaultSync && guardState.lastVaultSync.slice(0, 10) === todayGuard) {
+    process.exit(0);
+  }
+} catch(e) {}
+
 // Ensure persona directories exist
 try {
   fs.mkdirSync(path.join(PERSONA_DIR, 'rules'), { recursive: true });
