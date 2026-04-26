@@ -36,6 +36,11 @@ try {
 // No meaningful activity → pass silently
 if (wc === 0 && mc <= 2 && !hasAgent) { process.exit(0); }
 
+// Cooldown: block at most once every 30 minutes
+var COOLDOWN_MS = 1800000;
+var lastBlockedAt = state.lastBlockedAt || '';
+if (lastBlockedAt && (Date.now() - new Date(lastBlockedAt).getTime()) < COOLDOWN_MS) { process.exit(0); }
+
 // Detect language
 var lang = 'en';
 try {
@@ -64,6 +69,7 @@ var reason = isKo
 // UserPromptSubmit hook already reminds about /boss-briefing during session
 if (hasSession) { process.exit(0); }
 
+try { fs.writeFileSync(STATE_FILE, JSON.stringify(Object.assign({}, state, { lastBlockedAt: new Date().toISOString() })), 'utf8'); } catch(e) {}
 process.stdout.write(JSON.stringify({ decision: 'block', reason: reason }) + '\n');
 process.exit(0);
 } catch(e) { process.exit(0); }
