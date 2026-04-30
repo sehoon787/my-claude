@@ -55,7 +55,12 @@ var hasSession = false;
 try {
   if (fs.existsSync(SESSIONS_DIR)) {
     hasSession = fs.readdirSync(SESSIONS_DIR).some(function(f) {
-      return f.slice(0, 10) === todayStr && f.indexOf('-auto') === -1;
+      if (f.indexOf('-auto') !== -1) return false;
+      // Fix 2: match by filename date prefix OR file mtime
+      if (f.slice(0, 10) === todayStr) return true;
+      try {
+        return fs.statSync(path.join(SESSIONS_DIR, f)).mtime.toISOString().slice(0, 10) === todayStr;
+      } catch(e) { return false; }
     });
   }
 } catch(e) {}
@@ -65,9 +70,12 @@ var reason = isKo
   ? '[BriefingVault] /boss-briefing 미실행. 세션 종료 전 /boss-briefing을 실행하세요.'
   : '[BriefingVault] Run /boss-briefing before ending the session to sync your vault.';
 
-// Session exists but boss-briefing not run — pass silently
-// UserPromptSubmit hook already reminds about /boss-briefing during session
-if (hasSession) { process.exit(0); }
+// Session exists but boss-briefing not run — pass silently and auto-set lastVaultSync
+// Fix 1: auto-set lastVaultSync so future Stop calls won't block
+if (hasSession) {
+  try { fs.writeFileSync(STATE_FILE, JSON.stringify(Object.assign({}, readState(), { lastVaultSync: new Date().toISOString() })), 'utf8'); } catch(e) {}
+  process.exit(0);
+}
 
 try { fs.writeFileSync(STATE_FILE, JSON.stringify(Object.assign({}, state, { lastBlockedAt: new Date().toISOString() })), 'utf8'); } catch(e) {}
 process.stdout.write(JSON.stringify({ decision: 'block', reason: reason }) + '\n');
