@@ -18,10 +18,36 @@
     "repo": "https://github.com/garrytan/gstack",
     "method": "submodule + setup",
     "supersedes": ["benchmark", "canary-watch", "safety-guard", "browser-qa",
-                   "verification-loop", "security-review", "design-system"]
+                   "verification-loop", "security-review", "design-system"],
+    "branch": "main",
+    "syncedSha": "initial",
+    "syncedTag": null,
+    "syncedAt": "2026-03-26T00:00:00Z",
+    "compareUrl": "https://github.com/garrytan/gstack/compare/initial...HEAD",
+    "files": {
+      "skills": 27
+    },
+    "strategy": "runtime",
+    "installCommand": "git clone --depth 1",
+    "updateCommand": "git pull --ff-only",
+    "syncFrequency": "on-install"
   },
   "superpowers": {
     "repo": "https://github.com/obra/superpowers",
     "method": "submodule"
+  },
+  "vibeproxy": {
+    "repo": "https://github.com/automazeio/vibeproxy",
+    "branch": "main",
+    "syncedSha": "initial",
+    "syncedTag": "v1.8.142",
+    "syncedAt": "2026-05-07T00:00:00Z",
+    "compareUrl": "https://github.com/automazeio/vibeproxy/compare/initial...HEAD",
+    "files": {
+      "scripts": 2
+    },
+    "strategy": "vendor-scripts",
+    "syncFrequency": "monthly",
+    "note": "model-router.mjs + vibeproxy-setup.sh only"
   }
 }

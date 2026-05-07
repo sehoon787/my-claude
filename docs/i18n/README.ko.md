@@ -105,6 +105,53 @@ Boss는 my-claude의 핵심에 있는 메타 오케스트레이터입니다. 코
 └─────────────────────────────────────────────┘
 ```
 
+### 런타임 행동 교정
+- **Delegation Guard** (PreToolUse): 오케스트레이터가 직접 파일 수정 시도 시 서브에이전트 위임을 강제
+- **Subagent Verifier** (SubagentStop): 서브에이전트 작업 완료 후 독립 검증을 강제
+- **Completion Check** (Stop): 모든 태스크가 완료·검증되었는지 확인 후 세션 종료 허용
+
+### 외부 지식 연동 (MCP)
+- **Context7**: 라이브러리 공식 문서를 실시간으로 조회
+- **Exa**: 의미 기반 웹 검색 (월 1,000건 무료)
+- **grep.app**: GitHub 오픈소스 코드 검색
+
+### 통합 생태계
+- 플러그인 하나로 **202 에이전트, 185 스킬, 64 룰**을 한 환경에 구성
+- 8개 오픈소스 도구(OMC, omo, ECC, Anthropic Skills, Agency, Karpathy, gstack, VibeProxy)를 하나로 통합
+
+---
+
+## Core + OMO 에이전트
+
+**Boss**만 my-claude 고유 에이전트입니다. 나머지 9개는 Boss가 서브 오케스트레이터 및 전문가로 사용하는 [OMO 에이전트](https://github.com/code-yeongyu/oh-my-openagent)입니다. 플러그인은 **52개 코어 에이전트** (Core 2 + OMO 9 + Engineering 23 + OMC 19 + OMO 전문가)를 `~/.claude/agents/`에 항상 로드하며, **133개 도메인 에이전트 팩**은 `~/.claude/agent-packs/`에 설치되어 필요 시 활성화할 수 있습니다. Boss는 Priority 2 능력 매칭으로 활성화된 전체 에이전트 풀에서 최적의 전문가를 선택합니다. 전체 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
+
+| 에이전트 | 출처 | 모델 | 역할 |
+|---------|------|------|------|
+| **Boss** | my-claude | Opus | 동적 메타 오케스트레이터. 런타임에 모든 에이전트/스킬/MCP를 자동 감지하고 최적의 전문가에게 라우팅 |
+| **Sisyphus** | OMO | Opus | 서브 오케스트레이터. 의도 분류와 검증 프로토콜로 복잡한 멀티스텝 워크플로우 관리 |
+| **Hephaestus** | OMO | Opus | 자율 딥 워커. 탐색 → 계획 → 실행 → 검증 사이클을 자율적으로 수행 |
+| **Metis** | OMO | Opus | 사전 의도 분석. AI-slop 방지를 위해 요청을 실행 전에 구조화 |
+| **Atlas** | OMO | Opus | 마스터 태스크 오케스트레이터. 4단계 QA 사이클로 복잡한 작업을 분해 및 조율 |
+| **Oracle** | OMO | Opus | 전략적 기술 자문가. 코드를 변경하지 않고 read-only로 분석하여 방향 제시 |
+| **Momus** | OMO | Opus | 작업 계획 검토자. 승인 편향적 관점에서 계획을 검토. read-only |
+| **Prometheus** | OMO | Opus | 인터뷰 기반 계획 수립 컨설턴트. 대화를 통해 요구사항을 명확화 |
+| **Librarian** | OMO | Sonnet | MCP를 활용한 오픈소스 문서 연구 에이전트 |
+| **Multimodal-Looker** | OMO | Sonnet | 시각 분석 에이전트. 이미지/스크린샷을 분석. read-only |
+
+---
+
+## 에이전트 팩 (도메인 전문가)
+
+도메인 전문 에이전트는 `~/.claude/agent-packs/`에 설치되며 기본적으로 로드되지 **않습니다**. 심링크로 활성화하세요:
+
+```bash
+# 팩 활성화
+ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
+
+# 비활성화
+rm ~/.claude/agents/<agent-name>.md
+```
+
 ### 우선순위 라우팅
 
 Boss는 가장 적합한 매칭을 찾을 때까지 모든 요청을 우선순위 체인을 통해 순차적으로 처리합니다:
@@ -413,6 +460,10 @@ my-claude는 git 서브모듈을 통해 MIT 라이선스 업스트림 저장소 
 | 6 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 브레인스토밍, TDD, 병렬 에이전트, 코드 리뷰를 다루는 스킬 14개 + 에이전트 1개. |
 | 7 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | PDF, DOCX, PPTX, XLSX, MCP builder를 위한 공식 스킬 14개 이상. |
 | 8 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | AI 코딩 행동 가이드라인 4가지 (코딩 전 생각하기, 단순함 우선, 외과적 변경, 목표 중심 실행). |
+
+### 8. [VibeProxy](https://github.com/automazeio/vibeproxy)
+
+기존 AI 구독(ChatGPT Plus, Gemini, Claude)의 OAuth 토큰을 사용하여 별도 API 키 없이 GPT/Gemini/Claude 모델에 접근하는 API 프록시. Anthropic과 OpenAI API 형식을 모두 지원합니다. 설치 시 선택적으로 `vibeproxy-setup.sh`를 통해 통합됩니다. 모델 라우팅이 Claude 모델 티어(opus/sonnet/haiku)를 동급 벤더 모델로 매핑합니다.
 
 ---
 

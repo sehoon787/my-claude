@@ -414,6 +414,10 @@ my-claude bündelt Inhalte aus 5 MIT-lizenzierten Upstream-Repositories über gi
 | 7 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | 14+ offizielle Skills für PDF, DOCX, PPTX, XLSX und MCP builder. |
 | 8 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 KI-Coding-Verhaltensrichtlinien (Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution). |
 
+### 8. [VibeProxy](https://github.com/automazeio/vibeproxy)
+
+OAuth-basierter API-Proxy, der vorhandene AI-Abonnements (ChatGPT Plus, Gemini, Claude) nutzt, um ohne separate API-Schlüssel auf GPT/Gemini/Claude-Modelle zuzugreifen. Unterstützt sowohl Anthropic- als auch OpenAI-API-Formate. Wird bei der Installation optional über `vibeproxy-setup.sh` integriert. Das Model-Routing ordnet Claude-Modellebenen (opus/sonnet/haiku) den entsprechenden Anbietermodellen zu.
+
 ---
 
 ## GitHub Actions

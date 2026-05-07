@@ -58,6 +58,42 @@ Read https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md an
 
 ---
 
+## Open-Source Tools Used
+
+### 1. [Oh My Claude Code (OMC)](https://github.com/Yeachan-Heo/oh-my-claudecode)
+
+An agent harness dedicated to Claude Code. 18 specialist agents (architect, debugger, code reviewer, security reviewer, etc.) divide work by role, and magic keywords like `autopilot:` activate automatic parallel execution.
+
+### 2. [Oh My OpenAgent (omo)](https://github.com/code-yeongyu/oh-my-openagent)
+
+A multi-platform agent harness. Bridges to the Claude Code ecosystem via `claude-code-agent-loader` and `claude-code-plugin-loader`. Automatically routes across 8 providers (Claude, GPT, Gemini, etc.) by category. The 9 agents in this repository are adaptations of omo agents in Claude Code standalone `.md` format.
+
+### 3. [Andrej Karpathy Skills](https://github.com/forrestchang/andrej-karpathy-skills)
+
+The 4 AI coding behavioral guidelines proposed by Andrej Karpathy (Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution). Included in CLAUDE.md and always active across all sessions.
+
+### 4. [Everything Claude Code (ECC)](https://github.com/affaan-m/everything-claude-code)
+
+A comprehensive framework providing 67 skills + 17 agents + 45 commands + language-specific rules. Automates repetitive development patterns with slash commands like `/tdd`, `/plan`, `/code-review`, and `/build-fix`.
+
+### 5. [Anthropic Official Skills](https://github.com/anthropics/skills)
+
+The official agent skills repository provided directly by Anthropic. Enables specialist tasks such as PDF parsing, Word/Excel/PowerPoint document manipulation, and MCP server creation.
+
+### 6. [Agency Agents](https://github.com/msitarzewski/agency-agents)
+
+A library of 164 business specialist agent personas. Provides specialist perspectives in business contexts beyond technical roles — UX architects, data engineers, security auditors, QA managers, and more.
+
+### 7. [gstack](https://github.com/garrytan/gstack)
+
+A sprint-process harness by Garry Tan with 27 skills. Provides browser-based QA testing (`/qa`), code review with scope-drift detection (`/review`), security auditing (`/cso`), and a full Plan→Review→QA→Ship deployment workflow. Includes a compiled Playwright browser daemon for real-browser testing.
+
+### 8. [VibeProxy](https://github.com/automazeio/vibeproxy)
+
+OAuth-based API proxy that uses existing AI subscriptions (ChatGPT Plus, Gemini, Claude) to access GPT/Gemini/Claude models without separate API keys. Supports both Anthropic and OpenAI API formats. Integrated via optional `vibeproxy-setup.sh` during installation. Model routing maps Claude model tiers (opus/sonnet/haiku) to equivalent vendor models.
+
+---
+
 ## How Boss Works
 
 Boss is the meta-orchestrator at the core of my-claude. It never writes code — it discovers, classifies, matches, delegates, and verifies.

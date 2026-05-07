@@ -414,6 +414,10 @@ my-claude は git サブモジュール経由で 5 つの MIT ライセンスの
 | 7 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | PDF、DOCX、PPTX、XLSX、MCP ビルダー向けの 14 以上の公式スキル。 |
 | 8 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 つの AI コーディング行動ガイドライン（コーディング前に考える、シンプルさ優先、外科的変更、目標駆動実行）。 |
 
+### 8. [VibeProxy](https://github.com/automazeio/vibeproxy)
+
+既存のAIサブスクリプション（ChatGPT Plus、Gemini、Claude）のOAuthトークンを使用して、別途APIキーなしでGPT/Gemini/ClaudeモデルにアクセスできるAPIプロキシ。AnthropicとOpenAIの両方のAPI形式をサポートします。インストール時にオプションで `vibeproxy-setup.sh` を通じて統合されます。モデルルーティングがClaudeモデルティア（opus/sonnet/haiku）を同等のベンダーモデルにマッピングします。
+
 ---
 
 ## GitHub Actions

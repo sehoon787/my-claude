@@ -598,7 +598,23 @@ else
   fi
 fi
 
-# ── Generate manifest from installed files in $HOME/.claude/ ──
+# 5e. VibeProxy (optional — use GPT/Gemini models in Claude Code)
+echo "  [5e] VibeProxy (optional)..."
+if [ "${MY_CLAUDE_SKIP_VIBEPROXY:-}" = "1" ]; then
+  echo "    Skipped (MY_CLAUDE_SKIP_VIBEPROXY=1)"
+elif [ -t 0 ]; then
+  printf "    Install VibeProxy to use GPT/Gemini models in Claude Code? [y/N] "
+  read -r INSTALL_VP
+  if [ "$INSTALL_VP" = "y" ] || [ "$INSTALL_VP" = "Y" ]; then
+    bash "$SCRIPT_DIR/scripts/vibeproxy-setup.sh" --claude
+  else
+    echo "    Skipped"
+  fi
+else
+  echo "    Skipped (non-interactive)"
+fi
+
+# Generate manifest from SOURCE files (only tracks what my-claude installs, not user content)
 {
   find "$HOME/.claude/agents" -maxdepth 1 -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
   for pack in academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing; do

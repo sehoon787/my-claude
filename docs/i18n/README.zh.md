@@ -414,6 +414,10 @@ my-claude 通过 git 子模块捆绑了 5 个 MIT 授权的上游仓库的内容
 | 7 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | 14+ 个官方 skills，用于 PDF、DOCX、PPTX、XLSX 和 MCP builder。 |
 | 8 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 条 AI 编码行为准则（先思考再编码、简洁优先、精准修改、目标驱动执行）。 |
 
+### 8. [VibeProxy](https://github.com/automazeio/vibeproxy)
+
+基于OAuth的API代理，使用现有AI订阅（ChatGPT Plus、Gemini、Claude）无需单独API密钥即可访问GPT/Gemini/Claude模型。支持Anthropic和OpenAI两种API格式。安装时可通过 `vibeproxy-setup.sh` 选择性集成。模型路由将Claude模型层级（opus/sonnet/haiku）映射到对应的供应商模型。
+
 ---
 
 ## GitHub Actions
