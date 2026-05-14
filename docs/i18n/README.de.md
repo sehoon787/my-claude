@@ -367,11 +367,17 @@ Obsidian-kompatibler persistenter Speicher. Jedes Projekt pflegt ein `.briefing/
 ├── agents/
 │   ├── agent-log.jsonl              ← Subagent execution telemetry
 │   └── YYYY-MM-DD-summary.md        ← Daily agent usage breakdown
-└── persona/
-    ├── profile.md                   ← Agent affinity stats (auto-updated)
-    ├── suggestions.jsonl            ← Routing suggestions (auto-generated)
-    ├── rules/                       ← Accepted routing preferences
-    └── skills/                      ← Accepted persona skills
+├── persona/
+│   ├── profile.md                   ← Agent affinity stats (auto-updated)
+│   ├── suggestions.jsonl            ← Routing suggestions (auto-generated)
+│   ├── rules/                       ← Accepted routing preferences
+│   └── skills/                      ← Accepted persona skills
+├── archives/                        ← Abgeschlossene/inaktive Notizen (30+ Tage)
+│   ├── sessions/
+│   ├── decisions/
+│   └── learnings/
+└── wiki/                            ← Konzeptseiten (automatisch vorgeschlagen)
+    └── _schema.md
 ```
 
 ### Sub-Vaults
@@ -385,6 +391,18 @@ Obsidian-kompatibler persistenter Speicher. Jedes Projekt pflegt ein `.briefing/
 | `references/` | **Web-Recherche-URLs.** `auto-links.md` — automatisch gesammelt bei WebSearch/WebFetch-Aufrufen. |
 | `agents/` | **Agenten-Telemetrie.** `agent-log.jsonl` — Protokoll pro Aufruf. `YYYY-MM-DD-summary.md` — tägliche Nutzungsübersicht. |
 | `persona/` | **Arbeitsstil-Profil.** `profile.md` — Tool-Affinitätsstatistiken. `suggestions.jsonl` — Routing-Vorschläge. `rules/`, `skills/` — akzeptierte Präferenzen. |
+| `archives/` | **Abgeschlossene/inaktive Notizen.** Notizen älter als 30 Tage sind Archivierungskandidaten. PARA-Archives-Konzept. Flache Struktur — das `type:`-Feld im Frontmatter identifiziert die ursprüngliche Kategorie. |
+| `wiki/` | **Konzept-Wiki-Seiten.** Schlüsselwörter, die 3+ Mal vorkommen, werden automatisch vorgeschlagen. LLM-wiki-Konzept. Format wird über `_schema.md` definiert. |
+
+### Wissensmanagement (v2)
+
+BriefingVault v2 integriert drei Wissensmanagement-Methoden:
+
+| Methode | Konzept | Anwendung in BriefingVault |
+|---------|---------|---------------------------|
+| **PARA** (Tiago Forte) | Ordnen nach Umsetzbarkeit: Projects, Areas, Resources, Archives | sessions/ = Projects, decisions/ = Areas, references/ = Resources, archives/ = Archives |
+| **Zettelkasten** (Luhmann) | Atomare Notizen mit eindeutigen IDs und expliziten Verknüpfungen | learnings/-Dateien: `YYYYMMDDHHMMSS`-IDs, `related:` mindestens 2 Links erforderlich |
+| **LLM-wiki** (Karpathy) | KI-gepflegte Konzeptseiten aus Quellnotizen | wiki/-Seiten: automatisch vorgeschlagen bei 3+ wiederholten Schlüsselwörtern |
 
 ### Sitzungsspezifische Diffs
 

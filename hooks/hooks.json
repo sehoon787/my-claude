@@ -47,6 +47,12 @@
             "command": "node -e \"const fs=require('fs');const path=require('path');try{const briefingIdx='.briefing/INDEX.md';if(!fs.existsSync(briefingIdx)){process.exit(0)}const sf='.briefing/state.json';function rs(){try{return JSON.parse(fs.readFileSync(sf,'utf8'))}catch(e){return{}}}function ws(u){var s=rs();Object.assign(s,u);fs.writeFileSync(sf,JSON.stringify(s,null,2))}var st=rs();var counter=(parseInt(st.workCounter,10)||0)+1;ws({workCounter:counter});const today=new Date().toISOString().slice(0,10);let todayCount=0;for(const sub of['decisions','learnings']){const d='.briefing/'+sub;if(fs.existsSync(d)){todayCount+=fs.readdirSync(d).filter(f=>{try{return fs.statSync(d+'/'+f).mtime.toISOString().slice(0,10)===today}catch(e){return false}}).length}}var prev=parseInt(rs().prevEntryCount,10)||0;ws({prevEntryCount:todayCount});if(counter>=10&&todayCount===0){process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'PostToolUse',additionalContext:'[BriefingVault] WARNING: '+counter+' file edits this session, 0 decisions/learnings written to .briefing/. Write at least one entry to .briefing/decisions/ or .briefing/learnings/ to document your work.'}})+'\\n')}else if(counter>=3&&todayCount===0){process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'PostToolUse',additionalContext:'[BriefingVault] REQUIRED: You have made '+counter+' file edits this session and written no decisions/learnings to .briefing/. Write at least one decision or learning NOW before continuing. See rules/common/knowledge-vault.md.'}})+'\\n')}process.exit(0)}catch(e){process.exit(0)}\"",
             "timeout": 5000,
             "description": "BriefingVault enforcer: warns at 3 edits, blocks at 10 edits if no decisions/learnings written today"
+          },
+          {
+            "type": "command",
+            "command": "echo '{}' | node \"$HOME/.claude/hooks/session-sync.js\" edit",
+            "timeout": 5000,
+            "description": "BriefingVault v2: track edit counters and refresh auto scaffolds"
           }
         ]
       },
@@ -58,6 +64,12 @@
             "command": "node -e \"const fs=require('fs');try{if(!fs.existsSync('.briefing/INDEX.md')){process.exit(0)}const j=JSON.parse(require('fs').readFileSync(0,'utf8'));const url=j.tool_input&&(j.tool_input.url||j.tool_input.query||'');if(!url){process.exit(0)}const f='.briefing/references/auto-links.md';fs.mkdirSync('.briefing/references',{recursive:true});var existing='';if(fs.existsSync(f)){existing=fs.readFileSync(f,'utf8')}var line='- '+new Date().toISOString().slice(0,10)+' '+url;if(existing.indexOf(url)===-1){fs.appendFileSync(f,line+'\\n')}}catch(e){process.exit(0)}\"",
             "timeout": 5000,
             "description": "BriefingVault: auto-collect web search/fetch URLs to references/auto-links.md"
+          },
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/session-sync.js\" search",
+            "timeout": 5000,
+            "description": "BriefingVault v2: track search events and refresh auto scaffolds"
           }
         ]
       }
@@ -74,6 +86,12 @@
             "type": "command",
             "command": "node -e \"console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'SubagentStop',additionalContext:'VERIFICATION REQUIRED: Subagent finished. (1) Read changed files yourself, (2) Run tests/diagnostics to verify, (3) Only then mark task complete. Agent execution auto-logged to .briefing/agents/agent-log.jsonl.'}}))\"",
             "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "echo '{}' | node \"$HOME/.claude/hooks/session-sync.js\" subagent",
+            "timeout": 5000,
+            "description": "BriefingVault v2: track subagent events"
           }
         ]
       }
@@ -114,6 +132,12 @@
             "command": "node \"$HOME/.claude/hooks/stop-session-enforcement.js\"",
             "timeout": 5000,
             "description": "BriefingVault: guards /boss-briefing execution, blocks if no vault sync or session summary"
+          },
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/session-end.js\"",
+            "timeout": 30000,
+            "description": "BriefingVault v2: auto-create session/learning/decision scaffolds and suggest archives/wiki"
           }
         ]
       }
@@ -132,6 +156,12 @@
             "command": "node -e \"const fs=require('fs');try{if(!fs.existsSync('.briefing/INDEX.md')){process.exit(0)}const sf='.briefing/state.json';function rs(){try{return JSON.parse(fs.readFileSync(sf,'utf8'))}catch(e){return{}}}function ws(u){var s=rs();Object.assign(s,u);fs.writeFileSync(sf,JSON.stringify(s,null,2))}var st=rs();var mc=(parseInt(st.sessionMessageCount,10)||0)+1;ws({sessionMessageCount:mc});if(mc<3){process.exit(0)}var lw=st.lastVaultWarning||'';if(lw&&(Date.now()-new Date(lw).getTime())<300000){process.exit(0)}const today=new Date().toISOString().slice(0,10);var wc=parseInt(rs().workCounter,10)||0;let hasAgent=false;try{const lp='.briefing/agents/agent-log.jsonl';if(fs.existsSync(lp)){hasAgent=fs.statSync(lp).mtime.toISOString().slice(0,10)===today}}catch(e){}let sessionCount=0;const sd='.briefing/sessions';if(fs.existsSync(sd)){sessionCount=fs.readdirSync(sd).filter(f=>{if(f.indexOf('-auto')!==-1)return false;try{return fs.statSync(sd+'/'+f).mtime.toISOString().slice(0,10)===today}catch(e){return false}}).length}let dlCount=0;for(const sub of['decisions','learnings']){const d='.briefing/'+sub;if(fs.existsSync(d)){dlCount+=fs.readdirSync(d).filter(f=>{if(f.indexOf('-auto')!==-1)return false;try{return fs.statSync(d+'/'+f).mtime.toISOString().slice(0,10)===today}catch(e){return false}}).length}}const total=sessionCount+dlCount;if(total>0&&sessionCount>0){var st2=rs();var lastSync=st2.lastVaultSync||'';var syncToday=lastSync&&lastSync.slice(0,10)===today;if(mc>=5&&!syncToday){ws({lastVaultWarning:new Date().toISOString()});process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'UserPromptSubmit',additionalContext:'[BriefingVault] Tip: run /boss-briefing to sync vault, update profile, and detect workflow patterns.'}})+'\\n')}process.exit(0)}if(total>0&&sessionCount===0){ws({lastVaultWarning:new Date().toISOString()});process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'UserPromptSubmit',additionalContext:'[BriefingVault] You have written '+dlCount+' decisions/learnings but no session summary yet. Write .briefing/sessions/'+today+'-<topic>.md to document this conversation.'}})+'\\n');process.exit(0)}ws({lastVaultWarning:new Date().toISOString()});if(mc>=6){process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'UserPromptSubmit',additionalContext:'[BriefingVault] WARNING: '+mc+' messages exchanged, '+wc+' file edits, but 0 vault entries written today. Write a session summary, decision, or learning to .briefing/ to document your work.'}})+'\\n')}else{process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'UserPromptSubmit',additionalContext:'[BriefingVault] REQUIRED: '+mc+' messages exchanged this session with '+wc+' file edits. Write at least one entry to .briefing/sessions/, .briefing/decisions/, or .briefing/learnings/ NOW. Template: ---\\ndate: '+today+'\\ntype: session\\ntags: [relevant]\\n---\\n# Session: <topic>\\n\\n## Summary\\n(what was discussed/decided/learned)'}})+'\\n')}var st2=rs();var lastSync=st2.lastVaultSync||'';var syncToday=lastSync&&lastSync.slice(0,10)===today;if(mc>=5&&!syncToday){process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'UserPromptSubmit',additionalContext:'[BriefingVault] Tip: run /boss-briefing to sync vault, update profile, and detect workflow patterns.'}})+'\\n')}process.exit(0)}catch(e){process.exit(0)}\"",
             "timeout": 5000,
             "description": "BriefingVault enforcer: warns at 3+ messages if no vault entries written today, suggests /boss-briefing after 5+, 5min cooldown on warnings"
+          },
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/session-sync.js\" prompt",
+            "timeout": 5000,
+            "description": "BriefingVault v2: track prompts and refresh auto scaffolds"
           }
         ]
       }

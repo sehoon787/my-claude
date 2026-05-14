@@ -367,11 +367,17 @@ ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
 ├── agents/
 │   ├── agent-log.jsonl              ← Subagent execution telemetry
 │   └── YYYY-MM-DD-summary.md        ← Daily agent usage breakdown
-└── persona/
-    ├── profile.md                   ← Agent affinity stats (auto-updated)
-    ├── suggestions.jsonl            ← Routing suggestions (auto-generated)
-    ├── rules/                       ← Accepted routing preferences
-    └── skills/                      ← Accepted persona skills
+├── persona/
+│   ├── profile.md                   ← Agent affinity stats (auto-updated)
+│   ├── suggestions.jsonl            ← Routing suggestions (auto-generated)
+│   ├── rules/                       ← Accepted routing preferences
+│   └── skills/                      ← Accepted persona skills
+├── archives/                        ← 已完成/不活跃的笔记 (30天+)
+│   ├── sessions/
+│   ├── decisions/
+│   └── learnings/
+└── wiki/                            ← 概念页面 (自动建议)
+    └── _schema.md
 ```
 
 ### 子 Vault
@@ -385,6 +391,18 @@ ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
 | `references/` | **网络调研 URL。** `auto-links.md` — 从 WebSearch/WebFetch 调用自动收集。 |
 | `agents/` | **Agent 遥测。** `agent-log.jsonl` — 每次调用日志。`YYYY-MM-DD-summary.md` — 每日使用汇总。 |
 | `persona/` | **用户工作风格档案。** `profile.md` — 工具偏好统计。`suggestions.jsonl` — 路由建议。`rules/`、`skills/` — 已接受的偏好。 |
+| `archives/` | **已完成/不活跃的笔记。** 超过 30 天的笔记为存档候选。PARA 方法中的 Archives 概念。扁平结构，通过 frontmatter 中的 `type:` 字段识别原始分类。 |
+| `wiki/` | **概念 Wiki 页面。** 出现 3 次以上的关键词会触发自动建议。采用 LLM-wiki 概念，`_schema.md` 定义格式规范。 |
+
+### 知识管理 (v2)
+
+BriefingVault v2 融合了三种知识管理方法论：
+
+| 方法论 | 概念 | 在 BriefingVault 中的应用 |
+|--------|------|--------------------------|
+| **PARA** (Tiago Forte) | 按可执行性分类：Projects、Areas、Resources、Archives | sessions/ = Projects，decisions/ = Areas，references/ = Resources，archives/ = Archives |
+| **Zettelkasten** (Luhmann) | 具有唯一 ID 和显式链接的原子笔记 | learnings/ 文件：`YYYYMMDDHHMMSS` ID，`related:` 至少需要 2 个链接 |
+| **LLM-wiki** (Karpathy) | 由 AI 从源笔记维护的概念页面 | wiki/ 页面：关键词出现 3 次以上时自动建议 |
 
 ### 会话专属差异
 

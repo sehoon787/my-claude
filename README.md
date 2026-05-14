@@ -400,6 +400,9 @@ Obsidian-compatible persistent memory. Every project maintains a `.briefing/` di
 │   └── YYYY-MM-DD-auto-session.md   ← Auto-generated scaffold (agents, files)
 ├── references/
 │   └── auto-links.md                ← Auto-collected URLs from web searches
+├── archives/                         ← PARA: completed/inactive notes (flat)
+├── wiki/                             ← LLM-wiki: concept pages
+│   └── _schema.md
 ├── agents/
 │   ├── agent-log.jsonl              ← Subagent execution telemetry
 │   └── YYYY-MM-DD-summary.md        ← Daily agent usage breakdown
@@ -421,6 +424,23 @@ Obsidian-compatible persistent memory. Every project maintains a `.briefing/` di
 | `references/` | **Web research URLs.** `auto-links.md` — auto-collected from WebSearch/WebFetch calls. |
 | `agents/` | **Agent telemetry.** `agent-log.jsonl` — per-call log with enriched fields `{ts, agent_type, phase, seq, task_hint}`. `YYYY-MM-DD-summary.md` — daily usage breakdown. |
 | `persona/` | **User work style profile.** `profile.md` — tool affinity stats. `suggestions.jsonl` — routing recommendations. Workflow sequence patterns in `rules/workflow-*.md`. Run /boss-briefing to analyze. |
+| `archives/` | PARA Archives — completed sessions (30+ days), superseded decisions, inactive learnings |
+| `wiki/` | LLM-wiki concept pages — distilled knowledge from multiple sessions |
+
+### Knowledge Management (v2)
+
+BriefingVault v2 integrates three knowledge management methodologies:
+
+| Methodology | Applied As |
+|------------|-----------|
+| **PARA** (Tiago Forte) | Directory structure: sessions=Projects, decisions=Areas, references=Resources, archives=Archives |
+| **Zettelkasten** (Luhmann) | Atomic notes in `learnings/`, unique IDs (`YYYYMMDDHHMMSS`), enforced `[[wiki-links]]` |
+| **LLM-wiki** (Karpathy) | Concept pages in `wiki/` — auto-suggested when keywords appear 3+ times |
+
+Claude Code session-end hooks automatically:
+- Suggest archiving notes older than 30 days
+- Propose wiki pages for frequently mentioned concepts
+- Generate unique Zettelkasten IDs for new notes
 
 ### Session-Specific Diffs
 

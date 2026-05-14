@@ -377,11 +377,17 @@ Mémoire persistante compatible Obsidian. Chaque projet maintient un répertoire
 ├── agents/
 │   ├── agent-log.jsonl              ← Télémétrie d'exécution des sous-agents
 │   └── YYYY-MM-DD-summary.md        ← Récapitulatif quotidien d'utilisation des agents
-└── persona/
-    ├── profile.md                   ← Statistiques d'affinité d'agents (mis à jour auto)
-    ├── suggestions.jsonl            ← Suggestions de routage (auto-générées)
-    ├── rules/                       ← Préférences de routage acceptées
-    └── skills/                      ← Skills persona acceptés
+├── persona/
+│   ├── profile.md                   ← Statistiques d'affinité d'agents (mis à jour auto)
+│   ├── suggestions.jsonl            ← Suggestions de routage (auto-générées)
+│   ├── rules/                       ← Préférences de routage acceptées
+│   └── skills/                      ← Skills persona acceptés
+├── archives/                        ← Notes terminées/inactives (30+ jours)
+│   ├── sessions/
+│   ├── decisions/
+│   └── learnings/
+└── wiki/                            ← Pages de concepts (suggestion automatique)
+    └── _schema.md
 ```
 
 ### Sous-Vaults
@@ -395,6 +401,18 @@ Mémoire persistante compatible Obsidian. Chaque projet maintient un répertoire
 | `references/` | **URLs de recherche web.** `auto-links.md` — collectées automatiquement lors des appels WebSearch/WebFetch. |
 | `agents/` | **Télémétrie des agents.** `agent-log.jsonl` — log par appel. `YYYY-MM-DD-summary.md` — récapitulatif quotidien d'utilisation. |
 | `persona/` | **Profil de style de travail.** `profile.md` — statistiques d'affinité d'outils. `suggestions.jsonl` — recommandations de routage. `rules/`, `skills/` — préférences acceptées. |
+| `archives/` | **Notes terminées/inactives.** Les notes de plus de 30 jours sont candidates à l'archivage. Concept Archives de PARA. Structure plate — le champ `type:` du frontmatter identifie la catégorie d'origine. |
+| `wiki/` | **Pages wiki de concepts.** Les mots-clés apparaissant 3 fois ou plus déclenchent une suggestion automatique. Concept LLM-wiki. Format défini via `_schema.md`. |
+
+### Gestion des connaissances (v2)
+
+BriefingVault v2 intègre trois méthodologies de gestion des connaissances :
+
+| Méthodologie | Concept | Application dans BriefingVault |
+|--------------|---------|-------------------------------|
+| **PARA** (Tiago Forte) | Organiser par capacité d'action : Projects, Areas, Resources, Archives | sessions/ = Projects, decisions/ = Areas, references/ = Resources, archives/ = Archives |
+| **Zettelkasten** (Luhmann) | Notes atomiques avec identifiants uniques et liens explicites | fichiers learnings/ : IDs `YYYYMMDDHHMMSS`, champ `related:` avec 2+ liens obligatoires |
+| **LLM-wiki** (Karpathy) | Pages de concepts maintenues par l'IA à partir des notes sources | pages wiki/ : suggestion automatique pour les mots-clés répétés 3+ fois |
 
 ### Diffs spécifiques à la session
 
