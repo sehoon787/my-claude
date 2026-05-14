@@ -395,15 +395,19 @@ if [ "$SKIP_SUPERPOWERS" = "0" ]; then
         rm -f "$target"
       fi
     done
-    find "$UPSTREAM_DIR/agents" -maxdepth 1 -name '*.md' | while read -r agent_src; do
-      agent_base=$(basename "$agent_src")
-      if [ -f "$HOME/.claude/agents/$agent_base" ]; then
-        echo "  [superpowers] Skipping $agent_base (higher-tier version already installed)"
-      else
-        cp "$agent_src" "$HOME/.claude/agents/"
-      fi
-    done
-    cp -r "$UPSTREAM_DIR"/skills/* "$HOME/.claude/skills/"
+    if [ -d "$UPSTREAM_DIR/agents" ]; then
+      find "$UPSTREAM_DIR/agents" -maxdepth 1 -name '*.md' | while read -r agent_src; do
+        agent_base=$(basename "$agent_src")
+        if [ -f "$HOME/.claude/agents/$agent_base" ]; then
+          echo "  [superpowers] Skipping $agent_base (higher-tier version already installed)"
+        else
+          cp "$agent_src" "$HOME/.claude/agents/"
+        fi
+      done
+    fi
+    if [ -d "$UPSTREAM_DIR/skills" ]; then
+      cp -r "$UPSTREAM_DIR"/skills/* "$HOME/.claude/skills/" 2>/dev/null || true
+    fi
   else
     echo "  WARNING: superpowers install failed"
   fi
