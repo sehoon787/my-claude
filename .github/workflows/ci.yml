@@ -65,9 +65,9 @@ jobs:
                 [ "$COUNT" -ge 20 ] || (echo "FAIL: $sub has $COUNT skills" && exit 1)
                 echo "OK: $sub — $COUNT skills" ;;
               superpowers)
-                COUNT=$(find "$subdir/agents" -name '*.md' | wc -l)
-                [ "$COUNT" -ge 1 ] || (echo "FAIL: $sub has $COUNT agents" && exit 1)
-                echo "OK: $sub — $COUNT agents" ;;
+                COUNT=$(find "$subdir/skills" -name '*.md' | wc -l)
+                [ "$COUNT" -ge 1 ] || (echo "FAIL: $sub has $COUNT skills" && exit 1)
+                echo "OK: $sub — $COUNT skills" ;;
             esac
           done
       - name: Lint YAML workflows
