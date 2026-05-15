@@ -2,6 +2,12 @@ name: Auto Tag & Release
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: auto-tag
+  cancel-in-progress: false
+
 permissions:
   contents: write
   pull-requests: write
