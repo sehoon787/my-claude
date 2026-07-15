@@ -175,34 +175,6 @@ mkdir -p "$HOME/.claude/agent-packs/academic" "$HOME/.claude/agent-packs/design"
          "$HOME/.claude/agent-packs/support" "$HOME/.claude/agent-packs/testing"
 mkdir -p "$HOME/.claude/docs/nexus"
 
-# Clean up old flattened agents from previous installs
-echo "  Cleaning up old flattened agents..."
-for prefix in marketing- sales- paid- academic- design- support- testing- specialized- product- project-management- game- godot- unity- unreal- roblox- xr- phase- scenario-; do
-  find "$HOME/.claude/agents" -maxdepth 1 -name "${prefix}*.md" -delete 2>/dev/null || true
-done
-# Also remove known non-agent files that may have leaked into agents/
-for name in nexus-strategy EXECUTIVE-BRIEF QUICKSTART handoff-templates agent-activation-prompts; do
-  find "$HOME/.claude/agents" -maxdepth 1 -name "${name}*.md" -delete 2>/dev/null || true
-done
-
-# Clean up old-named agent-pack directories from previous installs
-echo "  Cleaning up old naming variants..."
-EXPECTED_PACKS=(academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing)
-if [ -d "$HOME/.claude/agent-packs" ]; then
-  for dir in "$HOME/.claude/agent-packs"/*/; do
-    [ ! -d "$dir" ] && continue
-    dirname=$(basename "$dir")
-    is_expected=0
-    for ep in "${EXPECTED_PACKS[@]}"; do
-      [ "$dirname" = "$ep" ] && is_expected=1 && break
-    done
-    if [ "$is_expected" = "0" ]; then
-      echo "  Removing stale agent-pack: $dirname"
-      rm -rf "$dir"
-    fi
-  done
-fi
-
 # ── 1a. Self-owned files (always installed) ──
 echo "  [core] Installing self-owned files..."
 
