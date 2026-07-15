@@ -43,10 +43,52 @@ If `/plugin marketplace update my-claude` isn't available in your Claude Code ve
 remove and re-add the marketplace instead: `/plugin marketplace remove my-claude` then
 `/plugin marketplace add sehoon787/my-claude`.
 
-**Troubleshooting: "I just reinstalled but it still looks like the old version"** (e.g.
-Boss or another agent still shows an old model like `claude-opus-4-6`) — this is almost
-always a stale marketplace cache, not a broken install. Run the update sequence above,
-then re-verify with `cat ~/.claude/.my-claude-version` and `grep model ~/.claude/agents/boss.md`.
+### Two agent sources — why marketplace update alone may not fix a stale model
+
+Agents can reach Claude Code through **two independent paths**, and they update
+differently:
+
+1. **Plugin cache** (`~/.claude/plugins/...`) — populated by `/plugin install`, refreshed
+   by `/plugin marketplace update`. These agents are namespaced (`my-claude:boss`).
+2. **User-level agents** (`~/.claude/agents/*.md`, bare names like `boss`) — written
+   **only by `install.sh`** (Step 1b), and mirrored on the daily SessionStart
+   auto-update for repo-based installs. `/plugin marketplace update` and
+   `/plugin install` **never touch these files.**
+
+The configure step sets the default agent to the bare name `boss`
+(`settings.agent = 'boss'`), so when a user-level `~/.claude/agents/boss.md` exists it
+**takes precedence over** the plugin's `my-claude:boss`. That means a stale
+`~/.claude/agents/boss.md` left over from an earlier `install.sh` run keeps serving the
+old model no matter how many times you update the marketplace and reinstall the plugin.
+
+**Troubleshooting: "I just reinstalled but Boss still shows an old model"** (e.g.
+`claude-opus-4-6`):
+
+```bash
+# 1. Diagnose — check which model the user-level file serves
+grep '^model:' ~/.claude/agents/boss.md   # if this shows the OLD model, it is shadowing the plugin
+
+# 2a. Repo-based install (Step 1b / you have the repo cloned): re-run install.sh.
+#     It overwrites every user-level agent it owns, including boss.md.
+cd <your my-claude repo> && git pull && bash install.sh
+#     (Or just start a new Claude Code session — the SessionStart auto-update now
+#      refreshes core user-level agents from your local repo once per day.)
+
+# 2b. Pure plugin install (never ran install.sh, no local repo): the stale file is a
+#     leftover. Remove it so the plugin's namespaced my-claude:boss takes over, then
+#     refresh the marketplace cache.
+rm ~/.claude/agents/boss.md
+#     followed by:  /plugin marketplace update my-claude
+#                   /plugin uninstall my-claude@my-claude
+#                   /plugin install my-claude@my-claude
+
+# 3. Re-verify
+grep '^model:' ~/.claude/agents/boss.md   # should now show the current model, or be absent (plugin-only)
+cat ~/.claude/.my-claude-version
+```
+
+A stale marketplace cache (path 1) is only the cause when you have **no** user-level
+`~/.claude/agents/boss.md`; if that file exists, path 2 above is the real fix.
 
 This installs:
 - 56 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 26 engineering

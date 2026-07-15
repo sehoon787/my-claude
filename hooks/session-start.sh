@@ -303,6 +303,17 @@ if [ "$_vc_today" != "$_vc_last" ]; then
           done
         fi
 
+        # Refresh user-level core agents (mirrors install.sh) so model/prompt
+        # changes to boss and other core agents land without a full reinstall.
+        # Without this, ~/.claude/agents/*.md keeps a stale model (e.g. an old
+        # boss model) even after the marketplace/repo has moved on.
+        if [ -d "$_repo_dir/agents/core" ]; then
+          find "$_repo_dir/agents/core" -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec cp {} "$HOME/.claude/agents/" \; 2>/dev/null || true
+        fi
+        if [ -d "$_repo_dir/agents/omo" ]; then
+          cp "$_repo_dir/agents/omo/"*.md "$HOME/.claude/agents/" 2>/dev/null || true
+        fi
+
         # Update HUD wrapper from upstream (if available)
         _hud_src="$_repo_dir/upstream/omc/scripts/lib/hud-wrapper-template.txt"
         if [ -f "$_hud_src" ]; then
@@ -339,7 +350,7 @@ if [ "$_vc_today" != "$_vc_last" ]; then
           echo "$_new_sha" > "$HOME/.claude/.my-claude-installed-sha"
         fi
 
-        _update_msg="[UpdateCheck] my-claude hooks auto-updated (${_vc_installed_sha} → ${_new_sha:-unknown})"
+        _update_msg="[UpdateCheck] my-claude hooks+agents auto-updated (${_vc_installed_sha} → ${_new_sha:-unknown})"
       else
         _vc_current=$(cat "$HOME/.claude/.my-claude-version" 2>/dev/null || echo "unknown")
         _update_msg="[UpdateCheck] my-claude update available (installed: v${_vc_current}). Run: cd <my-claude-repo> && bash install.sh"
