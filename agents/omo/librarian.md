@@ -1,7 +1,7 @@
 ---
 name: librarian
 description: Open-source codebase understanding agent — finds documentation and source code with GitHub permalink evidence (Sonnet)
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 disallowedTools: Write, Edit, NotebookEdit
 ---
 

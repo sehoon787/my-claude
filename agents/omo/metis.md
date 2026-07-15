@@ -1,7 +1,7 @@
 ---
 name: metis
 description: Pre-planning intent analyst that classifies requests, detects ambiguity, and prevents AI-slop before planning begins (Opus)
-model: claude-opus-4-6
+model: claude-opus-4-8
 disallowedTools: Write, Edit
 ---
 

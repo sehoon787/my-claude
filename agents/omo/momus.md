@@ -1,7 +1,7 @@
 ---
 name: momus
 description: Practical work plan reviewer that verifies executability and catches blocking issues only — read-only (Opus)
-model: claude-opus-4-6
+model: claude-opus-4-8
 disallowedTools: Write, Edit, NotebookEdit
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: multimodal-looker
 description: Visual analysis agent that interprets media files — images, PDFs, diagrams, screenshots — read-only
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 disallowedTools: Write, Edit, NotebookEdit, Bash
 ---
 

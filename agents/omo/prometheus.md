@@ -1,7 +1,7 @@
 ---
 name: prometheus
 description: Strategic planning consultant — interview-driven plan generation with intent analysis and review loops (Opus)
-model: claude-opus-4-6
+model: claude-opus-4-8
 disallowedTools: NotebookEdit
 ---
 

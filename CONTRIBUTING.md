@@ -42,7 +42,7 @@ Agents are Markdown files with YAML frontmatter.
 ---
 name: my-agent-name
 description: Use when a task needs X in order to Y.
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 ---
 ```
 
@@ -58,8 +58,8 @@ model: claude-sonnet-4-6
 
 | Model | Use For |
 |-------|---------|
-| `claude-opus-4-6` | Deep reasoning, architecture, complex analysis |
-| `claude-sonnet-4-6` | Standard development work, orchestration |
+| `claude-opus-4-8` | Deep reasoning, architecture, complex analysis |
+| `claude-sonnet-5` | Standard development work, orchestration |
 | `claude-haiku-4-5` | Fast lookups, lightweight agents, frequent invocation |
 
 ### File Location
