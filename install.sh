@@ -633,6 +633,7 @@ fi
   find "$HOME/.claude/docs/nexus" -name '*.md' -exec sh -c 'echo "docs/nexus/$(basename "$1")"' _ {} \; 2>/dev/null || true
 } | sort -u > "$HOME/.claude/.my-claude-manifest"
 echo "  Manifest saved ($(wc -l < "$HOME/.claude/.my-claude-manifest") entries)"
+echo "$SCRIPT_DIR" > "$HOME/.claude/.my-claude-repo-path" 2>/dev/null || true
 
 # ── 6. Verification ──
 echo ""

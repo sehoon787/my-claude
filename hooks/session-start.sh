@@ -275,12 +275,12 @@ if [ "$_vc_today" != "$_vc_last" ]; then
     if [ -n "$_vc_remote_sha" ] && [ "${_vc_installed_sha}" != "${_vc_remote_sha}" ]; then
       # Auto-update hooks/scripts only (lightweight, <5s)
       _repo_dir=""
-      if [ -f "$HOME/.claude/.my-claude-manifest" ]; then
-        _repo_dir=$(head -1 "$HOME/.claude/.my-claude-manifest" 2>/dev/null | grep -o '/.*my-claude' | head -1)
+      if [ -f "$HOME/.claude/.my-claude-repo-path" ]; then
+        _repo_dir=$(cat "$HOME/.claude/.my-claude-repo-path" 2>/dev/null)
       fi
       # Fallback: check common locations
       if [ -z "$_repo_dir" ] || [ ! -d "$_repo_dir" ]; then
-        for _candidate in "$HOME/Desktop/proj/my-claude" "$HOME/projects/my-claude" "$HOME/my-claude"; do
+        for _candidate in "$HOME/Desktop/proj/my-claude" "$HOME/Desktop/proj/ai-proj/my-claude" "$HOME/Desktop/proj"/*/my-claude "$HOME/projects/my-claude" "$HOME/my-claude"; do
           if [ -d "$_candidate/.git" ] && [ -f "$_candidate/hooks/hooks.json" ]; then
             _repo_dir="$_candidate"
             break
