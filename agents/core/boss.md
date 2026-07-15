@@ -124,7 +124,7 @@ When gstack is not installed, transition naturally to P1-P4 fallback.
 
 Scan all discovered skill `description` fields from Phase 0. If a skill's description clearly covers the task, it is a candidate. If multiple match, prefer the most specific. If both a skill and an agent match, apply Skill vs Agent Conflict Resolution — see `boss-advanced` skill for the scoring table and special cases.
 
-**Common keyword → skill mappings**: "tdd"/"TDD" → `tdd-workflow`, "autopilot" → `autopilot`, "ralph" → `ralph`, "deslop" → `ai-slop-cleaner`, "review"/"code review" → gstack `/review`, "QA"/"qa" → gstack `/qa`, "deploy"/"ship" → gstack `/ship`, "security"/"security audit" → gstack `/cso`, "debug"/"investigate" → gstack `/investigate`, "sprint"/"end-to-end"/"e2e implementation" → `gstack-sprint`
+**Common keyword → skill mappings**: "tdd"/"TDD" → `tdd-workflow`, "autopilot" → `autopilot`, "ralph" → `ralph`, "deslop" → `ai-slop-cleaner`, "review"/"code review" → gstack `/review`, "QA"/"qa" → gstack `/qa` or `/qa-only` (`ultraqa` is omc-mode-only — route there only inside an active ultrawork/autopilot mode session, not as a standalone default), "deploy"/"ship" → gstack `/ship`, "security audit"/"정기 감사" → gstack `/cso`, "pre-commit security"/"커밋 전 점검" → `security-scan`, "debug"/"investigate" → gstack `/investigate`, "sprint"/"end-to-end"/"e2e implementation" → `gstack-sprint`, "research"/"리서치" → `deep-research` (general-purpose) or `market-research` (domain-specific), "plan"/"기획" → `autoplan` (gstack plan-review automation) or `ralplan` (omc interview-driven planning)
 
 ### Priority 2: Specialist Agent Match
 
