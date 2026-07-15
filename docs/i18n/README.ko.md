@@ -117,7 +117,7 @@ Boss는 my-claude의 핵심에 있는 메타 오케스트레이터입니다. 코
 
 ### 통합 생태계
 - 플러그인 하나로 **202 에이전트, 185 스킬, 64 룰**을 한 환경에 구성
-- 8개 오픈소스 도구(OMC, omo, ECC, Anthropic Skills, Agency, Karpathy, gstack, VibeProxy)를 하나로 통합
+- 7개 오픈소스 도구(OMC, omo, ECC, Anthropic Skills, Agency, Karpathy, gstack)를 하나로 통합
 
 ---
 
@@ -478,10 +478,6 @@ my-claude는 git 서브모듈을 통해 MIT 라이선스 업스트림 저장소 
 | 6 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 브레인스토밍, TDD, 병렬 에이전트, 코드 리뷰를 다루는 스킬 14개 + 에이전트 1개. |
 | 7 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | PDF, DOCX, PPTX, XLSX, MCP builder를 위한 공식 스킬 14개 이상. |
 | 8 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | AI 코딩 행동 가이드라인 4가지 (코딩 전 생각하기, 단순함 우선, 외과적 변경, 목표 중심 실행). |
-
-### 8. [VibeProxy](https://github.com/automazeio/vibeproxy)
-
-기존 AI 구독(ChatGPT Plus, Gemini, Claude)의 OAuth 토큰을 사용하여 별도 API 키 없이 GPT/Gemini/Claude 모델에 접근하는 API 프록시. Anthropic과 OpenAI API 형식을 모두 지원합니다. 설치 시 선택적으로 `vibeproxy-setup.sh`를 통해 통합됩니다. 모델 라우팅이 Claude 모델 티어(opus/sonnet/haiku)를 동급 벤더 모델로 매핑합니다.
 
 ---
 

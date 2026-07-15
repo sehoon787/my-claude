@@ -88,10 +88,6 @@ A library of 164 business specialist agent personas. Provides specialist perspec
 
 A sprint-process harness by Garry Tan with 27 skills. Provides browser-based QA testing (`/qa`), code review with scope-drift detection (`/review`), security auditing (`/cso`), and a full Plan→Review→QA→Ship deployment workflow. Includes a compiled Playwright browser daemon for real-browser testing.
 
-### 8. [VibeProxy](https://github.com/automazeio/vibeproxy)
-
-OAuth-based API proxy that uses existing AI subscriptions (ChatGPT Plus, Gemini, Claude) to access GPT/Gemini/Claude models without separate API keys. Supports both Anthropic and OpenAI API formats. Integrated via optional `vibeproxy-setup.sh` during installation. Model routing maps Claude model tiers (opus/sonnet/haiku) to equivalent vendor models.
-
 ---
 
 ## How Boss Works

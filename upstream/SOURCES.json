@@ -35,19 +35,5 @@
   "superpowers": {
     "repo": "https://github.com/obra/superpowers",
     "method": "submodule"
-  },
-  "vibeproxy": {
-    "repo": "https://github.com/automazeio/vibeproxy",
-    "branch": "main",
-    "syncedSha": "initial",
-    "syncedTag": "v1.8.142",
-    "syncedAt": "2026-05-07T00:00:00Z",
-    "compareUrl": "https://github.com/automazeio/vibeproxy/compare/initial...HEAD",
-    "files": {
-      "scripts": 2
-    },
-    "strategy": "vendor-scripts",
-    "syncFrequency": "monthly",
-    "note": "model-router.mjs + vibeproxy-setup.sh only"
   }
 }
