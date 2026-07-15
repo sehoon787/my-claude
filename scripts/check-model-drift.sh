@@ -18,8 +18,9 @@
 set -uo pipefail
 
 # Previous-generation Claude model IDs. Extend this alternation as the
-# current generation moves forward. Overridable via env (the CI workflow sets
-# it at the top of smoke.yml so the list lives in one obvious place).
+# current generation moves forward. Overridable via env for local testing;
+# CI (smoke.yml) calls this script with no override, so this default is the
+# single source of truth — do not duplicate it elsewhere.
 OLD_MODEL_PATTERN="${OLD_MODEL_PATTERN:-claude-opus-4-[0-7]|claude-sonnet-4-[0-9]|claude-haiku-4-[0-4]|claude-(2|3)([.-]|$)}"
 
 # Path fragments to exclude from the scan (grep -E, matched against file path).
