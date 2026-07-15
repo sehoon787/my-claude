@@ -248,7 +248,14 @@ if [ "$SKIP_ECC" = "0" ]; then
         fi
       done
       cp -r "$UPSTREAM_DIR"/skills/* "$HOME/.claude/skills/"
-      for src in "$UPSTREAM_DIR"/skills/*/; do [ -d "$src" ] && echo "skills/$(basename "$src")/SKILL.md" >> "$MANIFEST_TMP"; done
+      # continuous-learning v1 is self-declared deprecated in favor of v2; exclude from install
+      rm -rf "$HOME/.claude/skills/continuous-learning"
+      for src in "$UPSTREAM_DIR"/skills/*/; do
+        [ -d "$src" ] || continue
+        name=$(basename "$src")
+        [ "$name" = "continuous-learning" ] && continue
+        echo "skills/$name/SKILL.md" >> "$MANIFEST_TMP"
+      done
       if [ -d "$UPSTREAM_DIR/rules" ]; then
         cp -r "$UPSTREAM_DIR"/rules/* "$HOME/.claude/rules/"
         find "$UPSTREAM_DIR/rules" -name '*.md' | while IFS= read -r f; do echo "rules/${f#"$UPSTREAM_DIR"/rules/}"; done >> "$MANIFEST_TMP"
