@@ -23,6 +23,31 @@ node -e "const fs=require('fs'),p=require('path'),os=require('os'),f=p.join(os.h
 
 The plugin records its version automatically. To check: `cat ~/.claude/.my-claude-version`
 
+### Updating or reinstalling the plugin
+
+`/plugin marketplace add` clones and caches the marketplace repo locally. Re-running
+`/plugin install my-claude@my-claude` alone reinstalls from that **cached** copy — it
+does not by itself fetch new commits. If you update or reinstall later (new PC, newer
+release, or just picking up recent changes), refresh the cache first:
+
+```bash
+# 1. Refresh the cached marketplace repo to the latest commit
+/plugin marketplace update my-claude
+
+# 2. Reinstall so the refreshed cache is actually applied
+/plugin uninstall my-claude@my-claude
+/plugin install my-claude@my-claude
+```
+
+If `/plugin marketplace update my-claude` isn't available in your Claude Code version,
+remove and re-add the marketplace instead: `/plugin marketplace remove my-claude` then
+`/plugin marketplace add sehoon787/my-claude`.
+
+**Troubleshooting: "I just reinstalled but it still looks like the old version"** (e.g.
+Boss or another agent still shows an old model like `claude-opus-4-6`) — this is almost
+always a stale marketplace cache, not a broken install. Run the update sequence above,
+then re-verify with `cat ~/.claude/.my-claude-version` and `grep model ~/.claude/agents/boss.md`.
+
 This installs:
 - 56 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 26 engineering
 - 136 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
@@ -141,6 +166,7 @@ echo "gstack:           $(find ~/.claude/skills -path '*/gstack/SKILL.md' 2>/dev
 echo "omc:              $(command -v omc >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "Version:          $(cat ~/.claude/.my-claude-version 2>/dev/null || echo 'unknown')"
+echo "Boss model:       $(grep '^model:' ~/.claude/agents/boss.md 2>/dev/null || echo 'MISSING')"
 ```
 
 Expected:
@@ -154,6 +180,8 @@ Expected:
 - gstack: OK
 - omc: OK
 - omo: OK
-- Version: matches latest release
+- Version: matches latest release (compare against the latest GitHub release tag — if it
+  doesn't match after a reinstall, see "Updating or reinstalling the plugin" above)
+- Boss model: matches the current model in the published `agents/core/boss.md` on GitHub
 
 Setup complete. Boss orchestrator is ready.
