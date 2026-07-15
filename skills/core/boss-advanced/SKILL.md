@@ -68,6 +68,14 @@ Example: "refactor and code review"
 
 ---
 
+## Worktree Isolation for Parallel File-Modifying Delegations
+
+When 2+ agents run in parallel (`run_in_background=true`) and may touch the same repo's files, pass `isolation: "worktree"` on each `Agent()` call — each agent works in an isolated git worktree, avoiding overwrite races. Skip isolation for read-only agents (Explore, code-reviewer) or agents scoped to separate repos/directories.
+
+Merge procedure: after each agent completes, review its worktree diff, then merge (cherry-pick, rebase, or manual patch apply) into the main working tree before the next dependent step.
+
+---
+
 ## Priority 3b: Sub-Orchestrator Delegation (Complex workflows)
 
 When 5+ agents needed OR complex dependency chains OR iterative planning required:

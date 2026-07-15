@@ -242,6 +242,7 @@ Use 6-section delegation prompt for Method B and D (full template in `boss-advan
 1. Independent tasks -> parallel: spawn with `run_in_background=true`
 2. Dependent tasks -> sequential: wait for results before spawning next
 3. Verify each background result before proceeding
+4. 2+ agents modifying files in the same repo in parallel -> default to `isolation: "worktree"`, merge results after completion. Read-only or separate-repo work doesn't need isolation.
 
 **Task Tracking:** TaskCreate at start, TaskUpdate after verification.
 
