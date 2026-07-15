@@ -113,6 +113,15 @@ fi
 CLONE_TMPDIR=$(mktemp -d)
 trap 'rm -rf "$CLONE_TMPDIR"' EXIT
 
+# Provenance-tracked manifest: every path this script actually copies gets
+# appended here (relative to $HOME/.claude). The manifest is NEVER built by
+# scanning destination directories — that would also capture user-owned files
+# that happen to live alongside managed ones (e.g. a custom agent dropped
+# directly into ~/.claude/agents/), which would then be deleted on a later
+# update. See MANIFEST_TMP write-outs throughout this script.
+MANIFEST_TMP="$CLONE_TMPDIR/new-manifest.txt"
+: > "$MANIFEST_TMP"
+
 UPSTREAM_DIR=""
 init_upstream() {
   local name="$1" url="$2"
@@ -141,7 +150,12 @@ echo "[1/6] Installing plugin files..."
 #   ~/.claude/docs/nexus/  → strategy docs (reference material, never parsed as agents)
 mkdir -p "$HOME/.claude/agents" "$HOME/.claude/skills" "$HOME/.claude/rules"
 
-# Manifest-based cleanup: remove only files from previous my-claude install
+# Manifest-based cleanup: remove only files from previous my-claude install.
+# Diff behavior: every file recorded in the OLD manifest is deleted here; the
+# copy steps below then recreate whichever of those paths are still part of
+# the current install. Anything the old manifest listed but this run does not
+# recreate stays deleted (stale). Files never listed in the manifest (i.e.
+# user-owned) are never touched, because we never delete-by-directory-scan.
 if [ -f "$HOME/.claude/.my-claude-manifest" ]; then
   while IFS= read -r rel_path; do
     target="$HOME/.claude/$rel_path"
@@ -149,6 +163,8 @@ if [ -f "$HOME/.claude/.my-claude-manifest" ]; then
   done < "$HOME/.claude/.my-claude-manifest"
   # Remove empty agent-pack directories (only if empty after cleanup)
   find "$HOME/.claude/agent-packs" -type d -empty -delete 2>/dev/null || true
+else
+  echo "  No previous manifest found — skipping stale-file cleanup (safe default for first-time or legacy installs)"
 fi
 
 mkdir -p "$HOME/.claude/agent-packs/academic" "$HOME/.claude/agent-packs/design" \
@@ -192,7 +208,9 @@ echo "  [core] Installing self-owned files..."
 
 # agents — core tier (always loaded)
 find "$SCRIPT_DIR/agents/core" -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec cp {} "$HOME/.claude/agents/" \;
+find "$SCRIPT_DIR/agents/core" -maxdepth 1 -name '*.md' ! -name 'agent-teams-reference.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \; >> "$MANIFEST_TMP"
 cp "$SCRIPT_DIR"/agents/omo/*.md "$HOME/.claude/agents/"
+for f in "$SCRIPT_DIR"/agents/omo/*.md; do [ -f "$f" ] && echo "agents/$(basename "$f")" >> "$MANIFEST_TMP"; done
 
 # skills/core
 if [ -d "$SCRIPT_DIR/skills/core" ]; then
@@ -203,12 +221,14 @@ if [ -d "$SCRIPT_DIR/skills/core" ]; then
     if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
       rm -f "$target"
     fi
+    echo "skills/$name/SKILL.md" >> "$MANIFEST_TMP"
   done
   cp -r "$SCRIPT_DIR"/skills/core/* "$HOME/.claude/skills/"
 fi
 
 # docs/nexus — reference material (never parsed as agents)
 cp "$SCRIPT_DIR/agents/core/agent-teams-reference.md" "$HOME/.claude/docs/nexus/"
+echo "docs/nexus/agent-teams-reference.md" >> "$MANIFEST_TMP"
 
 # ── 1b. agency-agents upstream ──
 if [ "$SKIP_AGENCY" = "0" ]; then
@@ -216,19 +236,25 @@ if [ "$SKIP_AGENCY" = "0" ]; then
   if init_upstream "agency-agents" "https://github.com/msitarzewski/agency-agents"; then
     # engineering/*.md → core agents (always loaded)
     find "$UPSTREAM_DIR/engineering" -maxdepth 1 -name '*.md' -exec cp {} "$HOME/.claude/agents/" \;
+    find "$UPSTREAM_DIR/engineering" -maxdepth 1 -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \; >> "$MANIFEST_TMP"
 
     # domain agent-packs
     for pack in academic design marketing paid-media product project-management sales spatial-computing specialized support testing; do
-      [ -d "$UPSTREAM_DIR/$pack" ] && cp -r "$UPSTREAM_DIR/$pack/"*.md "$HOME/.claude/agent-packs/$pack/" 2>/dev/null || true
+      if [ -d "$UPSTREAM_DIR/$pack" ]; then
+        cp -r "$UPSTREAM_DIR/$pack/"*.md "$HOME/.claude/agent-packs/$pack/" 2>/dev/null || true
+        for f in "$UPSTREAM_DIR/$pack/"*.md; do [ -f "$f" ] && echo "agent-packs/$pack/$(basename "$f")" >> "$MANIFEST_TMP"; done
+      fi
     done
     # game-development may contain subdirectories; use find to flatten
     if [ -d "$UPSTREAM_DIR/game-development" ]; then
       find "$UPSTREAM_DIR/game-development" -name '*.md' -exec cp {} "$HOME/.claude/agent-packs/game-development/" \;
+      find "$UPSTREAM_DIR/game-development" -name '*.md' -exec sh -c 'echo "agent-packs/game-development/$(basename "$1")"' _ {} \; >> "$MANIFEST_TMP"
     fi
 
     # strategy/*.md → docs/nexus (never parsed as agents)
     if [ -d "$UPSTREAM_DIR/strategy" ]; then
       find "$UPSTREAM_DIR/strategy" -name '*.md' -exec cp {} "$HOME/.claude/docs/nexus/" \;
+      find "$UPSTREAM_DIR/strategy" -name '*.md' -exec sh -c 'echo "docs/nexus/$(basename "$1")"' _ {} \; >> "$MANIFEST_TMP"
     fi
   else
     echo "  WARNING: agency-agents install failed"
@@ -250,8 +276,10 @@ if [ "$SKIP_ECC" = "0" ]; then
         fi
       done
       cp -r "$UPSTREAM_DIR"/skills/* "$HOME/.claude/skills/"
+      for src in "$UPSTREAM_DIR"/skills/*/; do [ -d "$src" ] && echo "skills/$(basename "$src")/SKILL.md" >> "$MANIFEST_TMP"; done
       if [ -d "$UPSTREAM_DIR/rules" ]; then
         cp -r "$UPSTREAM_DIR"/rules/* "$HOME/.claude/rules/"
+        find "$UPSTREAM_DIR/rules" -name '*.md' | while IFS= read -r f; do echo "rules/${f#"$UPSTREAM_DIR"/rules/}"; done >> "$MANIFEST_TMP"
       fi
     else
       echo "  WARNING: ECC install failed"
@@ -262,6 +290,7 @@ fi
 # ── 1c-post. Self-owned rules (override ECC rules if same name) ──
 if [ -d "$SCRIPT_DIR/rules" ]; then
   cp -r "$SCRIPT_DIR"/rules/* "$HOME/.claude/rules/" 2>/dev/null || true
+  find "$SCRIPT_DIR/rules" -name '*.md' | while IFS= read -r f; do echo "rules/${f#"$SCRIPT_DIR"/rules/}"; done >> "$MANIFEST_TMP"
 fi
 
 # ── 1d. OMC upstream ──
@@ -288,7 +317,9 @@ if [ "$SKIP_OMC" = "0" ]; then
         fi
       done
       find "$UPSTREAM_DIR/agents" -maxdepth 1 -name '*.md' -exec cp {} "$HOME/.claude/agents/" \;
+      find "$UPSTREAM_DIR/agents" -maxdepth 1 -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \; >> "$MANIFEST_TMP"
       cp -r "$UPSTREAM_DIR"/skills/* "$HOME/.claude/skills/"
+      for src in "$UPSTREAM_DIR"/skills/*/; do [ -d "$src" ] && echo "skills/$(basename "$src")/SKILL.md" >> "$MANIFEST_TMP"; done
     fi
   else
     echo "  WARNING: OMC install failed"
@@ -323,6 +354,7 @@ if [ "$SKIP_GSTACK" = "0" ]; then
     # Root gstack meta-skill
     mkdir -p "$HOME/.claude/skills/gstack"
     cp "$UPSTREAM_DIR/SKILL.md" "$HOME/.claude/skills/gstack/" 2>/dev/null || true
+    echo "skills/gstack/SKILL.md" >> "$MANIFEST_TMP"
 
     # Individual skill subdirectories
     for skill_dir in "$UPSTREAM_DIR"/*/; do
@@ -330,6 +362,7 @@ if [ "$SKIP_GSTACK" = "0" ]; then
       skill_name=$(basename "$skill_dir")
       mkdir -p "$HOME/.claude/skills/$skill_name"
       cp "$skill_dir/SKILL.md" "$HOME/.claude/skills/$skill_name/"
+      echo "skills/$skill_name/SKILL.md" >> "$MANIFEST_TMP"
     done
   else
     echo "  WARNING: gstack skills install failed"
@@ -402,11 +435,13 @@ if [ "$SKIP_SUPERPOWERS" = "0" ]; then
           echo "  [superpowers] Skipping $agent_base (higher-tier version already installed)"
         else
           cp "$agent_src" "$HOME/.claude/agents/"
+          echo "agents/$agent_base" >> "$MANIFEST_TMP"
         fi
       done
     fi
     if [ -d "$UPSTREAM_DIR/skills" ]; then
       cp -r "$UPSTREAM_DIR"/skills/* "$HOME/.claude/skills/" 2>/dev/null || true
+      for src in "$UPSTREAM_DIR"/skills/*/; do [ -d "$src" ] && echo "skills/$(basename "$src")/SKILL.md" >> "$MANIFEST_TMP"; done
     fi
   else
     echo "  WARNING: superpowers install failed"
@@ -426,6 +461,7 @@ if [ -n "$WITH_PACKS" ]; then
         [ -f "$HOME/.claude/agents/$basename" ] && continue
         ln -sf "$agent" "$HOME/.claude/agents/$basename"
         echo "  Symlinked: $basename (from $pack)"
+        echo "agents/$basename" >> "$MANIFEST_TMP"
       done
     else
       echo "  WARNING: Pack '$pack' not found in $HOME/.claude/agent-packs/"
@@ -478,6 +514,9 @@ cp "$SCRIPT_DIR/hooks/persona-rule.js"             "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/briefing-runtime.js"         "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/session-sync.js"             "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/session-end.js"              "$HOME/.claude/hooks/"
+for f in hooks.json session-start.sh stop-profile-update.js stop-session-enforcement.js persona-rule.js briefing-runtime.js session-sync.js session-end.js; do
+  echo "hooks/$f" >> "$MANIFEST_TMP"
+done
 mkdir -p "$HOME/.claude/scripts"
 cp "$SCRIPT_DIR/scripts/validate-hooks.js" "$HOME/.claude/scripts/"
 echo "  Hooks installed"
@@ -605,17 +644,16 @@ else
   fi
 fi
 
-# Generate manifest from SOURCE files (only tracks what my-claude installs, not user content)
-{
-  find "$HOME/.claude/agents" -maxdepth 1 -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \;
-  for pack in academic design game-development marketing paid-media product project-management sales spatial-computing specialized support testing; do
-    find "$HOME/.claude/agent-packs/$pack" -name '*.md' -exec sh -c 'echo "agent-packs/'"$pack"'/$(basename "$1")"' _ {} \; 2>/dev/null || true
-  done
-  find "$HOME/.claude/skills" -maxdepth 2 -name 'SKILL.md' -exec sh -c 'echo "skills/$(basename "$(dirname "$1")")/SKILL.md"' _ {} \;
-  find "$HOME/.claude/rules" -name '*.md' | while read -r f; do echo "rules/${f#$HOME/.claude/rules/}"; done 2>/dev/null || true
-  find "$HOME/.claude/hooks" -type f | while read -r f; do echo "hooks/$(basename "$f")"; done
-  find "$HOME/.claude/docs/nexus" -name '*.md' -exec sh -c 'echo "docs/nexus/$(basename "$1")"' _ {} \; 2>/dev/null || true
-} | sort -u > "$HOME/.claude/.my-claude-manifest"
+# Write the manifest from provenance-tracked entries (MANIFEST_TMP), not from
+# scanning $HOME/.claude directories. A directory scan would also pick up
+# user-owned files that happen to sit in the same folders (a custom agent
+# dropped into ~/.claude/agents/, a hand-written skill, etc.), and those would
+# then be deleted on a future update by the manifest-diff cleanup above.
+# The final "still exists on disk" filter drops any entry that dedup steps
+# removed after it was recorded (e.g. OMC-plugin-duplicate agents/skills).
+sort -u "$MANIFEST_TMP" | while IFS= read -r rel_path; do
+  [ -e "$HOME/.claude/$rel_path" ] && printf '%s\n' "$rel_path"
+done > "$HOME/.claude/.my-claude-manifest"
 echo "  Manifest saved ($(wc -l < "$HOME/.claude/.my-claude-manifest") entries)"
 echo "$SCRIPT_DIR" > "$HOME/.claude/.my-claude-repo-path" 2>/dev/null || true
 

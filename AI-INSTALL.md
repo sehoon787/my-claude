@@ -27,7 +27,7 @@ This installs:
 - 56 core agents in ~/.claude/agents/ (always loaded): Boss, 9 OMO, 19 OMC, 26 engineering
 - 136 domain agent-packs in ~/.claude/agent-packs/ (on-demand via symlink)
 - 200+ skills (180+ ECC + 36 OMC + 3 Core + 40 gstack)
-  Note: gstack skills are installed separately in Step 2.
+  Note: gstack skills are installed separately — run Step 1b (`install.sh`) for those.
 - 89 rules
 - 7 behavioral hooks (SessionStart, PreToolUse, PostToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop)
   - The SessionStart hook auto-creates a `.briefing/` vault per-project (with `INDEX.md`) on first session. This provides persistent project context, decision logs, and session summaries.
@@ -40,6 +40,10 @@ This installs:
 `install.sh` is the single source of truth for installation. It handles everything:
 agents, skills, rules, hooks, MCP servers, companion tools (omc, omo, ast-grep),
 gstack, Anthropic skills, Karpathy guidelines, and manifest generation.
+
+Prerequisites: `bash` (Git Bash or WSL on Windows — this is a bash script, not
+PowerShell), `node`/`npm` (v20+), and `git`. `install.sh` checks for these and
+exits with an error naming whichever is missing before doing anything else.
 
 ```bash
 # Resolve the latest release tag so manual installs match published releases.
@@ -111,9 +115,17 @@ If you only need the skills (not agents, rules, hooks, or MCP configs), use:
 npx skills add sehoon787/my-claude -y -g
 ```
 
-This installs skills to `~/.agents/skills/` and auto-symlinks to `~/.claude/skills/`. Cross-platform: works with Claude Code, Codex, Cursor, and other tools that support the skills.sh standard. For the full experience (agents, hooks, rules, MCP), complete Steps 1–2 above instead.
+This installs skills to `~/.agents/skills/` and auto-symlinks to `~/.claude/skills/`. Cross-platform: works with Claude Code, Codex, Cursor, and other tools that support the skills.sh standard. For the full experience (agents, hooks, rules, MCP), complete Step 1 (or 1b) above instead.
 
-Note: `npx skills add` does NOT install gstack. gstack requires Step 2 (`install.sh`) for full installation, including the superseded-skill cleanup and auto-upgrade config.
+Note: `npx skills add` does NOT install gstack. gstack requires Step 1b (`install.sh`) for full installation, including the superseded-skill cleanup and auto-upgrade config.
+
+## Update behavior
+
+Re-running `install.sh` (Step 1b) later, e.g. on a new PC or to pick up a newer release, is safe:
+- Only files that `install.sh` itself previously installed are removed and replaced. This is tracked in `~/.claude/.my-claude-manifest`, which records the exact set of paths this script wrote — never a scan of `~/.claude/agents`, `~/.claude/skills`, `~/.claude/rules`, or `~/.claude/hooks`.
+- Any file you added yourself directly in those directories (a custom agent, a hand-written skill, a personal rule) is never listed in the manifest and is therefore never touched, on this run or any future one.
+- Files that were part of a previous my-claude install but are no longer part of the current one (e.g. an upstream agent was renamed or removed) are deleted as stale.
+- If `~/.claude/.my-claude-manifest` does not exist (very first install, or a pre-manifest legacy install), stale-file cleanup is skipped entirely and a warning is printed — nothing is deleted in that case.
 
 ## Verify
 
