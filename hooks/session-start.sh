@@ -54,14 +54,9 @@ fi
 if [ "$_needs_regen" -eq 1 ]; then
   _ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-  # Detect project type from current directory
+  # Agent packs were removed with the agency-agents submodule (2026-07-27);
+  # keep the registry field for schema compatibility, always empty.
   _recommended_packs="[]"
-  if [ -f "package.json" ] || [ -f "tsconfig.json" ] || [ -f "Cargo.toml" ] || \
-     [ -f "requirements.txt" ] || [ -f "pyproject.toml" ] || [ -f "go.mod" ] || [ -f "Gemfile" ]; then
-    _recommended_packs='["engineering"]'
-  elif ls *.unity 2>/dev/null | grep -q . || [ -d "Assets" ]; then
-    _recommended_packs='["game-development"]'
-  fi
 
   _agents_json="["
   _first_agent=1
