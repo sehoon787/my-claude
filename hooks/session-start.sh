@@ -151,7 +151,9 @@ if [ ! -f "$_kv_dir/INDEX.md" ]; then
   if [ -z "$_session_id" ]; then
     _session_id="$(date +%Y-%m-%d):$(pwd)"
   fi
-  node -e "var f='$_kv_dir/state.json',s={};try{s=JSON.parse(require('fs').readFileSync(f,'utf8'))}catch(e){}Object.assign(s,{date:'$(date +%Y-%m-%d)',sessionStartHead:'$_session_id',sessionMessageCount:0,workCounter:0,profileUpdateCounter:0,prevEntryCount:0,subagentSeq:0});require('fs').writeFileSync(f,JSON.stringify(s,null,2))" 2>/dev/null || true
+  # _session_id falls back to a path, which may contain quotes — pass it through
+  # the environment instead of interpolating it into the JS source string.
+  KV_SESSION_ID="$_session_id" node -e "var f='$_kv_dir/state.json',s={};try{s=JSON.parse(require('fs').readFileSync(f,'utf8'))}catch(e){}Object.assign(s,{date:'$(date +%Y-%m-%d)',sessionStartHead:process.env.KV_SESSION_ID,sessionMessageCount:0,workCounter:0,profileUpdateCounter:0,prevEntryCount:0,subagentSeq:0});require('fs').writeFileSync(f,JSON.stringify(s,null,2))" 2>/dev/null || true
   _proj_name=$(basename "$(pwd)")
   cat > "$_kv_dir/INDEX.md" <<KVEOF
 ---
@@ -217,7 +219,7 @@ else
   if [ -z "$_session_id" ]; then
     _session_id="$(date +%Y-%m-%d):$(pwd)"
   fi
-  node -e "var f='$_kv_dir/state.json',s={};try{s=JSON.parse(require('fs').readFileSync(f,'utf8'))}catch(e){}Object.assign(s,{date:'$_today',sessionStartHead:'$_session_id',sessionMessageCount:0,workCounter:0,profileUpdateCounter:0,prevEntryCount:0,subagentSeq:0});require('fs').writeFileSync(f,JSON.stringify(s,null,2))" 2>/dev/null || true
+  KV_SESSION_ID="$_session_id" node -e "var f='$_kv_dir/state.json',s={};try{s=JSON.parse(require('fs').readFileSync(f,'utf8'))}catch(e){}Object.assign(s,{date:'$_today',sessionStartHead:process.env.KV_SESSION_ID,sessionMessageCount:0,workCounter:0,profileUpdateCounter:0,prevEntryCount:0,subagentSeq:0});require('fs').writeFileSync(f,JSON.stringify(s,null,2))" 2>/dev/null || true
   # Add language field to INDEX.md if missing
   if ! grep -q '^language:' "$_kv_dir/INDEX.md" 2>/dev/null; then
     sed -i '/^type:/a language: en' "$_kv_dir/INDEX.md" 2>/dev/null || true

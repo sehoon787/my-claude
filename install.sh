@@ -582,7 +582,13 @@ npm i -g @ast-grep/cli@0.42.0 @code-yeongyu/comment-checker@0.7.0 2>/dev/null ||
 
 # 5d. Karpathy guidelines (append to CLAUDE.md)
 echo "  [5d] Karpathy guidelines..."
-if grep -q 'karpathy' "$HOME/.claude/CLAUDE.md" 2>/dev/null; then
+# Idempotency is keyed on a marker WE write, not on the fetched text: the
+# upstream guidelines never contain the word "karpathy", so the old content
+# sniff never matched and every install re-appended the whole block (10 copies
+# accumulated in the wild). The checksum below pins the download for supply
+# chain safety and plays no part in this guard.
+KARPATHY_MARKER="<!-- my-claude:karpathy-guidelines -->"
+if grep -qF "$KARPATHY_MARKER" "$HOME/.claude/CLAUDE.md" 2>/dev/null; then
   echo "    Karpathy guidelines already present"
 else
   # Pinned to a specific commit SHA + checksum to prevent supply chain attacks.
@@ -595,7 +601,13 @@ else
   if curl -sL "$KARPATHY_URL" -o "$_tmp_karpathy" 2>/dev/null; then
     ACTUAL_CHECKSUM=$(sha256 "$_tmp_karpathy")
     if [ "$ACTUAL_CHECKSUM" = "$KARPATHY_EXPECTED_CHECKSUM" ]; then
-      cat "$_tmp_karpathy" >> "$HOME/.claude/CLAUDE.md"
+      # The upstream file has no trailing newline; the leading blank line and
+      # the trailing newline keep repeated sections from running together.
+      {
+        printf '\n%s\n\n' "$KARPATHY_MARKER"
+        cat "$_tmp_karpathy"
+        printf '\n'
+      } >> "$HOME/.claude/CLAUDE.md"
       echo "    Karpathy guidelines appended"
     else
       echo "    WARNING: Checksum mismatch, skipping Karpathy guidelines"

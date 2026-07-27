@@ -6,16 +6,25 @@
   },
   "everything-claude-code": {
     "repo": "https://github.com/affaan-m/everything-claude-code",
+    "path": "upstream/ecc",
     "method": "submodule + plugin-add",
-    "note": "ECC plugin install attempted first, submodule as fallback"
+    "note": "ECC plugin install attempted first, submodule as fallback",
+    "pinned_sha": "40927950c49f6e742d341e20ff7b9b7e1e7bfff5",
+    "pinned_date": "2026-07-27",
+    "license": "MIT"
   },
   "oh-my-claudecode": {
     "repo": "https://github.com/Yeachan-Heo/oh-my-claudecode",
+    "path": "upstream/omc",
     "method": "submodule + npm-cli",
-    "package": "oh-my-claude-sisyphus"
+    "package": "oh-my-claude-sisyphus",
+    "pinned_sha": "590fb988931d34a12604be0ca4215c818079018e",
+    "pinned_date": "2026-07-27",
+    "license": "MIT"
   },
   "gstack": {
     "repo": "https://github.com/garrytan/gstack",
+    "path": "upstream/gstack",
     "method": "submodule + setup",
     "supersedes": ["benchmark", "canary-watch", "safety-guard", "browser-qa",
                    "verification-loop", "security-review", "design-system"],
@@ -30,10 +39,17 @@
     "strategy": "runtime",
     "installCommand": "git clone --depth 1",
     "updateCommand": "git pull --ff-only",
-    "syncFrequency": "on-install"
+    "syncFrequency": "on-install",
+    "pinned_sha": "7c9df1c568a9ea745508f679a329332b2c338063",
+    "pinned_date": "2026-07-27",
+    "license": "MIT"
   },
   "superpowers": {
     "repo": "https://github.com/obra/superpowers",
-    "method": "submodule"
+    "path": "upstream/superpowers",
+    "method": "submodule",
+    "pinned_sha": "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9",
+    "pinned_date": "2026-07-27",
+    "license": "MIT"
   }
 }
