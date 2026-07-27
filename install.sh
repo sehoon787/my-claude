@@ -16,6 +16,10 @@ sha256() {
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# Which upstream skills/rules this installer copies — see scripts/skill-allowlists.sh
+# shellcheck source=scripts/skill-allowlists.sh
+. "$SCRIPT_DIR/scripts/skill-allowlists.sh"
+
 echo "=== my-claude installer ==="
 echo ""
 
@@ -194,28 +198,28 @@ if [ "$SKIP_ECC" = "0" ]; then
   echo "  [ecc] Installing everything-claude-code..."
   if ! claude plugin add affaan-m/everything-claude-code 2>/dev/null; then
     if init_upstream "ecc" "https://github.com/affaan-m/everything-claude-code"; then
-      # Pre-clean: resolve file/symlink vs directory conflicts
-      for src in "$UPSTREAM_DIR"/skills/*/; do
-        [ ! -d "$src" ] && continue
-        name=$(basename "$src")
+      # Allowlisted skills only — $ECC_SKILL_ALLOWLIST (scripts/skill-allowlists.sh)
+      for name in $ECC_SKILL_ALLOWLIST; do
+        src="$UPSTREAM_DIR/skills/$name"
+        [ -d "$src" ] || continue
         target="$HOME/.claude/skills/$name"
+        # Pre-clean: resolve file/symlink vs directory conflicts
         if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
           rm -f "$target"
         fi
-      done
-      cp -r "$UPSTREAM_DIR"/skills/* "$HOME/.claude/skills/"
-      # continuous-learning v1 is self-declared deprecated in favor of v2; exclude from install
-      rm -rf "$HOME/.claude/skills/continuous-learning"
-      for src in "$UPSTREAM_DIR"/skills/*/; do
-        [ -d "$src" ] || continue
-        name=$(basename "$src")
-        [ "$name" = "continuous-learning" ] && continue
+        cp -r "$src" "$HOME/.claude/skills/"
         echo "skills/$name/SKILL.md" >> "$MANIFEST_TMP"
       done
-      if [ -d "$UPSTREAM_DIR/rules" ]; then
-        cp -r "$UPSTREAM_DIR"/rules/* "$HOME/.claude/rules/"
-        find "$UPSTREAM_DIR/rules" -name '*.md' | while IFS= read -r f; do echo "rules/${f#"$UPSTREAM_DIR"/rules/}"; done >> "$MANIFEST_TMP"
-      fi
+      # continuous-learning v1 is self-declared deprecated in favor of v2; never
+      # allowlisted — this also clears copies left by pre-allowlist installs.
+      rm -rf "$HOME/.claude/skills/continuous-learning"
+      # Allowlisted rule sets only — $ECC_RULES_ALLOWLIST
+      for name in $ECC_RULES_ALLOWLIST; do
+        src="$UPSTREAM_DIR/rules/$name"
+        [ -d "$src" ] || continue
+        cp -r "$src" "$HOME/.claude/rules/"
+        find "$src" -name '*.md' | while IFS= read -r f; do echo "rules/${f#"$UPSTREAM_DIR"/rules/}"; done >> "$MANIFEST_TMP"
+      done
     else
       echo "  WARNING: ECC install failed"
     fi
@@ -242,19 +246,20 @@ if [ "$SKIP_OMC" = "0" ]; then
     if [ "$_omc_plugin_active" = "1" ]; then
       echo "  [omc] Plugin detected — skipping file copy (plugin provides agents/skills)"
     else
-      # Pre-clean: resolve file/symlink vs directory conflicts for skills
-      for src in "$UPSTREAM_DIR"/skills/*/; do
-        [ ! -d "$src" ] && continue
-        name=$(basename "$src")
+      find "$UPSTREAM_DIR/agents" -maxdepth 1 -name '*.md' -exec cp {} "$HOME/.claude/agents/" \;
+      find "$UPSTREAM_DIR/agents" -maxdepth 1 -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \; >> "$MANIFEST_TMP"
+      # Allowlisted skills only — $OMC_SKILL_ALLOWLIST (scripts/skill-allowlists.sh)
+      for name in $OMC_SKILL_ALLOWLIST; do
+        src="$UPSTREAM_DIR/skills/$name"
+        [ -d "$src" ] || continue
         target="$HOME/.claude/skills/$name"
+        # Pre-clean: resolve file/symlink vs directory conflicts
         if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
           rm -f "$target"
         fi
+        cp -r "$src" "$HOME/.claude/skills/"
+        echo "skills/$name/SKILL.md" >> "$MANIFEST_TMP"
       done
-      find "$UPSTREAM_DIR/agents" -maxdepth 1 -name '*.md' -exec cp {} "$HOME/.claude/agents/" \;
-      find "$UPSTREAM_DIR/agents" -maxdepth 1 -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \; >> "$MANIFEST_TMP"
-      cp -r "$UPSTREAM_DIR"/skills/* "$HOME/.claude/skills/"
-      for src in "$UPSTREAM_DIR"/skills/*/; do [ -d "$src" ] && echo "skills/$(basename "$src")/SKILL.md" >> "$MANIFEST_TMP"; done
     fi
   else
     echo "  WARNING: OMC install failed"
@@ -277,9 +282,7 @@ if [ "$SKIP_GSTACK" = "0" ]; then
 
   if init_upstream "gstack" "https://github.com/garrytan/gstack"; then
     # Pre-clean: resolve file/symlink vs directory conflicts
-    for src in "$UPSTREAM_DIR"/*/; do
-      [ ! -d "$src" ] && continue
-      name=$(basename "$src")
+    for name in gstack $GSTACK_SKILL_ALLOWLIST; do
       target="$HOME/.claude/skills/$name"
       if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
         rm -f "$target"
@@ -291,10 +294,10 @@ if [ "$SKIP_GSTACK" = "0" ]; then
     cp "$UPSTREAM_DIR/SKILL.md" "$HOME/.claude/skills/gstack/" 2>/dev/null || true
     echo "skills/gstack/SKILL.md" >> "$MANIFEST_TMP"
 
-    # Individual skill subdirectories
-    for skill_dir in "$UPSTREAM_DIR"/*/; do
+    # Allowlisted skill subdirectories — $GSTACK_SKILL_ALLOWLIST (scripts/skill-allowlists.sh)
+    for skill_name in $GSTACK_SKILL_ALLOWLIST; do
+      skill_dir="$UPSTREAM_DIR/$skill_name"
       [ -f "$skill_dir/SKILL.md" ] || continue
-      skill_name=$(basename "$skill_dir")
       mkdir -p "$HOME/.claude/skills/$skill_name"
       cp "$skill_dir/SKILL.md" "$HOME/.claude/skills/$skill_name/"
       echo "skills/$skill_name/SKILL.md" >> "$MANIFEST_TMP"
@@ -375,8 +378,16 @@ if [ "$SKIP_SUPERPOWERS" = "0" ]; then
       done
     fi
     if [ -d "$UPSTREAM_DIR/skills" ]; then
-      cp -r "$UPSTREAM_DIR"/skills/* "$HOME/.claude/skills/" 2>/dev/null || true
-      for src in "$UPSTREAM_DIR"/skills/*/; do [ -d "$src" ] && echo "skills/$(basename "$src")/SKILL.md" >> "$MANIFEST_TMP"; done
+      # All skills except $SUPERPOWERS_SKILL_EXCLUDE (scripts/skill-allowlists.sh)
+      # shellcheck disable=SC2086  # deliberate re-split: newline list -> " a b " for case matching
+      _sp_exclude=" $(echo $SUPERPOWERS_SKILL_EXCLUDE) "
+      for src in "$UPSTREAM_DIR"/skills/*/; do
+        [ -d "$src" ] || continue
+        name=$(basename "$src")
+        case "$_sp_exclude" in *" $name "*) continue ;; esac
+        cp -r "${src%/}" "$HOME/.claude/skills/" 2>/dev/null || true
+        echo "skills/$name/SKILL.md" >> "$MANIFEST_TMP"
+      done
     fi
   else
     echo "  WARNING: superpowers install failed"

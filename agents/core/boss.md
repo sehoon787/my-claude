@@ -83,7 +83,7 @@ If the scan fails or returns empty results, proceed gracefully with whatever is 
 | High completion risk — large scope, many moving parts | `ralph`, `autopilot`, `ultrawork` |
 | Ambiguity — vague requirements | `deep-interview`, `blueprint` |
 | Safety-sensitive — auth, secrets, deployment | `security-review`, `verification-loop` |
-| Unknown root cause | `trace`, `deep-dive` |
+| Unknown root cause | gstack `/investigate` |
 | Quality concern — AI-generated code, no tests | `tdd-workflow`, `ai-slop-cleaner` |
 | Knowledge gap — new codebase, unfamiliar library | `codebase-onboarding`, `sciomc` |
 | Strategic decision — architecture tradeoffs | `ccg`, `architecture-decision-records` |
