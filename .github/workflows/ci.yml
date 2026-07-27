@@ -44,14 +44,10 @@ jobs:
           echo "OK: skills/core — $COUNT skills"
       - name: Validate upstream submodule file counts
         run: |
-          for sub in agency-agents ecc omc gstack superpowers; do
+          for sub in ecc omc gstack superpowers; do
             subdir="upstream/$sub"
             [ -d "$subdir" ] && [ -n "$(ls -A "$subdir" 2>/dev/null)" ] || { echo "SKIP: $subdir not initialized"; continue; }
             case "$sub" in
-              agency-agents)
-                COUNT=$(find "$subdir" -name '*.md' | wc -l)
-                [ "$COUNT" -ge 100 ] || (echo "FAIL: $sub has $COUNT agents" && exit 1)
-                echo "OK: $sub — $COUNT agents" ;;
               ecc)
                 COUNT=$(find "$subdir/skills" -name 'SKILL.md' | wc -l)
                 [ "$COUNT" -ge 30 ] || (echo "FAIL: $sub has $COUNT skills" && exit 1)

@@ -1,6 +1,3 @@
-[submodule "upstream/agency-agents"]
-	path = upstream/agency-agents
-	url = https://github.com/msitarzewski/agency-agents
 [submodule "upstream/ecc"]
 	path = upstream/ecc
 	url = https://github.com/affaan-m/everything-claude-code

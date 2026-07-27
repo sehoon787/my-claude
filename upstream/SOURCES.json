@@ -1,8 +1,8 @@
 {
   "agency-agents": {
-    "repo": "https://github.com/msitarzewski/agency-agents",
-    "method": "submodule",
-    "note": "engineering/ → core tier, domain categories → agent-packs"
+    "status": "removed-2026-07-27",
+    "url": "https://github.com/msitarzewski/agency-agents",
+    "note": "3 engineering agents vendored into agents/vendored/"
   },
   "everything-claude-code": {
     "repo": "https://github.com/affaan-m/everything-claude-code",

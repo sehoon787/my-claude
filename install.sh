@@ -27,33 +27,23 @@ command -v git  >/dev/null 2>&1 || { echo "ERROR: git not found"; exit 1; }
 echo "  Prerequisites OK"
 
 # ── Argument parsing ──
-WITH_PACKS=""
-SKIP_AGENCY=0
 SKIP_ECC=0
 SKIP_OMC=0
 SKIP_GSTACK=0
 SKIP_SUPERPOWERS=0
 for arg in "$@"; do
   case "$arg" in
-    --with-packs=*) WITH_PACKS="${arg#*=}" ;;
-    --skip-agency)     SKIP_AGENCY=1 ;;
     --skip-ecc)        SKIP_ECC=1 ;;
     --skip-omc)        SKIP_OMC=1 ;;
     --skip-gstack)     SKIP_GSTACK=1 ;;
     --skip-superpowers) SKIP_SUPERPOWERS=1 ;;
-    --self-only)       SKIP_AGENCY=1; SKIP_ECC=1; SKIP_OMC=1; SKIP_GSTACK=1; SKIP_SUPERPOWERS=1 ;;
+    --self-only)       SKIP_ECC=1; SKIP_OMC=1; SKIP_GSTACK=1; SKIP_SUPERPOWERS=1 ;;
     -h|--help)
       cat <<'EOF'
 Usage:
   bash install.sh
-  bash install.sh --with-packs=<pack1,pack2,...>
 
 Options:
-  --with-packs=<packs>    Comma-separated list of agent packs to symlink into ~/.claude/agents/
-                          Available: academic, design, game-development, marketing, paid-media,
-                                     product, project-management, sales, spatial-computing,
-                                     specialized, support, testing
-  --skip-agency           Skip agency-agents upstream install
   --skip-ecc              Skip everything-claude-code upstream install
   --skip-omc              Skip oh-my-claudecode upstream install
   --skip-gstack           Skip gstack upstream install
@@ -145,9 +135,8 @@ init_upstream() {
 # ── 1. Plugin files (agents, skills, rules) ──
 echo "[1/6] Installing plugin files..."
 # Tiered agent structure:
-#   ~/.claude/agents/      → core only (always loaded): core + omc + omo + engineering
-#   ~/.claude/agent-packs/ → domain agents (not auto-loaded, available on demand)
-#   ~/.claude/docs/nexus/  → strategy docs (reference material, never parsed as agents)
+#   ~/.claude/agents/      → core only (always loaded): core + omc + omo + vendored
+#   ~/.claude/docs/nexus/  → reference material (never parsed as agents)
 mkdir -p "$HOME/.claude/agents" "$HOME/.claude/skills" "$HOME/.claude/rules"
 
 # Manifest-based cleanup: remove only files from previous my-claude install.
@@ -167,12 +156,6 @@ else
   echo "  No previous manifest found — skipping stale-file cleanup (safe default for first-time or legacy installs)"
 fi
 
-mkdir -p "$HOME/.claude/agent-packs/academic" "$HOME/.claude/agent-packs/design" \
-         "$HOME/.claude/agent-packs/game-development" "$HOME/.claude/agent-packs/marketing" \
-         "$HOME/.claude/agent-packs/paid-media" "$HOME/.claude/agent-packs/product" \
-         "$HOME/.claude/agent-packs/project-management" "$HOME/.claude/agent-packs/sales" \
-         "$HOME/.claude/agent-packs/spatial-computing" "$HOME/.claude/agent-packs/specialized" \
-         "$HOME/.claude/agent-packs/support" "$HOME/.claude/agent-packs/testing"
 mkdir -p "$HOME/.claude/docs/nexus"
 
 # ── 1a. Self-owned files (always installed) ──
@@ -202,36 +185,9 @@ fi
 cp "$SCRIPT_DIR/agents/core/agent-teams-reference.md" "$HOME/.claude/docs/nexus/"
 echo "docs/nexus/agent-teams-reference.md" >> "$MANIFEST_TMP"
 
-# ── 1b. agency-agents upstream ──
-if [ "$SKIP_AGENCY" = "0" ]; then
-  echo "  [agency] Installing agency-agents..."
-  if init_upstream "agency-agents" "https://github.com/msitarzewski/agency-agents"; then
-    # engineering/*.md → core agents (always loaded)
-    find "$UPSTREAM_DIR/engineering" -maxdepth 1 -name '*.md' -exec cp {} "$HOME/.claude/agents/" \;
-    find "$UPSTREAM_DIR/engineering" -maxdepth 1 -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \; >> "$MANIFEST_TMP"
-
-    # domain agent-packs
-    for pack in academic design marketing paid-media product project-management sales spatial-computing specialized support testing; do
-      if [ -d "$UPSTREAM_DIR/$pack" ]; then
-        cp -r "$UPSTREAM_DIR/$pack/"*.md "$HOME/.claude/agent-packs/$pack/" 2>/dev/null || true
-        for f in "$UPSTREAM_DIR/$pack/"*.md; do [ -f "$f" ] && echo "agent-packs/$pack/$(basename "$f")" >> "$MANIFEST_TMP"; done
-      fi
-    done
-    # game-development may contain subdirectories; use find to flatten
-    if [ -d "$UPSTREAM_DIR/game-development" ]; then
-      find "$UPSTREAM_DIR/game-development" -name '*.md' -exec cp {} "$HOME/.claude/agent-packs/game-development/" \;
-      find "$UPSTREAM_DIR/game-development" -name '*.md' -exec sh -c 'echo "agent-packs/game-development/$(basename "$1")"' _ {} \; >> "$MANIFEST_TMP"
-    fi
-
-    # strategy/*.md → docs/nexus (never parsed as agents)
-    if [ -d "$UPSTREAM_DIR/strategy" ]; then
-      find "$UPSTREAM_DIR/strategy" -name '*.md' -exec cp {} "$HOME/.claude/docs/nexus/" \;
-      find "$UPSTREAM_DIR/strategy" -name '*.md' -exec sh -c 'echo "docs/nexus/$(basename "$1")"' _ {} \; >> "$MANIFEST_TMP"
-    fi
-  else
-    echo "  WARNING: agency-agents install failed"
-  fi
-fi
+# ── 1b. Vendored third-party agents (kept in-tree, always loaded) ──
+cp "$SCRIPT_DIR"/agents/vendored/*.md "$HOME/.claude/agents/"
+for f in "$SCRIPT_DIR"/agents/vendored/*.md; do [ -f "$f" ] && echo "agents/$(basename "$f")" >> "$MANIFEST_TMP"; done
 
 # ── 1c. ECC upstream ──
 if [ "$SKIP_ECC" = "0" ]; then
@@ -427,34 +383,6 @@ if [ "$SKIP_SUPERPOWERS" = "0" ]; then
   fi
 fi
 
-# ── --with-packs: symlink requested pack agents into ~/.claude/agents/ ──
-if [ -n "$WITH_PACKS" ]; then
-  IFS=',' read -ra PACKS <<< "$WITH_PACKS"
-  for pack in "${PACKS[@]}"; do
-    pack_dir="$HOME/.claude/agent-packs/$pack"
-    if [ -d "$pack_dir" ]; then
-      for agent in "$pack_dir"/*.md; do
-        [ -f "$agent" ] || continue
-        basename=$(basename "$agent")
-        # Skip if file already exists (dedup)
-        [ -f "$HOME/.claude/agents/$basename" ] && continue
-        ln -sf "$agent" "$HOME/.claude/agents/$basename"
-        echo "  Symlinked: $basename (from $pack)"
-        echo "agents/$basename" >> "$MANIFEST_TMP"
-      done
-    else
-      echo "  WARNING: Pack '$pack' not found in $HOME/.claude/agent-packs/"
-    fi
-  done
-fi
-
-# Dedup: remove agent-pack entries that duplicate core agents
-for f in "$HOME/.claude/agents"/*.md; do
-  [ ! -f "$f" ] && continue
-  name=$(basename "$f")
-  find "$HOME/.claude/agent-packs" -name "$name" -delete 2>/dev/null || true
-done
-
 # Dedup: remove agents/skills that duplicate OMC plugin-provided content
 if [ -d "$HOME/.claude/plugins/cache/omc/oh-my-claudecode" ]; then
   _omc_has_version=0
@@ -640,7 +568,6 @@ echo "$SCRIPT_DIR" > "$HOME/.claude/.my-claude-repo-path" 2>/dev/null || true
 echo ""
 echo "[6/6] Verification"
 echo "  agents (core):    $(find "$HOME/.claude/agents" -name '*.md' 2>/dev/null | wc -l | tr -d ' ') files"
-echo "  agent-packs:      $(find "$HOME/.claude/agent-packs" -name '*.md' 2>/dev/null | wc -l | tr -d ' ') files"
 echo "  skills:           $(find "$HOME/.claude/skills" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ') installed"
 echo "  rules:            $(find "$HOME/.claude/rules"  -name '*.md' 2>/dev/null | wc -l | tr -d ' ') files"
 echo "  hooks:            $(find "$HOME/.claude/hooks"  -type f      2>/dev/null | wc -l | tr -d ' ') files"

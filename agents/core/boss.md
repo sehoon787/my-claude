@@ -144,18 +144,9 @@ When multiple agents match the same request, prefer higher-tier agents:
 |------|--------|----------|----------|
 | 1 (highest) | `agents/core/` | Core orchestration | boss |
 | 2 | `agents/omo/` | Meta-orchestration | atlas, sisyphus, oracle |
-| 3 | `agents/omc/` | Operational specialists | executor, code-reviewer, architect |
-| 4 (lowest) | `agents/agency/` | Domain specialists | Content Creator, SEO Specialist |
+| 3 (lowest) | `agents/omc/` | Operational specialists | executor, code-reviewer, architect |
 
 Same-tier conflict: prefer the agent with more specific `description` match.
-
-### Agency Agent Cost Optimization
-
-For agency (tier 4) agents only:
-- **Simple advisory** (question, recommendation, short consultation) → `model="haiku"`
-- **Implementation work** (file modifications, analysis, multi-step tasks) → `model="sonnet"` (default)
-
-This reduces cost for the 172 domain specialist agents that are primarily prompt-based personas.
 
 ### Priority 3: Multi-Agent Tasks
 
