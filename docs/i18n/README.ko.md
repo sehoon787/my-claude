@@ -9,14 +9,14 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-200%2B-blue)
-![Skills](https://img.shields.io/badge/skills-200%2B-purple)
-![Rules](https://img.shields.io/badge/rules-87-orange)
+![Agents](https://img.shields.io/badge/agents-32-blue)
+![Skills](https://img.shields.io/badge/skills-139-purple)
+![Rules](https://img.shields.io/badge/rules-54-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
-![Hooks](https://img.shields.io/badge/hooks-7-red)
+![Hooks](https://img.shields.io/badge/hooks-8-red)
 
 **Claude Code를 위한 올인원 에이전트 하네스.**
-**플러그인 하나로 200개 이상의 에이전트가 준비됩니다.**
+**플러그인 하나로 엄선된 32개 에이전트가 준비됩니다.**
 
 Boss가 런타임에 모든 에이전트, 스킬, MCP 도구를 자동으로 탐색하고,<br>
 작업을 적합한 전문가에게 라우팅합니다. 설정 파일도, 보일러플레이트도 없습니다.
@@ -85,7 +85,7 @@ Boss는 my-claude의 핵심에 있는 메타 오케스트레이터입니다. 코
 │  Phase 2 · CAPABILITY MATCHING              │
 │  P0: gstack skill (if installed)            │
 │  P1: Exact skill match                      │
-│  P2: Specialist agent (200+)               │
+│  P2: Specialist agent (32)                  │
 │  P3: Multi-agent orchestration              │
 │  P4: General-purpose fallback               │
 └──────────────────────┬──────────────────────┘
@@ -116,18 +116,18 @@ Boss는 my-claude의 핵심에 있는 메타 오케스트레이터입니다. 코
 - **grep.app**: GitHub 오픈소스 코드 검색
 
 ### 통합 생태계
-- 플러그인 하나로 **202 에이전트, 185 스킬, 64 룰**을 한 환경에 구성
-- 7개 오픈소스 도구(OMC, omo, ECC, Anthropic Skills, Agency, Karpathy, gstack)를 하나로 통합
+- 플러그인 하나로 **32 에이전트, 139 스킬, 54 룰**을 한 환경에 구성
+- 6개 오픈소스 도구(OMC, omo, ECC, gstack, superpowers, Karpathy)를 하나로 통합. Anthropic 공식 문서 스킬은 `install.sh`가 별도로 추가
 
 ---
 
 ## Core + OMO 에이전트
 
-**Boss**만 my-claude 고유 에이전트입니다. 나머지 9개는 Boss가 서브 오케스트레이터 및 전문가로 사용하는 [OMO 에이전트](https://github.com/code-yeongyu/oh-my-openagent)입니다. 플러그인은 **52개 코어 에이전트** (Core 2 + OMO 9 + Engineering 23 + OMC 19 + OMO 전문가)를 `~/.claude/agents/`에 항상 로드하며, **133개 도메인 에이전트 팩**은 `~/.claude/agent-packs/`에 설치되어 필요 시 활성화할 수 있습니다. Boss는 Priority 2 능력 매칭으로 활성화된 전체 에이전트 풀에서 최적의 전문가를 선택합니다. 전체 목록은 아래 [설치 후 전체 구성 요소](#설치-후-전체-구성-요소)를 참고하세요.
+**Boss**만 my-claude 고유 에이전트입니다. 나머지 9개는 Boss가 서브 오케스트레이터 및 전문가로 사용하는 [OMO 에이전트](https://github.com/code-yeongyu/oh-my-openagent)입니다. 플러그인은 **32개 에이전트** (Boss 1 + OMO 9 + OMC 19 + 벤더링 3)를 `~/.claude/agents/`에 항상 로드합니다. 온디맨드 에이전트 팩은 더 이상 존재하지 않습니다. Boss는 Priority 2 능력 매칭으로 전체 에이전트 풀에서 최적의 전문가를 선택합니다. 전체 목록은 아래 [구성 요소](#구성-요소)를 참고하세요.
 
 | 에이전트 | 출처 | 모델 | 역할 |
 |---------|------|------|------|
-| **Boss** | my-claude | Opus | 동적 메타 오케스트레이터. 런타임에 모든 에이전트/스킬/MCP를 자동 감지하고 최적의 전문가에게 라우팅 |
+| **Boss** | my-claude | Fable | 동적 메타 오케스트레이터. 런타임에 모든 에이전트/스킬/MCP를 자동 감지하고 최적의 전문가에게 라우팅 |
 | **Sisyphus** | OMO | Opus | 서브 오케스트레이터. 의도 분류와 검증 프로토콜로 복잡한 멀티스텝 워크플로우 관리 |
 | **Hephaestus** | OMO | Opus | 자율 딥 워커. 탐색 → 계획 → 실행 → 검증 사이클을 자율적으로 수행 |
 | **Metis** | OMO | Opus | 사전 의도 분석. AI-slop 방지를 위해 요청을 실행 전에 구조화 |
@@ -140,17 +140,9 @@ Boss는 my-claude의 핵심에 있는 메타 오케스트레이터입니다. 코
 
 ---
 
-## 에이전트 팩 (도메인 전문가)
+## 벤더링 에이전트
 
-도메인 전문 에이전트는 `~/.claude/agent-packs/`에 설치되며 기본적으로 로드되지 **않습니다**. 심링크로 활성화하세요:
-
-```bash
-# 팩 활성화
-ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
-
-# 비활성화
-rm ~/.claude/agents/<agent-name>.md
-```
+`agency-agents` 서브모듈은 2026-07-27에 제거되었습니다. 스택 내에 대체재가 없던 엔지니어링 에이전트 3개(ai-engineer, devops-automator, multi-agent-systems-architect)만 `agents/vendored/`로 스냅샷하여 항상 로드되는 32개에 포함시켰습니다. 각 파일에는 출처·라이선스·스냅샷 날짜가 명시되어 있습니다. 온디맨드 팩과 `--with-packs` 플래그는 더 이상 제공되지 않습니다.
 
 ### 우선순위 라우팅
 
@@ -158,8 +150,9 @@ Boss는 가장 적합한 매칭을 찾을 때까지 모든 요청을 우선순�
 
 | 우선순위 | 매칭 유형 | 조건 | 예시 |
 |:--------:|-----------|------|---------|
+| **P0** | gstack 스킬 | 배포·QA·보안 워크플로 | `"ship this"` → gstack `/ship` |
 | **P1** | 스킬 매칭 | 작업이 독립적인 스킬에 해당 | `"merge PDFs"` → pdf 스킬 |
-| **P2** | 전문가 에이전트 | 도메인별 에이전트 존재 | `"security audit"` → Security Engineer |
+| **P2** | 전문가 에이전트 | 도메인별 에이전트 존재 | `"security audit"` → security-reviewer |
 | **P3a** | Boss 직접 | 독립적인 에이전트 2~4개 | `"fix 3 bugs"` → 병렬 스폰 |
 | **P3b** | 서브 오케스트레이터 | 복잡한 다단계 워크플로 | `"refactor + test"` → Sisyphus |
 | **P3c** | 에이전트 팀 | P2P 통신이 필요한 경우 | `"implement + review"` → Review Chain |
@@ -169,9 +162,10 @@ Boss는 가장 적합한 매칭을 찾을 때까지 모든 요청을 우선순�
 
 | 복잡도 | 모델 | 사용 대상 |
 |-----------|-------|----------|
-| 심층 분석, 아키텍처 | Opus | Boss, Oracle, Sisyphus |
-| 표준 구현 | Sonnet | executor, debugger, security-reviewer |
-| 빠른 조회, 탐색 | Haiku | explore, 간단한 자문 |
+| 최상위 오케스트레이션 | `claude-fable-5` | Boss |
+| 심층 분석, 아키텍처 | `claude-opus-5` | Sisyphus, Atlas, Hephaestus, Oracle, Metis, Momus, Prometheus |
+| 표준 구현 | `claude-sonnet-5` | Librarian, Multimodal-Looker, OMC 전문가 |
+| 빠른 조회, 탐색 | `claude-haiku-4-5` | 경량 OMC 에이전트, 간단한 자문 |
 
 ### 3단계 스프린트 워크플로
 
@@ -196,7 +190,7 @@ Confirm "design done"   Architect verification  User: approve / improve
 └───────────────────────┬─────────────────────────────┘
                         ▼
 ┌─────────────────────────────────────────────────────┐
-│  Boss · Meta-Orchestrator (Opus)                      │
+│  Boss · Meta-Orchestrator (Fable)                     │
 │  Discovery → Classification → Matching → Delegation  │
 └──┬──────────┬──────────┬──────────┬─────────────────┘
    │          │          │          │
@@ -210,15 +204,14 @@ Confirm "design done"   Architect verification  User: approve / improve
          └────────┘
 ┌─────────────────────────────────────────────────────┐
 │  Behavioral Layer                                     │
-│  Karpathy Guidelines · ECC Rules (87) · Hooks (7)    │
+│  Karpathy Guidelines · Rules (54) · Hooks (8)        │
 ├─────────────────────────────────────────────────────┤
-│  Specialist Agents (200+)                             │
-│  OMO 9 · OMC 19 · Agency Eng. 26 · Superpowers 1    │
-│  + 136 domain packs (on-demand)                       │
+│  Specialist Agents (32)                               │
+│  Boss 1 · OMO 9 · OMC 19 · Vendored 3                │
 ├─────────────────────────────────────────────────────┤
-│  Skills (200+)                                        │
-│  ECC 180+ · OMC 36 · gstack 40 · Superpowers 14     │
-│  + Core 3 · Anthropic 14+                             │
+│  Skills (139)                                         │
+│  ECC 79 · gstack 27 · OMC 16 · Superpowers 13       │
+│  + Core 4                                             │
 ├─────────────────────────────────────────────────────┤
 │  MCP Layer                                            │
 │  Context7 · Exa · grep.app                            │
@@ -231,21 +224,22 @@ Confirm "design done"   Architect verification  User: approve / improve
 
 | 카테고리 | 수량 | 출처 |
 |----------|------:|--------|
-| **핵심 에이전트** (항상 로드됨) | 56 | Boss 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 |
-| **에이전트 팩** (온디맨드) | 136 | agency-agents의 12개 도메인 카테고리 |
-| **스킬** | 200+ | ECC 180+ · OMC 36 · gstack 40 · Superpowers 14 · Core 3 |
-| **Anthropic 스킬** | 14+ | PDF, DOCX, PPTX, XLSX, MCP builder |
-| **규칙** | 87 | ECC common + 14개 언어 디렉터리 |
+| **에이전트** (항상 로드됨) | 32 | Boss 1 + OMO 9 + OMC 19 + 벤더링 3 |
+| **스킬** | 139 | ECC 79 · gstack 27 · OMC 16 · Superpowers 13 · Core 4 |
+| **규칙** | 54개 파일 / 9개 룰셋 | ECC 53 (common + 8개 언어 디렉터리) + Core 1 |
 | **MCP 서버** | 3 | Context7, Exa, grep.app |
-| **훅** | 7 | 위임 가드, 텔레메트리, 검증 |
+| **훅** | 8개 파일 / 8개 이벤트 | 위임 가드, 텔레메트리, 검증, 지식 금고 |
+| **업스트림 서브모듈** | 4 | ecc, omc, gstack, superpowers |
 | **CLI 도구** | 3 | omc, omo, ast-grep |
+
+위의 에이전트·스킬·룰은 모두 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh)의 허용목록에 등재되어 설치 매니페스트로 추적됩니다. Anthropic 공식 문서 스킬(pdf, docx 등)은 `claude plugin add anthropics/skills`로 별도 설치되며 의도적으로 매니페스트에서 제외됩니다.
 
 <details>
 <summary><strong>핵심 에이전트 — Boss 메타 오케스트레이터 (1)</strong></summary>
 
 | 에이전트 | 모델 | 역할 | 출처 |
 |-------|-------|------|--------|
-| Boss | Opus | 동적 런타임 탐색 → 역량 매칭 → 최적 라우팅. 코드를 직접 작성하지 않습니다. | my-claude |
+| Boss | Fable | 동적 런타임 탐색 → 역량 매칭 → 최적 라우팅. 코드를 직접 작성하지 않습니다. | my-claude |
 
 </details>
 
@@ -294,81 +288,35 @@ Confirm "design done"   Architect verification  User: approve / improve
 </details>
 
 <details>
-<summary><strong>Agency Engineering — 항상 로드되는 전문가 (26)</strong></summary>
+<summary><strong>벤더링 에이전트 — AI·인프라 전문가 (3)</strong></summary>
+
+`agency-agents` 서브모듈이 제거된 2026-07-27에 [agency-agents](https://github.com/msitarzewski/agency-agents)(MIT)에서 스냅샷했습니다. 스택 내 대체재가 없는 엔지니어링 에이전트만 남겼으며, 각 파일에 출처 표기가 포함되어 있습니다.
 
 | 에이전트 | 역할 | 출처 |
 |-------|------|--------|
-| AI Engineer | AI/ML 엔지니어링 | [agency-agents](https://github.com/msitarzewski/agency-agents) |
-| Backend Architect | 백엔드 아키텍처 | agency-agents |
-| CMS Developer | CMS 개발 | agency-agents |
-| Code Reviewer | 코드 리뷰 | agency-agents |
-| Data Engineer | 데이터 엔지니어링 | agency-agents |
-| Database Optimizer | 데이터베이스 최적화 | agency-agents |
-| DevOps Automator | DevOps 자동화 | agency-agents |
-| Embedded Firmware Engineer | 임베디드 펌웨어 | agency-agents |
-| Frontend Developer | 프론트엔드 개발 | agency-agents |
-| Git Workflow Master | Git 워크플로 | agency-agents |
-| Incident Response Commander | 인시던트 대응 | agency-agents |
-| Mobile App Builder | 모바일 앱 | agency-agents |
-| Rapid Prototyper | 빠른 프로토타이핑 | agency-agents |
-| Security Engineer | 보안 엔지니어링 | agency-agents |
-| Senior Developer | 시니어 개발 | agency-agents |
-| Software Architect | 소프트웨어 아키텍처 | agency-agents |
-| SRE | 사이트 신뢰성 | agency-agents |
-| Technical Writer | 기술 문서 | agency-agents |
-| AI Data Remediation Engineer | 자가 복구 데이터 파이프라인 | agency-agents |
-| Autonomous Optimization Architect | API 성능 거버넌스 | agency-agents |
-| Email Intelligence Engineer | 이메일 데이터 추출 | agency-agents |
-| Feishu Integration Developer | Feishu/Lark 플랫폼 | agency-agents |
-| Filament Optimization Specialist | Filament PHP 최적화 | agency-agents |
-| Solidity Smart Contract Engineer | EVM 스마트 컨트랙트 | agency-agents |
-| Threat Detection Engineer | SIEM 및 위협 헌팅 | agency-agents |
-| WeChat Mini Program Developer | WeChat 小程序 | agency-agents |
+| AI Engineer | AI/ML 엔지니어링, 모델 통합, 데이터 파이프라인 | agency-agents (벤더링) |
+| DevOps Automator | 인프라 자동화, CI/CD, 클라우드 운영 | agency-agents (벤더링) |
+| Multi-Agent Systems Architect | 에이전트 토폴로지, 컨텍스트 관리, 장애 복구 | agency-agents (벤더링) |
 
 </details>
 
 <details>
-<summary><strong>에이전트 팩 — 온디맨드 도메인 전문가 (136)</strong></summary>
+<summary><strong>스킬 — 5개 출처에서 139개</strong></summary>
 
-`~/.claude/agent-packs/`에 설치됩니다. 심볼릭 링크로 활성화:
-
-```bash
-ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
-```
-
-| 팩 | 수량 | 예시 | 출처 |
-|------|------:|---------|--------|
-| marketing | 29 | Douyin, Xiaohongshu, TikTok, SEO | [agency-agents](https://github.com/msitarzewski/agency-agents) |
-| specialized | 28 | 법률, 금융, 헬스케어, MCP Builder | agency-agents |
-| game-development | 20 | Unity, Unreal, Godot, Roblox | agency-agents |
-| design | 8 | 브랜드, UI, UX, 비주얼 스토리텔링 | agency-agents |
-| testing | 8 | API, 접근성, 성능 | agency-agents |
-| sales | 8 | 딜 전략, 파이프라인 분석 | agency-agents |
-| paid-media | 7 | Google Ads, Meta Ads, 프로그래매틱 | agency-agents |
-| project-management | 6 | Scrum, Kanban, 리스크 관리 | agency-agents |
-| spatial-computing | 6 | visionOS, WebXR, Metal | agency-agents |
-| support | 6 | 분석, 인프라, 법률 | agency-agents |
-| academic | 5 | 인류학자, 역사학자, 심리학자 | agency-agents |
-| product | 5 | 프로덕트 매니저, 스프린트, 피드백 | agency-agents |
-
-</details>
-
-<details>
-<summary><strong>스킬 — 6개 출처에서 200개 이상</strong></summary>
+각 출처는 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh)의 허용목록으로 관리되며, 목록에 없는 스킬은 설치되지 않습니다.
 
 | 출처 | 수량 | 주요 스킬 |
 |--------|------:|------------|
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 180+ | tdd-workflow, autopilot, ralph, security-review, coding-standards |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 36 | plan, team, trace, deep-dive, blueprint, ultrawork |
-| [gstack](https://github.com/garrytan/gstack) | 40 | /qa, /review, /ship, /cso, /investigate, /office-hours |
-| [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming, systematic-debugging, TDD, parallel-agents |
-| [my-claude Core](https://github.com/sehoon787/my-claude) | 3 | boss-advanced, gstack-sprint, briefing-vault |
-| [Anthropic Official](https://github.com/anthropics/skills) | 14+ | pdf, docx, pptx, xlsx, canvas-design, mcp-builder |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 79 | coding-standards, react-patterns, fastapi-patterns, agent-architecture-audit, e2e-testing |
+| [gstack](https://github.com/garrytan/gstack) | 27 | /qa, /review, /ship, /cso, /investigate, /office-hours |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 16 | autopilot, ralph, team, ultrawork, ralplan, omc-reference |
+| [superpowers](https://github.com/obra/superpowers) | 13 | brainstorming, systematic-debugging, test-driven-development, writing-plans |
+| [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced, boss-briefing, briefing-vault, gstack-sprint |
 
 </details>
 
 <details>
-<summary><strong>MCP 서버 (3) + 훅 (7)</strong></summary>
+<summary><strong>MCP 서버 (3) + 훅 (8)</strong></summary>
 
 **MCP 서버**
 
@@ -466,18 +414,23 @@ BriefingVault v2는 세 가지 지식 관리 방법론을 통합합니다:
 
 ## 업스트림 오픈소스 출처
 
-my-claude는 git 서브모듈을 통해 MIT 라이선스 업스트림 저장소 5개의 콘텐츠를 번들로 제공합니다:
+my-claude는 MIT 라이선스 업스트림 저장소 4개를 git 서브모듈로 연결하며, 각각 명시적인 SHA에 고정되어 있습니다:
 
 | # | 출처 | 제공 내용 |
 |---|--------|-----------------|
-| 1 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 전문가 에이전트 19개 + 스킬 36개. autopilot, ralph, 팀 오케스트레이션을 갖춘 Claude Code 멀티 에이전트 하네스. |
-| 2 | <img src="https://github.com/code-yeongyu.png?size=32" width="20" height="20" align="center"/> **[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — code-yeongyu | OMO 에이전트 9개 (Sisyphus, Atlas, Oracle 등). Claude, GPT, Gemini를 연결하는 멀티 플랫폼 에이전트 하네스. |
-| 3 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** — affaan-m | 14개 언어에 걸친 스킬 180개 이상 + 규칙 87개. TDD, 보안, 코딩 표준을 갖춘 포괄적인 개발 프레임워크. |
-| 4 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 엔지니어링 에이전트 26개 (항상 로드) + 12개 카테고리에 걸친 도메인 에이전트 팩 136개. |
-| 5 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | 코드 리뷰, QA, 보안 감사, 배포를 위한 스킬 40개. Playwright 브라우저 데몬 포함. |
-| 6 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 브레인스토밍, TDD, 병렬 에이전트, 코드 리뷰를 다루는 스킬 14개 + 에이전트 1개. |
-| 7 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | PDF, DOCX, PPTX, XLSX, MCP builder를 위한 공식 스킬 14개 이상. |
-| 8 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | AI 코딩 행동 가이드라인 4가지 (코딩 전 생각하기, 단순함 우선, 외과적 변경, 목표 중심 실행). |
+| 1 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** — affaan-m | 설치 스킬 79개 + 룰셋 9개. 언어·스택 지식 레인: TDD, 보안, 코딩 표준, 프레임워크 패턴. |
+| 2 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 전문가 에이전트 19개 + 설치 스킬 16개. 오케스트레이션 레인: autopilot, ralph, team. |
+| 3 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | 배포·QA·보안 리뷰(Boss P0 레인)를 위한 설치 스킬 27개. Playwright 브라우저 데몬 포함. |
+| 4 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 개발 프로세스 레인 설치 스킬 13개: 브레인스토밍, TDD, 체계적 디버깅, 계획 작성. |
+
+서브모듈은 아니지만 스택의 일부인 출처:
+
+| 출처 | 편입 방식 |
+|--------|----------------|
+| <img src="https://github.com/code-yeongyu.png?size=32" width="20" height="20" align="center"/> **[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — code-yeongyu | OMO 에이전트 9개(Sisyphus, Atlas, Oracle 등)를 이 저장소의 `agents/omo/`에 독립 `.md` 에이전트로 이식. |
+| <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 2026-07-27 서브모듈 제거. 엔지니어링 에이전트 3개를 출처 표기와 함께 `agents/vendored/`로 벤더링. |
+| <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | `install.sh`가 `claude plugin add anthropics/skills`로 설치(pdf, docx 등). 매니페스트 추적 대상 아님. |
+| <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | AI 코딩 행동 가이드라인 4가지를 `~/.claude/CLAUDE.md`에 추가. |
 
 ---
 
@@ -486,7 +439,8 @@ my-claude는 git 서브모듈을 통해 MIT 라이선스 업스트림 저장소 
 | 워크플로 | 트리거 | 목적 |
 |----------|---------|---------|
 | **CI** | push, PR | JSON 설정, 에이전트 프론트매터, 스킬 존재 여부, 업스트림 파일 수 검증 |
-| **Update Upstream** | 주간 / 수동 | `git submodule update --remote` 실행 후 자동 병합 PR 생성 |
+| **Smoke** | push, PR | 4개 잡 — `hooks`(훅 실행), `shell`(설치 스크립트 형태), `drift`(모델 드리프트), `routing-refs`(끊어진 에이전트·스킬 참조) |
+| **Update Upstream** | 3일마다 / 수동 | `git submodule update --remote` → `SOURCES.json` SHA 핀 갱신 → 업스트림 diff 보안 스캔 → 스캔 통과 시에만 자동 병합, 아니면 사람이 검토하도록 PR을 열어 둠 |
 | **Auto Tag** | main에 push | `plugin.json` 버전 읽고 신규 시 git 태그 생성 |
 | **Pages** | main에 push | `docs/index.html`을 GitHub Pages에 배포 |
 | **CLA** | PR | 기여자 라이선스 동의 확인 |
@@ -502,27 +456,26 @@ my-claude는 git 서브모듈을 통해 MIT 라이선스 업스트림 저장소 
 |---------|-------------|
 | **Boss 메타 오케스트레이터** | 동적 역량 탐색 → 의도 분류 → 5단계 우선순위 라우팅 → 위임 → 검증 |
 | **3단계 스프린트** | 설계 (대화형) → 실행 (ralph를 통한 자율) → 리뷰 (설계 문서와 대화형 비교) |
-| **에이전트 티어 우선순위** | core > omo > omc > agency 중복 제거. 가장 특화된 에이전트가 선택됩니다. |
-| **Agency 비용 최적화** | 자문에는 Haiku, 구현에는 Sonnet — 172개 도메인 에이전트에 대한 자동 모델 라우팅 |
+| **에이전트 티어 우선순위** | core > omo > omc > vendored 중복 제거. 가장 특화된 에이전트가 선택됩니다. |
+| **레인 소유권** | 오케스트레이션 → OMC, 개발 프로세스 → superpowers, 배포·QA·보안 → gstack (Boss P0), 언어·스택 지식 → ECC, AI·도메인 → 벤더링 에이전트 |
+| **큐레이션 허용목록** | `scripts/skill-allowlists.sh`가 단일 진실 공급원 — 업스트림 수천 개 중 스킬 139개와 룰셋 9개만 살아남아, 목록에 없는 것은 세션 컨텍스트에 절대 올라오지 않습니다 |
 | **Briefing Vault** | 세션, 의사결정, 학습, 참조를 포함하는 Obsidian 호환 `.briefing/` 디렉터리 |
 | **에이전트 텔레메트리** | PostToolUse 훅이 에이전트 사용량을 `agent-usage.jsonl`에 기록 |
-| **Smart Packs** | 프로젝트 유형 감지로 세션 시작 시 관련 에이전트 팩 추천 |
-| **CI SHA 사전 확인** | `git ls-remote` SHA 비교를 통해 변경 없는 소스의 업스트림 동기화 건너뛰기 |
-| **에이전트 중복 탐지** | 정규화된 이름 비교로 업스트림 소스 간 중복 포착 |
+| **무변경 동기화 스킵** | 업스트림 동기화는 서브모듈 범프와 `SOURCES.json` 핀을 스테이징한 뒤, 그 diff가 비어 있지 않을 때만 PR을 생성 |
+| **에이전트 중복 탐지** | `tests/validate-sync.sh`가 `agents/`와 omc·superpowers 서브모듈의 에이전트 파일명을 비교해 충돌을 보고 |
 
 ---
 
 ## 번들된 업스트림 버전
 
-git 서브모듈을 통해 연결됩니다. 고정된 커밋은 `.gitmodules`에서 기본으로 추적됩니다.
+git 서브모듈을 통해 연결됩니다. 고정된 커밋은 `.gitmodules`가 기본으로 추적하며, [`upstream/SOURCES.json`](../../upstream/SOURCES.json)에 AI-BOM으로 미러링됩니다. `install.sh`는 `main`을 따라가지 않고 아래 SHA를 그대로 체크아웃합니다.
 
 | 출처 | SHA | 날짜 | 비교 |
 |--------|-----|------|------|
-| [agency-agents](https://github.com/msitarzewski/agency-agents) | `4feb0cd` | 2026-04-07 | [compare](https://github.com/msitarzewski/agency-agents/compare/4feb0cd...HEAD) |
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `7dfdbe0` | 2026-04-07 | [compare](https://github.com/affaan-m/everything-claude-code/compare/7dfdbe0...HEAD) |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `2487d38` | 2026-04-07 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/2487d38...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | `03973c2` | 2026-04-07 | [compare](https://github.com/garrytan/gstack/compare/03973c2...HEAD) |
-| [superpowers](https://github.com/obra/superpowers) | `b7a8f76` | 2026-04-06 | [compare](https://github.com/obra/superpowers/compare/b7a8f76...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `4092795` | 2026-07-27 | [compare](https://github.com/affaan-m/everything-claude-code/compare/4092795...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `590fb98` | 2026-07-27 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/590fb98...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `7c9df1c` | 2026-07-27 | [compare](https://github.com/garrytan/gstack/compare/7c9df1c...HEAD) |
+| [superpowers](https://github.com/obra/superpowers) | `3dcbd5c` | 2026-07-27 | [compare](https://github.com/obra/superpowers/compare/3dcbd5c...HEAD) |
 
 ---
 
@@ -532,7 +485,7 @@ git 서브모듈을 통해 연결됩니다. 고정된 커밋은 `.gitmodules`에
 
 ## 크레딧
 
-다음 작업을 기반으로 구축되었습니다: [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) (Yeachan Heo), [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) (code-yeongyu), [everything-claude-code](https://github.com/affaan-m/everything-claude-code) (affaan-m), [agency-agents](https://github.com/msitarzewski/agency-agents) (msitarzewski), [gstack](https://github.com/garrytan/gstack) (garrytan), [superpowers](https://github.com/obra/superpowers) (Jesse Vincent), [anthropic/skills](https://github.com/anthropics/skills) (Anthropic), [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) (forrestchang).
+다음 작업을 기반으로 구축되었습니다: [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) (Yeachan Heo), [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) (code-yeongyu), [everything-claude-code](https://github.com/affaan-m/everything-claude-code) (affaan-m), [gstack](https://github.com/garrytan/gstack) (garrytan), [superpowers](https://github.com/obra/superpowers) (Jesse Vincent), [agency-agents](https://github.com/msitarzewski/agency-agents) (msitarzewski — 벤더링 에이전트 3개), [anthropic/skills](https://github.com/anthropics/skills) (Anthropic), [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) (forrestchang).
 
 ## 라이선스
 

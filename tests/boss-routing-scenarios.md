@@ -24,12 +24,13 @@ frontend-patterns, backend-patterns, internal-comms, iterative-retrieval, karpat
 postgres-patterns, slack-gif-creator, strategic-compact, theme-factory, verification-loop,
 web-artifacts-builder, webapp-testing
 
-### Verified Agent Registry (71 global)
+### Verified Agent Registry (32 global)
 analyst, architect, atlas, boss, code-reviewer, code-simplifier, critic, debugger,
 designer, document-specialist, executor, explore, git-master, hephaestus, librarian,
 metis, momus, multimodal-looker, oracle, planner, prometheus, qa-tester, scientist,
 security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
-+ 8 design-*, 22 engineering-*, 8 testing-*, 4 product-* (Agency agents, all model=sonnet)
++ engineering-ai-engineer, engineering-devops-automator,
+engineering-multi-agent-systems-architect (vendored, model inherited)
 
 ---
 
@@ -70,23 +71,23 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 | 26 | "이 파일 하나 TDD로 테스트 작성" | N/S/O | S4:A0 | P1→Skill(tdd-workflow) | All 3 → Skill |
 | 27 | "frontend 패턴 적용해서 컴포넌트 리팩토링" | W/D/I | S0:A4 | Skill(frontend-patterns) inside Agent | Methodology+Implementation |
 | 28 | "PostgreSQL 인덱스 최적화 조언해줘" | N/S/O | S4:A0 | P1→Skill(postgres-patterns) | Advice lookup, narrow scope |
-| 29 | "DB 스키마 전체 리뷰하고 최적화해줘" | W/D/I | S0:A4 | P2→Agent(Database Optimizer) | All 3 → Agent |
+| 29 | "DB 스키마 전체 리뷰하고 최적화해줘" | W/D/I | S0:A4 | P2→Agent(architect) | All 3 → Agent; schema design (agency removed 2026-07-27) |
 | 30 | "이 API 엔드포인트 보안 강화해줘" | N/D/O | S2:A2 | Tie→but security-review skill exists → CR: Narrow+One-shot(2) vs Deep×2(2)=Tie→ASK scope | "강화"=implement changes? If yes, Agent. If advice only, Skill |
 | 31 | "백엔드 아키텍처 패턴 정리해줘" | N/S/O | S4:A0 | P1→Skill(backend-patterns) | Reference lookup |
-| 32 | "백엔드 전체 아키텍처 재설계해줘" | W/D/I | S0:A4 | P2→Agent(Backend Architect) | All 3 → Agent |
+| 32 | "백엔드 전체 아키텍처 재설계해줘" | W/D/I | S0:A4 | P2→Agent(architect) | All 3 → Agent (agency removed 2026-07-27) |
 | 33 | "이 코드에서 배울 수 있는 패턴 추출" | N/D/O | — | P2→Agent(analyst) or P4→Agent(opus) | No skill match → skip to P2. analyst handles pattern analysis, not code-simplifier |
-| 34 | "프로젝트 전체에서 재사용 패턴 분석" | W/D/I | S0:A4 | P2→Agent(Software Architect) | All 3 → Agent |
+| 34 | "프로젝트 전체에서 재사용 패턴 분석" | W/D/I | S0:A4 | P2→Agent(architect) | All 3 → Agent (agency removed 2026-07-27) |
 | 35 | "evaluation 프레임워크 적용해줘" | N/S/O | S4:A0 | P1→Skill(eval-harness) | Framework application = shallow (apply template), narrow scope, one-shot |
 | 36 | "Claude API로 챗봇 만들어줘" | W/D/I | S0:A4 | Skill(claude-api) inside Agent | Methodology+Implementation |
 | 37 | "이 HTML을 예쁘게 꾸며줘" | N/S/O | S4:A0 | P1→Skill(frontend-design) | Single file, shallow styling |
-| 38 | "웹앱 전체 UI 리디자인" | W/D/I | S0:A4 | P2→Agent(designer) or Agent(UI Designer) | All 3 → Agent |
+| 38 | "웹앱 전체 UI 리디자인" | W/D/I | S0:A4 | P2→Agent(designer) | All 3 → Agent (agency removed 2026-07-27) |
 | 39 | "문서 같이 작성하자" | N/S/I | S3:A1 | P1→Skill(doc-coauthoring) | Iterative but narrow+shallow → Skill wins 3:1 |
 | 40 | "SQL 쿼리 하나 최적화해줘" | N/S/O | S4:A0 | P1→Skill(postgres-patterns) | Consistent with #28 |
 | 41 | "보안 체크리스트 한번 돌려줘" | N/S/O | S4:A0 | P1→Skill(security-review) | Checklist = shallow, one-shot |
 | 42 | "이 코드 간소화해줘" | N/D/O | S2:A2 | Tie→no simplify skill → P2→Agent(code-simplifier) | No skill candidate → skip to P2 |
 | 43 | "포스터 디자인해줘" | N/S/O | S4:A0 | P1→Skill(canvas-design) | Skill desc: "create a poster" |
 | 44 | "랜딩 페이지 디자인해줘" | N/S/O | S4:A0 | P1→Skill(frontend-design) | Skill desc: "landing pages" |
-| 45 | "web artifact 복잡한 거 만들어줘" | N/D/I | S1:A3 | P2→Agent(designer) or Agent(Frontend Developer) | Score A3>S1 → Agent wins. web-artifacts-builder skill exists but 3D scoring overrides |
+| 45 | "web artifact 복잡한 거 만들어줘" | N/D/I | S1:A3 | P2→Agent(designer) or Agent(executor) | Score A3>S1 → Agent wins. web-artifacts-builder skill exists but 3D scoring overrides |
 
 ## Category 3: Pure Agent Requests (46-70)
 
@@ -94,29 +95,29 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 |---|---------|---------------|-----------|
 | 46 | "이 버그 원인 찾아줘" | P2→Agent(debugger) | Investigation, no skill match |
 | 47 | "메모리 누수 추적해줘" | P2→Agent(tracer) | Evidence-driven causal tracing |
-| 48 | "production 장애 대응해줘" | P2→Agent(Incident Response Commander) | Specialist domain |
-| 49 | "ESP32 펌웨어 작성해줘" | P2→Agent(Embedded Firmware Engineer) | Specialist domain |
-| 50 | "Solidity 스마트 컨트랙트 작성해줘" | P2→Agent(Solidity Smart Contract Engineer) | Specialist domain |
-| 51 | "CI/CD 파이프라인 구축해줘" | P2→Agent(DevOps Automator) | Specialist domain |
-| 52 | "WeChat 미니프로그램 개발해줘" | P2→Agent(WeChat Mini Program Developer) | Specialist domain |
-| 53 | "Feishu 봇 만들어줘" | P2→Agent(Feishu Integration Developer) | Specialist domain |
-| 54 | "SLO 설정하고 에러 버짓 관리해줘" | P2→Agent(SRE) | Specialist domain |
-| 55 | "SIEM 탐지 룰 작성해줘" | P2→Agent(Threat Detection Engineer) | Specialist domain |
-| 56 | "데이터 파이프라인 설계해줘" | P2→Agent(Data Engineer) | Specialist domain |
-| 57 | "접근성 감사해줘" | P2→Agent(Accessibility Auditor) | Specialist domain |
-| 58 | "API 성능 벤치마크 돌려줘" | P2→Agent(Performance Benchmarker) | Specialist domain |
+| 48 | "production 장애 대응해줘" | P2→Agent(engineering-devops-automator) | Ops/infra, vendored (agency removed 2026-07-27) |
+| 49 | "ESP32 펌웨어 작성해줘" | P4→general-purpose | Embedded domain has no remaining owner (agency removed 2026-07-27) |
+| 50 | "Solidity 스마트 컨트랙트 작성해줘" | P4→general-purpose | Niche domain, no remaining owner (agency removed 2026-07-27) |
+| 51 | "CI/CD 파이프라인 구축해줘" | P2→Agent(engineering-devops-automator) | Ops/infra, vendored |
+| 52 | "WeChat 미니프로그램 개발해줘" | P4→general-purpose | Niche domain, no remaining owner (agency removed 2026-07-27) |
+| 53 | "Feishu 봇 만들어줘" | P4→general-purpose | Niche domain, no remaining owner (agency removed 2026-07-27) |
+| 54 | "SLO 설정하고 에러 버짓 관리해줘" | P2→Agent(engineering-devops-automator) | Ops/infra, vendored (agency removed 2026-07-27) |
+| 55 | "SIEM 탐지 룰 작성해줘" | P2→Agent(security-reviewer) | Security-adjacent (agency removed 2026-07-27) |
+| 56 | "데이터 파이프라인 설계해줘" | P2→Agent(engineering-ai-engineer) | Data pipelines, vendored (agency removed 2026-07-27) |
+| 57 | "접근성 감사해줘" | P2→Agent(qa-tester) | QA/testing lane (agency removed 2026-07-27) |
+| 58 | "API 성능 벤치마크 돌려줘" | P2→Agent(test-engineer) | QA/testing lane (agency removed 2026-07-27) |
 | 59 | "이 오픈소스 라이브러리 소스 분석해줘" | P2→Agent(librarian) | Source code understanding |
 | 60 | "이 스크린샷 분석해줘" | P2→Agent(multimodal-looker) | Visual analysis |
 | 61 | "git 히스토리 정리하고 rebase 해줘" | P2→Agent(git-master) | Git specialist |
-| 62 | "사용자 피드백 분석해서 우선순위 정해줘" | P2→Agent(Feedback Synthesizer) | Product specialist |
-| 63 | "스프린트 백로그 우선순위 정해줘" | P2→Agent(Sprint Prioritizer) | Product specialist |
-| 64 | "시장 트렌드 리서치해줘" | P2→Agent(Trend Researcher) | Research specialist |
-| 65 | "UX 리서치 계획 수립해줘" | P2→Agent(UX Researcher) | Design specialist |
-| 66 | "브랜드 아이덴티티 수립해줘" | P2→Agent(Brand Guardian) | Design specialist |
+| 62 | "사용자 피드백 분석해서 우선순위 정해줘" | P2→Agent(analyst) | Analysis lane (agency removed 2026-07-27) |
+| 63 | "스프린트 백로그 우선순위 정해줘" | P2→Agent(planner) | Planning lane (agency removed 2026-07-27) |
+| 64 | "시장 트렌드 리서치해줘" | P2→Agent(analyst) | Analysis lane (agency removed 2026-07-27) |
+| 65 | "UX 리서치 계획 수립해줘" | P2→Agent(designer) | Design/UX lane (agency removed 2026-07-27) |
+| 66 | "브랜드 아이덴티티 수립해줘" | P4→general-purpose | Brand domain has no remaining owner (agency removed 2026-07-27) |
 | 67 | "이 코드의 아키텍처 결정 조언해줘" | P2→Agent(oracle) | Strategic advisor, read-only |
 | 68 | "요구사항 분석해줘" | P2→Agent(analyst) | Pre-planning analysis |
 | 69 | "이 작업 계획 리뷰해줘" | P2→Agent(momus) | Plan review, read-only |
-| 70 | "MVP 빠르게 만들어줘" | P2→Agent(Rapid Prototyper) | Specialist domain |
+| 70 | "MVP 빠르게 만들어줘" | P2→Agent(executor) | Implementation lane (agency removed 2026-07-27) |
 
 ## Category 4: P3a Boss Direct Orchestration (71-85)
 
@@ -125,13 +126,13 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 | 71 | "리팩토링하고 코드리뷰해줘" | 2 (executor→code-reviewer) | P3a | ≤4, sequential |
 | 72 | "버그 고치고 테스트 작성해줘" | 2 (debugger→test-engineer) | P3a | ≤4, sequential |
 | 73 | "API 구현하고 보안 체크해줘" | 2 (executor→security-reviewer) | P3a | ≤4, sequential |
-| 74 | "DB 스키마 설계하고 마이그레이션 작성해줘" | 2 (Database Optimizer→executor) | P3a | ≤4, sequential |
+| 74 | "DB 스키마 설계하고 마이그레이션 작성해줘" | 2 (architect→executor) | P3a | ≤4, sequential (agency removed 2026-07-27) |
 | 75 | "코드 작성하고 테스트하고 리뷰해줘" | 3 (executor→test-engineer→code-reviewer) | P3a | ≤4, linear chain |
-| 76 | "UI 만들고 접근성 검사해줘" | 2 (designer→Accessibility Auditor) | P3a | ≤4, sequential |
+| 76 | "UI 만들고 접근성 검사해줘" | 2 (designer→qa-tester) | P3a | ≤4, sequential (agency removed 2026-07-27) |
 | 77 | "문서 작성하고 리뷰해줘" | 2 (writer→critic) | P3a | ≤4, sequential |
-| 78 | "성능 벤치마크 돌리고 결과 분석해줘" | 2 (Performance Benchmarker→Test Results Analyzer) | P3a | ≤4, sequential |
-| 79 | "프론트엔드 구현하고 테스트해줘" | 2 (Frontend Developer→test-engineer) | P3a | ≤4, sequential |
-| 80 | "API 테스트하고 문서화해줘" | 2 (API Tester→Technical Writer) | P3a | ≤4, sequential |
+| 78 | "성능 벤치마크 돌리고 결과 분석해줘" | 2 (test-engineer→scientist) | P3a | ≤4, sequential; 분석 verb → scientist keeps the pair distinct (agency removed 2026-07-27) |
+| 79 | "프론트엔드 구현하고 테스트해줘" | 2 (executor→test-engineer) | P3a | ≤4, sequential (agency removed 2026-07-27) |
+| 80 | "API 테스트하고 문서화해줘" | 2 (qa-tester→writer) | P3a | ≤4, sequential (agency removed 2026-07-27) |
 | 81 | "보안 리뷰하고 취약점 고쳐줘" | 2 (security-reviewer→executor) | P3a | ≤4, sequential |
 | 82 | "요구사항 분석하고 계획 세워줘" | 2 (analyst→planner) | P3a | ≤4, sequential |
 | 83 | "Git 히스토리 정리해줘" | 1 (git-master) | P2→Agent(git-master) | Single agent = P2, not P3a |
@@ -167,21 +168,21 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 | 103 | "한국어로 코드 리뷰해줘" | P2→Agent(code-reviewer), Korean output | Language is modifier, not routing factor |
 | 104 | "3개 파일만 리팩토링해줘" | P2→Agent(executor) | ≤4 files = single agent sufficient |
 | 105 | "이것도 하고 저것도 하고 그것도 해줘" | ASK→specific tasks | Cannot route without clarity |
-| 106 | "production 긴급 장애!" | P2→Agent(Incident Response Commander) | Urgency doesn't change routing |
+| 106 | "production 긴급 장애!" | P2→Agent(engineering-devops-automator) | Urgency doesn't change routing (agency removed 2026-07-27) |
 | 107 | "이 Jupyter 노트북 분석해줘" | P2→Agent(scientist) | Data analysis domain |
 | 108 | "이 코드 왜 느린지 알려줘" | P2→Agent(tracer) | Performance investigation = deep tracing |
-| 109 | "Next.js 앱 만들어줘" | P2→Agent(Frontend Developer) | Consistent with #113 (Flutter→Mobile App Builder). Build intent clear |
+| 109 | "Next.js 앱 만들어줘" | P2→Agent(executor) | Implementation lane; consistent with #113 (agency removed 2026-07-27) |
 | 110 | "이 PR merge해도 될까?" | P3a: Agent(code-reviewer) ∥ Agent(security-reviewer) | 2 agents parallel, Boss verifies |
 | 111 | "테스트 왜 실패하는지 봐줘" | P2→Agent(debugger) | Investigation, no skill match |
 | 112 | "이 에러 메시지 뭔 뜻이야?" | P4→Agent(model="haiku") | Trivial lookup |
-| 113 | "Flutter 앱 만들어줘" | P2→Agent(Mobile App Builder) | Specialist match |
+| 113 | "Flutter 앱 만들어줘" | P4→general-purpose | Mobile domain has no remaining owner (agency removed 2026-07-27) |
 | 114 | "로고 만들어줘" | P1→Skill(canvas-design) | S4:A0, visual output = skill |
 | 115 | "어제 한 작업 이어서 해줘" | ASK→이전 작업 확인 후 해당 task에 맞게 재라우팅 | Resume is mechanism, not routing. Identify previous task first |
 | 116 | "이 코드 설명해줘" | P4→Agent(model="haiku") | Quick explanation |
 | 117 | "아키텍처 리뷰 좀" | P2→Agent(architect) | Strategic analysis |
 | 118 | "Help me debug this flaky test" | P2→Agent(debugger) or Agent(tracer) | Investigation, "flaky" = root cause tracing |
 | 119 | "셋업 가이드 작성해줘" | P2→Agent(writer) | Documentation, model=haiku |
-| 120 | "Design a REST API for user management" | P2→Agent(Backend Architect) | API design specialist |
+| 120 | "Design a REST API for user management" | P2→Agent(architect) | API design (agency removed 2026-07-27) |
 
 ## Category 7: Intent Classification Stress (121-140)
 
@@ -205,7 +206,7 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 | 136 | "Refactor and add tests" | Mid-sized | Mid-sized | P3a (executor→test-engineer) |
 | 137 | "Create a beautiful landing page with animations" | Design | Design | P1→Skill(frontend-design) |
 | 138 | "Build a complete e-commerce platform" | Build | Complex | P3b→sisyphus |
-| 139 | "Deploy to production" | DevOps | DevOps | P2→Agent(DevOps Automator) |
+| 139 | "Deploy to production" | DevOps | DevOps | P2→Agent(engineering-devops-automator) |
 | 140 | "Fix the login bug" | Bug fix | Bug fix | P2→Agent(debugger) |
 
 ## Category 8: MCP Tool Routing (141-155) — NEW
@@ -223,7 +224,7 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 | 149 | "Django REST framework 인증 패턴 찾아줘" | P4→Agent(haiku) using context7 MCP | context7 | Library docs via agent |
 | 150 | "PostgreSQL 17 새 기능 알려줘" | P4→Agent(haiku) using context7 or exa MCP | context7/exa | Docs or web search via agent |
 | 151 | "React 문서 보고 이 컴포넌트 구현해줘" | MCP(context7)→Agent(executor) | context7+Agent | Research → implement |
-| 152 | "경쟁사 기술 스택 분석해줘" | P2→Agent(Trend Researcher) using exa MCP | exa | Research via specialist agent |
+| 152 | "경쟁사 기술 스택 분석해줘" | P2→Agent(analyst) using exa MCP | exa | Analysis lane (agency removed 2026-07-27) |
 | 153 | "이 npm 패키지 대안 찾아줘" | P2→Agent(librarian) using exa+grep_app MCP | exa+grep_app | Multi-source search via agent |
 | 154 | "Supabase Edge Functions 문서 확인해줘" | P4→Agent(haiku) using context7 MCP | context7 | Library docs via agent |
 | 155 | "이 API의 rate limit 정책 찾아줘" | P4→Agent(haiku) using context7 or exa MCP | context7/exa | External reference via agent |
@@ -237,9 +238,9 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 | 158 | "파일 하나 찾아줘" | explore | haiku (declared) | Agent has model field |
 | 159 | "README 작성해줘" | writer | haiku (declared) | Agent has model field |
 | 160 | "프로젝트 보안 감사" | security-reviewer | opus (declared) | Agent has model field |
-| 161 | "브랜드 전략 수립해줘" | Brand Guardian | sonnet (Agency, declared) | Fix 1 added model |
-| 162 | "API 부하 테스트해줘" | API Tester | sonnet (Agency, declared) | Fix 1 added model |
-| 163 | "Workflow 최적화해줘" | Workflow Optimizer | sonnet (Agency, declared) | Fix 1 added model |
+| 161 | "브랜드 전략 수립해줘" | P4→general-purpose | inherited | Brand domain left with agency-agents (agency removed 2026-07-27); no specialist remains |
+| 162 | "API 부하 테스트해줘" | qa-tester | sonnet (declared) | API Tester replaced by omc qa-tester (agency removed 2026-07-27) |
+| 163 | "Workflow 최적화해줘" | P4→general-purpose | inherited | Workflow domain left with agency-agents (agency removed 2026-07-27); no specialist remains |
 | 164 | "데이터 분석 결과 리포트" | scientist | sonnet (declared) | Agent has model field |
 | 165 | "이 계획 검증해줘" | verifier | sonnet (declared) | Agent has model field |
 
@@ -250,8 +251,8 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 | 166 | "코드 리뷰해줘" in aircok_backoffice | code-reviewer (opus) | code-reviewer (opus) | Project | Project overrides global (same name) |
 | 167 | "아키텍처 조언해줘" in aircok_backoffice | architect (opus) | architect (opus) | Project | Project overrides global |
 | 168 | "보안 리뷰해줘" in aircok_backoffice | security-reviewer (opus) | security-reviewer (opus) | Project | Project overrides global |
-| 169 | "데이터 파이프라인 만들어줘" in aircok_backoffice | Data Engineer (sonnet) | (none) | Global | No project override exists |
-| 170 | "ESP32 코드 작성해줘" in aircok_backoffice | Embedded Firmware Engineer (sonnet) | (none) | Global | No project override exists |
+| 169 | "데이터 파이프라인 만들어줘" in aircok_backoffice | engineering-ai-engineer (vendored) | (none) | Global | No project override exists; data-pipeline work covered by the vendored AI engineer (agency removed 2026-07-27) |
+| 170 | "ESP32 코드 작성해줘" in aircok_backoffice | P4→general-purpose | (none) | Global | Embedded-firmware domain left with agency-agents (agency removed 2026-07-27); no specialist remains |
 
 ## Category 11: Phase 4 Verification & Retry (171-175) — NEW
 
@@ -340,10 +341,10 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 
 ## Bundled Agent Routing Scenarios
 
-### Scenario: Route to agency engineering agent
+### Scenario: Route a language-specific review to the generalist reviewer
 **Input**: "Review my Rust code for ownership issues"
-**Expected**: Boss routes to `rust-reviewer` agent (flat in `~/.claude/agents/`)
-**Verify**: Agent description matches Rust expertise
+**Expected**: Boss routes to `code-reviewer` (flat in `~/.claude/agents/`) — the generalist covers language reviews now that per-language reviewers left with agency-agents (removed 2026-07-27)
+**Verify**: Agent description matches code-review expertise; no per-language reviewer is expected in the registry
 
 ### Scenario: Route to OMC agent
 **Input**: "Trace the root cause of this production error"
@@ -357,47 +358,22 @@ security-reviewer, sisyphus, test-engineer, tracer, verifier, writer,
 
 ### Scenario: Plugin-scoped agent discovery
 **Input**: "Show me all available agents"
-**Expected**: Boss reports 200+ agents (55+ core + domain packs) from the plugin bundle
+**Expected**: Boss reports 32 agents (Boss 1 + OMO 9 + OMC 19 + vendored 3) from the plugin bundle
 **Verify**: Count includes all installed agents
 
 ---
 
 ## New Scenarios: Architecture Improvements (v0.21+)
 
-### Scenario: Agent tier priority — OMC over Agency
+### Scenario: Agent tier priority — OMC over vendored
 **Input**: "Do a code review"
-**Expected**: Boss selects the omc-tier `code-reviewer` (tier 3) over the agency-tier `Code Reviewer` (tier 4); all agents are flat in `~/.claude/agents/`
-**Verify**: Tier priority core(1) > omo(2) > omc(3) > agency(4) applied
+**Expected**: Boss selects the omc-tier `code-reviewer` (tier 3) over any vendored-tier agent (tier 4); all agents are flat in `~/.claude/agents/`
+**Verify**: Tier priority core(1) > omo(2) > omc(3) > vendored(4) applied
 
-### Scenario: Agency agent cost optimization — haiku for advisory
-**Input**: "What's the best social media strategy for a B2B SaaS?"
-**Expected**: Boss routes to agency Social Media Strategist with `model="haiku"` (simple advisory, no files to modify)
-**Verify**: model parameter is haiku, not sonnet
-
-### Scenario: Agency agent cost optimization — sonnet for implementation
-**Input**: "Write a LinkedIn content calendar for next month"
-**Expected**: Boss routes to agency LinkedIn Content Creator with `model="sonnet"` (produces file output)
-**Verify**: model parameter is sonnet (implementation work)
-
-### Scenario: install.sh --with-packs symlinks
-**Input**: `bash install.sh --with-packs=marketing,testing`
-**Expected**: Marketing and testing agent .md files symlinked from `~/.claude/agent-packs/` to `~/.claude/agents/`
-**Verify**: `ls -la ~/.claude/agents/ | grep -l "agent-packs"` shows symlinks; existing core agents not overwritten
-
-### Scenario: CI SHA pre-check skips unchanged upstream
-**Input**: CI sync runs when agency-agents SHA unchanged
-**Expected**: Sync step skipped with message "agency-agents: no changes (SHA ...)"
-**Verify**: `steps.check-agency.outputs.skip == 'true'` and clone step not executed
-
-### Scenario: CI agent dedup detection
-**Input**: CI sync with "Code Reviewer" (agency) and "code-reviewer" (omc)
-**Expected**: Dedup report includes "⚠️ Code Reviewer ↔ code-reviewer"
-**Verify**: Normalized name comparison catches case/spacing differences
-
-### Scenario: Smart Packs recommendation
-**Input**: Session starts in a project with `package.json` and `tsconfig.json`
-**Expected**: capability-registry.json includes `"recommended_packs": ["engineering"]`
-**Verify**: Boss Phase 0 reads recommended_packs and offers to activate if not already active
+### Scenario: Upstream sync opens no PR when nothing changed
+**Input**: `update-upstream` runs and none of the 4 submodules (ecc, omc, gstack, superpowers) advanced
+**Expected**: The staged diff of the submodule pointers plus `upstream/SOURCES.json` is empty, so `steps.check.outputs.changed == 'false'` and no PR is created
+**Verify**: Security scan and PR steps are skipped; a changed submodule flips `changed` to `'true'` and gates the auto-merge on a clean scan
 
 ### Scenario: Agent telemetry PostToolUse hook
 **Input**: Boss delegates to executor agent

@@ -10,23 +10,29 @@ Thank you for contributing. This guide covers how to author agents and skills, m
 agents/
   core/                   # Self-owned (boss.md, agent-teams-reference.md)
   omo/                    # Self-owned OMO agents — always loaded
-upstream/                 # Git submodules (upstream sources)
-  agency-agents/          # Domain agent specialists (MD agents)
-  ecc/                    # everything-claude-code (skills)
+  vendored/               # Snapshotted third-party agents (attribution in-file)
+upstream/                 # Git submodules (4 upstream sources)
+  ecc/                    # everything-claude-code (skills + rules)
   omc/                    # oh-my-claudecode (agents + skills)
   gstack/                 # gstack (sprint-process skills)
-  superpowers/            # superpowers (agent + skills)
+  superpowers/            # superpowers (dev-process skills)
 skills/
   core/                   # Self-owned skills
+scripts/
+  skill-allowlists.sh     # Single source of truth for what actually installs
 ```
 
-**3-Tier Architecture**
+**Load Model**
 
-| Tier | Paths | Load Behavior |
-|------|-------|---------------|
-| Core | `agents/core/`, `agents/omo/`, `upstream/omc/agents/`, `upstream/agency-agents/engineering/` | Always loaded |
-| Agent Packs | `upstream/agency-agents/{domain}/` | On-demand via symlink at install |
-| Docs | `upstream/agency-agents/strategy/` | Reference only — never parsed as agents |
+Every agent is always loaded — there are no on-demand packs. 32 agents install in total.
+
+| Source | Paths | Count |
+|--------|-------|------:|
+| Self-owned | `agents/core/boss.md`, `agents/omo/` | 10 |
+| Upstream | `upstream/omc/agents/` | 19 |
+| Vendored | `agents/vendored/` | 3 |
+
+Skills and rules are not loaded wholesale from upstream: only names listed in `scripts/skill-allowlists.sh` are copied (139 skills, 9 rule sets). Adding a skill to the stack means adding its name there.
 
 ---
 
@@ -66,7 +72,7 @@ model: claude-sonnet-5
 ### File Location
 
 - Core/infrastructure agents: `agents/core/` or `agents/omo/`
-- Domain agents: `upstream/agency-agents/{category}/{name}.md` (via submodule)
+- Third-party agents kept without a submodule: `agents/vendored/{name}.md`, with an attribution comment naming the upstream repo, its license, and the snapshot date
 - File name must match the `name` field: `security-reviewer.md` for `name: security-reviewer`
 
 ### Body Structure
@@ -139,7 +145,7 @@ Where `{source}` is the upstream origin (e.g., `core`) or installed from submodu
 
 - Agent names: kebab-case (`security-reviewer`, `backend-architect`)
 - File names: `{name}.md` matching the `name` frontmatter field exactly
-- Category directories: lowercase with hyphens (`game-development`, `paid-media`)
+- Directories: lowercase with hyphens (`agents/vendored/`, `skills/core/`)
 
 ---
 

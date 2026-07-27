@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>my-claude — All-in-one agent harness for Claude Code</title>
-<meta name="description" content="All-in-one Claude Code multi-agent orchestration plugin. 200+ agents, 200+ skills, 87 rules, 3 MCP servers, 7 hooks.">
+<meta name="description" content="All-in-one Claude Code multi-agent orchestration plugin. 32 curated agents, 139 curated skills, 54 rules, 3 MCP servers, 8 hooks.">
 <meta property="og:title" content="my-claude — All-in-one agent harness for Claude Code">
-<meta property="og:description" content="Boss orchestrates 200+ agents, 200+ skills, 87 rules, 3 MCP servers. Dynamic runtime discovery. One plugin.">
+<meta property="og:description" content="Boss orchestrates 32 curated agents, 139 curated skills, 54 rules, 3 MCP servers. Dynamic runtime discovery. One plugin.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://sehoon787.github.io/my-claude/">
 <meta name="twitter:card" content="summary_large_image">
@@ -235,11 +235,11 @@ section{padding:80px 0}
   <h1>my-claude</h1>
   <p class="tagline"><span class="lang" data-en="All-in-one agent harness for Claude Code" data-ko="Claude Code를 위한 올인원 에이전트 하네스"></span></p>
   <div class="badges">
-    <span class="badge"><em>200+</em>&nbsp;agents</span>
-    <span class="badge"><em>200+</em>&nbsp;skills</span>
-    <span class="badge"><em>87</em>&nbsp;rules</span>
+    <span class="badge"><em>32</em>&nbsp;agents</span>
+    <span class="badge"><em>139</em>&nbsp;skills</span>
+    <span class="badge"><em>54</em>&nbsp;rules</span>
     <span class="badge"><em>3</em>&nbsp;MCP</span>
-    <span class="badge"><em>7</em>&nbsp;hooks</span>
+    <span class="badge"><em>8</em>&nbsp;hooks</span>
   </div>
   <div class="inst-tabs">
     <button class="inst-tab active" onclick="switchInst(this,'human')">Human</button>
@@ -280,7 +280,7 @@ section{padding:80px 0}
         <tr><th><span class="lang" data-en="Priority" data-ko="우선순위"></span></th><th><span class="lang" data-en="Target" data-ko="대상"></span></th></tr>
         <tr><td style="color:var(--green)">P0</td><td><span class="lang" data-en="gstack skill (if installed)" data-ko="gstack 스킬 (설치된 경우)"></span></td></tr>
         <tr><td style="color:var(--accent)">P1</td><td><span class="lang" data-en="Skill match" data-ko="스킬 매칭"></span></td></tr>
-        <tr><td style="color:var(--primary)">P2</td><td><span class="lang" data-en="Specialist agent (200+)" data-ko="전문 에이전트 (200+)"></span></td></tr>
+        <tr><td style="color:var(--primary)">P2</td><td><span class="lang" data-en="Specialist agent (32)" data-ko="전문 에이전트 (32)"></span></td></tr>
         <tr><td style="color:var(--violet)">P3</td><td><span class="lang" data-en="Multi-agent orchestration" data-ko="멀티에이전트 오케스트레이션"></span></td></tr>
         <tr><td style="color:var(--text2)">P4</td><td><span class="lang" data-en="General-purpose fallback" data-ko="범용 폴백"></span></td></tr>
       </table>
@@ -289,6 +289,7 @@ section{padding:80px 0}
       <h3 style="font-size:1rem;margin-bottom:12px;color:var(--accent)"><span class="lang" data-en="Model Routing" data-ko="모델 라우팅"></span></h3>
       <table class="route-table">
         <tr><th><span class="lang" data-en="Model" data-ko="모델"></span></th><th><span class="lang" data-en="Usage" data-ko="용도"></span></th></tr>
+        <tr><td style="color:var(--violet)">Fable</td><td><span class="lang" data-en="Top-level orchestration (Boss)" data-ko="최상위 오케스트레이션 (Boss)"></span></td></tr>
         <tr><td style="color:var(--primary)">Opus</td><td><span class="lang" data-en="Deep analysis, architecture" data-ko="심층 분석, 아키텍처"></span></td></tr>
         <tr><td style="color:var(--accent)">Sonnet</td><td><span class="lang" data-en="Standard implementation" data-ko="표준 구현"></span></td></tr>
         <tr><td style="color:var(--green)">Haiku</td><td><span class="lang" data-en="Quick lookup, exploration" data-ko="빠른 조회, 탐색"></span></td></tr>
@@ -326,7 +327,7 @@ section{padding:80px 0}
     <div class="arch-layer" style="border-color:var(--accent)"><h4 style="color:var(--accent)"><span class="lang" data-en="User Request" data-ko="사용자 요청"></span></h4></div>
     <div class="arch-conn"></div>
     <div class="arch-layer boss-glow" style="border-color:var(--primary)">
-      <h4 style="color:var(--primary)">Boss Meta-Orchestrator<span class="cnt">(Opus)</span></h4>
+      <h4 style="color:var(--primary)">Boss Meta-Orchestrator<span class="cnt">(Fable)</span></h4>
       <p><span class="lang" data-en="Discovery → Intent Gate → Capability Match → Delegation → Verification" data-ko="탐색 → 의도 게이트 → 능력 매칭 → 위임 → 검증"></span></p>
     </div>
     <div class="arch-conn"></div>
@@ -337,11 +338,11 @@ section{padding:80px 0}
       <div class="arch-layer"><h4 style="color:var(--accent)">P1/P2<span class="cnt"><span class="lang" data-en="Skill/Agent" data-ko="스킬/에이전트"></span></span></h4><p><span class="lang" data-en="Direct match" data-ko="직접 매칭"></span></p></div>
     </div>
     <div class="arch-conn"></div>
-    <div class="arch-layer"><h4><span class="lang" data-en="Behavioral Layer" data-ko="행동 규칙 레이어"></span><span class="cnt">87 rules &middot; 7 hooks</span></h4><p>Karpathy Guidelines &middot; ECC Rules &middot; PreToolUse / PostToolUse</p></div>
+    <div class="arch-layer"><h4><span class="lang" data-en="Behavioral Layer" data-ko="행동 규칙 레이어"></span><span class="cnt">54 rules &middot; 8 hooks</span></h4><p>Karpathy Guidelines &middot; ECC Rules &middot; PreToolUse / PostToolUse</p></div>
     <div class="arch-conn"></div>
-    <div class="arch-layer"><h4><span class="lang" data-en="Specialist Agents" data-ko="전문 에이전트"></span><span class="cnt">200+</span></h4><p>Boss 1 &middot; OMO 9 &middot; OMC 19 &middot; Agency 26 &middot; Packs 136 &middot; Superpowers 1</p></div>
+    <div class="arch-layer"><h4><span class="lang" data-en="Specialist Agents" data-ko="전문 에이전트"></span><span class="cnt">32</span></h4><p>Boss 1 &middot; OMO 9 &middot; OMC 19 &middot; Vendored 3</p></div>
     <div class="arch-conn"></div>
-    <div class="arch-layer"><h4><span class="lang" data-en="Skills Layer" data-ko="스킬 레이어"></span><span class="cnt">200+</span></h4><p>ECC 180+ &middot; OMC 36 &middot; gstack 40 &middot; Superpowers 14 &middot; Core 3 &middot; Anthropic 14+</p></div>
+    <div class="arch-layer"><h4><span class="lang" data-en="Skills Layer" data-ko="스킬 레이어"></span><span class="cnt">139</span></h4><p>ECC 79 &middot; gstack 27 &middot; OMC 16 &middot; Superpowers 13 &middot; Core 4</p></div>
     <div class="arch-conn"></div>
     <div class="arch-layer" style="border-color:var(--accent)"><h4 style="color:var(--accent)">MCP Layer<span class="cnt">3</span></h4><p>Context7 &middot; Exa &middot; grep.app</p></div>
   </div>
@@ -354,17 +355,17 @@ section{padding:80px 0}
   <h2 class="st"><span class="lang" data-en="What's Inside" data-ko="구성 요소"></span></h2>
   <p class="ss"><span class="lang" data-en="Everything bundled with a single install." data-ko="단 한 번의 설치로 함께 제공되는 모든 것."></span></p>
   <div class="inside-grid fade-in" style="margin-bottom:40px">
-    <div class="inside-card"><span class="inside-num">200+</span><span class="inside-label"><span class="lang" data-en="Agents" data-ko="에이전트"></span></span><span class="inside-desc"><span class="lang" data-en="Boss + OMO + OMC + Agency + Packs + Superpowers" data-ko="Boss + OMO + OMC + Agency + Packs + Superpowers"></span></span></div>
-    <div class="inside-card"><span class="inside-num">200+</span><span class="inside-label"><span class="lang" data-en="Skills" data-ko="스킬"></span></span><span class="inside-desc"><span class="lang" data-en="Reusable /slash command tools" data-ko="/slash 명령어 도구"></span></span></div>
-    <div class="inside-card"><span class="inside-num">87</span><span class="inside-label"><span class="lang" data-en="Rules" data-ko="규칙"></span></span><span class="inside-desc"><span class="lang" data-en="Behavioral enforcement" data-ko="행동 규칙 강제"></span></span></div>
+    <div class="inside-card"><span class="inside-num">32</span><span class="inside-label"><span class="lang" data-en="Agents" data-ko="에이전트"></span></span><span class="inside-desc"><span class="lang" data-en="Boss + OMO + OMC + Vendored" data-ko="Boss + OMO + OMC + 벤더링"></span></span></div>
+    <div class="inside-card"><span class="inside-num">139</span><span class="inside-label"><span class="lang" data-en="Skills" data-ko="스킬"></span></span><span class="inside-desc"><span class="lang" data-en="Reusable /slash command tools" data-ko="/slash 명령어 도구"></span></span></div>
+    <div class="inside-card"><span class="inside-num">54</span><span class="inside-label"><span class="lang" data-en="Rules" data-ko="규칙"></span></span><span class="inside-desc"><span class="lang" data-en="Behavioral enforcement" data-ko="행동 규칙 강제"></span></span></div>
     <div class="inside-card"><span class="inside-num">3</span><span class="inside-label">MCP</span><span class="inside-desc">Context7 &middot; Exa &middot; grep.app</span></div>
-    <div class="inside-card"><span class="inside-num">7</span><span class="inside-label"><span class="lang" data-en="Hooks" data-ko="훅"></span></span><span class="inside-desc">PreToolUse &middot; PostToolUse</span></div>
-    <div class="inside-card"><span class="inside-num">8</span><span class="inside-label"><span class="lang" data-en="Upstreams" data-ko="업스트림"></span></span><span class="inside-desc"><span class="lang" data-en="Weekly auto-sync" data-ko="매주 자동 동기화"></span></span></div>
+    <div class="inside-card"><span class="inside-num">8</span><span class="inside-label"><span class="lang" data-en="Hooks" data-ko="훅"></span></span><span class="inside-desc">PreToolUse &middot; PostToolUse</span></div>
+    <div class="inside-card"><span class="inside-num">4</span><span class="inside-label"><span class="lang" data-en="Upstreams" data-ko="업스트림"></span></span><span class="inside-desc"><span class="lang" data-en="SHA-pinned, synced every 3 days" data-ko="SHA 고정, 3일마다 동기화"></span></span></div>
   </div>
   <div class="catalog fade-in">
     <details>
       <summary>Boss (Core) <span class="cat-count">1 <span class="lang" data-en="agent" data-ko="에이전트"></span></span></summary>
-      <div class="cat-body"><strong>Boss</strong> (Opus) — <span class="lang" data-en="Dynamic meta-orchestrator. Auto-discovers all agents, skills, and MCP at runtime. Routes via 5-priority chain. Never writes code." data-ko="동적 메타 오케스트레이터. 런타임에 모든 에이전트, 스킬, MCP를 자동 탐색. 5단계 우선순위 체인으로 라우팅. 직접 코드를 작성하지 않음."></span></div>
+      <div class="cat-body"><strong>Boss</strong> (Fable) — <span class="lang" data-en="Dynamic meta-orchestrator. Auto-discovers all agents, skills, and MCP at runtime. Routes via 5-priority chain. Never writes code." data-ko="동적 메타 오케스트레이터. 런타임에 모든 에이전트, 스킬, MCP를 자동 탐색. 5단계 우선순위 체인으로 라우팅. 직접 코드를 작성하지 않음."></span></div>
     </details>
     <details>
       <summary>OMO <span class="cat-count">9 <span class="lang" data-en="agents" data-ko="에이전트"></span></span></summary>
@@ -405,27 +406,22 @@ section{padding:80px 0}
       </div>
     </details>
     <details>
-      <summary>Agency Engineering <span class="cat-count">26 <span class="lang" data-en="agents" data-ko="에이전트"></span></span></summary>
-      <div class="cat-body"><span class="lang" data-en="26 engineering specialists in ~/.claude/agents/: AI Engineer, Backend Architect, CMS Developer, Code Reviewer, Data Engineer, Database Optimizer, DevOps Automator, Email Intelligence, Embedded Firmware, Feishu Integration, Filament Optimization, Frontend Developer, Git Workflow Master, Incident Response, Mobile App Builder, Rapid Prototyper, Security Engineer, Senior Developer, Software Architect, Solidity Engineer, SRE, Technical Writer, Threat Detection, WeChat Mini Program, AI Data Remediation, Autonomous Optimization Architect. All use claude-sonnet-5." data-ko="~/.claude/agents/에 26개 엔지니어링 전문가. 모두 claude-sonnet-5 사용."></span></div>
+      <summary>Vendored <span class="cat-count">3 <span class="lang" data-en="agents" data-ko="에이전트"></span></span></summary>
+      <div class="cat-body"><span class="lang" data-en="AI Engineer, DevOps Automator, Multi-Agent Systems Architect — MIT-licensed snapshots from agency-agents, vendored into agents/vendored/ on 2026-07-27 when that submodule was removed." data-ko="AI Engineer, DevOps Automator, Multi-Agent Systems Architect — 2026-07-27 agency-agents 서브모듈 제거 시 agents/vendored/로 스냅샷한 MIT 라이선스 에이전트."></span></div>
     </details>
     <details>
-      <summary>Agent Packs <span class="cat-count">136 <span class="lang" data-en="across 12 categories" data-ko="12개 카테고리"></span></span></summary>
-      <div class="cat-body"><span class="lang" data-en="On-demand domain specialists: Marketing (29), Specialized (28), Game Dev (20), Design (8), Testing (8), Sales (8), Paid Media (7), Project Mgmt (6), Spatial Computing (6), Support (6), Academic (5), Product (5). Activate: ln -s ~/.claude/agent-packs/&lt;pack&gt;/*.md ~/.claude/agents/" data-ko="온디맨드 도메인 전문가: 마케팅(29), 특화(28), 게임개발(20), 디자인(8), 테스트(8), 영업(8), 유료광고(7), PM(6), 공간컴퓨팅(6), 지원(6), 학술(5), 프로덕트(5). 활성화: ln -s ~/.claude/agent-packs/&lt;pack&gt;/*.md ~/.claude/agents/"></span></div>
-    </details>
-    <details>
-      <summary>Skills <span class="cat-count">200+</span></summary>
+      <summary>Skills <span class="cat-count">139</span></summary>
       <div class="cat-skills">
-        <div class="sk"><strong>ECC</strong><span>180+ skills</span></div>
-        <div class="sk"><strong>OMC</strong><span>36 skills</span></div>
-        <div class="sk"><strong>gstack</strong><span>40 skills</span></div>
-        <div class="sk"><strong>Superpowers</strong><span>14 skills</span></div>
+        <div class="sk"><strong>ECC</strong><span>79 skills</span></div>
+        <div class="sk"><strong>gstack</strong><span>27 skills</span></div>
+        <div class="sk"><strong>OMC</strong><span>16 skills</span></div>
+        <div class="sk"><strong>Superpowers</strong><span>13 skills</span></div>
         <div class="sk"><strong>Core</strong><span>4 skills</span></div>
-        <div class="sk"><strong>Anthropic</strong><span>14+ skills</span></div>
       </div>
     </details>
     <details>
-      <summary>MCP + Hooks <span class="cat-count">3 MCP &middot; 7 hooks</span></summary>
-      <div class="cat-body"><strong>MCP:</strong> Context7 (docs), Exa (web search), grep.app (GitHub code search)<br><strong>Hooks:</strong> 8 hooks: SessionStart, PreToolUse, PostToolUse (&times;3), SubagentStop, UserPromptSubmit, Stop</div>
+      <summary>MCP + Hooks <span class="cat-count">3 MCP &middot; 8 hooks</span></summary>
+      <div class="cat-body"><strong>MCP:</strong> Context7 (docs), Exa (web search), grep.app (GitHub code search)<br><strong>Hooks:</strong> 8 hook files across 8 events: SessionStart, PreToolUse, PostToolUse (&times;3), SubagentStop, TeammateIdle, TaskCompleted, Stop, UserPromptSubmit</div>
     </details>
   </div>
 </div>
@@ -503,15 +499,15 @@ section{padding:80px 0}
 <section id="credits" style="background:var(--bg2)">
 <div class="container">
   <h2 class="st"><span class="lang" data-en="Upstream Open-Source Sources" data-ko="업스트림 오픈소스 소스"></span></h2>
-  <p class="ss"><span class="lang" data-en="Built on the shoulders of 8 open-source projects. Weekly auto-sync keeps everything current." data-ko="8개 오픈소스 프로젝트의 기반 위에 구축됩니다. 매주 자동 동기화로 최신 상태를 유지합니다."></span></p>
+  <p class="ss"><span class="lang" data-en="Built on the shoulders of 8 open-source projects. 4 are SHA-pinned submodules, auto-synced every 3 days behind a security scan." data-ko="8개 오픈소스 프로젝트의 기반 위에 구축됩니다. 그중 4개는 SHA 고정 서브모듈로, 보안 스캔을 거쳐 3일마다 자동 동기화됩니다."></span></p>
   <div class="credits-grid fade-in">
-    <a class="credit" href="https://github.com/Yeachan-Heo/oh-my-claudecode"><h4>oh-my-claudecode</h4><p>Yeachan Heo — 19 agents + 36 skills</p></a>
+    <a class="credit" href="https://github.com/affaan-m/everything-claude-code"><h4>everything-claude-code</h4><p>affaan-m — 79 skills + 9 rule sets</p></a>
+    <a class="credit" href="https://github.com/Yeachan-Heo/oh-my-claudecode"><h4>oh-my-claudecode</h4><p>Yeachan Heo — 19 agents + 16 skills</p></a>
+    <a class="credit" href="https://github.com/garrytan/gstack"><h4>gstack</h4><p>garrytan — 27 skills + Playwright browser</p></a>
+    <a class="credit" href="https://github.com/obra/superpowers"><h4>superpowers</h4><p>Jesse Vincent — 13 skills</p></a>
     <a class="credit" href="https://github.com/code-yeongyu/oh-my-openagent"><h4>oh-my-openagent</h4><p>code-yeongyu — 9 OMO agents</p></a>
-    <a class="credit" href="https://github.com/affaan-m/everything-claude-code"><h4>everything-claude-code</h4><p>affaan-m — 180+ skills + 87 rules</p></a>
-    <a class="credit" href="https://github.com/msitarzewski/agency-agents"><h4>agency-agents</h4><p>msitarzewski — 26 eng + 136 domain agents</p></a>
-    <a class="credit" href="https://github.com/garrytan/gstack"><h4>gstack</h4><p>garrytan — 40 skills + Playwright browser</p></a>
-    <a class="credit" href="https://github.com/obra/superpowers"><h4>superpowers</h4><p>Jesse Vincent — 14 skills + 1 agent</p></a>
-    <a class="credit" href="https://github.com/anthropics/skills"><h4>anthropic/skills</h4><p>Anthropic — 14+ official skills</p></a>
+    <a class="credit" href="https://github.com/msitarzewski/agency-agents"><h4>agency-agents</h4><p>msitarzewski — 3 vendored agents</p></a>
+    <a class="credit" href="https://github.com/anthropics/skills"><h4>anthropic/skills</h4><p>Anthropic — official document skills</p></a>
     <a class="credit" href="https://github.com/forrestchang/andrej-karpathy-skills"><h4>andrej-karpathy-skills</h4><p>forrestchang — 4 behavioral guidelines</p></a>
   </div>
 </div>
@@ -521,10 +517,11 @@ section{padding:80px 0}
 <section id="ci">
 <div class="container">
   <h2 class="st">GitHub Actions</h2>
-  <p class="ss"><span class="lang" data-en="6 workflows keep my-claude tested, synced, and deployed." data-ko="6개 워크플로우가 my-claude를 테스트, 동기화, 배포합니다."></span></p>
+  <p class="ss"><span class="lang" data-en="7 workflows keep my-claude tested, synced, and deployed." data-ko="7개 워크플로우가 my-claude를 테스트, 동기화, 배포합니다."></span></p>
   <div class="actions-grid fade-in">
     <div class="action-card"><div class="ac-name">CI</div><div class="ac-trigger">push, pull_request</div><div class="ac-desc"><span class="lang" data-en="Validates configs, agents, skills" data-ko="설정, 에이전트, 스킬 유효성 검사"></span></div></div>
-    <div class="action-card"><div class="ac-name"><span class="lang" data-en="Update Upstream" data-ko="업스트림 업데이트"></span></div><div class="ac-trigger">weekly</div><div class="ac-desc"><span class="lang" data-en="Submodule update + auto PR" data-ko="서브모듈 업데이트 + 자동 PR"></span></div></div>
+    <div class="action-card"><div class="ac-name">Smoke</div><div class="ac-trigger">push, pull_request</div><div class="ac-desc"><span class="lang" data-en="hooks · shell · model drift · routing refs" data-ko="훅 · 셸 · 모델 드리프트 · 라우팅 참조"></span></div></div>
+    <div class="action-card"><div class="ac-name"><span class="lang" data-en="Update Upstream" data-ko="업스트림 업데이트"></span></div><div class="ac-trigger">every 3 days</div><div class="ac-desc"><span class="lang" data-en="Submodule update + SHA pins + security scan gate" data-ko="서브모듈 업데이트 + SHA 고정 + 보안 스캔 게이트"></span></div></div>
     <div class="action-card"><div class="ac-name">Auto Tag</div><div class="ac-trigger">push (main)</div><div class="ac-desc"><span class="lang" data-en="Version tag from plugin.json" data-ko="plugin.json에서 버전 태그"></span></div></div>
     <div class="action-card"><div class="ac-name">Pages</div><div class="ac-trigger">push (main)</div><div class="ac-desc"><span class="lang" data-en="Deploy index.html" data-ko="index.html 배포"></span></div></div>
     <div class="action-card"><div class="ac-name">CLA</div><div class="ac-trigger">pull_request</div><div class="ac-desc"><span class="lang" data-en="Contributor License Agreement" data-ko="기여자 라이선스 동의"></span></div></div>
@@ -545,7 +542,7 @@ section{padding:80px 0}
     <div class="orig-card"><h4><span class="lang" data-en="Cost Optimization" data-ko="비용 최적화"></span></h4><p><span class="lang" data-en="Automatic Opus/Sonnet/Haiku model routing by task complexity" data-ko="작업 복잡도에 따른 자동 Opus/Sonnet/Haiku 모델 라우팅"></span></p></div>
     <div class="orig-card"><h4><span class="lang" data-en="Briefing Vault" data-ko="지식 금고"></span></h4><p><span class="lang" data-en="Persistent Obsidian-compatible project memory" data-ko="지속적 Obsidian 호환 프로젝트 메모리"></span></p></div>
     <div class="orig-card"><h4><span class="lang" data-en="Agent Telemetry" data-ko="에이전트 텔레메트리"></span></h4><p><span class="lang" data-en="Execution logging to .briefing/agents/" data-ko=".briefing/agents/에 실행 로깅"></span></p></div>
-    <div class="orig-card"><h4><span class="lang" data-en="Smart Packs" data-ko="스마트 팩"></span></h4><p><span class="lang" data-en="136 domain agents activated on-demand via symlink" data-ko="심링크로 온디맨드 활성화되는 136개 도메인 에이전트"></span></p></div>
+    <div class="orig-card"><h4><span class="lang" data-en="Curated Allowlists" data-ko="큐레이션 허용목록"></span></h4><p><span class="lang" data-en="139 skills and 9 rule sets survive from thousands upstream — nothing unlisted reaches your context" data-ko="업스트림 수천 개 중 139개 스킬과 9개 룰셋만 설치 — 목록에 없는 것은 컨텍스트에 들어오지 않음"></span></p></div>
     <div class="orig-card"><h4>CI SHA Pre-check</h4><p><span class="lang" data-en="Upstream sync validates SHA before merge" data-ko="업스트림 동기화 시 병합 전 SHA 검증"></span></p></div>
     <div class="orig-card"><h4><span class="lang" data-en="Agent Dedup" data-ko="에이전트 중복 제거"></span></h4><p><span class="lang" data-en="Automatic deduplication across upstream sources" data-ko="업스트림 소스 간 자동 중복 제거"></span></p></div>
   </div>
@@ -594,7 +591,7 @@ bash my-claude/install.sh</pre>
     </div>
     <div class="faq-item">
       <button class="faq-q" onclick="toggleFaq(this)"><span class="lang" data-en="How do I update?" data-ko="어떻게 업데이트하나요?"></span><span></span></button>
-      <div class="faq-a"><div class="faq-a-inner"><span class="lang" data-en="Run the install script again — it pulls the latest from all 8 upstream sources. GitHub Actions also auto-syncs weekly and creates PRs for upstream changes." data-ko="설치 스크립트를 다시 실행하면 8개 업스트림 소스에서 최신 버전을 가져옵니다. GitHub Actions도 매주 자동 동기화하고 업스트림 변경에 대한 PR을 생성합니다."></span></div></div>
+      <div class="faq-a"><div class="faq-a-inner"><span class="lang" data-en="Run the install script again — it checks out the pinned SHA of each of the 4 upstream submodules. GitHub Actions also auto-syncs every 3 days and opens a PR, which only auto-merges when the security scan of the upstream diff comes back clean." data-ko="설치 스크립트를 다시 실행하면 4개 업스트림 서브모듈의 고정된 SHA를 체크아웃합니다. GitHub Actions도 3일마다 자동 동기화하여 PR을 생성하며, 업스트림 diff 보안 스캔이 통과한 경우에만 자동 병합됩니다."></span></div></div>
     </div>
     <div class="faq-item">
       <button class="faq-q" onclick="toggleFaq(this)"><span class="lang" data-en="What models does it use?" data-ko="어떤 모델이 사용되나요?"></span><span></span></button>

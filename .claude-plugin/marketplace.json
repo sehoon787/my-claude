@@ -4,13 +4,13 @@
     "name": "sehoon787"
   },
   "metadata": {
-    "description": "All-in-one agent harness for Claude Code — 200+ agents, 200+ skills, rules, 10 hooks (7 events), 3 MCP servers. Links via submodules from agency-agents, everything-claude-code, oh-my-claudecode, gstack, and superpowers."
+    "description": "All-in-one agent harness for Claude Code — 32 curated agents, 139 curated skills, 9 rule sets, 8 hooks (8 events), 3 MCP servers. Links via submodules from everything-claude-code, oh-my-claudecode, gstack, and superpowers."
   },
   "plugins": [
     {
       "name": "my-claude",
       "source": "./",
-      "description": "200+ agents (core always loaded + domain agent-packs on demand), 200+ skills, rules, 10 behavioral hooks (vault enforcement, agent logging, verification), and MCP servers (Context7, Exa, grep.app)",
+      "description": "32 curated agents (Boss meta-orchestrator + OMO sub-orchestrators + OMC specialists + vendored engineering agents), 139 curated skills, rules, 8 behavioral hooks (vault enforcement, agent logging, verification), and MCP servers (Context7, Exa, grep.app)",
       "author": {
         "name": "sehoon787"
       },
@@ -23,7 +23,6 @@
         "boss",
         "sisyphus",
         "hephaestus",
-        "agency-agents",
         "everything-claude-code",
         "oh-my-claudecode",
         "gstack",

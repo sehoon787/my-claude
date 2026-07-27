@@ -1,6 +1,6 @@
 # my-claude — Full Setup Guide
 
-> **Version Note (2026-04):** Last verified April 2026. The architecture is now plugin + `install.sh` based. Do not follow the old per-upstream manual clone steps. See [AI-INSTALL.md](./AI-INSTALL.md) for the AI-agent-friendly version of these instructions.
+> **Version Note (2026-07):** Last verified July 2026, after the agency-agents submodule was removed and the skill allowlists were introduced. The architecture is plugin + `install.sh` based. Do not follow the old per-upstream manual clone steps. See [AI-INSTALL.md](./AI-INSTALL.md) for the AI-agent-friendly version of these instructions.
 
 ---
 
@@ -10,7 +10,7 @@
 2. [Install (choose one method)](#2-install-choose-one-method)
 3. [What Gets Installed](#3-what-gets-installed)
 4. [Companion Tools](#4-companion-tools)
-5. [Agent Packs](#5-agent-packs)
+5. [Agents](#5-agents)
 6. [gstack Sprint Process](#6-gstack-sprint-process)
 7. [Briefing Vault](#7-briefing-vault)
 8. [Verify Installation](#8-verify-installation)
@@ -164,26 +164,23 @@ This installs skills to `~/.agents/skills/` and auto-symlinks them to `~/.claude
 
 | Category | Count | Details |
 |----------|------:|---------|
-| **Core agents** (always loaded) | 56 | Boss (1) + OMO sub-orchestrators (9) + OMC specialists (19) + Agency Engineering (26) + Superpowers (1) |
-| **Agent packs** (on-demand) | 136 | 12 domain categories in `~/.claude/agent-packs/` |
-| **Skills** | 280+ | ECC (180+) + OMC (36) + gstack (40) + Superpowers (14) + Core (3) + Anthropic (14+) |
-| **Rules** | 90 | ECC (89) + Core (1) |
-| **Hooks** | 7 | SessionStart, PreToolUse, PostToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop |
+| **Agents** (always loaded) | 32 | Boss (1) + OMO sub-orchestrators (9) + OMC specialists (19) + vendored engineering agents (3) |
+| **Skills** | 139 | ECC (79) + gstack (27) + OMC (16) + Superpowers (13) + Core (4) |
+| **Rules** | 54 files / 9 sets | ECC (53) + Core (1) |
+| **Hooks** | 8 files / 8 events | SessionStart, PreToolUse, PostToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop, UserPromptSubmit |
 | **MCP Servers** | 3 | Context7, Exa, grep.app (registered globally) |
+
+Skills and rules are installed from an explicit allowlist (`scripts/skill-allowlists.sh`). Upstream ships far more — 278 ECC skills, 59 gstack skills, 41 OMC skills — and everything unlisted is deliberately left out to keep session context lean. Anthropic's official document skills are installed separately (see [Section 4](#4-companion-tools)) and add to the skill count.
 
 ### File layout after install
 
 ```
 ~/.claude/
-├── agents/          ← Core agents (always loaded by Claude Code)
-├── agent-packs/     ← Domain packs (activate on demand)
-│   ├── marketing/
-│   ├── testing/
-│   └── ...         (12 categories total)
-├── skills/          ← 280+ skill directories
-├── rules/           ← 90 rule files
-├── hooks/           ← hooks.json + session-start.sh
-├── docs/nexus/      ← Strategy reference docs (not parsed as agents)
+├── agents/          ← 32 agents (always loaded by Claude Code)
+├── skills/          ← 139 skill directories
+├── rules/           ← 54 rule files in 9 rule sets
+├── hooks/           ← hooks.json + 7 hook scripts
+├── docs/nexus/      ← Agent Teams reference (not parsed as an agent)
 ├── .my-claude-manifest   ← Tracks installed files for safe upgrades
 └── .my-claude-version    ← Installed version string
 ```
@@ -196,7 +193,7 @@ This installs skills to `~/.agents/skills/` and auto-symlinks them to `~/.claude
 
 | Tool | What It Is | Why |
 |------|-----------|-----|
-| **Anthropic Official Skills** | 14+ proprietary skills (pdf, docx, pptx, xlsx, canvas-design, mcp-builder) | Cannot be bundled in the plugin; installed via `claude plugin add anthropics/skills` |
+| **Anthropic Official Skills** | Official document and design skills (pdf, docx, pptx, xlsx, canvas-design, mcp-builder) | Cannot be bundled in the plugin; installed via `claude plugin add anthropics/skills`. Deliberately not manifest-tracked, so upgrades never delete them |
 | **omc** (`oh-my-claude-sisyphus`) | npm CLI for OMC team orchestration | Enables `omc team` multi-agent split-pane sessions |
 | **omo** (`oh-my-opencode`) | npm CLI bridging Claude Code and OpenCode | Optional — only needed for OpenCode TUI workflows |
 | **ast-grep** | Structural code search and rewrite tool | Used by several skills for code analysis |
@@ -208,46 +205,26 @@ This installs skills to `~/.agents/skills/` and auto-symlinks them to `~/.claude
 
 ---
 
-## 5. Agent Packs
+## 5. Agents
 
-136 domain agents are stored in `~/.claude/agent-packs/` and are NOT loaded by default. This keeps the core agent list clean for Boss's routing.
+All 32 agents load on every session — there are no on-demand packs to activate.
 
-### Activating packs
+| Group | Count | Path | Models |
+|-------|------:|------|--------|
+| Boss meta-orchestrator | 1 | `~/.claude/agents/boss.md` | `claude-fable-5` |
+| OMO sub-orchestrators and specialists | 9 | `~/.claude/agents/` | 7× `claude-opus-5`, 2× `claude-sonnet-5` |
+| OMC specialists | 19 | `~/.claude/agents/` | opus / sonnet / haiku per agent |
+| Vendored engineering agents | 3 | `~/.claude/agents/` | inherited from the caller |
 
-```bash
-# Activate specific packs (symlinks agents into ~/.claude/agents/)
-bash install.sh --with-packs=marketing,testing,sales
-
-# Activate a pack manually (without re-running install.sh)
-ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
-```
-
-**Plugin users:** All 136 domain agents are accessible via the `my-claude:agency:*` namespace in Claude Code — no symlinks needed.
-
-### Available packs
-
-| Pack | Agents | Examples |
-|------|-------:|---------|
-| marketing | 29 | Douyin, Xiaohongshu, TikTok, SEO Strategist |
-| specialized | 28 | Legal, Finance, Healthcare, MCP Builder |
-| game-development | 20 | Unity, Unreal, Godot, Roblox, XR |
-| design | 8 | Brand Identity, UI Designer, UX Researcher |
-| testing | 8 | API Tester, Accessibility, Performance |
-| sales | 8 | Deal Strategist, Pipeline Analyst |
-| paid-media | 7 | Google Ads, Meta Ads, Programmatic |
-| project-management | 6 | Scrum Master, Kanban, Risk Manager |
-| spatial-computing | 6 | visionOS, WebXR, Metal |
-| support | 6 | Analytics, Infrastructure, Legal Ops |
-| academic | 5 | Anthropologist, Historian, Psychologist |
-| product | 5 | Product Manager, Sprint Planner, Feedback Analyst |
+The vendored three — ai-engineer, devops-automator, multi-agent-systems-architect — are MIT-licensed snapshots taken from [agency-agents](https://github.com/msitarzewski/agency-agents) on 2026-07-27, when that submodule was dropped. The rest of that repo's domain agents are no longer part of my-claude; the `--with-packs` flag and the `my-claude:agency:*` namespace no longer exist.
 
 ---
 
 ## 6. gstack Sprint Process
 
-gstack is a sprint-process harness from [garrytan/gstack](https://github.com/garrytan/gstack) that adds 40 skills for structured engineering workflows.
+gstack is a sprint-process harness from [garrytan/gstack](https://github.com/garrytan/gstack). my-claude installs 26 of its skills plus the `gstack` root router — 27 in total — for structured engineering workflows.
 
-Key gstack skills: `/review`, `/qa`, `/ship`, `/cso`, `/investigate`, `/office-hours`, `/plan-fix`, `/plan-feature`, `/plan-refactor`, `/security-review`, `/canary-watch`, `/benchmark`, `/verification-loop`. gstack supersedes several ECC skills of the same name — `install.sh` removes stale copies automatically.
+Key gstack skills: `/review`, `/qa`, `/ship`, `/cso`, `/investigate`, `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`, `/plan-design-review`, `/plan-devex-review`, `/land-and-deploy`, `/canary`, `/benchmark`, `/retro`. gstack supersedes several ECC skills of the same name — `install.sh` removes stale copies automatically.
 
 ### How Boss uses gstack
 
@@ -302,13 +279,13 @@ Boss reads `INDEX.md` at session start, writes notes during work, and updates th
 Run this block in your terminal after installation:
 
 ```bash
-echo "Core agents:      $(find ~/.claude/agents -name '*.md' 2>/dev/null | wc -l) (no domain agents in core)"
-echo "Agent packs:      $(find ~/.claude/agent-packs -name '*.md' 2>/dev/null | wc -l)"
-echo "Plugin skills:    $(find ~/.claude/skills -name 'SKILL.md' 2>/dev/null | wc -l)"
+echo "Agents:           $(find ~/.claude/agents -name '*.md' 2>/dev/null | wc -l)"
+echo "Skills (total):   $(find ~/.claude/skills -maxdepth 2 -name 'SKILL.md' 2>/dev/null | wc -l)"
+echo "Skills (my-claude): $(grep '^skills/' ~/.claude/.my-claude-manifest 2>/dev/null | cut -d/ -f2 | sort -u | wc -l)"
 echo "Rules:            $(find ~/.claude/rules -name '*.md' 2>/dev/null | wc -l)"
 echo "Anthropic skills: $(ls -d ~/.claude/skills/pdf ~/.claude/skills/docx 2>/dev/null | wc -l) key skills"
 echo "Manifest:         $(wc -l < ~/.claude/.my-claude-manifest 2>/dev/null || echo 'MISSING') entries"
-echo "Duplicates:       $(find ~/.claude/agents ~/.claude/agent-packs -name '*.md' -exec basename {} \; | sort | uniq -d | wc -l | tr -d ' ') (should be 0)"
+echo "Duplicates:       $(find ~/.claude/agents -name '*.md' -exec basename {} \; | sort | uniq -d | wc -l | tr -d ' ') (should be 0)"
 echo "gstack:           $(find ~/.claude/skills -path '*/gstack/SKILL.md' 2>/dev/null | head -1 | grep -q . && echo 'OK' || echo 'MISSING')"
 echo "omc:              $(command -v omc >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
@@ -318,12 +295,12 @@ echo "Version:          $(cat ~/.claude/.my-claude-version 2>/dev/null || echo '
 ### Expected output
 
 ```
-Core agents:      55+  (no domain agents in core)
-Agent packs:      136+
-Plugin skills:    200+
-Rules:            89
+Agents:           32
+Skills (total):   139 or more (Anthropic document skills add to this)
+Skills (my-claude): 139
+Rules:            54
 Anthropic skills: 2 key skills (pdf, docx)
-Manifest:         300+ entries
+Manifest:         315 entries
 Duplicates:       0 (should be 0)
 gstack:           OK
 omc:              OK
@@ -400,7 +377,7 @@ If `npm i -g` fails with a permissions error, set a user-local npm prefix: `npm 
 
 ### Agent not recognized by Boss
 
-Boss discovers agents at runtime by scanning `~/.claude/agents/`. Check that the `.md` file is in `~/.claude/agents/` (not `agent-packs/`), then start a new session. For pack agents, symlink them in or re-run `install.sh --with-packs=<pack>`.
+Boss discovers agents at runtime by scanning `~/.claude/agents/`. Check that the `.md` file is there and that its frontmatter parses, then start a new session.
 
 ### Windows: symlinks not working in install.sh
 

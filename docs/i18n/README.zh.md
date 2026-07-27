@@ -9,14 +9,14 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-200%2B-blue)
-![Skills](https://img.shields.io/badge/skills-200%2B-purple)
-![Rules](https://img.shields.io/badge/rules-87-orange)
+![Agents](https://img.shields.io/badge/agents-32-blue)
+![Skills](https://img.shields.io/badge/skills-139-purple)
+![Rules](https://img.shields.io/badge/rules-54-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
-![Hooks](https://img.shields.io/badge/hooks-7-red)
+![Hooks](https://img.shields.io/badge/hooks-8-red)
 
 **Claude Code 的一体化 Agent 框架。**
-**一个插件，200+ Agent 随时待命。**
+**一个插件，32 个精选 Agent 随时待命。**
 
 Boss 在运行时自动发现所有 Agent、Skill 和 MCP 工具，<br>
 并将任务路由到最合适的专家。无需配置文件，无需样板代码。
@@ -85,7 +85,7 @@ User Request
 │  Phase 2 · CAPABILITY MATCHING              │
 │  P0: gstack skill (if installed)            │
 │  P1: Exact skill match                      │
-│  P2: Specialist agent (200+)               │
+│  P2: Specialist agent (32)                  │
 │  P3: Multi-agent orchestration              │
 │  P4: General-purpose fallback               │
 └──────────────────────┬──────────────────────┘
@@ -111,8 +111,9 @@ Boss 对每个请求按优先级链逐级匹配，直到找到最佳方案：
 
 | 优先级 | 匹配类型 | 触发时机 | 示例 |
 |:--------:|-----------|------|---------|
+| **P0** | gstack Skill | 发布 / QA / 部署 / 安全流程 | `"ship this"` → gstack `/ship` |
 | **P1** | Skill 匹配 | 任务对应某个独立 skill | `"merge PDFs"` → pdf skill |
-| **P2** | 专家 Agent | 存在领域专属 Agent | `"security audit"` → Security Engineer |
+| **P2** | 专家 Agent | 存在领域专属 Agent | `"security audit"` → security-reviewer |
 | **P3a** | Boss 直接 | 2-4 个独立 Agent | `"fix 3 bugs"` → parallel spawn |
 | **P3b** | 子编排器 | 复杂多步骤工作流 | `"refactor + test"` → Sisyphus |
 | **P3c** | Agent 团队 | 需要点对点通信 | `"implement + review"` → Review Chain |
@@ -122,9 +123,10 @@ Boss 对每个请求按优先级链逐级匹配，直到找到最佳方案：
 
 | 复杂度 | 模型 | 用途 |
 |-----------|-------|----------|
-| 深度分析、架构 | Opus | Boss、Oracle、Sisyphus |
-| 标准实现 | Sonnet | executor、debugger、security-reviewer |
-| 快速查询、探索 | Haiku | explore、简单咨询 |
+| 顶层编排 | `claude-fable-5` | Boss |
+| 深度分析、架构 | `claude-opus-5` | Sisyphus、Atlas、Hephaestus、Oracle、Metis、Momus、Prometheus |
+| 标准实现 | `claude-sonnet-5` | Librarian、Multimodal-Looker、OMC 专家 Agent |
+| 快速查询、探索 | `claude-haiku-4-5` | 轻量 OMC Agent、简单咨询 |
 
 ### 三阶段冲刺工作流
 
@@ -149,7 +151,7 @@ Confirm "design done"   Architect verification  User: approve / improve
 └───────────────────────┬─────────────────────────────┘
                         ▼
 ┌─────────────────────────────────────────────────────┐
-│  Boss · Meta-Orchestrator (Opus)                      │
+│  Boss · Meta-Orchestrator (Fable)                     │
 │  Discovery → Classification → Matching → Delegation  │
 └──┬──────────┬──────────┬──────────┬─────────────────┘
    │          │          │          │
@@ -163,15 +165,14 @@ Confirm "design done"   Architect verification  User: approve / improve
          └────────┘
 ┌─────────────────────────────────────────────────────┐
 │  Behavioral Layer                                     │
-│  Karpathy Guidelines · ECC Rules (87) · Hooks (7)    │
+│  Karpathy Guidelines · Rules (54) · Hooks (8)        │
 ├─────────────────────────────────────────────────────┤
-│  Specialist Agents (200+)                             │
-│  OMO 9 · OMC 19 · Agency Eng. 26 · Superpowers 1    │
-│  + 136 domain packs (on-demand)                       │
+│  Specialist Agents (32)                               │
+│  Boss 1 · OMO 9 · OMC 19 · Vendored 3                │
 ├─────────────────────────────────────────────────────┤
-│  Skills (200+)                                        │
-│  ECC 180+ · OMC 36 · gstack 40 · Superpowers 14     │
-│  + Core 3 · Anthropic 14+                             │
+│  Skills (139)                                         │
+│  ECC 79 · gstack 27 · OMC 16 · Superpowers 13       │
+│  + Core 4                                             │
 ├─────────────────────────────────────────────────────┤
 │  MCP Layer                                            │
 │  Context7 · Exa · grep.app                            │
@@ -184,21 +185,22 @@ Confirm "design done"   Architect verification  User: approve / improve
 
 | 类别 | 数量 | 来源 |
 |----------|------:|--------|
-| **核心 Agent**（始终加载） | 56 | Boss 1 + OMO 9 + OMC 19 + Agency Engineering 26 + Superpowers 1 |
-| **Agent 包**（按需加载） | 136 | 来自 agency-agents 的 12 个领域分类 |
-| **Skills** | 200+ | ECC 180+ · OMC 36 · gstack 40 · Superpowers 14 · Core 3 |
-| **Anthropic Skills** | 14+ | PDF、DOCX、PPTX、XLSX、MCP builder |
-| **规则** | 87 | ECC common + 14 个语言目录 |
+| **Agent**（始终加载） | 32 | Boss 1 + OMO 9 + OMC 19 + Vendored 3 |
+| **Skills** | 139 | ECC 79 · gstack 27 · OMC 16 · Superpowers 13 · Core 4 |
+| **规则** | 54 个文件 / 9 个规则集 | ECC 53（common + 8 个语言目录）+ Core 1 |
 | **MCP 服务器** | 3 | Context7、Exa、grep.app |
-| **Hooks** | 7 | 委派守卫、遥测、验证 |
+| **Hooks** | 8 个文件 / 8 个事件 | 委派守卫、遥测、验证、知识库 |
+| **上游子模块** | 4 | ecc、omc、gstack、superpowers |
 | **CLI 工具** | 3 | omc、omo、ast-grep |
+
+以上 Agent、Skills、规则全部登记在 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) 的白名单中，并由安装清单跟踪。Anthropic 官方文档 Skills（pdf、docx 等）通过 `claude plugin add anthropics/skills` 单独安装，有意不纳入清单跟踪。
 
 <details>
 <summary><strong>核心 Agent — Boss 元编排器（1）</strong></summary>
 
 | Agent | 模型 | 角色 | 来源 |
 |-------|-------|------|--------|
-| Boss | Opus | 动态运行时发现 → 能力匹配 → 最优路由。从不编写代码。 | my-claude |
+| Boss | Fable | 动态运行时发现 → 能力匹配 → 最优路由。从不编写代码。 | my-claude |
 
 </details>
 
@@ -247,81 +249,35 @@ Confirm "design done"   Architect verification  User: approve / improve
 </details>
 
 <details>
-<summary><strong>Agency Engineering — 始终加载的专家（26）</strong></summary>
+<summary><strong>Vendored Agent — AI 与基础设施专家（3）</strong></summary>
+
+在 2026-07-27 移除 `agency-agents` 子模块时，从 [agency-agents](https://github.com/msitarzewski/agency-agents)（MIT）快照而来。仅保留栈内没有替代者的工程 Agent，每个文件都保留了上游署名。
 
 | Agent | 角色 | 来源 |
 |-------|------|--------|
-| AI Engineer | AI/ML 工程 | [agency-agents](https://github.com/msitarzewski/agency-agents) |
-| Backend Architect | 后端架构 | agency-agents |
-| CMS Developer | CMS 开发 | agency-agents |
-| Code Reviewer | 代码审查 | agency-agents |
-| Data Engineer | 数据工程 | agency-agents |
-| Database Optimizer | 数据库优化 | agency-agents |
-| DevOps Automator | DevOps 自动化 | agency-agents |
-| Embedded Firmware Engineer | 嵌入式固件 | agency-agents |
-| Frontend Developer | 前端开发 | agency-agents |
-| Git Workflow Master | Git 工作流 | agency-agents |
-| Incident Response Commander | 事故响应 | agency-agents |
-| Mobile App Builder | 移动应用 | agency-agents |
-| Rapid Prototyper | 快速原型 | agency-agents |
-| Security Engineer | 安全工程 | agency-agents |
-| Senior Developer | 高级开发 | agency-agents |
-| Software Architect | 软件架构 | agency-agents |
-| SRE | 站点可靠性 | agency-agents |
-| Technical Writer | 技术文档 | agency-agents |
-| AI Data Remediation Engineer | 自愈数据管道 | agency-agents |
-| Autonomous Optimization Architect | API 性能治理 | agency-agents |
-| Email Intelligence Engineer | 邮件数据提取 | agency-agents |
-| Feishu Integration Developer | 飞书 / Lark 平台 | agency-agents |
-| Filament Optimization Specialist | Filament PHP 优化 | agency-agents |
-| Solidity Smart Contract Engineer | EVM 智能合约 | agency-agents |
-| Threat Detection Engineer | SIEM 与威胁狩猎 | agency-agents |
-| WeChat Mini Program Developer | WeChat 小程序 | agency-agents |
+| AI Engineer | AI/ML 工程、模型集成、数据管道 | agency-agents（vendored） |
+| DevOps Automator | 基础设施自动化、CI/CD、云运维 | agency-agents（vendored） |
+| Multi-Agent Systems Architect | Agent 拓扑、上下文管理、故障恢复 | agency-agents（vendored） |
 
 </details>
 
 <details>
-<summary><strong>Agent 包 — 按需领域专家（136）</strong></summary>
+<summary><strong>Skills — 139 个，来自 5 个来源</strong></summary>
 
-安装至 `~/.claude/agent-packs/`。通过软链接激活：
-
-```bash
-ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
-```
-
-| 包 | 数量 | 示例 | 来源 |
-|------|------:|---------|--------|
-| marketing | 29 | Douyin、Xiaohongshu、TikTok、SEO | [agency-agents](https://github.com/msitarzewski/agency-agents) |
-| specialized | 28 | 法律、金融、医疗、MCP Builder | agency-agents |
-| game-development | 20 | Unity、Unreal、Godot、Roblox | agency-agents |
-| design | 8 | 品牌、UI、UX、视觉叙事 | agency-agents |
-| testing | 8 | API、无障碍、性能 | agency-agents |
-| sales | 8 | 交易策略、管道分析 | agency-agents |
-| paid-media | 7 | Google Ads、Meta Ads、程序化广告 | agency-agents |
-| project-management | 6 | Scrum、看板、风险管理 | agency-agents |
-| spatial-computing | 6 | visionOS、WebXR、Metal | agency-agents |
-| support | 6 | 分析、基础设施、法律 | agency-agents |
-| academic | 5 | 人类学家、历史学家、心理学家 | agency-agents |
-| product | 5 | 产品经理、冲刺、反馈 | agency-agents |
-
-</details>
-
-<details>
-<summary><strong>Skills — 200+ 来自 6 个来源</strong></summary>
+每个来源都由 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) 白名单管理，未列入的 Skills 一律不安装。
 
 | 来源 | 数量 | 核心 Skills |
 |--------|------:|------------|
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 180+ | tdd-workflow、autopilot、ralph、security-review、coding-standards |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 36 | plan、team、trace、deep-dive、blueprint、ultrawork |
-| [gstack](https://github.com/garrytan/gstack) | 40 | /qa、/review、/ship、/cso、/investigate、/office-hours |
-| [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming、systematic-debugging、TDD、parallel-agents |
-| [my-claude Core](https://github.com/sehoon787/my-claude) | 3 | boss-advanced、gstack-sprint、briefing-vault |
-| [Anthropic Official](https://github.com/anthropics/skills) | 14+ | pdf、docx、pptx、xlsx、canvas-design、mcp-builder |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 79 | coding-standards、react-patterns、fastapi-patterns、agent-architecture-audit、e2e-testing |
+| [gstack](https://github.com/garrytan/gstack) | 27 | /qa、/review、/ship、/cso、/investigate、/office-hours |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 16 | autopilot、ralph、team、ultrawork、ralplan、omc-reference |
+| [superpowers](https://github.com/obra/superpowers) | 13 | brainstorming、systematic-debugging、test-driven-development、writing-plans |
+| [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced、boss-briefing、briefing-vault、gstack-sprint |
 
 </details>
 
 <details>
-<summary><strong>MCP 服务器（3）+ Hooks（7）</strong></summary>
+<summary><strong>MCP 服务器（3）+ Hooks（8）</strong></summary>
 
 **MCP 服务器**
 
@@ -342,6 +298,7 @@ ln -s ~/.claude/agent-packs/marketing/*.md ~/.claude/agents/
 | Completion Check | Stop | 确认任务已验证 + 提示会话摘要 |
 | Teammate Idle Guide | TeammateIdle | 提示领导者关注空闲队友 |
 | Task Quality Gate | TaskCompleted | 验证交付物质量 |
+| Vault Reminder | UserPromptSubmit | 超过 5 条消息后提示运行 /boss-briefing |
 
 </details>
 
@@ -419,18 +376,23 @@ BriefingVault v2 融合了三种知识管理方法论：
 
 ## 上游开源来源
 
-my-claude 通过 git 子模块捆绑了 5 个 MIT 授权的上游仓库的内容：
+my-claude 以 git 子模块方式关联 4 个 MIT 授权的上游仓库，每个都固定在明确的 SHA 上：
 
 | # | 来源 | 提供的内容 |
 |---|--------|-----------------|
-| 1 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 19 个专家 Agent + 36 个 skills。Claude Code 多 Agent 框架，含 autopilot、ralph、团队编排。 |
-| 2 | <img src="https://github.com/code-yeongyu.png?size=32" width="20" height="20" align="center"/> **[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — code-yeongyu | 9 个 OMO Agent（Sisyphus、Atlas、Oracle 等）。支持 Claude、GPT、Gemini 的多平台 Agent 框架。 |
-| 3 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** — affaan-m | 180+ 个 skills + 87 条规则，覆盖 14 种语言。全面的开发框架，包含 TDD、安全和编码标准。 |
-| 4 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 26 个工程 Agent（始终加载）+ 12 个分类共 136 个领域 Agent 包。 |
-| 5 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | 40 个用于代码审查、QA、安全审计、部署的 skills。包含 Playwright 浏览器守护进程。 |
-| 6 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 14 个 skills + 1 个 Agent，覆盖头脑风暴、TDD、并行 Agent 和代码审查。 |
-| 7 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | 14+ 个官方 skills，用于 PDF、DOCX、PPTX、XLSX 和 MCP builder。 |
-| 8 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 条 AI 编码行为准则（先思考再编码、简洁优先、精准修改、目标驱动执行）。 |
+| 1 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** — affaan-m | 安装 79 个 skills + 9 个规则集。语言与技术栈知识通道：TDD、安全、编码标准、框架模式。 |
+| 2 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 19 个专家 Agent + 安装 16 个 skills。编排通道：autopilot、ralph、team。 |
+| 3 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | 安装 27 个 skills，用于发布、QA、部署与安全审查（Boss P0 通道）。含 Playwright 浏览器守护进程。 |
+| 4 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 安装 13 个 skills，覆盖开发流程通道：头脑风暴、TDD、系统化调试、计划撰写。 |
+
+并非子模块，但同属这套技术栈：
+
+| 来源 | 接入方式 |
+|--------|----------------|
+| <img src="https://github.com/code-yeongyu.png?size=32" width="20" height="20" align="center"/> **[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — code-yeongyu | 9 个 OMO Agent（Sisyphus、Atlas、Oracle 等），已移植为本仓库 `agents/omo/` 下的独立 `.md` Agent。 |
+| <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 2026-07-27 移除子模块。3 个工程 Agent 连同署名一并 vendored 到 `agents/vendored/`。 |
+| <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | 由 `install.sh` 通过 `claude plugin add anthropics/skills` 安装（pdf、docx 等）。不纳入清单跟踪。 |
+| <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 条 AI 编码行为准则，追加到 `~/.claude/CLAUDE.md`。 |
 
 ---
 
@@ -439,7 +401,8 @@ my-claude 通过 git 子模块捆绑了 5 个 MIT 授权的上游仓库的内容
 | 工作流 | 触发条件 | 用途 |
 |----------|---------|---------|
 | **CI** | push、PR | 验证 JSON 配置、Agent frontmatter、skill 存在性、上游文件数量 |
-| **Update Upstream** | 每周 / 手动 | 运行 `git submodule update --remote` 并创建自动合并 PR |
+| **Smoke** | push、PR | 4 个 job — `hooks`（钩子执行）、`shell`（安装脚本形态）、`drift`（模型漂移）、`routing-refs`（失效的 Agent/Skill 引用） |
+| **Update Upstream** | 每 3 天 / 手动 | `git submodule update --remote` → 刷新 `SOURCES.json` 的 SHA 固定 → 上游 diff 安全扫描 → 扫描通过才自动合并，否则保留 PR 供人工复核 |
 | **Auto Tag** | push 到 main | 读取 `plugin.json` 版本并在有新版本时创建 git tag |
 | **Pages** | push 到 main | 将 `docs/index.html` 部署到 GitHub Pages |
 | **CLA** | PR | 贡献者许可协议检查 |
@@ -455,27 +418,27 @@ my-claude 通过 git 子模块捆绑了 5 个 MIT 授权的上游仓库的内容
 |---------|-------------|
 | **Boss 元编排器** | 动态能力发现 → 意图分类 → 5 级优先路由 → 委派 → 验证 |
 | **三阶段冲刺** | 设计（交互式）→ 执行（通过 ralph 自主进行）→ 审查（交互式对比设计文档） |
-| **Agent 层级优先级** | core > omo > omc > agency 去重。最专业的 Agent 优先。 |
-| **Agency 成本优化** | 咨询用 Haiku，实现用 Sonnet——172 个领域 Agent 自动模型路由 |
+| **Agent 层级优先级** | core > omo > omc > vendored 去重。最专业的 Agent 优先。 |
+| **通道归属** | 编排 → OMC，开发流程 → superpowers，发布/QA/部署/安全 → gstack（Boss P0），语言与技术栈知识 → ECC，AI 与领域 → vendored Agent |
+| **精选白名单** | `scripts/skill-allowlists.sh` 是唯一事实来源——上游数千项中只留下 139 个 Skills 和 9 个规则集，未列入的绝不进入会话上下文 |
 | **Briefing Vault** | 兼容 Obsidian 的 `.briefing/` 目录，含会话、决策、学习、参考资料 |
 | **Agent 遥测** | PostToolUse hook 将 Agent 使用情况记录到 `agent-usage.jsonl` |
 | **智能包** | 项目类型检测在会话开始时推荐相关 Agent 包 |
-| **CI SHA 预检** | 上游同步通过 `git ls-remote` SHA 对比跳过未变更来源 |
-| **Agent 重复检测** | 规范化名称对比检测跨上游来源的重复项 |
+| **无变更同步跳过** | 上游同步先暂存子模块升级与 `SOURCES.json` 固定，只有该 diff 非空时才创建 PR |
+| **Agent 重复检测** | `tests/validate-sync.sh` 比对 `agents/` 与 omc、superpowers 子模块中的 Agent 文件名并报告冲突 |
 
 ---
 
 ## 捆绑的上游版本
 
-通过 git 子模块链接。固定提交由 `.gitmodules` 原生追踪。
+通过 git 子模块链接。固定提交由 `.gitmodules` 原生追踪，并以 AI-BOM 形式镜像在 [`upstream/SOURCES.json`](../../upstream/SOURCES.json) 中。`install.sh` 直接检出下列 SHA，而不是跟踪 `main`。
 
 | 来源 | SHA | 日期 | 差异 |
 |--------|-----|------|------|
-| [agency-agents](https://github.com/msitarzewski/agency-agents) | `4feb0cd` | 2026-04-07 | [compare](https://github.com/msitarzewski/agency-agents/compare/4feb0cd...HEAD) |
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `7dfdbe0` | 2026-04-07 | [compare](https://github.com/affaan-m/everything-claude-code/compare/7dfdbe0...HEAD) |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `2487d38` | 2026-04-07 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/2487d38...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | `03973c2` | 2026-04-07 | [compare](https://github.com/garrytan/gstack/compare/03973c2...HEAD) |
-| [superpowers](https://github.com/obra/superpowers) | `b7a8f76` | 2026-04-06 | [compare](https://github.com/obra/superpowers/compare/b7a8f76...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `4092795` | 2026-07-27 | [compare](https://github.com/affaan-m/everything-claude-code/compare/4092795...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `590fb98` | 2026-07-27 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/590fb98...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `7c9df1c` | 2026-07-27 | [compare](https://github.com/garrytan/gstack/compare/7c9df1c...HEAD) |
+| [superpowers](https://github.com/obra/superpowers) | `3dcbd5c` | 2026-07-27 | [compare](https://github.com/obra/superpowers/compare/3dcbd5c...HEAD) |
 
 ---
 
@@ -485,7 +448,7 @@ my-claude 通过 git 子模块捆绑了 5 个 MIT 授权的上游仓库的内容
 
 ## 致谢
 
-本项目基于以下工作构建：[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)（Yeachan Heo）、[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)（code-yeongyu）、[everything-claude-code](https://github.com/affaan-m/everything-claude-code)（affaan-m）、[agency-agents](https://github.com/msitarzewski/agency-agents)（msitarzewski）、[gstack](https://github.com/garrytan/gstack)（garrytan）、[superpowers](https://github.com/obra/superpowers)（Jesse Vincent）、[anthropic/skills](https://github.com/anthropics/skills)（Anthropic）、[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)（forrestchang）。
+本项目基于以下工作构建：[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)（Yeachan Heo）、[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)（code-yeongyu）、[everything-claude-code](https://github.com/affaan-m/everything-claude-code)（affaan-m）、[gstack](https://github.com/garrytan/gstack)（garrytan）、[superpowers](https://github.com/obra/superpowers)（Jesse Vincent）、[agency-agents](https://github.com/msitarzewski/agency-agents)（msitarzewski — 3 个 vendored Agent）、[anthropic/skills](https://github.com/anthropics/skills)（Anthropic）、[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)（forrestchang）。
 
 ## 许可证
 
