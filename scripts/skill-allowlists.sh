@@ -38,7 +38,6 @@ bun-runtime
 click-path-audit
 code-tour
 codebase-onboarding
-codehealth-mcp
 coding-standards
 content-hash-cache-pattern
 context-budget
@@ -79,7 +78,6 @@ mcp-server-patterns
 motion-advanced
 motion-foundations
 motion-patterns
-motion-ui
 mysql-patterns
 nestjs-patterns
 nextjs-turbopack
