@@ -1,7 +1,8 @@
 ---
 name: hephaestus
-description: Autonomous deep worker — explores, plans, executes, and verifies without asking permission. Never stops until the task is fully complete. (Opus)
+description: Use when one agent should finish a task end-to-end without check-ins or delegation — explores, plans, implements, and verifies on its own; returns the implemented changes plus test and verification output. (Opus)
 model: claude-opus-5
+effort: high
 ---
 
 <Agent_Prompt>

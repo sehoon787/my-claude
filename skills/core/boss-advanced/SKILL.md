@@ -6,6 +6,24 @@ user-invocable: false
 
 # Boss Advanced Orchestration Patterns
 
+## Capability Lanes
+
+Boss discovers capabilities at runtime. This is the ownership map for resolving overlaps between what it finds — one owner per lane, no cross-lane duplicates.
+
+| Lane | Owner | Contents |
+|------|-------|----------|
+| Core orchestration | this repo (`skills/core/`) | boss-advanced, boss-briefing, briefing-vault, gstack-sprint (4) |
+| Execution modes | OMC | autopilot, ralph, ultrawork, ultraqa, team, ralplan, cancel, ccg, ask, deep-interview, ai-slop-cleaner, hud, omc-reference, omc-setup, omc-doctor, setup (16) |
+| Dev discipline | superpowers | test-driven-development, systematic-debugging, brainstorming, writing-plans, executing-plans, requesting/receiving-code-review, verification-before-completion, using-git-worktrees, subagent-driven-development, writing-skills, using-superpowers, finishing-a-development-branch (13) |
+| P0 workflows | gstack | 26 skills + the `gstack` root router (27) — see the Priority 0 table in boss.md |
+| Stack + AI knowledge | ECC | 79 skills — language/framework patterns, agent and LLM engineering, codebase tooling |
+| Document deliverables | Anthropic doc skills | pdf, docx, pptx, xlsx |
+| Agents | this repo + OMC | 32 total: boss (core) + omo 9 + omc 19 + vendored AI-lane 3 |
+
+A name outside these lanes is not installed. Never route to a capability Phase 0 did not discover.
+
+---
+
 ## Skill vs Agent Conflict Resolution
 
 When both a skill and an agent could handle the request, evaluate three dimensions:
@@ -251,7 +269,7 @@ The `name` parameter in the Agent() call must match the canonical agent type bei
 
 **CONTEXT**:
 [Relevant code snippets, file paths, patterns to follow]
-Recommended skills: [skills matched in Phase 2, e.g. /tdd-workflow, /security-review]
+Recommended skills: [skills matched in Phase 2, e.g. /test-driven-development, /cso]
 Recommended agents: [agents matched in Phase 2, e.g. test-engineer (sonnet)]
 ```
 

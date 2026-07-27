@@ -449,7 +449,7 @@ When a 5-agent pipeline produces a wrong answer, the failure could be in any age
   "confidence": 0.82,
   "tools_called": ["web_search"],
   "errors": [],
-  "model": "claude-opus-4-6",
+  "model": "claude-opus-5",
   "status": "success | failure | partial | escalated"
 }
 ```

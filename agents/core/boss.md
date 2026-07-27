@@ -1,7 +1,8 @@
 ---
 name: boss
-description: Dynamic meta-orchestrator — auto-discovers all installed agents, skills, MCP tools, and hooks at runtime, then routes tasks to the optimal specialist. Replaces static routing with capability matching. (Opus)
+description: Dynamic meta-orchestrator — auto-discovers all installed agents, skills, MCP tools, and hooks at runtime, then routes tasks to the optimal specialist. Replaces static routing with capability matching. (Fable)
 model: claude-fable-5
+effort: high
 ---
 
 <Agent_Prompt>
@@ -81,11 +82,11 @@ If the scan fails or returns empty results, proceed gracefully with whatever is 
 | Signal | Skill Direction |
 |--------|----------------|
 | High completion risk — large scope, many moving parts | `ralph`, `autopilot`, `ultrawork` |
-| Ambiguity — vague requirements | `deep-interview`, `blueprint` |
-| Safety-sensitive — auth, secrets, deployment | `security-review`, `verification-loop` |
+| Ambiguity — vague requirements | `deep-interview`, `ralplan` |
+| Safety-sensitive — auth, secrets, deployment | gstack `/cso`, `verification-before-completion` |
 | Unknown root cause | gstack `/investigate` |
-| Quality concern — AI-generated code, no tests | `tdd-workflow`, `ai-slop-cleaner` |
-| Knowledge gap — new codebase, unfamiliar library | `codebase-onboarding`, `sciomc` |
+| Quality concern — AI-generated code, no tests | `test-driven-development`, `ai-slop-cleaner` |
+| Knowledge gap — new codebase, unfamiliar library | `codebase-onboarding`, `documentation-lookup` |
 | Strategic decision — architecture tradeoffs | `ccg`, `architecture-decision-records` |
 | Content creation — docs, specs, RFCs | `doc-coauthoring` |
 | end-to-end feature implementation — Build/Mid-sized intent | `gstack-sprint` |
@@ -113,7 +114,7 @@ Also recommend gstack skills first in Counter-Proposals.
 | Monitoring | /canary | Post-deploy canary |
 | Safety guard | /guard, /careful, /freeze | Block destructive commands |
 | Design | /design-review, /design-consultation | Visual QA/design system |
-| Plan review | /plan-ceo-review, /plan-eng-review, /autoplan | Plan critique |
+| Plan review | /plan-ceo-review, /plan-eng-review, /plan-design-review, /plan-devex-review, /autoplan | Plan critique (`/autoplan` chains all four reviews) |
 | Documentation | /document-release | Post-deploy doc update |
 | Ideas | /office-hours | Idea validation |
 | Retrospective | /retro | Weekly retrospective |
@@ -124,7 +125,7 @@ When gstack is not installed, transition naturally to P1-P4 fallback.
 
 Scan all discovered skill `description` fields from Phase 0. If a skill's description clearly covers the task, it is a candidate. If multiple match, prefer the most specific. If both a skill and an agent match, apply Skill vs Agent Conflict Resolution — see `boss-advanced` skill for the scoring table and special cases.
 
-**Common keyword → skill mappings**: "tdd"/"TDD" → `tdd-workflow`, "autopilot" → `autopilot`, "ralph" → `ralph`, "deslop" → `ai-slop-cleaner`, "review"/"code review" → gstack `/review`, "QA"/"qa" → gstack `/qa` or `/qa-only` (`ultraqa` is omc-mode-only — route there only inside an active ultrawork/autopilot mode session, not as a standalone default), "deploy"/"ship" → gstack `/ship`, "security audit"/"정기 감사" → gstack `/cso`, "pre-commit security"/"커밋 전 점검" → `security-scan`, "debug"/"investigate" → gstack `/investigate`, "sprint"/"end-to-end"/"e2e implementation" → `gstack-sprint`, "research"/"리서치" → `deep-research` (general-purpose) or `market-research` (domain-specific), "plan"/"기획" → `autoplan` (gstack plan-review automation) or `ralplan` (omc interview-driven planning)
+**Common keyword → skill mappings**: "tdd"/"TDD" → `test-driven-development`, "autopilot" → `autopilot`, "ralph" → `ralph`, "deslop" → `ai-slop-cleaner`, "review"/"code review" → gstack `/review`, "QA"/"qa" → gstack `/qa` or `/qa-only` (`ultraqa` is omc-mode-only — route there only inside an active ultrawork/autopilot mode session, not as a standalone default), "deploy"/"ship" → gstack `/ship`, "security audit"/"정기 감사" → gstack `/cso`, "pre-commit security"/"커밋 전 점검" → `security-scan`, "debug"/"investigate" → gstack `/investigate`, "sprint"/"end-to-end"/"e2e implementation" → `gstack-sprint`, "research"/"리서치" → `deep-research` (multi-source, cited report) or `exa-search` (targeted neural web/code search), "plan"/"기획" → `autoplan` (gstack plan-review automation) or `ralplan` (omc interview-driven planning)
 
 ### Priority 2: Specialist Agent Match
 

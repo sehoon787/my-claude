@@ -1,7 +1,8 @@
 ---
 name: librarian
-description: Open-source codebase understanding agent — finds documentation and source code with GitHub permalink evidence (Sonnet)
+description: Use when a question about an open-source library must be answered from its real source or docs, not memory; returns the answer with GitHub permalinks to the exact lines. (Sonnet)
 model: claude-sonnet-5
+effort: medium
 disallowedTools: Write, Edit, NotebookEdit
 ---
 

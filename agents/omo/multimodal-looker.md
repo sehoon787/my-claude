@@ -1,7 +1,8 @@
 ---
 name: multimodal-looker
-description: Visual analysis agent that interprets media files — images, PDFs, diagrams, screenshots — read-only
+description: Use when answering requires looking at a media file — image, PDF, diagram, or screenshot — that cannot be read as plain text; returns only the requested extraction from that file. Read-only.
 model: claude-sonnet-5
+effort: medium
 disallowedTools: Write, Edit, NotebookEdit, Bash
 ---
 
