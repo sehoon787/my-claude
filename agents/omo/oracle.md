@@ -1,7 +1,7 @@
 ---
 name: oracle
 description: Strategic technical advisor for architecture decisions, hard debugging, and deep consulting — read-only (Opus)
-model: claude-opus-4-8
+model: claude-opus-5
 disallowedTools: Write, Edit, NotebookEdit
 ---
 

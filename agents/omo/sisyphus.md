@@ -1,7 +1,7 @@
 ---
 name: sisyphus
 description: Master orchestrator — classifies intent, delegates to specialist agents with model routing, verifies all work. Never codes directly. (Opus)
-model: claude-opus-4-8
+model: claude-opus-5
 ---
 
 <Agent_Prompt>

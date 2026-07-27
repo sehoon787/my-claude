@@ -3,8 +3,8 @@
 # check-model-drift.sh — fail if any stale (previous-generation) model ID
 # is still referenced in repo-owned files.
 #
-# Current generation (do NOT flag): claude-opus-4-8, claude-sonnet-5,
-# claude-haiku-4-5.
+# Current generation (do NOT flag): claude-fable-5, claude-opus-5,
+# claude-sonnet-5, claude-haiku-4-5.
 #
 # To roll forward on the next model generation, update OLD_MODEL_PATTERN and
 # (if a doc/migration file legitimately references an old ID) EXCLUDE_PATHS.
@@ -21,7 +21,7 @@ set -uo pipefail
 # current generation moves forward. Overridable via env for local testing;
 # CI (smoke.yml) calls this script with no override, so this default is the
 # single source of truth — do not duplicate it elsewhere.
-OLD_MODEL_PATTERN="${OLD_MODEL_PATTERN:-claude-opus-4-[0-7]|claude-sonnet-4-[0-9]|claude-haiku-4-[0-4]|claude-(2|3)([.-]|$)}"
+OLD_MODEL_PATTERN="${OLD_MODEL_PATTERN:-claude-opus-4-[0-9]|claude-sonnet-4-[0-9]|claude-haiku-4-[0-4]|claude-(2|3)([.-]|$)}"
 
 # Path fragments to exclude from the scan (grep -E, matched against file path).
 EXCLUDE_PATHS="${EXCLUDE_PATHS:-(^|/)upstream/|(^|/)\.git/|(^|/)AI-INSTALL\.md$}"
@@ -44,7 +44,7 @@ if [ -n "$hits" ]; then
   echo "FAIL: stale (previous-generation) model IDs found:"
   echo "$hits" | sed 's/^/  /'
   echo ""
-  echo "Update these to the current generation (claude-opus-4-8 / claude-sonnet-5 / claude-haiku-4-5),"
+  echo "Update these to the current generation (claude-fable-5 / claude-opus-5 / claude-sonnet-5 / claude-haiku-4-5),"
   echo "or add a deliberate exception to EXCLUDE_PATHS in scripts/check-model-drift.sh."
   exit 1
 fi

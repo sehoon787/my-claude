@@ -1,7 +1,7 @@
 ---
 name: atlas
 description: Master task orchestrator that delegates, coordinates, and verifies work across agents until all tasks complete (Opus)
-model: claude-opus-4-8
+model: claude-opus-5
 disallowedTools: Write, Edit
 ---
 
