@@ -116,6 +116,18 @@ trap 'rm -rf "$CLONE_TMPDIR"' EXIT
 MANIFEST_TMP="$CLONE_TMPDIR/new-manifest.txt"
 : > "$MANIFEST_TMP"
 
+# Record every file a directory copy actually placed under $HOME/.claude.
+# `cp -r <dir>` installs the whole subtree, so recording just the top-level
+# SKILL.md left every other file (references/, scripts/, nested dirs)
+# unmanaged: the manifest-diff cleanup below deleted the SKILL.md and left the
+# rest behind as husk directories on every update. Paths are emitted relative
+# to $HOME/.claude with forward slashes — the exact format the cleanup reads.
+manifest_dir() {
+  local rel="$1"
+  [ -d "$HOME/.claude/$rel" ] || return 0
+  ( cd "$HOME/.claude" && find "$rel" -type f ) >> "$MANIFEST_TMP" || true
+}
+
 UPSTREAM_DIR=""
 init_upstream() {
   local name="$1" url="$2"
@@ -154,6 +166,19 @@ if [ -f "$HOME/.claude/.my-claude-manifest" ]; then
     target="$HOME/.claude/$rel_path"
     [ -f "$target" ] && rm -f "$target"
   done < "$HOME/.claude/.my-claude-manifest"
+  # Prune directories the deletions above emptied. Scoped strictly to
+  # directories that appear in the manifest — never a blanket prune of
+  # ~/.claude — and deepest-first (longest path first), so nested husks
+  # collapse before their parents. Top-level roots (agents/, skills/, rules/,
+  # ...) are deliberately excluded: later copy steps write into them. rmdir
+  # only succeeds on an already-empty directory, so user-owned files sitting
+  # alongside managed ones keep their directory alive.
+  awk -F/ 'NF>1 { p=$1; for (i=2;i<NF;i++) { p=p"/"$i; print p } }' "$HOME/.claude/.my-claude-manifest" \
+    | sort -u \
+    | awk '{ print length($0) "\t" $0 }' | sort -rn -k1,1 | cut -f2- \
+    | while IFS= read -r rel_dir; do
+        rmdir "$HOME/.claude/$rel_dir" 2>/dev/null || true
+      done
   # Remove empty agent-pack directories (only if empty after cleanup)
   find "$HOME/.claude/agent-packs" -type d -empty -delete 2>/dev/null || true
 else
@@ -180,9 +205,12 @@ if [ -d "$SCRIPT_DIR/skills/core" ]; then
     if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
       rm -f "$target"
     fi
-    echo "skills/$name/SKILL.md" >> "$MANIFEST_TMP"
   done
   cp -r "$SCRIPT_DIR"/skills/core/* "$HOME/.claude/skills/"
+  for src in "$SCRIPT_DIR"/skills/core/*/; do
+    [ ! -d "$src" ] && continue
+    manifest_dir "skills/$(basename "$src")"
+  done
 fi
 
 # docs/nexus — reference material (never parsed as agents)
@@ -208,7 +236,7 @@ if [ "$SKIP_ECC" = "0" ]; then
           rm -f "$target"
         fi
         cp -r "$src" "$HOME/.claude/skills/"
-        echo "skills/$name/SKILL.md" >> "$MANIFEST_TMP"
+        manifest_dir "skills/$name"
       done
       # continuous-learning v1 is self-declared deprecated in favor of v2; never
       # allowlisted — this also clears copies left by pre-allowlist installs.
@@ -218,7 +246,7 @@ if [ "$SKIP_ECC" = "0" ]; then
         src="$UPSTREAM_DIR/rules/$name"
         [ -d "$src" ] || continue
         cp -r "$src" "$HOME/.claude/rules/"
-        find "$src" -name '*.md' | while IFS= read -r f; do echo "rules/${f#"$UPSTREAM_DIR"/rules/}"; done >> "$MANIFEST_TMP"
+        manifest_dir "rules/$name"
       done
     else
       echo "  WARNING: ECC install failed"
@@ -229,7 +257,15 @@ fi
 # ── 1c-post. Self-owned rules (override ECC rules if same name) ──
 if [ -d "$SCRIPT_DIR/rules" ]; then
   cp -r "$SCRIPT_DIR"/rules/* "$HOME/.claude/rules/" 2>/dev/null || true
-  find "$SCRIPT_DIR/rules" -name '*.md' | while IFS= read -r f; do echo "rules/${f#"$SCRIPT_DIR"/rules/}"; done >> "$MANIFEST_TMP"
+  for src in "$SCRIPT_DIR"/rules/*; do
+    [ -e "$src" ] || continue
+    name=$(basename "$src")
+    if [ -d "$src" ]; then
+      manifest_dir "rules/$name"
+    else
+      echo "rules/$name" >> "$MANIFEST_TMP"
+    fi
+  done
 fi
 
 # ── 1d. OMC upstream ──
@@ -258,7 +294,7 @@ if [ "$SKIP_OMC" = "0" ]; then
           rm -f "$target"
         fi
         cp -r "$src" "$HOME/.claude/skills/"
-        echo "skills/$name/SKILL.md" >> "$MANIFEST_TMP"
+        manifest_dir "skills/$name"
       done
     fi
   else
@@ -386,7 +422,7 @@ if [ "$SKIP_SUPERPOWERS" = "0" ]; then
         name=$(basename "$src")
         case "$_sp_exclude" in *" $name "*) continue ;; esac
         cp -r "${src%/}" "$HOME/.claude/skills/" 2>/dev/null || true
-        echo "skills/$name/SKILL.md" >> "$MANIFEST_TMP"
+        manifest_dir "skills/$name"
       done
     fi
   else
@@ -492,6 +528,11 @@ else
     git clone --depth 1 https://github.com/anthropics/skills.git "$_tmp_skills/skills" 2>/dev/null || true
     if [ -d "$_tmp_skills/skills/skills" ]; then
       mkdir -p "$HOME/.claude/skills"
+      # Deliberately manifest-exempt: this fallback only runs once (the
+      # `[ -d pdf ] && [ -d docx ]` guard above skips it afterwards). Tracking
+      # it would make every update delete these skills at cleanup time and
+      # re-clone the whole anthropics/skills repo. Left fully untracked rather
+      # than half-tracked.
       cp -r "$_tmp_skills/skills/skills/"* "$HOME/.claude/skills/"
       echo "    Anthropic skills installed via git clone"
     else
