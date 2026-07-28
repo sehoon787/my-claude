@@ -4,6 +4,8 @@ description: Expert AI/ML engineer specializing in machine learning model develo
 color: blue
 emoji: 🤖
 vibe: Turns ML models into production features that actually scale.
+model: claude-sonnet-5
+effort: medium
 ---
 <!-- Vendored from https://github.com/msitarzewski/agency-agents (MIT License). Snapshot: 2026-07-27. -->
 

@@ -4,6 +4,8 @@ description: Expert DevOps engineer specializing in infrastructure automation, C
 color: orange
 emoji: ⚙️
 vibe: Automates infrastructure so your team ships faster and sleeps better.
+model: claude-sonnet-5
+effort: medium
 ---
 <!-- Vendored from https://github.com/msitarzewski/agency-agents (MIT License). Snapshot: 2026-07-27. -->
 

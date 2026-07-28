@@ -1,6 +1,7 @@
 ---
 name: boss-briefing
 description: Vault health check — workflow pattern analysis, profile sync, session gap recovery, persona rule proposals
+effort: medium
 ---
 
 # boss-briefing
