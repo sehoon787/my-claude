@@ -2,7 +2,7 @@
 name: boss
 description: Dynamic meta-orchestrator — auto-discovers all installed agents, skills, MCP tools, and hooks at runtime, then routes tasks to the optimal specialist. Replaces static routing with capability matching. (Fable)
 model: claude-fable-5
-effort: max
+effort: xhigh
 ---
 
 <Agent_Prompt>
