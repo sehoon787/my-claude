@@ -1,0 +1,27 @@
+{
+  "typescript": {
+    "command": "typescript-language-server",
+    "args": ["--stdio"],
+    "extensionToLanguage": {
+      ".ts": "typescript",
+      ".tsx": "typescriptreact",
+      ".js": "javascript",
+      ".jsx": "javascriptreact",
+      ".mjs": "javascript",
+      ".cjs": "javascript"
+    },
+    "startupTimeout": 15000,
+    "restartOnCrash": true,
+    "maxRestarts": 3
+  },
+  "python": {
+    "command": "pyright-langserver",
+    "args": ["--stdio"],
+    "extensionToLanguage": {
+      ".py": "python"
+    },
+    "startupTimeout": 20000,
+    "restartOnCrash": true,
+    "maxRestarts": 3
+  }
+}

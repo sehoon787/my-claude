@@ -213,6 +213,17 @@ if [ -d "$SCRIPT_DIR/skills/core" ]; then
   done
 fi
 
+# workflows — named deterministic workflows, user-scope (~/.claude/workflows/).
+# Invoke via Workflow({name: "code-review-fanout"}) etc. from any project.
+if [ -d "$SCRIPT_DIR/workflows" ]; then
+  mkdir -p "$HOME/.claude/workflows"
+  for wf in "$SCRIPT_DIR"/workflows/*.js; do
+    [ -f "$wf" ] || continue
+    cp "$wf" "$HOME/.claude/workflows/"
+    echo "workflows/$(basename "$wf")" >> "$MANIFEST_TMP"
+  done
+fi
+
 # docs/nexus — reference material (never parsed as agents)
 cp "$SCRIPT_DIR/agents/core/agent-teams-reference.md" "$HOME/.claude/docs/nexus/"
 echo "docs/nexus/agent-teams-reference.md" >> "$MANIFEST_TMP"
@@ -579,6 +590,13 @@ else
   echo "    omo installed"
 fi
 npm i -g @ast-grep/cli@0.42.0 @code-yeongyu/comment-checker@0.7.0 2>/dev/null || true
+
+# 5c-lsp. Language servers for the plugin's .lsp.json declaration (typescript + python).
+# Binaries must be on PATH (docs: plugins-reference → LSP servers); a missing binary
+# only disables that one server, so this stays non-fatal.
+echo "  [5c-lsp] Language servers (typescript-language-server, pyright)..."
+command -v typescript-language-server >/dev/null 2>&1 || npm i -g typescript-language-server typescript 2>/dev/null || true
+command -v pyright-langserver >/dev/null 2>&1 || npm i -g pyright 2>/dev/null || true
 
 # 5d. Karpathy guidelines (append to CLAUDE.md)
 echo "  [5d] Karpathy guidelines..."
