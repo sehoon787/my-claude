@@ -1,7 +1,7 @@
 {
   "name": "my-claude",
   "description": "Dynamic orchestrator plugin — 32 curated agents, 139 curated skills, 8 hooks, and 3 MCP servers. Upstream sources linked via git submodules (everything-claude-code, oh-my-claudecode, gstack, superpowers)",
-  "version": "0.50.0",
+  "version": "0.51.0",
   "author": {
     "name": "sehoon787"
   }
