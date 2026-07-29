@@ -1,7 +1,8 @@
 # my-claude AI Installation Guide
 
 You are an AI agent setting up a Claude Code multi-agent orchestration environment.
-The plugin bundles 32 curated agents, 139 curated skills, 54 rule files (9 rule sets), 8 hooks, and 3 MCP servers.
+The plugin bundles 32 curated agents, 139 curated skills, 54 rule files (9 rule sets), 8 hooks, 3 MCP servers, and 2 LSP servers.
+`install.sh` additionally copies 2 named workflows to `~/.claude/workflows/` and installs the LSP binaries.
 Only 2-3 steps are needed.
 
 ---
@@ -98,6 +99,8 @@ This installs:
 - 8 behavioral hooks across 8 events (SessionStart, PreToolUse, PostToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop, UserPromptSubmit)
   - The SessionStart hook auto-creates a `.briefing/` vault per-project (with `INDEX.md`) on first session. This provides persistent project context, decision logs, and session summaries.
 - 3 MCP servers globally (Context7, Exa, grep.app) — available in all projects
+- 2 LSP servers declared in `.lsp.json` (typescript, python) — auto-started diagnostics and code navigation for agents
+- Per-agent `effort` tiers preset in frontmatter (`xhigh` for Boss and the deep-reasoning agents, down to `medium` for focused workers)
 - Boss meta-orchestrator as default agent
 - HUD statusline (via OMC wrapper — shows context usage, active agents, task progress)
 
@@ -126,6 +129,8 @@ This installs everything in one step:
 - 139 skills (ECC + gstack + OMC + Superpowers + Core)
 - 54 rule files (9 rule sets), 8 hooks
 - 3 MCP servers (Context7, Exa, grep.app)
+- 2 named workflows in `~/.claude/workflows/` (code-review-fanout, upstream-audit) — usable from any project via the Workflow tool
+- 2 LSP server binaries (`typescript-language-server`, `pyright-langserver`) — installed non-fatally, a missing binary only disables that one server
 - Companion tools: OMC CLI, omo CLI, ast-grep
 - Anthropic Official Skills (pdf, docx)
 - Karpathy coding guidelines
@@ -191,6 +196,9 @@ echo "Duplicates:       $(find ~/.claude/agents -name '*.md' -exec basename {} \
 echo "gstack:           $(find ~/.claude/skills -path '*/gstack/SKILL.md' 2>/dev/null | head -1 | grep -q . && echo 'OK' || echo 'MISSING')"
 echo "omc:              $(command -v omc >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
+echo "Workflows:        $(ls ~/.claude/workflows 2>/dev/null | wc -l)"
+echo "LSP (typescript): $(command -v typescript-language-server >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
+echo "LSP (python):     $(command -v pyright-langserver >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "Version:          $(cat ~/.claude/.my-claude-version 2>/dev/null || echo 'unknown')"
 echo "Boss model:       $(grep '^model:' ~/.claude/agents/boss.md 2>/dev/null || echo 'MISSING')"
 ```
@@ -206,6 +214,9 @@ Expected:
 - gstack: OK
 - omc: OK
 - omo: OK
+- Workflows: 2 (code-review-fanout.js, upstream-audit.js)
+- LSP (typescript): OK
+- LSP (python): OK
 - Version: matches latest release (compare against the latest GitHub release tag — if it
   doesn't match after a reinstall, see "Updating or reinstalling the plugin" above)
 - Boss model: matches the current model in the published `agents/core/boss.md` on GitHub

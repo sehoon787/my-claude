@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>my-claude — All-in-one agent harness for Claude Code</title>
-<meta name="description" content="All-in-one Claude Code multi-agent orchestration plugin. 32 curated agents, 139 curated skills, 54 rules, 3 MCP servers, 8 hooks.">
+<meta name="description" content="All-in-one Claude Code multi-agent orchestration plugin. 32 curated agents, 139 curated skills, 54 rules, 3 MCP servers, 8 hooks, 2 LSP servers, 2 named workflows.">
 <meta property="og:title" content="my-claude — All-in-one agent harness for Claude Code">
 <meta property="og:description" content="Boss orchestrates 32 curated agents, 139 curated skills, 54 rules, 3 MCP servers. Dynamic runtime discovery. One plugin.">
 <meta property="og:type" content="website">
@@ -240,6 +240,8 @@ section{padding:80px 0}
     <span class="badge"><em>54</em>&nbsp;rules</span>
     <span class="badge"><em>3</em>&nbsp;MCP</span>
     <span class="badge"><em>8</em>&nbsp;hooks</span>
+    <span class="badge"><em>2</em>&nbsp;LSP</span>
+    <span class="badge"><em>2</em>&nbsp;workflows</span>
   </div>
   <div class="inst-tabs">
     <button class="inst-tab active" onclick="switchInst(this,'human')">Human</button>
@@ -315,6 +317,28 @@ section{padding:80px 0}
       <span class="sp-tag" style="background:rgba(244,114,182,.12);color:var(--pink)"><span class="lang" data-en="interactive" data-ko="대화형"></span></span>
     </div>
   </div>
+  <div class="route-grid fade-in">
+    <div>
+      <h3 style="font-size:1rem;margin-bottom:12px;color:var(--violet)"><span class="lang" data-en="Effort Tiers" data-ko="Effort 계층"></span></h3>
+      <table class="route-table">
+        <tr><th>Effort</th><th><span class="lang" data-en="Agents" data-ko="에이전트"></span></th></tr>
+        <tr><td style="color:var(--violet)">xhigh</td><td>Boss &middot; Oracle &middot; Prometheus &middot; Multi-Agent Systems Architect</td></tr>
+        <tr><td style="color:var(--primary)">high</td><td>Sisyphus &middot; Hephaestus &middot; Atlas &middot; Metis &middot; Momus</td></tr>
+        <tr><td style="color:var(--accent)">medium</td><td><span class="lang" data-en="Librarian, Multimodal-Looker, vendored engineering agents" data-ko="Librarian, Multimodal-Looker, 벤더링 엔지니어링 에이전트"></span></td></tr>
+        <tr><td style="color:var(--green)">low</td><td><span class="lang" data-en="Mechanical, well-specified skills" data-ko="정형화된 기계적 스킬"></span></td></tr>
+      </table>
+      <p style="margin-top:10px;font-size:.72rem;color:var(--text2)"><span class="lang" data-en="Precedence: CLAUDE_CODE_EFFORT_LEVEL env &gt; frontmatter &gt; session level. xhigh is Fable's ceiling; max is opus-class only." data-ko="우선순위: CLAUDE_CODE_EFFORT_LEVEL 환경변수 &gt; 프론트매터 &gt; 세션 레벨. xhigh는 Fable의 상한이며, max는 opus 계열 전용입니다."></span></p>
+    </div>
+    <div>
+      <h3 style="font-size:1rem;margin-bottom:12px;color:var(--pink)"><span class="lang" data-en="Named Workflows" data-ko="네임드 워크플로우"></span></h3>
+      <table class="route-table">
+        <tr><th><span class="lang" data-en="Workflow" data-ko="워크플로우"></span></th><th><span class="lang" data-en="What It Does" data-ko="동작"></span></th></tr>
+        <tr><td style="color:var(--pink)">code-review-fanout</td><td><span class="lang" data-en="4 dimension reviewers (correctness, security, performance, tests) in parallel; every finding adversarially verified" data-ko="4개 관점 리뷰어(정확성·보안·성능·테스트) 병렬 실행, 모든 발견 사항을 적대적으로 검증"></span></td></tr>
+        <tr><td style="color:var(--green)">upstream-audit</td><td><span class="lang" data-en="Per-upstream analyst — pin delta, allowlist fit, new overlaps, security signals, health — plus a synthesized action list" data-ko="업스트림별 분석(핀 델타, 허용목록 적합성, 신규 중복, 보안 시그널, 건전성)과 종합 액션 목록"></span></td></tr>
+      </table>
+      <p style="margin-top:10px;font-size:.72rem;color:var(--text2)"><span class="lang" data-en="Installed to ~/.claude/workflows/ — invoke from any project:" data-ko="~/.claude/workflows/에 설치되어 어느 프로젝트에서든 호출:"></span> <code>Workflow({name: "code-review-fanout"})</code></p>
+    </div>
+  </div>
 </div>
 </section>
 
@@ -345,6 +369,8 @@ section{padding:80px 0}
     <div class="arch-layer"><h4><span class="lang" data-en="Skills Layer" data-ko="스킬 레이어"></span><span class="cnt">139</span></h4><p>ECC 79 &middot; gstack 27 &middot; OMC 16 &middot; Superpowers 13 &middot; Core 4</p></div>
     <div class="arch-conn"></div>
     <div class="arch-layer" style="border-color:var(--accent)"><h4 style="color:var(--accent)">MCP Layer<span class="cnt">3</span></h4><p>Context7 &middot; Exa &middot; grep.app</p></div>
+    <div class="arch-conn"></div>
+    <div class="arch-layer"><h4><span class="lang" data-en="Tooling Layer" data-ko="툴링 레이어"></span><span class="cnt">2 LSP &middot; 2 <span class="lang" data-en="workflows" data-ko="워크플로우"></span></span></h4><p>typescript &middot; python &middot; code-review-fanout &middot; upstream-audit</p></div>
   </div>
 </div>
 </section>
@@ -361,6 +387,8 @@ section{padding:80px 0}
     <div class="inside-card"><span class="inside-num">3</span><span class="inside-label">MCP</span><span class="inside-desc">Context7 &middot; Exa &middot; grep.app</span></div>
     <div class="inside-card"><span class="inside-num">8</span><span class="inside-label"><span class="lang" data-en="Hooks" data-ko="훅"></span></span><span class="inside-desc">PreToolUse &middot; PostToolUse</span></div>
     <div class="inside-card"><span class="inside-num">4</span><span class="inside-label"><span class="lang" data-en="Upstreams" data-ko="업스트림"></span></span><span class="inside-desc"><span class="lang" data-en="SHA-pinned, synced every 3 days" data-ko="SHA 고정, 3일마다 동기화"></span></span></div>
+    <div class="inside-card"><span class="inside-num">2</span><span class="inside-label">LSP</span><span class="inside-desc">typescript &middot; python</span></div>
+    <div class="inside-card"><span class="inside-num">2</span><span class="inside-label"><span class="lang" data-en="Workflows" data-ko="워크플로우"></span></span><span class="inside-desc">code-review-fanout &middot; upstream-audit</span></div>
   </div>
   <div class="catalog fade-in">
     <details>
@@ -422,6 +450,10 @@ section{padding:80px 0}
     <details>
       <summary>MCP + Hooks <span class="cat-count">3 MCP &middot; 8 hooks</span></summary>
       <div class="cat-body"><strong>MCP:</strong> Context7 (docs), Exa (web search), grep.app (GitHub code search)<br><strong>Hooks:</strong> 8 hook files across 8 events: SessionStart, PreToolUse, PostToolUse (&times;3), SubagentStop, TeammateIdle, TaskCompleted, Stop, UserPromptSubmit</div>
+    </details>
+    <details>
+      <summary>LSP + Workflows <span class="cat-count">2 LSP &middot; 2 <span class="lang" data-en="workflows" data-ko="워크플로우"></span></span></summary>
+      <div class="cat-body"><strong>LSP:</strong> typescript (<code>typescript-language-server --stdio</code> &mdash; .ts/.tsx/.js/.jsx/.mjs/.cjs), python (<code>pyright-langserver --stdio</code> &mdash; .py). <span class="lang" data-en="Declared in .lsp.json and started on demand, so agents get diagnostics and code navigation without a build round-trip. install.sh installs both binaries non-fatally — a missing binary disables only that server." data-ko=".lsp.json에 선언되어 필요할 때 자동 시작되므로, 에이전트가 빌드를 거치지 않고 바로 진단과 코드 탐색을 사용합니다. install.sh는 두 바이너리를 비치명적으로 설치하며, 없으면 해당 서버만 비활성화됩니다."></span><br><strong>Workflows:</strong> code-review-fanout, upstream-audit &mdash; <span class="lang" data-en="installed to ~/.claude/workflows/, invocable from any project via the Workflow tool." data-ko="~/.claude/workflows/에 설치되어 Workflow 도구로 어느 프로젝트에서든 호출할 수 있습니다."></span></div>
     </details>
   </div>
 </div>

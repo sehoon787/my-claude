@@ -169,6 +169,8 @@ This installs skills to `~/.agents/skills/` and auto-symlinks them to `~/.claude
 | **Rules** | 54 files / 9 sets | ECC (53) + Core (1) |
 | **Hooks** | 8 files / 8 events | SessionStart, PreToolUse, PostToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop, UserPromptSubmit |
 | **MCP Servers** | 3 | Context7, Exa, grep.app (registered globally) |
+| **LSP Servers** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) — declared in `.lsp.json`, started on demand for diagnostics and code navigation |
+| **Named Workflows** | 2 | code-review-fanout, upstream-audit — copied to `~/.claude/workflows/`, invocable from any project via the Workflow tool |
 
 Skills and rules are installed from an explicit allowlist (`scripts/skill-allowlists.sh`). Upstream ships far more — 278 ECC skills, 59 gstack skills, 41 OMC skills — and everything unlisted is deliberately left out to keep session context lean. Anthropic's official document skills are installed separately (see [Section 4](#4-companion-tools)) and add to the skill count.
 
@@ -180,6 +182,7 @@ Skills and rules are installed from an explicit allowlist (`scripts/skill-allowl
 ├── skills/          ← 139 skill directories
 ├── rules/           ← 54 rule files in 9 rule sets
 ├── hooks/           ← hooks.json + 7 hook scripts
+├── workflows/       ← 2 named workflows (code-review-fanout.js, upstream-audit.js)
 ├── docs/nexus/      ← Agent Teams reference (not parsed as an agent)
 ├── .my-claude-manifest   ← Tracks installed files for safe upgrades
 └── .my-claude-version    ← Installed version string
@@ -197,6 +200,7 @@ Skills and rules are installed from an explicit allowlist (`scripts/skill-allowl
 | **omc** (`oh-my-claude-sisyphus`) | npm CLI for OMC team orchestration | Enables `omc team` multi-agent split-pane sessions |
 | **omo** (`oh-my-opencode`) | npm CLI bridging Claude Code and OpenCode | Optional — only needed for OpenCode TUI workflows |
 | **ast-grep** | Structural code search and rewrite tool | Used by several skills for code analysis |
+| **LSP servers** | `typescript-language-server` + `pyright-langserver` | Back the plugin's `.lsp.json` declaration. Installed non-fatally — a missing binary disables only that server |
 | **comment-checker** | Static analysis for code comment quality | Used by code-review skills |
 | **Karpathy guidelines** | Andrej Karpathy's 4 AI coding principles | Appended to `~/.claude/CLAUDE.md` (checksum-verified before writing) |
 | **gstack runtime** | Browser daemon for `/browse` and `/qa` skills | Requires `bun`; installed automatically if `bun` is present |
@@ -209,12 +213,14 @@ Skills and rules are installed from an explicit allowlist (`scripts/skill-allowl
 
 All 32 agents load on every session — there are no on-demand packs to activate.
 
-| Group | Count | Path | Models |
-|-------|------:|------|--------|
-| Boss meta-orchestrator | 1 | `~/.claude/agents/boss.md` | `claude-fable-5` |
-| OMO sub-orchestrators and specialists | 9 | `~/.claude/agents/` | 7× `claude-opus-5`, 2× `claude-sonnet-5` |
-| OMC specialists | 19 | `~/.claude/agents/` | opus / sonnet / haiku per agent |
-| Vendored engineering agents | 3 | `~/.claude/agents/` | inherited from the caller |
+| Group | Count | Path | Models | Effort |
+|-------|------:|------|--------|--------|
+| Boss meta-orchestrator | 1 | `~/.claude/agents/boss.md` | `claude-fable-5` | `xhigh` |
+| OMO sub-orchestrators and specialists | 9 | `~/.claude/agents/` | 7× `claude-opus-5`, 2× `claude-sonnet-5` | 2× `xhigh`, 5× `high`, 2× `medium` |
+| OMC specialists | 19 | `~/.claude/agents/` | opus / sonnet / haiku per agent | not set (upstream defaults) |
+| Vendored engineering agents | 3 | `~/.claude/agents/` | inherited from the caller | 1× `xhigh`, 2× `medium` |
+
+`effort` sets how much reasoning budget an agent spends, independent of its model. See [CONTRIBUTING.md](./CONTRIBUTING.md) for the field's values and the model-gating rules.
 
 The vendored three — ai-engineer, devops-automator, multi-agent-systems-architect — are MIT-licensed snapshots taken from [agency-agents](https://github.com/msitarzewski/agency-agents) on 2026-07-27, when that submodule was dropped. The rest of that repo's domain agents are no longer part of my-claude; the `--with-packs` flag and the `my-claude:agency:*` namespace no longer exist.
 
@@ -289,6 +295,9 @@ echo "Duplicates:       $(find ~/.claude/agents -name '*.md' -exec basename {} \
 echo "gstack:           $(find ~/.claude/skills -path '*/gstack/SKILL.md' 2>/dev/null | head -1 | grep -q . && echo 'OK' || echo 'MISSING')"
 echo "omc:              $(command -v omc >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
+echo "Workflows:        $(ls ~/.claude/workflows 2>/dev/null | wc -l)"
+echo "LSP (typescript): $(command -v typescript-language-server >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
+echo "LSP (python):     $(command -v pyright-langserver >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "Version:          $(cat ~/.claude/.my-claude-version 2>/dev/null || echo 'unknown')"
 ```
 
@@ -305,10 +314,13 @@ Duplicates:       0 (should be 0)
 gstack:           OK
 omc:              OK
 omo:              OK
+Workflows:        2
+LSP (typescript): OK
+LSP (python):     OK
 Version:          <latest release tag>
 ```
 
-Non-zero duplicates: re-run `install.sh` (deduplicates automatically). gstack MISSING: install `bun` and re-run `install.sh`.
+Non-zero duplicates: re-run `install.sh` (deduplicates automatically). gstack MISSING: install `bun` and re-run `install.sh`. LSP MISSING: install the binary yourself (`npm i -g typescript-language-server typescript` or `npm i -g pyright`) — the rest of the stack is unaffected.
 
 ---
 

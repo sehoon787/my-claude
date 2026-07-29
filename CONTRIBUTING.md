@@ -18,6 +18,8 @@ upstream/                 # Git submodules (4 upstream sources)
   superpowers/            # superpowers (dev-process skills)
 skills/
   core/                   # Self-owned skills
+workflows/                # Named workflows (code-review-fanout, upstream-audit)
+.lsp.json                 # LSP servers: typescript-language-server, pyright-langserver
 scripts/
   skill-allowlists.sh     # Single source of truth for what actually installs
 ```
@@ -56,6 +58,7 @@ model: claude-sonnet-5
 
 | Field | Values | Notes |
 |-------|--------|-------|
+| `effort` | `low`, `medium`, `high`, `xhigh`, `max` | Reasoning budget — see [Effort](#effort) below |
 | `disallowedTools` | array of tool names | Restrict tool access |
 | `color` | hex or named color | UI display only |
 | `emoji` | single character | UI display only |
@@ -68,6 +71,23 @@ model: claude-sonnet-5
 | `claude-opus-5` | Deep reasoning, architecture, complex analysis |
 | `claude-sonnet-5` | Standard development work, orchestration |
 | `claude-haiku-4-5` | Fast lookups, lightweight agents, frequent invocation |
+
+### Effort
+
+`effort` sets how much reasoning budget an agent spends, independent of its model.
+
+| Effort | Use For |
+|--------|---------|
+| `xhigh` | Meta-orchestration and deep advisory work (Boss, Oracle, Prometheus) |
+| `high` | Sub-orchestrators and planning agents (Sisyphus, Hephaestus, Atlas, Metis, Momus) |
+| `medium` | Focused workers (Librarian, Multimodal-Looker, vendored engineering agents) |
+| `low` | Mechanical, well-specified tasks |
+
+The top two tiers are model-gated: `xhigh` and `max` require an opus-class model. `xhigh` is Fable's supported ceiling, and `max` silently falls back on anything that is not opus-class — so do not set `max` on a Fable agent expecting it to take effect.
+
+Precedence at runtime: `CLAUDE_CODE_EFFORT_LEVEL` (env) > frontmatter > session effort level.
+
+Skills may declare `effort` too, but with a caveat: a skill's effort overrides the session level for the duration of the invocation. Omit `effort` on any skill that runs inside Boss's flow (as `boss-advanced` and `gstack-sprint` do) — otherwise invoking it downgrades Boss mid-task.
 
 ### File Location
 

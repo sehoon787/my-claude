@@ -14,6 +14,8 @@
 ![Rules](https://img.shields.io/badge/rules-54-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-8-red)
+![LSP Servers](https://img.shields.io/badge/LSP-2-008b8b)
+![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
 **Claude Code를 위한 올인원 에이전트 하네스.**
 **플러그인 하나로 엄선된 32개 에이전트가 준비됩니다.**
@@ -167,6 +169,20 @@ Boss는 가장 적합한 매칭을 찾을 때까지 모든 요청을 우선순�
 | 표준 구현 | `claude-sonnet-5` | Librarian, Multimodal-Looker, OMC 전문가 |
 | 빠른 조회, 탐색 | `claude-haiku-4-5` | 경량 OMC 에이전트, 간단한 자문 |
 
+### Effort 계층
+
+모델 선택이 *어떤* 두뇌가 작업할지 정한다면, `effort:` 프론트매터 필드는 *얼마나 깊게* 사고할지를 정합니다. 자체 관리 에이전트는 모두 이 값을 선언합니다.
+
+| Effort | 에이전트 |
+|--------|--------|
+| `xhigh` | Boss, Oracle, Prometheus, Multi-Agent Systems Architect |
+| `high` | Sisyphus, Hephaestus, Atlas, Metis, Momus |
+| `medium` | Librarian, Multimodal-Looker, AI Engineer, DevOps Automator |
+
+스킬도 effort를 선언합니다 — `boss-briefing`은 `medium`, `briefing-vault`는 `low`입니다. `boss-advanced`와 `gstack-sprint`는 의도적으로 선언하지 않습니다. 스킬의 effort는 실행되는 동안 세션 레벨을 덮어쓰기 때문에, 선언하면 작업 도중 Boss의 effort가 조용히 낮아집니다.
+
+우선순위는 `CLAUDE_CODE_EFFORT_LEVEL`(환경 변수) > 프론트매터 > 세션 effort 레벨 순입니다. `xhigh`는 Fable이 지원하는 상한이며, `max`는 opus 계열 전용이라 그 외 모델에서는 조용히 하위 값으로 대체됩니다.
+
 ### 3단계 스프린트 워크플로
 
 엔드투엔드 기능 구현을 위해 Boss는 구조화된 스프린트를 오케스트레이션합니다:
@@ -179,6 +195,15 @@ User decides scope      ralph runs execution    Compare vs design doc
 Engineering review      Auto code review        Present comparison table
 Confirm "design done"   Architect verification  User: approve / improve
 ```
+
+### 네임드 워크플로
+
+결정적으로 실행되는 멀티에이전트 워크플로입니다. `install.sh`가 `~/.claude/workflows/`로 복사하므로 이 레포뿐 아니라 어느 프로젝트에서든 Workflow 도구로 호출할 수 있습니다.
+
+| 워크플로 | 동작 | 호출 |
+|----------|------|------|
+| **code-review-fanout** | 4개 관점 리뷰어(정확성, 보안, 성능, 테스트)가 병렬로 펼쳐지고, 보고 전에 모든 발견 사항을 적대적으로 검증합니다 | `Workflow({name: "code-review-fanout"})` — 인자: 리뷰 대상(브랜치, 커밋 범위, 경로). 기본값은 작업 트리 diff |
+| **upstream-audit** | 업스트림별 분석가가 핀 델타, 허용목록 적합성, 신규 중복, 보안 시그널, 건전성을 점검한 뒤 종합 액션 목록을 만듭니다 | `Workflow({name: "upstream-audit"})` — 분기별 또는 동기화 전 감사용 |
 
 ---
 
@@ -215,6 +240,9 @@ Confirm "design done"   Architect verification  User: approve / improve
 ├─────────────────────────────────────────────────────┤
 │  MCP Layer                                            │
 │  Context7 · Exa · grep.app                            │
+├─────────────────────────────────────────────────────┤
+│  Tooling Layer                                        │
+│  LSP (2) · Named Workflows (2)                        │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -229,6 +257,8 @@ Confirm "design done"   Architect verification  User: approve / improve
 | **규칙** | 54개 파일 / 9개 룰셋 | ECC 53 (common + 8개 언어 디렉터리) + Core 1 |
 | **MCP 서버** | 3 | Context7, Exa, grep.app |
 | **훅** | 8개 파일 / 8개 이벤트 | 위임 가드, 텔레메트리, 검증, 지식 금고 |
+| **LSP 서버** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
+| **네임드 워크플로** | 2 | code-review-fanout, upstream-audit |
 | **업스트림 서브모듈** | 4 | ecc, omc, gstack, superpowers |
 | **CLI 도구** | 3 | omc, omo, ast-grep |
 
@@ -337,6 +367,20 @@ Confirm "design done"   Architect verification  User: approve / improve
 | Completion Check | Stop | 작업 검증 확인 + 세션 요약 프롬프트 |
 | Teammate Idle Guide | TeammateIdle | 유휴 팀원에 대해 리더에게 알림 |
 | Task Quality Gate | TaskCompleted | 결과물 품질 검증 |
+
+</details>
+
+<details>
+<summary><strong>LSP 서버 (2)</strong></summary>
+
+플러그인은 `.lsp.json`에 두 개의 언어 서버를 선언합니다. Claude Code가 필요할 때 자동으로 띄우므로, 에이전트는 빌드를 한 번 돌리지 않고도 즉시 진단과 코드 탐색을 사용할 수 있습니다.
+
+| 서버 | 명령 | 확장자 |
+|--------|------|--------|
+| typescript | `typescript-language-server --stdio` | `.ts` `.tsx` `.js` `.jsx` `.mjs` `.cjs` |
+| python | `pyright-langserver --stdio` | `.py` |
+
+`install.sh`는 두 바이너리를 비치명적으로 설치합니다 — 하나를 설치하지 못해도 해당 서버만 비활성화되고 나머지 설치는 계속됩니다.
 
 </details>
 

@@ -14,6 +14,8 @@
 ![Rules](https://img.shields.io/badge/rules-54-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-8-red)
+![LSP Servers](https://img.shields.io/badge/LSP-2-008b8b)
+![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
 **All-in-one Agent-Harness für Claude Code.**
 **Ein Plugin, 32 kuratierte Agenten bereit.**
@@ -128,6 +130,20 @@ Boss leitet jede Anfrage durch eine Prioritätskette, bis die beste Übereinstim
 | Standardimplementierung | `claude-sonnet-5` | Librarian, Multimodal-Looker, OMC-Spezialisten |
 | Schnelle Suche, Erkundung | `claude-haiku-4-5` | Leichtgewichtige OMC-Agenten, einfache Beratung |
 
+### Effort-Stufen
+
+Die Modellwahl bestimmt, *welches* Gehirn eine Aufgabe übernimmt; das Frontmatter-Feld `effort:` bestimmt, *wie tief* es denkt. Jeder selbst gepflegte Agent deklariert einen Wert.
+
+| Effort | Agenten |
+|--------|---------|
+| `xhigh` | Boss, Oracle, Prometheus, Multi-Agent Systems Architect |
+| `high` | Sisyphus, Hephaestus, Atlas, Metis, Momus |
+| `medium` | Librarian, Multimodal-Looker, AI Engineer, DevOps Automator |
+
+Auch Skills deklarieren Effort — `boss-briefing` läuft auf `medium`, `briefing-vault` auf `low`. `boss-advanced` und `gstack-sprint` deklarieren bewusst keinen: Der Effort eines Skills überschreibt während des Aufrufs die Sitzungsstufe und würde Boss mitten in der Arbeit unbemerkt herabstufen.
+
+Vorrang gilt in dieser Reihenfolge: `CLAUDE_CODE_EFFORT_LEVEL` (Umgebungsvariable) > Frontmatter > Effort-Stufe der Sitzung. `xhigh` ist die von Fable unterstützte Obergrenze; `max` ist ausschließlich Opus-Klasse und fällt anderswo stillschweigend zurück.
+
 ### 3-Phasen-Sprint-Workflow
 
 Für die Ende-zu-Ende-Funktionsimplementierung orchestriert Boss einen strukturierten Sprint:
@@ -140,6 +156,15 @@ User decides scope      ralph runs execution    Compare vs design doc
 Engineering review      Auto code review        Present comparison table
 Confirm "design done"   Architect verification  User: approve / improve
 ```
+
+### Benannte Workflows
+
+Deterministische Multi-Agenten-Workflows. `install.sh` kopiert sie nach `~/.claude/workflows/`, sodass sie sich nicht nur aus diesem Repository, sondern aus jedem Projekt über das Workflow-Tool aufrufen lassen.
+
+| Workflow | Was er tut | Aufruf |
+|----------|------------|--------|
+| **code-review-fanout** | Vier Dimensions-Reviewer (Korrektheit, Sicherheit, Performance, Tests) laufen parallel; jeder Befund wird vor der Meldung adversarial verifiziert | `Workflow({name: "code-review-fanout"})` — Argument: das Review-Ziel (Branch, Commit-Bereich, Pfade). Standard ist das Diff des Arbeitsverzeichnisses |
+| **upstream-audit** | Ein Analyst je Upstream — Pin-Delta gegenüber Origin, Passung der Allowlist, neue Überschneidungen, Sicherheitssignale, Gesundheit — plus eine zusammengeführte Maßnahmenliste | `Workflow({name: "upstream-audit"})` — für vierteljährliche Audits oder vor einem Sync |
 
 ---
 
@@ -176,6 +201,9 @@ Confirm "design done"   Architect verification  User: approve / improve
 ├─────────────────────────────────────────────────────┤
 │  MCP Layer                                            │
 │  Context7 · Exa · grep.app                            │
+├─────────────────────────────────────────────────────┤
+│  Tooling Layer                                        │
+│  LSP (2) · Named Workflows (2)                        │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -190,6 +218,8 @@ Confirm "design done"   Architect verification  User: approve / improve
 | **Regeln** | 54 Dateien / 9 Regelsätze | ECC 53 (common + 8 Sprachverzeichnisse) + Core 1 |
 | **MCP-Server** | 3 | Context7, Exa, grep.app |
 | **Hooks** | 8 Dateien / 8 Events | Delegationswächter, Telemetrie, Verifikation, Vault |
+| **LSP-Server** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
+| **Benannte Workflows** | 2 | code-review-fanout, upstream-audit |
 | **Upstream-Submodule** | 4 | ecc, omc, gstack, superpowers |
 | **CLI-Tools** | 3 | omc, omo, ast-grep |
 
@@ -298,6 +328,20 @@ Jede Quelle wird über die Allowlist in [`scripts/skill-allowlists.sh`](../../sc
 | Completion Check | Stop | Bestätigt verifizierte Aufgaben + fordert Sitzungszusammenfassung an |
 | Teammate Idle Guide | TeammateIdle | Benachrichtigt Teamleiter über inaktive Teammitglieder |
 | Task Quality Gate | TaskCompleted | Prüft die Qualität des Lieferergebnisses |
+
+</details>
+
+<details>
+<summary><strong>LSP-Server (2)</strong></summary>
+
+Das Plugin deklariert in `.lsp.json` zwei Language Server. Claude Code startet sie bei Bedarf, sodass Agenten Diagnosen und Codenavigation sofort erhalten, ohne einen Build-Umweg zu gehen.
+
+| Server | Befehl | Dateiendungen |
+|--------|--------|---------------|
+| typescript | `typescript-language-server --stdio` | `.ts` `.tsx` `.js` `.jsx` `.mjs` `.cjs` |
+| python | `pyright-langserver --stdio` | `.py` |
+
+`install.sh` installiert beide Binaries nicht-fatal — fehlt eines, wird nur dieser Server deaktiviert, der Rest der Installation läuft weiter.
 
 </details>
 

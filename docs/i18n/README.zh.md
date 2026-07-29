@@ -14,6 +14,8 @@
 ![Rules](https://img.shields.io/badge/rules-54-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-8-red)
+![LSP Servers](https://img.shields.io/badge/LSP-2-008b8b)
+![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
 **Claude Code 的一体化 Agent 框架。**
 **一个插件，32 个精选 Agent 随时待命。**
@@ -128,6 +130,20 @@ Boss 对每个请求按优先级链逐级匹配，直到找到最佳方案：
 | 标准实现 | `claude-sonnet-5` | Librarian、Multimodal-Looker、OMC 专家 Agent |
 | 快速查询、探索 | `claude-haiku-4-5` | 轻量 OMC Agent、简单咨询 |
 
+### Effort 分级
+
+模型决定*由哪个大脑*执行任务，`effort:` frontmatter 字段则决定*思考多深*。所有自有 Agent 都声明该字段。
+
+| Effort | Agent |
+|--------|--------|
+| `xhigh` | Boss、Oracle、Prometheus、Multi-Agent Systems Architect |
+| `high` | Sisyphus、Hephaestus、Atlas、Metis、Momus |
+| `medium` | Librarian、Multimodal-Looker、AI Engineer、DevOps Automator |
+
+Skills 同样可以声明 effort —— `boss-briefing` 为 `medium`，`briefing-vault` 为 `low`。`boss-advanced` 与 `gstack-sprint` 刻意不声明：Skill 的 effort 会在调用期间覆盖会话级别，一旦声明就会在任务中途悄悄降低 Boss 的 effort。
+
+优先级：`CLAUDE_CODE_EFFORT_LEVEL`（环境变量）> frontmatter > 会话 effort 级别。`xhigh` 是 Fable 支持的上限；`max` 仅限 opus 级模型，在其他模型上会静默回退。
+
 ### 三阶段冲刺工作流
 
 对于端到端功能实现，Boss 编排结构化冲刺：
@@ -140,6 +156,15 @@ User decides scope      ralph runs execution    Compare vs design doc
 Engineering review      Auto code review        Present comparison table
 Confirm "design done"   Architect verification  User: approve / improve
 ```
+
+### 具名工作流
+
+确定性的多 Agent 工作流。`install.sh` 会把它们复制到 `~/.claude/workflows/`，因此不限于本仓库，在任意项目中都能通过 Workflow 工具调用。
+
+| 工作流 | 作用 | 调用方式 |
+|--------|------|----------|
+| **code-review-fanout** | 4 个维度的审查者（正确性、安全性、性能、测试）并行展开，每条发现在上报前都经过对抗性验证 | `Workflow({name: "code-review-fanout"})` —— 参数：审查目标（分支、提交范围、路径），默认为工作区 diff |
+| **upstream-audit** | 每个上游一名分析者（Pin 差异、允许列表契合度、新增重叠、安全信号、健康度），最后汇总成行动清单 | `Workflow({name: "upstream-audit"})` —— 用于季度审计或同步前审计 |
 
 ---
 
@@ -176,6 +201,9 @@ Confirm "design done"   Architect verification  User: approve / improve
 ├─────────────────────────────────────────────────────┤
 │  MCP Layer                                            │
 │  Context7 · Exa · grep.app                            │
+├─────────────────────────────────────────────────────┤
+│  Tooling Layer                                        │
+│  LSP (2) · Named Workflows (2)                        │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -190,6 +218,8 @@ Confirm "design done"   Architect verification  User: approve / improve
 | **规则** | 54 个文件 / 9 个规则集 | ECC 53（common + 8 个语言目录）+ Core 1 |
 | **MCP 服务器** | 3 | Context7、Exa、grep.app |
 | **Hooks** | 8 个文件 / 8 个事件 | 委派守卫、遥测、验证、知识库 |
+| **LSP 服务器** | 2 | typescript（`typescript-language-server`）、python（`pyright-langserver`） |
+| **具名工作流** | 2 | code-review-fanout、upstream-audit |
 | **上游子模块** | 4 | ecc、omc、gstack、superpowers |
 | **CLI 工具** | 3 | omc、omo、ast-grep |
 
@@ -299,6 +329,20 @@ Confirm "design done"   Architect verification  User: approve / improve
 | Teammate Idle Guide | TeammateIdle | 提示领导者关注空闲队友 |
 | Task Quality Gate | TaskCompleted | 验证交付物质量 |
 | Vault Reminder | UserPromptSubmit | 超过 5 条消息后提示运行 /boss-briefing |
+
+</details>
+
+<details>
+<summary><strong>LSP 服务器（2）</strong></summary>
+
+插件在 `.lsp.json` 中声明了两个语言服务器。Claude Code 按需启动它们，Agent 无需跑一遍构建即可获得诊断与代码导航。
+
+| 服务器 | 命令 | 扩展名 |
+|--------|------|--------|
+| typescript | `typescript-language-server --stdio` | `.ts` `.tsx` `.js` `.jsx` `.mjs` `.cjs` |
+| python | `pyright-langserver --stdio` | `.py` |
+
+`install.sh` 以非致命方式安装这两个二进制文件 —— 若其中一个不可用，仅禁用对应的服务器，其余安装照常进行。
 
 </details>
 

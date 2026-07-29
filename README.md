@@ -14,6 +14,8 @@
 ![Rules](https://img.shields.io/badge/rules-54-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-8-red)
+![LSP Servers](https://img.shields.io/badge/LSP-2-008b8b)
+![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
 **All-in-one agent harness for Claude Code.**
 **One plugin, 32 curated agents ready.**
@@ -158,6 +160,20 @@ Boss cascades every request through a priority chain until the best match is fou
 | Standard implementation | `claude-sonnet-5` | Librarian, Multimodal-Looker, OMC specialists |
 | Quick lookup, exploration | `claude-haiku-4-5` | Lightweight OMC agents, simple advisory |
 
+### Effort Tiers
+
+Model choice sets *which* brain runs a task; the `effort:` frontmatter field sets *how hard* it thinks. Every self-owned agent declares one.
+
+| Effort | Agents |
+|--------|--------|
+| `xhigh` | Boss, Oracle, Prometheus, Multi-Agent Systems Architect |
+| `high` | Sisyphus, Hephaestus, Atlas, Metis, Momus |
+| `medium` | Librarian, Multimodal-Looker, AI Engineer, DevOps Automator |
+
+Skills declare effort too — `boss-briefing` runs at `medium`, `briefing-vault` at `low`. `boss-advanced` and `gstack-sprint` deliberately declare none: a skill's effort overrides the session level while it runs, which would quietly downgrade Boss mid-flow.
+
+Precedence is `CLAUDE_CODE_EFFORT_LEVEL` (env) > frontmatter > session effort level. `xhigh` is Fable's supported ceiling; `max` is Opus-class only and silently falls back elsewhere.
+
 ### 3-Phase Sprint Workflow
 
 For end-to-end feature implementation, Boss orchestrates a structured sprint:
@@ -170,6 +186,15 @@ User decides scope      ralph runs execution    Compare vs design doc
 Engineering review      Auto code review        Present comparison table
 Confirm "design done"   Architect verification  User: approve / improve
 ```
+
+### Named Workflows
+
+Deterministic multi-agent workflows. `install.sh` copies them to `~/.claude/workflows/`, so they run from any project through the Workflow tool — not just from this repo.
+
+| Workflow | What It Does | Invocation |
+|----------|--------------|------------|
+| **code-review-fanout** | Four dimension reviewers (correctness, security, performance, tests) fan out in parallel, then every finding is adversarially verified before it is reported | `Workflow({name: "code-review-fanout"})` — args: the review target (branch, commit range, paths). Defaults to the working-tree diff |
+| **upstream-audit** | One analyst per upstream — pin delta vs origin, allowlist fit, new overlaps, security signals, health — followed by a synthesized action list | `Workflow({name: "upstream-audit"})` — for quarterly or pre-sync audits |
 
 ---
 
@@ -206,6 +231,9 @@ Confirm "design done"   Architect verification  User: approve / improve
 ├─────────────────────────────────────────────────────┤
 │  MCP Layer                                            │
 │  Context7 · Exa · grep.app                            │
+├─────────────────────────────────────────────────────┤
+│  Tooling Layer                                        │
+│  LSP (2) · Named Workflows (2)                        │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -220,6 +248,8 @@ Confirm "design done"   Architect verification  User: approve / improve
 | **Rules** | 54 files / 9 sets | ECC 53 (common + 8 language dirs) + Core 1 |
 | **MCP Servers** | 3 | Context7, Exa, grep.app |
 | **Hooks** | 8 files / 8 events | Delegation guard, telemetry, verification, vault |
+| **LSP Servers** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
+| **Named Workflows** | 2 | code-review-fanout, upstream-audit |
 | **Upstream submodules** | 4 | ecc, omc, gstack, superpowers |
 | **CLI Tools** | 3 | omc, omo, ast-grep |
 
@@ -329,6 +359,20 @@ Each source is allowlisted in [`scripts/skill-allowlists.sh`](./scripts/skill-al
 | Teammate Idle Guide | TeammateIdle | Prompts leader on idle teammates |
 | Task Quality Gate | TaskCompleted | Verifies deliverable quality |
 | Vault Reminder | UserPromptSubmit | Suggests /boss-briefing after 5+ messages |
+
+</details>
+
+<details>
+<summary><strong>LSP Servers (2)</strong></summary>
+
+The plugin declares two language servers in `.lsp.json`. Claude Code starts them on demand, so agents get diagnostics and code navigation instantly instead of paying for a build round-trip.
+
+| Server | Command | Extensions |
+|--------|---------|------------|
+| typescript | `typescript-language-server --stdio` | `.ts` `.tsx` `.js` `.jsx` `.mjs` `.cjs` |
+| python | `pyright-langserver --stdio` | `.py` |
+
+`install.sh` installs both binaries non-fatally — if one is unavailable, only that server is disabled and the rest of the install continues.
 
 </details>
 

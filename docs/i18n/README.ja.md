@@ -14,6 +14,8 @@
 ![Rules](https://img.shields.io/badge/rules-54-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-8-red)
+![LSP Servers](https://img.shields.io/badge/LSP-2-008b8b)
+![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
 **Claude Code 向けオールインワン・エージェントハーネス。**
 **プラグイン一つで、厳選された 32 のエージェントがすぐに使えます。**
@@ -128,6 +130,20 @@ Boss はすべてのリクエストを優先チェーンにカスケードし、
 | 標準的な実装 | `claude-sonnet-5` | Librarian、Multimodal-Looker、OMC スペシャリスト |
 | 簡単な検索、調査 | `claude-haiku-4-5` | 軽量な OMC エージェント、簡易アドバイザリー |
 
+### Effort ティア
+
+モデルは*どの頭脳*がタスクを担当するかを決め、`effort:` フロントマターフィールドは*どこまで深く*考えるかを決めます。自前で管理するエージェントはすべてこの値を宣言しています。
+
+| Effort | エージェント |
+|--------|--------|
+| `xhigh` | Boss、Oracle、Prometheus、Multi-Agent Systems Architect |
+| `high` | Sisyphus、Hephaestus、Atlas、Metis、Momus |
+| `medium` | Librarian、Multimodal-Looker、AI Engineer、DevOps Automator |
+
+スキルも effort を宣言できます — `boss-briefing` は `medium`、`briefing-vault` は `low` です。`boss-advanced` と `gstack-sprint` は意図的に宣言していません。スキルの effort は呼び出し中セッションレベルを上書きするため、宣言するとタスクの途中で Boss の effort が静かに下がってしまいます。
+
+優先順位は `CLAUDE_CODE_EFFORT_LEVEL`（環境変数）> フロントマター > セッションの effort レベルです。`xhigh` は Fable がサポートする上限で、`max` は opus クラス専用のため、それ以外のモデルでは静かにフォールバックします。
+
 ### 3 フェーズスプリントワークフロー
 
 エンドツーエンドの機能実装において、Boss は構造化されたスプリントをオーケストレートします:
@@ -140,6 +156,15 @@ User decides scope      ralph runs execution    Compare vs design doc
 Engineering review      Auto code review        Present comparison table
 Confirm "design done"   Architect verification  User: approve / improve
 ```
+
+### 名前付きワークフロー
+
+決定論的に動くマルチエージェントワークフローです。`install.sh` が `~/.claude/workflows/` にコピーするため、このリポジトリに限らずどのプロジェクトからでも Workflow ツールで呼び出せます。
+
+| ワークフロー | 動作 | 呼び出し |
+|--------------|------|----------|
+| **code-review-fanout** | 4 つの観点のレビュアー（正確性、セキュリティ、パフォーマンス、テスト）が並列に展開し、すべての指摘は報告前に敵対的に検証されます | `Workflow({name: "code-review-fanout"})` — 引数: レビュー対象（ブランチ、コミット範囲、パス）。既定は作業ツリーの diff |
+| **upstream-audit** | アップストリームごとのアナリスト（ピンとの差分、許可リストの適合性、新たな重複、セキュリティシグナル、健全性）と、統合されたアクションリスト | `Workflow({name: "upstream-audit"})` — 四半期ごと、または同期前の監査用 |
 
 ---
 
@@ -176,6 +201,9 @@ Confirm "design done"   Architect verification  User: approve / improve
 ├─────────────────────────────────────────────────────┤
 │  MCP Layer                                            │
 │  Context7 · Exa · grep.app                            │
+├─────────────────────────────────────────────────────┤
+│  Tooling Layer                                        │
+│  LSP (2) · Named Workflows (2)                        │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -190,6 +218,8 @@ Confirm "design done"   Architect verification  User: approve / improve
 | **ルール** | 54 ファイル / 9 ルールセット | ECC 53（common + 8 言語ディレクトリ）+ Core 1 |
 | **MCP サーバー** | 3 | Context7、Exa、grep.app |
 | **フック** | 8 ファイル / 8 イベント | 委任ガード、テレメトリー、検証、ナレッジ Vault |
+| **LSP サーバー** | 2 | typescript（`typescript-language-server`）、python（`pyright-langserver`） |
+| **名前付きワークフロー** | 2 | code-review-fanout、upstream-audit |
 | **アップストリームサブモジュール** | 4 | ecc、omc、gstack、superpowers |
 | **CLI ツール** | 3 | omc、omo、ast-grep |
 
@@ -298,6 +328,20 @@ Confirm "design done"   Architect verification  User: approve / improve
 | Completion Check | Stop | タスク検証の確認 + セッションサマリーのプロンプト |
 | Teammate Idle Guide | TeammateIdle | アイドル状態のチームメートについてリーダーにプロンプト |
 | Task Quality Gate | TaskCompleted | 成果物の品質を検証 |
+
+</details>
+
+<details>
+<summary><strong>LSP サーバー (2)</strong></summary>
+
+プラグインは `.lsp.json` で 2 つの言語サーバーを宣言します。Claude Code が必要に応じて起動するため、エージェントはビルドを一巡させることなく診断とコードナビゲーションをすぐに利用できます。
+
+| サーバー | コマンド | 拡張子 |
+|----------|----------|--------|
+| typescript | `typescript-language-server --stdio` | `.ts` `.tsx` `.js` `.jsx` `.mjs` `.cjs` |
+| python | `pyright-langserver --stdio` | `.py` |
+
+`install.sh` は両方のバイナリを非致命的にインストールします — どちらかが利用できなくても、そのサーバーだけが無効になり、残りのインストールは続行されます。
 
 </details>
 
