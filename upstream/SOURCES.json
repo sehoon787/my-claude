@@ -9,8 +9,8 @@
     "path": "upstream/ecc",
     "method": "submodule + plugin-add",
     "note": "ECC plugin install attempted first, submodule as fallback",
-    "pinned_sha": "4e973d3eaf92d97f8d2e2d8abb39d8bdc8711b38",
-    "pinned_date": "2026-07-28",
+    "pinned_sha": "ff15079b9f9852c385ac3a506f8ec3a26be4f563",
+    "pinned_date": "2026-08-04",
     "license": "MIT"
   },
   "oh-my-claudecode": {
@@ -48,8 +48,8 @@
     "repo": "https://github.com/obra/superpowers",
     "path": "upstream/superpowers",
     "method": "submodule",
-    "pinned_sha": "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9",
-    "pinned_date": "2026-07-27",
+    "pinned_sha": "44c9b2d6e889982ac18c27d05a19fefe335194e1",
+    "pinned_date": "2026-08-04",
     "license": "MIT"
   }
 }
