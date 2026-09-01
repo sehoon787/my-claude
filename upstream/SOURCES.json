@@ -9,8 +9,8 @@
     "path": "upstream/ecc",
     "method": "submodule + plugin-add",
     "note": "ECC plugin install attempted first, submodule as fallback",
-    "pinned_sha": "005eff40fd4a4ac005da7a70e713459175385516",
-    "pinned_date": "2026-08-31",
+    "pinned_sha": "ca185ef5f7667078a1e70a763bd3a9c71c48acf0",
+    "pinned_date": "2026-09-01",
     "license": "MIT"
   },
   "oh-my-claudecode": {
