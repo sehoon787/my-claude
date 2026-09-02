@@ -155,7 +155,7 @@ Boss cascades every request through a priority chain until the best match is fou
 
 | Complexity | Model | Used For |
 |-----------|-------|----------|
-| Top-level orchestration | `claude-fable-5` | Boss |
+| Top-level orchestration | `claude-fable-5-1` | Boss |
 | Deep analysis, architecture | `claude-opus-5` | Sisyphus, Atlas, Hephaestus, Oracle, Metis, Momus, Prometheus |
 | Standard implementation | `claude-sonnet-5` | Librarian, Multimodal-Looker, OMC specialists |
 | Quick lookup, exploration | `claude-haiku-4-5` | Lightweight OMC agents, simple advisory |

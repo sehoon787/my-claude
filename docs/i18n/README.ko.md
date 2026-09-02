@@ -164,7 +164,7 @@ Boss는 가장 적합한 매칭을 찾을 때까지 모든 요청을 우선순�
 
 | 복잡도 | 모델 | 사용 대상 |
 |-----------|-------|----------|
-| 최상위 오케스트레이션 | `claude-fable-5` | Boss |
+| 최상위 오케스트레이션 | `claude-fable-5-1` | Boss |
 | 심층 분석, 아키텍처 | `claude-opus-5` | Sisyphus, Atlas, Hephaestus, Oracle, Metis, Momus, Prometheus |
 | 표준 구현 | `claude-sonnet-5` | Librarian, Multimodal-Looker, OMC 전문가 |
 | 빠른 조회, 탐색 | `claude-haiku-4-5` | 경량 OMC 에이전트, 간단한 자문 |

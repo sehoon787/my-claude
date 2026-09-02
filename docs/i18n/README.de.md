@@ -125,7 +125,7 @@ Boss leitet jede Anfrage durch eine Prioritätskette, bis die beste Übereinstim
 
 | Komplexität | Modell | Verwendet für |
 |-------------|--------|---------------|
-| Orchestrierung auf oberster Ebene | `claude-fable-5` | Boss |
+| Orchestrierung auf oberster Ebene | `claude-fable-5-1` | Boss |
 | Tiefgehende Analyse, Architektur | `claude-opus-5` | Sisyphus, Atlas, Hephaestus, Oracle, Metis, Momus, Prometheus |
 | Standardimplementierung | `claude-sonnet-5` | Librarian, Multimodal-Looker, OMC-Spezialisten |
 | Schnelle Suche, Erkundung | `claude-haiku-4-5` | Leichtgewichtige OMC-Agenten, einfache Beratung |

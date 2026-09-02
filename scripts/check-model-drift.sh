@@ -13,7 +13,7 @@
 # Check 2 exists because check 1 cannot catch a nonexistent ID — it only knows
 # what to reject, not what to accept.
 #
-# Current generation (do NOT flag): claude-fable-5, claude-opus-5,
+# Current generation (do NOT flag): claude-fable-5-1, claude-opus-5,
 # claude-sonnet-5, claude-haiku-4-5.
 #
 # To roll forward on the next model generation, update OLD_MODEL_PATTERN,
@@ -33,7 +33,9 @@ set -uo pipefail
 # current generation moves forward. Overridable via env for local testing;
 # CI (smoke.yml) calls this script with no override, so this default is the
 # single source of truth — do not duplicate it elsewhere.
-OLD_MODEL_PATTERN="${OLD_MODEL_PATTERN:-claude-opus-4-[0-9]|claude-sonnet-4-[0-9]|claude-haiku-4-[0-4]|claude-(2|3)([.-]|$)}"
+# `claude-fable-5([^-]|$)` matches the superseded Fable 5 without touching
+# Fable 5.1 — the trailing guard is what keeps `claude-fable-5-1` out of it.
+OLD_MODEL_PATTERN="${OLD_MODEL_PATTERN:-claude-opus-4-[0-9]|claude-sonnet-4-[0-9]|claude-haiku-4-[0-4]|claude-fable-5([^-]|\$)|claude-(2|3)([.-]|\$)}"
 
 # Path fragments to exclude from the scan (grep -E, matched against file path).
 #   - this script : VALID_MODELS below spells out real IDs, so the stale-ID
@@ -68,7 +70,7 @@ if [ -n "$hits" ]; then
   echo "FAIL: stale (previous-generation) model IDs found:"
   echo "$hits" | sed 's/^/  /'
   echo ""
-  echo "Update these to the current generation (claude-fable-5 / claude-opus-5 / claude-sonnet-5 / claude-haiku-4-5),"
+  echo "Update these to the current generation (claude-fable-5-1 / claude-opus-5 / claude-sonnet-5 / claude-haiku-4-5),"
   echo "or add a deliberate exception to EXCLUDE_PATHS in scripts/check-model-drift.sh."
   status=1
 fi
@@ -90,7 +92,7 @@ fi
 # generation — OLD_MODEL_PATTERN above already rejects them. Listing them as
 # valid here would put the two checks in direct contradiction. Bare aliases
 # are included because Claude Code resolves them and upstream agents use them.
-VALID_MODELS="${VALID_MODELS:-claude-fable-5 claude-mythos-5 claude-opus-5 claude-sonnet-5 claude-haiku-4-5 opus sonnet haiku}"
+VALID_MODELS="${VALID_MODELS:-claude-fable-5-1 claude-mythos-5 claude-opus-5 claude-sonnet-5 claude-haiku-4-5 opus sonnet haiku}"
 
 unknown=""
 while IFS= read -r line; do
