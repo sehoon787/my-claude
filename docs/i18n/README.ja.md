@@ -157,6 +157,20 @@ Engineering review      Auto code review        Present comparison table
 Confirm "design done"   Architect verification  User: approve / improve
 ```
 
+### 構造化された最終レポート
+
+Boss は作業が発生したすべてのターン — ファイルの編集・作成、コミット/PR/マージ、設定変更、検証の実行があったターン — を、diff を開かなくても読み取れる構造化された最終レポートで締めくくります。レポートは固定された 5 つのテーブルから組み立てられ、各テーブルはその状況が実際に発生した場合にのみ出力されます（空のテーブルは決して出力しません）:
+
+| 状況 | テーブル | 列 |
+|-----------|-------|---------|
+| ファイル/設定の変更 | 변경 대조 (Changes) | 대상 / Before / After / 근거 |
+| 複数タスクの完了 | 작업 요약 (Work summary) | 항목 / 결과 / 근거 |
+| 検証を実行 | 검증 결과 (Verification) | 항목 / 기대 / 실제 / 판정 |
+| コミット/PR を作成 | 산출물 (Deliverables) | PR / 저장소 / 내용 / 상태 |
+| 未解決事項あり | 남은 것 (Remaining) | 항목 / 상태 / 다음 조치 |
+
+このレポートは推論の最後にのみ発動し — タスク途中の進捗報告としては決して出力されず — 純粋な Q&A のターンはレポートなしで通常どおり終了します。仕様は `boss.md § FINAL REPORT` にあり、`stop-final-report.js` Stop フックがこれを強制します。
+
 ### 名前付きワークフロー
 
 決定論的に動くマルチエージェントワークフローです。`install.sh` が `~/.claude/workflows/` にコピーするため、このリポジトリに限らずどのプロジェクトからでも Workflow ツールで呼び出せます。
@@ -221,7 +235,7 @@ Confirm "design done"   Architect verification  User: approve / improve
 | **LSP サーバー** | 2 | typescript（`typescript-language-server`）、python（`pyright-langserver`） |
 | **名前付きワークフロー** | 2 | code-review-fanout、upstream-audit |
 | **アップストリームサブモジュール** | 4 | ecc、omc、gstack、superpowers |
-| **CLI ツール** | 3 | omc、omo、ast-grep |
+| **CLI ツール** | 5 | omc、omo、ast-grep、comment-checker、codeburn |
 
 上記のエージェント・スキル・ルールはすべて [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) の許可リストに登録され、インストールマニフェストで追跡されます。Anthropic 公式のドキュメントスキル（pdf、docx など）は `claude plugin add anthropics/skills` で別途インストールされ、意図的にマニフェスト追跡の対象外です。
 
@@ -436,6 +450,7 @@ my-claude は 4 つの MIT ライセンスのアップストリームリポジ�
 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 2026-07-27 にサブモジュールを削除。エンジニアリングエージェント 3 個を帰属表示付きで `agents/vendored/` に vendored。 |
 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | `install.sh` が `claude plugin add anthropics/skills` でインストール（pdf、docx など）。マニフェスト追跡の対象外。 |
 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 つの AI コーディング行動ガイドラインを `~/.claude/CLAUDE.md` に追記。 |
+| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | npm CLI (MIT)。ローカルファーストのトークン/コストトラッカー — Claude Code が既に書き出すセッションファイルを読み取り専用で解析し、モデル・プロジェクト・タスク別にコストを集計します。プロキシ・API キー・アップロード不要。`install.sh` が `codeburn@0.9.23` に固定してインストールし、`upstream/SOURCES.json` に `method: npm-cli` として登録。予算ガードフックは `--with-codeburn-guard` でオプトイン。OMC HUD（現在のセッションのコンテキストとクォータ）を補完し、セッション横断のコストの行き先を示します。 |
 
 ---
 

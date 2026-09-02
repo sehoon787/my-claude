@@ -165,6 +165,20 @@ terminée"               User : approuver /      User : approuver /
                         améliorer               améliorer
 ```
 
+### Rapport final structuré
+
+Boss clôt chaque tour de travail — tout tour ayant édité ou créé des fichiers, produit des commits/PR/merges, modifié la configuration ou exécuté une vérification — par un rapport final structuré lisible sans ouvrir de diff. Le rapport est assemblé à partir de cinq tableaux fixes, chacun n'étant émis que si sa situation s'est réellement produite (jamais de tableau vide) :
+
+| Situation | Tableau | Colonnes |
+|-----------|-------|---------|
+| Fichiers/paramètres modifiés | 변경 대조 (Changes) | 대상 / Before / After / 근거 |
+| Plusieurs tâches terminées | 작업 요약 (Work summary) | 항목 / 결과 / 근거 |
+| Vérification exécutée | 검증 결과 (Verification) | 항목 / 기대 / 실제 / 판정 |
+| Commits/PR produits | 산출물 (Deliverables) | PR / 저장소 / 내용 / 상태 |
+| Éléments non résolus | 남은 것 (Remaining) | 항목 / 상태 / 다음 조치 |
+
+Il ne se déclenche qu'à la toute fin du raisonnement — jamais comme point d'étape en cours de tâche — et les tours de simple Q&R se terminent normalement sans lui. La spécification vit dans `boss.md § FINAL REPORT` ; le hook Stop `stop-final-report.js` la fait respecter.
+
 ### Workflows nommés
 
 Des workflows multi-agents déterministes. `install.sh` les copie dans `~/.claude/workflows/`, ce qui les rend appelables depuis n'importe quel projet via l'outil Workflow, et pas seulement depuis ce dépôt.
@@ -231,7 +245,7 @@ Des workflows multi-agents déterministes. `install.sh` les copie dans `~/.claud
 | **Serveurs LSP** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
 | **Workflows nommés** | 2 | code-review-fanout, upstream-audit |
 | **Sous-modules upstream** | 4 | ecc, omc, gstack, superpowers |
-| **Outils CLI** | 3 | omc, omo, ast-grep |
+| **Outils CLI** | 5 | omc, omo, ast-grep, comment-checker, codeburn |
 
 Chaque agent, skill et règle ci-dessus figure dans la liste d'autorisation de [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) et est suivi par le manifeste d'installation. Les skills documentaires officiels d'Anthropic (pdf, docx, etc.) sont installés séparément via `claude plugin add anthropics/skills` et volontairement exclus du manifeste.
 
@@ -446,6 +460,7 @@ Pas des sous-modules, mais partie intégrante de la stack :
 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | Sous-module supprimé le 2026-07-27. 3 agents d'ingénierie vendorisés dans `agents/vendored/` avec attribution. |
 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | Installés par `install.sh` via `claude plugin add anthropics/skills` (pdf, docx, etc.). Non suivis par le manifeste. |
 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 principes de comportement de codage IA ajoutés à `~/.claude/CLAUDE.md`. |
+| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | CLI npm (MIT). Suivi local-first des tokens et des coûts — lit en lecture seule les fichiers de session que Claude Code écrit déjà et ventile les dépenses par modèle, projet et tâche. Pas de proxy, pas de clé API, rien ne quitte la machine. Installé par `install.sh` épinglé en `codeburn@0.9.23` et enregistré dans `upstream/SOURCES.json` en `method: npm-cli`. Les hooks de garde budgétaire sont opt-in via `--with-codeburn-guard`. Complète le HUD OMC (contexte et quota de la session courante) en montrant où va l'argent entre les sessions. |
 
 ---
 
