@@ -119,7 +119,7 @@ Boss는 my-claude의 핵심에 있는 메타 오케스트레이터입니다. 코
 
 ### 통합 생태계
 - 플러그인 하나로 **32 에이전트, 139 스킬, 54 룰**을 한 환경에 구성
-- 6개 오픈소스 도구(OMC, omo, ECC, gstack, superpowers, Karpathy)를 하나로 통합. Anthropic 공식 문서 스킬은 `install.sh`가 별도로 추가
+- 7개 오픈소스 도구(OMC, omo, ECC, gstack, superpowers, Karpathy, codeburn)를 하나로 통합. Anthropic 공식 문서 스킬은 `install.sh`가 별도로 추가
 
 ---
 
@@ -196,6 +196,20 @@ Engineering review      Auto code review        Present comparison table
 Confirm "design done"   Architect verification  User: approve / improve
 ```
 
+### 정형화된 최종 보고
+
+Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지, 설정 변경, 검증 실행이 있었던 턴 — 을 diff를 열지 않고도 훑어볼 수 있는 정형화된 최종 보고로 마무리합니다. 보고는 고정된 표 5종으로 구성되며, 각 표는 해당 상황이 실제로 발생했을 때만 출력됩니다(빈 표는 만들지 않음):
+
+| 상황 | 표 | 컬럼 |
+|-----------|-------|---------|
+| 파일/설정 변경 | 변경 대조 (Changes) | 대상 / Before / After / 근거 |
+| 여러 작업 완료 | 작업 요약 (Work summary) | 항목 / 결과 / 근거 |
+| 검증 실행 | 검증 결과 (Verification) | 항목 / 기대 / 실제 / 판정 |
+| 커밋/PR 산출 | 산출물 (Deliverables) | PR / 저장소 / 내용 / 상태 |
+| 미해결 존재 | 남은 것 (Remaining) | 항목 / 상태 / 다음 조치 |
+
+이 보고는 추론의 맨 마지막에만 발동하며 — 작업 중간의 진행 상황 보고로는 절대 출력되지 않음 — 순수 질답 턴은 보고 없이 정상 종료됩니다. 규격은 `boss.md § FINAL REPORT`에 있고, `stop-final-report.js` Stop 훅이 이를 강제합니다.
+
 ### 네임드 워크플로
 
 결정적으로 실행되는 멀티에이전트 워크플로입니다. `install.sh`가 `~/.claude/workflows/`로 복사하므로 이 레포뿐 아니라 어느 프로젝트에서든 Workflow 도구로 호출할 수 있습니다.
@@ -260,7 +274,7 @@ Confirm "design done"   Architect verification  User: approve / improve
 | **LSP 서버** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
 | **네임드 워크플로** | 2 | code-review-fanout, upstream-audit |
 | **업스트림 서브모듈** | 4 | ecc, omc, gstack, superpowers |
-| **CLI 도구** | 3 | omc, omo, ast-grep |
+| **CLI 도구** | 5 | omc, omo, ast-grep, comment-checker, codeburn |
 
 위의 에이전트·스킬·룰은 모두 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh)의 허용목록에 등재되어 설치 매니페스트로 추적됩니다. Anthropic 공식 문서 스킬(pdf, docx 등)은 `claude plugin add anthropics/skills`로 별도 설치되며 의도적으로 매니페스트에서 제외됩니다.
 
@@ -475,6 +489,7 @@ my-claude는 MIT 라이선스 업스트림 저장소 4개를 git 서브모듈로
 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 2026-07-27 서브모듈 제거. 엔지니어링 에이전트 3개를 출처 표기와 함께 `agents/vendored/`로 벤더링. |
 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | `install.sh`가 `claude plugin add anthropics/skills`로 설치(pdf, docx 등). 매니페스트 추적 대상 아님. |
 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | AI 코딩 행동 가이드라인 4가지를 `~/.claude/CLAUDE.md`에 추가. |
+| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | npm CLI (MIT). 로컬 우선 토큰/비용 추적기 — Claude Code가 이미 기록하는 세션 파일을 읽기 전용으로 파싱해 모델·프로젝트·작업별 비용을 집계합니다. 프록시·API 키·업로드 없음. `install.sh`가 `codeburn@0.9.23`으로 고정 설치하며 `upstream/SOURCES.json`에 `method: npm-cli`로 등재. 예산 가드 훅은 `--with-codeburn-guard`로 opt-in. OMC HUD(현재 세션의 컨텍스트·한도)를 보완해 세션 전체의 비용 흐름을 보여줍니다. |
 
 ---
 

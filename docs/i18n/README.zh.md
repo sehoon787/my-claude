@@ -157,6 +157,20 @@ Engineering review      Auto code review        Present comparison table
 Confirm "design done"   Architect verification  User: approve / improve
 ```
 
+### 结构化最终报告
+
+Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束每个有实际工作的回合 — 即编辑/创建了文件、进行了提交/PR/合并、更改了配置或执行了验证的回合。报告由 5 个固定表格组成，每个表格仅在对应情况确实发生时才输出（绝不输出空表）:
+
+| 情况 | 表格 | 列 |
+|-----------|-------|---------|
+| 文件/设置变更 | 변경 대조 (Changes) | 대상 / Before / After / 근거 |
+| 完成多项任务 | 작업 요약 (Work summary) | 항목 / 결과 / 근거 |
+| 执行了验证 | 검증 결과 (Verification) | 항목 / 기대 / 실제 / 판정 |
+| 产出提交/PR | 산출물 (Deliverables) | PR / 저장소 / 내용 / 상태 |
+| 存在未解决项 | 남은 것 (Remaining) | 항목 / 상태 / 다음 조치 |
+
+该报告仅在推理的最末尾触发 — 绝不会作为任务中途的进度更新输出 — 纯问答回合则正常结束、不生成报告。规范位于 `boss.md § FINAL REPORT`，由 `stop-final-report.js` Stop 钩子强制执行。
+
 ### 具名工作流
 
 确定性的多 Agent 工作流。`install.sh` 会把它们复制到 `~/.claude/workflows/`，因此不限于本仓库，在任意项目中都能通过 Workflow 工具调用。
@@ -221,7 +235,7 @@ Confirm "design done"   Architect verification  User: approve / improve
 | **LSP 服务器** | 2 | typescript（`typescript-language-server`）、python（`pyright-langserver`） |
 | **具名工作流** | 2 | code-review-fanout、upstream-audit |
 | **上游子模块** | 4 | ecc、omc、gstack、superpowers |
-| **CLI 工具** | 3 | omc、omo、ast-grep |
+| **CLI 工具** | 5 | omc、omo、ast-grep、comment-checker、codeburn |
 
 以上 Agent、Skills、规则全部登记在 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) 的白名单中，并由安装清单跟踪。Anthropic 官方文档 Skills（pdf、docx 等）通过 `claude plugin add anthropics/skills` 单独安装，有意不纳入清单跟踪。
 
@@ -437,6 +451,7 @@ my-claude 以 git 子模块方式关联 4 个 MIT 授权的上游仓库，每个
 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 2026-07-27 移除子模块。3 个工程 Agent 连同署名一并 vendored 到 `agents/vendored/`。 |
 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | 由 `install.sh` 通过 `claude plugin add anthropics/skills` 安装（pdf、docx 等）。不纳入清单跟踪。 |
 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 条 AI 编码行为准则，追加到 `~/.claude/CLAUDE.md`。 |
+| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | npm CLI (MIT)。本地优先的 token/成本追踪器 — 只读解析 Claude Code 已写出的会话文件，按模型、项目、任务汇总花费。无代理、无 API 密钥、不上传。由 `install.sh` 以 `codeburn@0.9.23` 固定版本安装，并在 `upstream/SOURCES.json` 中以 `method: npm-cli` 登记。预算守卫钩子通过 `--with-codeburn-guard` 选择启用。与 OMC HUD（当前会话的上下文与配额）互补，展示跨会话的花费去向。 |
 
 ---
 
