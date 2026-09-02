@@ -26,8 +26,15 @@
     "repo": "https://github.com/garrytan/gstack",
     "path": "upstream/gstack",
     "method": "submodule + setup",
-    "supersedes": ["benchmark", "canary-watch", "safety-guard", "browser-qa",
-                   "verification-loop", "security-review", "design-system"],
+    "supersedes": [
+      "benchmark",
+      "canary-watch",
+      "safety-guard",
+      "browser-qa",
+      "verification-loop",
+      "security-review",
+      "design-system"
+    ],
     "branch": "main",
     "syncedSha": "initial",
     "syncedTag": null,
@@ -50,6 +57,30 @@
     "method": "submodule",
     "pinned_sha": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
     "pinned_date": "2026-08-31",
+    "license": "MIT"
+  },
+  "codeburn": {
+    "repo": "https://github.com/getagentseal/codeburn",
+    "method": "npm-cli",
+    "package": "codeburn",
+    "pinned_version": "0.9.23",
+    "note": "Local-first AI token/cost tracker; reads session files read-only, no proxy, no upload. Budget-guard hooks are opt-in (--with-codeburn-guard).",
+    "license": "MIT"
+  },
+  "ast-grep": {
+    "repo": "https://github.com/ast-grep/ast-grep",
+    "method": "npm-cli",
+    "package": "@ast-grep/cli",
+    "pinned_version": "0.42.0",
+    "note": "Structural code search/rewrite CLI used by agents",
+    "license": "MIT"
+  },
+  "comment-checker": {
+    "repo": "https://github.com/code-yeongyu/go-claude-code-comment-checker",
+    "method": "npm-cli",
+    "package": "@code-yeongyu/comment-checker",
+    "pinned_version": "0.7.0",
+    "note": "Comment quality checker companion CLI",
     "license": "MIT"
   }
 }

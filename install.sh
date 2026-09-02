@@ -42,6 +42,7 @@ for arg in "$@"; do
     --skip-gstack)     SKIP_GSTACK=1 ;;
     --skip-superpowers) SKIP_SUPERPOWERS=1 ;;
     --self-only)       SKIP_ECC=1; SKIP_OMC=1; SKIP_GSTACK=1; SKIP_SUPERPOWERS=1 ;;
+    --with-codeburn-guard) WITH_CODEBURN_GUARD=1 ;;
     -h|--help)
       cat <<'EOF'
 Usage:
@@ -590,7 +591,11 @@ else
   oh-my-opencode install --no-tui --claude=yes --openai=no --gemini=no --copilot=no 2>/dev/null || true
   echo "    omo installed"
 fi
-npm i -g @ast-grep/cli@0.42.0 @code-yeongyu/comment-checker@0.7.0 2>/dev/null || true
+npm i -g @ast-grep/cli@0.42.0 @code-yeongyu/comment-checker@0.7.0 codeburn@0.9.23 2>/dev/null || true
+# codeburn budget guard is opt-in: it adds a PreToolUse hook on every tool call.
+if [ "${WITH_CODEBURN_GUARD:-0}" = "1" ] && command -v codeburn >/dev/null 2>&1; then
+  codeburn guard install 2>/dev/null && echo "  codeburn guard hooks installed" || echo "  WARNING: codeburn guard install failed"
+fi
 
 # 5c-lsp. Language servers for the plugin's .lsp.json declaration (typescript + python).
 # Binaries must be on PATH (docs: plugins-reference → LSP servers); a missing binary
@@ -657,6 +662,7 @@ echo "  hooks:            $(find "$HOME/.claude/hooks"  -type f      2>/dev/null
 echo "  omc:              $(command -v omc            >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  ast-grep:         $(command -v ast-grep       >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
+echo "  codeburn:         $(command -v codeburn       >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  tmux:             $(command -v tmux >/dev/null 2>&1 && echo "OK ($(tmux -V))" || echo 'NOT INSTALLED (in-process mode)')"
 echo "  hud:              $(test -f "$HOME/.claude/hud/omc-hud.mjs" && echo 'OK' || echo 'MISSING')"
 TEAMMATE_MODE=$(node -e "try{const h=process.env.HOME||process.env.USERPROFILE;console.log(JSON.parse(require('fs').readFileSync(h+'/.claude/settings.json','utf8')).teammateMode||'auto')}catch(e){console.log('auto')}")

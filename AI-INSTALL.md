@@ -107,11 +107,11 @@ This installs:
 ## Step 1b: Manual install (if plugin unavailable)
 
 `install.sh` is the single source of truth for installation. It handles everything:
-agents, skills, rules, hooks, MCP servers, companion tools (omc, omo, ast-grep),
+agents, skills, rules, hooks, MCP servers, companion tools (omc, omo, ast-grep, comment-checker, codeburn),
 gstack, Anthropic skills, Karpathy guidelines, and manifest generation.
 
 Prerequisites: `bash` (Git Bash or WSL on Windows — this is a bash script, not
-PowerShell), `node`/`npm` (v20+), and `git`. `install.sh` checks for these and
+PowerShell), `node`/`npm` (v22.13+ — required by codeburn), and `git`. `install.sh` checks for these and
 exits with an error naming whichever is missing before doing anything else.
 
 ```bash
@@ -131,7 +131,7 @@ This installs everything in one step:
 - 3 MCP servers (Context7, Exa, grep.app)
 - 2 named workflows in `~/.claude/workflows/` (code-review-fanout, upstream-audit) — usable from any project via the Workflow tool
 - 2 LSP server binaries (`typescript-language-server`, `pyright-langserver`) — installed non-fatally, a missing binary only disables that one server
-- Companion tools: OMC CLI, omo CLI, ast-grep
+- Companion tools: OMC CLI, omo CLI, ast-grep, comment-checker, codeburn (budget-guard hooks opt-in via `--with-codeburn-guard`)
 - Anthropic Official Skills (pdf, docx)
 - Karpathy coding guidelines
 - gstack sprint-process harness (27 skills)
