@@ -13,7 +13,7 @@
 ![Skills](https://img.shields.io/badge/skills-139-purple)
 ![Rules](https://img.shields.io/badge/rules-54-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
-![Hooks](https://img.shields.io/badge/hooks-8-red)
+![Hooks](https://img.shields.io/badge/hooks-9-red)
 ![LSP Servers](https://img.shields.io/badge/LSP-2-008b8b)
 ![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 

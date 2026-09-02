@@ -1,7 +1,7 @@
 # my-claude AI Installation Guide
 
 You are an AI agent setting up a Claude Code multi-agent orchestration environment.
-The plugin bundles 32 curated agents, 139 curated skills, 54 rule files (9 rule sets), 8 hooks, 3 MCP servers, and 2 LSP servers.
+The plugin bundles 32 curated agents, 139 curated skills, 54 rule files (9 rule sets), 9 hooks, 3 MCP servers, and 2 LSP servers.
 `install.sh` additionally copies 2 named workflows to `~/.claude/workflows/` and installs the LSP binaries.
 Only 2-3 steps are needed.
 
@@ -96,7 +96,7 @@ This installs:
 - 139 skills (79 ECC + 27 gstack + 16 OMC + 13 Superpowers + 4 Core)
   Note: gstack skills are installed separately — run Step 1b (`install.sh`) for those.
 - 54 rule files across 9 rule sets
-- 8 behavioral hooks across 8 events (SessionStart, PreToolUse, PostToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop, UserPromptSubmit)
+- 9 behavioral hooks across 8 events (SessionStart, PreToolUse, PostToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop, UserPromptSubmit)
   - The SessionStart hook auto-creates a `.briefing/` vault per-project (with `INDEX.md`) on first session. This provides persistent project context, decision logs, and session summaries.
 - 3 MCP servers globally (Context7, Exa, grep.app) — available in all projects
 - 2 LSP servers declared in `.lsp.json` (typescript, python) — auto-started diagnostics and code navigation for agents
@@ -127,7 +127,7 @@ rm -rf /tmp/my-claude
 This installs everything in one step:
 - 32 agents (Boss + OMO + OMC + vendored)
 - 139 skills (ECC + gstack + OMC + Superpowers + Core)
-- 54 rule files (9 rule sets), 8 hooks
+- 54 rule files (9 rule sets), 9 hooks
 - 3 MCP servers (Context7, Exa, grep.app)
 - 2 named workflows in `~/.claude/workflows/` (code-review-fanout, upstream-audit) — usable from any project via the Workflow tool
 - 2 LSP server binaries (`typescript-language-server`, `pyright-langserver`) — installed non-fatally, a missing binary only disables that one server
