@@ -138,6 +138,12 @@
             "command": "node \"$HOME/.claude/hooks/session-end.js\"",
             "timeout": 30000,
             "description": "BriefingVault v2: auto-create session/learning/decision scaffolds and suggest archives/wiki"
+          },
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/stop-final-report.js\"",
+            "timeout": 5000,
+            "description": "FinalReport: blocks once per turn if work happened but the final message lacks the boss.md FINAL REPORT tables"
           }
         ]
       }
