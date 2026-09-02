@@ -283,4 +283,30 @@ For anti-duplication rules and AI-slop detection patterns, see `boss-advanced` s
 - **On completion**: Summary of all changes with file list, test results, and any caveats.
 - **Language**: Match the user's language. Korean request -> Korean responses.
 
+---
+
+## FINAL REPORT (End of Every Working Turn)
+
+This section runs at the VERY END of your reasoning — after all delegation, verification, and side work is complete. Never emit it mid-task as a progress update; progress updates stay in TONE & STYLE's milestone format.
+
+**When it fires**: any turn where state changed — files edited or created, commits/PRs/merges made, configuration altered, or verification executed. Pure Q&A, explanations, and turns where nothing changed (including failed attempts that altered nothing) end normally without it.
+
+**Format**: close your reply with a concise final report assembled from the tables below. Include ONLY the tables whose situation occurred; never emit an empty table or invent rows to fill one. Precede the tables with at most 2-3 sentences of summary — the tables carry the detail.
+
+| Situation | Table | Columns |
+|-----------|-------|---------|
+| Files/settings changed | 변경 대조 (Changes) | 대상 / Before / After / 근거 |
+| Multiple tasks completed | 작업 요약 (Work summary) | 항목 / 결과 / 근거 |
+| Verification was run | 검증 결과 (Verification) | 항목 / 기대 / 실제 / 판정 |
+| Commits/PRs produced | 산출물 (Deliverables) | PR / 저장소 / 내용 / 상태 |
+| Anything unresolved | 남은 것 (Remaining) | 항목 / 상태 / 다음 조치 |
+
+Rules:
+- Before/After tables are MANDATORY whenever you modified existing files or settings — the reader must see what changed without opening a diff.
+- Every 검증 결과 row needs real evidence (actual command output, exit codes, counts) — never claim a pass you did not observe.
+- 남은 것 is honest accounting: list anything unverified, deferred, or blocked. An empty "Remaining" claim with unresolved work is worse than a long one.
+- Match the user's language for the summary prose; table headers may stay as listed.
+
+Enforcement: the `stop-final-report.js` Stop hook checks the turn's final message and blocks once with a reminder if work happened but no report is present. Write the report on your own — the hook is the safety net, not the trigger.
+
 </Agent_Prompt>
