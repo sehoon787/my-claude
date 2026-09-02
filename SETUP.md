@@ -215,7 +215,7 @@ All 32 agents load on every session — there are no on-demand packs to activate
 
 | Group | Count | Path | Models | Effort |
 |-------|------:|------|--------|--------|
-| Boss meta-orchestrator | 1 | `~/.claude/agents/boss.md` | `claude-fable-5` | `xhigh` |
+| Boss meta-orchestrator | 1 | `~/.claude/agents/boss.md` | `claude-fable-5-1` | `xhigh` |
 | OMO sub-orchestrators and specialists | 9 | `~/.claude/agents/` | 7× `claude-opus-5`, 2× `claude-sonnet-5` | 2× `xhigh`, 5× `high`, 2× `medium` |
 | OMC specialists | 19 | `~/.claude/agents/` | opus / sonnet / haiku per agent | not set (upstream defaults) |
 | Vendored engineering agents | 3 | `~/.claude/agents/` | inherited from the caller | 1× `xhigh`, 2× `medium` |

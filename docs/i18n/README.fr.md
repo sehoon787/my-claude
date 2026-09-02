@@ -130,7 +130,7 @@ Boss cascade chaque requête dans une chaîne de priorités jusqu'à trouver la 
 
 | Complexité | Modèle | Utilisé pour |
 |-----------|-------|----------|
-| Orchestration de haut niveau | `claude-fable-5` | Boss |
+| Orchestration de haut niveau | `claude-fable-5-1` | Boss |
 | Analyse approfondie, architecture | `claude-opus-5` | Sisyphus, Atlas, Hephaestus, Oracle, Metis, Momus, Prometheus |
 | Implémentation standard | `claude-sonnet-5` | Librarian, Multimodal-Looker, spécialistes OMC |
 | Recherche rapide, exploration | `claude-haiku-4-5` | Agents OMC légers, conseil simple |

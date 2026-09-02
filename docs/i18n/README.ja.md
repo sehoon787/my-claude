@@ -125,7 +125,7 @@ Boss はすべてのリクエストを優先チェーンにカスケードし、
 
 | 複雑度 | モデル | 使用場面 |
 |-----------|-------|----------|
-| トップレベルのオーケストレーション | `claude-fable-5` | Boss |
+| トップレベルのオーケストレーション | `claude-fable-5-1` | Boss |
 | 深い分析、アーキテクチャ | `claude-opus-5` | Sisyphus、Atlas、Hephaestus、Oracle、Metis、Momus、Prometheus |
 | 標準的な実装 | `claude-sonnet-5` | Librarian、Multimodal-Looker、OMC スペシャリスト |
 | 簡単な検索、調査 | `claude-haiku-4-5` | 軽量な OMC エージェント、簡易アドバイザリー |

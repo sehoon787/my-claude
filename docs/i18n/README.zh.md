@@ -125,7 +125,7 @@ Boss 对每个请求按优先级链逐级匹配，直到找到最佳方案：
 
 | 复杂度 | 模型 | 用途 |
 |-----------|-------|----------|
-| 顶层编排 | `claude-fable-5` | Boss |
+| 顶层编排 | `claude-fable-5-1` | Boss |
 | 深度分析、架构 | `claude-opus-5` | Sisyphus、Atlas、Hephaestus、Oracle、Metis、Momus、Prometheus |
 | 标准实现 | `claude-sonnet-5` | Librarian、Multimodal-Looker、OMC 专家 Agent |
 | 快速查询、探索 | `claude-haiku-4-5` | 轻量 OMC Agent、简单咨询 |
