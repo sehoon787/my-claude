@@ -90,6 +90,10 @@ A sprint-process harness by Garry Tan. my-claude installs 26 of its skills plus 
 
 Jesse Vincent's development-process skill library. my-claude installs 13 of its 14 skills — brainstorming, systematic debugging, TDD, plan writing and execution, and code-review etiquette. (`dispatching-parallel-agents` is excluded because Boss and Agent Teams already own that path.)
 
+### 8. [codeburn](https://github.com/getagentseal/codeburn)
+
+Local-first AI token and cost tracker. Reads the session files Claude Code already writes (`~/.claude/projects/**/*.jsonl`) and breaks spend down by model, project, and task — no proxy, no API key, nothing leaves the machine. Installed as a companion CLI (`codeburn`, pinned in `install.sh`); the budget-guard hooks are opt-in via `bash install.sh --with-codeburn-guard` because they add a PreToolUse hook on every tool call. Complements the OMC HUD: the HUD shows this session's context and quota, codeburn shows where money went across sessions.
+
 ---
 
 ## How Boss Works
@@ -265,7 +269,7 @@ Deterministic multi-agent workflows. `install.sh` copies them to `~/.claude/work
 | **LSP Servers** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
 | **Named Workflows** | 2 | code-review-fanout, upstream-audit |
 | **Upstream submodules** | 4 | ecc, omc, gstack, superpowers |
-| **CLI Tools** | 3 | omc, omo, ast-grep |
+| **CLI Tools** | 5 | omc, omo, ast-grep, comment-checker, codeburn |
 
 Every agent, skill, and rule above is allowlisted in [`scripts/skill-allowlists.sh`](./scripts/skill-allowlists.sh) and tracked in the install manifest. Anthropic's official document skills (pdf, docx, …) are added separately via `claude plugin add anthropics/skills` and are deliberately not manifest-tracked.
 
