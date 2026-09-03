@@ -42,6 +42,13 @@ jobs:
             echo "level=minor" >> $GITHUB_OUTPUT
           elif echo "$COMMITS" | grep -qiE "^(fix|perf|refactor)(\(.*\))?:"; then
             echo "level=patch" >> $GITHUB_OUTPUT
+          # Commit type alone is not enough: agent definitions, hooks, and the
+          # installer are shipped to users by install.sh, so a change there must
+          # release even when it was committed as docs:/chore:. Without this,
+          # boss.md edits labelled docs(boss) sat unreleased while releases/latest
+          # kept serving the old prompt.
+          elif [ "$LAST_TAG" != "v0.0.0" ] && git diff --name-only "${LAST_TAG}..HEAD" | grep -qE "^(agents/|hooks/|scripts/|install\.sh$|\.claude-plugin/)"; then
+            echo "level=patch" >> $GITHUB_OUTPUT
           else
             echo "level=none" >> $GITHUB_OUTPUT
           fi
