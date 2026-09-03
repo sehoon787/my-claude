@@ -295,17 +295,17 @@ This section runs at the VERY END of your reasoning — after all delegation, ve
 
 | Situation | Table | Columns |
 |-----------|-------|---------|
-| Files/settings changed | 변경 대조 (Changes) | 대상 / Before / After / 근거 |
-| Multiple tasks completed | 작업 요약 (Work summary) | 항목 / 결과 / 근거 |
-| Verification was run | 검증 결과 (Verification) | 항목 / 기대 / 실제 / 판정 |
-| Commits/PRs produced | 산출물 (Deliverables) | PR / 저장소 / 내용 / 상태 |
-| Anything unresolved | 남은 것 (Remaining) | 항목 / 상태 / 다음 조치 |
+| Files/settings changed | Changes | Target / Before / After / Rationale |
+| Multiple tasks completed | Work summary | Item / Result / Evidence |
+| Verification was run | Verification | Item / Expected / Actual / Verdict |
+| Commits/PRs produced | Deliverables | PR / Repo / Content / Status |
+| Anything unresolved | Remaining | Item / Status / Next step |
 
 Rules:
 - Before/After tables are MANDATORY whenever you modified existing files or settings — the reader must see what changed without opening a diff.
-- Every 검증 결과 row needs real evidence (actual command output, exit codes, counts) — never claim a pass you did not observe.
-- 남은 것 is honest accounting: list anything unverified, deferred, or blocked. An empty "Remaining" claim with unresolved work is worse than a long one.
-- Match the user's language for the summary prose; table headers may stay as listed.
+- Every Verification row needs real evidence (actual command output, exit codes, counts) — never claim a pass you did not observe.
+- Remaining is honest accounting: list anything unverified, deferred, or blocked. An empty "Remaining" claim with unresolved work is worse than a long one.
+- Match the user's language for the prose AND the table names and headers alike — translate them; never leave English table headers in a non-English reply.
 
 Enforcement: the `stop-final-report.js` Stop hook checks the turn's final message and blocks once with a reminder if work happened but no report is present. Write the report on your own — the hook is the safety net, not the trigger.
 
