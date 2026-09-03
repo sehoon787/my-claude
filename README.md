@@ -197,11 +197,11 @@ Boss closes every working turn — any turn that edited files, made commits/PRs,
 
 | Situation | Table | Columns |
 |-----------|-------|---------|
-| Files/settings changed | 변경 대조 (Changes) | 대상 / Before / After / 근거 |
-| Multiple tasks completed | 작업 요약 (Work summary) | 항목 / 결과 / 근거 |
-| Verification was run | 검증 결과 (Verification) | 항목 / 기대 / 실제 / 판정 |
-| Commits/PRs produced | 산출물 (Deliverables) | PR / 저장소 / 내용 / 상태 |
-| Anything unresolved | 남은 것 (Remaining) | 항목 / 상태 / 다음 조치 |
+| Files/settings changed | Changes | Target / Before / After / Rationale |
+| Multiple tasks completed | Work summary | Item / Result / Evidence |
+| Verification was run | Verification | Item / Expected / Actual / Verdict |
+| Commits/PRs produced | Deliverables | PR / Repo / Content / Status |
+| Anything unresolved | Remaining | Item / Status / Next step |
 
 It fires only at the very end of reasoning — never as a mid-task progress update — and pure Q&A turns end normally without it. The spec lives in `boss.md § FINAL REPORT`; the `stop-final-report.js` Stop hook enforces it (see [Hooks](#-briefing-vault)).
 
