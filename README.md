@@ -92,7 +92,7 @@ Jesse Vincent's development-process skill library. my-claude installs 13 of its 
 
 ### 8. [codeburn](https://github.com/getagentseal/codeburn)
 
-Local-first AI token and cost tracker. Reads the session files Claude Code already writes (`~/.claude/projects/**/*.jsonl`) and breaks spend down by model, project, and task — no proxy, no API key, nothing leaves the machine. Installed as a companion CLI (`codeburn`, pinned in `install.sh`); the budget-guard hooks are opt-in via `bash install.sh --with-codeburn-guard` because they add a PreToolUse hook on every tool call. Complements the OMC HUD: the HUD shows this session's context and quota, codeburn shows where money went across sessions.
+Local-first AI token and cost tracker. Reads the session files Claude Code already writes (`~/.claude/projects/**/*.jsonl`) and breaks spend down by model, project, and task — no proxy, no API key, nothing leaves the machine. Installed as a companion CLI (`codeburn`, pinned in `install.sh`); the budget-guard hooks are opt-in via `bash install.sh --with-codeburn-guard` because they add a PreToolUse hook on every tool call. The dollar figures are estimates — token counts priced at API list rates; codeburn itself is free and bills nothing, so on a subscription plan they are a usage proxy. The guard's hard cap ($15/session by default) blocks every tool call in that session, including the `codeburn guard allow` that lifts it (run it from an external terminal), which is why it stays opt-in. Complements the OMC HUD: the HUD shows this session's context and quota, codeburn shows where money went across sessions.
 
 ---
 
