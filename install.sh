@@ -74,7 +74,7 @@ else
   echo "  Updating: v${INSTALLED_VERSION} → v${INSTALLING_VERSION}"
 fi
 
-# ── 0b. tmux (optional — for Agent Teams split-pane mode) ──
+# ── 0b. tmux (optional — used by omc qa-tester; Agent Teams run in-process) ──
 echo "[0b] Checking tmux..."
 if command -v tmux >/dev/null 2>&1; then
   echo "  tmux found: $(tmux -V)"
@@ -100,7 +100,7 @@ else
   if [ "$TMUX_AVAILABLE" = "1" ]; then
     echo "  tmux installed: $(tmux -V)"
   else
-    echo "  tmux install failed — will use in-process mode (no action needed)"
+    echo "  tmux install failed — optional, no action needed"
   fi
 fi
 
@@ -500,11 +500,7 @@ echo "  MCP servers registered"
 
 # ── 4. Merge settings.json ──
 echo "[4/6] Merging settings.json..."
-if [ "$TMUX_AVAILABLE" = "1" ]; then
-  node "$SCRIPT_DIR/scripts/merge-settings.js" --tmux
-else
-  node "$SCRIPT_DIR/scripts/merge-settings.js"
-fi
+node "$SCRIPT_DIR/scripts/merge-settings.js"
 
 # ── 4b. Merge hooks from hooks.json into settings.json ──
 echo "[4b] Merging hooks into settings.json..."
@@ -663,9 +659,9 @@ echo "  omc:              $(command -v omc            >/dev/null 2>&1 && echo 'O
 echo "  omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  ast-grep:         $(command -v ast-grep       >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  codeburn:         $(command -v codeburn       >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
-echo "  tmux:             $(command -v tmux >/dev/null 2>&1 && echo "OK ($(tmux -V))" || echo 'NOT INSTALLED (in-process mode)')"
+echo "  tmux:             $(command -v tmux >/dev/null 2>&1 && echo "OK ($(tmux -V))" || echo 'NOT INSTALLED (optional)')"
 echo "  hud:              $(test -f "$HOME/.claude/hud/omc-hud.mjs" && echo 'OK' || echo 'MISSING')"
-TEAMMATE_MODE=$(node -e "try{const h=process.env.HOME||process.env.USERPROFILE;console.log(JSON.parse(require('fs').readFileSync(h+'/.claude/settings.json','utf8')).teammateMode||'auto')}catch(e){console.log('auto')}")
+TEAMMATE_MODE=$(node -e "try{const h=process.env.HOME||process.env.USERPROFILE;console.log(JSON.parse(require('fs').readFileSync(h+'/.claude/settings.json','utf8')).teammateMode||'in-process (default)')}catch(e){console.log('auto')}")
 echo "  version:          v${INSTALLING_VERSION}"
 echo "  teammateMode:     $TEAMMATE_MODE"
 echo ""
