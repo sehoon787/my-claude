@@ -47,7 +47,12 @@ jobs:
           # release even when it was committed as docs:/chore:. Without this,
           # boss.md edits labelled docs(boss) sat unreleased while releases/latest
           # kept serving the old prompt.
-          elif [ "$LAST_TAG" != "v0.0.0" ] && git diff --name-only "${LAST_TAG}..HEAD" | grep -qE "^(agents/|hooks/|scripts/|install\.sh$|\.claude-plugin/)"; then
+          # .claude-plugin/plugin.json is excluded: the post-release "chore: bump
+          # plugin version" commit touches it, and counting that made every
+          # following docs/chore push release again (v0.56.2 was docs-only).
+          elif [ "$LAST_TAG" != "v0.0.0" ] && git diff --name-only "${LAST_TAG}..HEAD" \
+               | grep -v "^\.claude-plugin/plugin\.json$" \
+               | grep -qE "^(agents/|hooks/|scripts/|install\.sh$|\.claude-plugin/)"; then
             echo "level=patch" >> $GITHUB_OUTPUT
           else
             echo "level=none" >> $GITHUB_OUTPUT
