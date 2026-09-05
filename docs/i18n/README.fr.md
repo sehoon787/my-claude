@@ -177,7 +177,7 @@ Boss clôt chaque tour de travail — tout tour ayant édité ou créé des fich
 | Commits/PR produits | 산출물 (Deliverables) | PR / 저장소 / 내용 / 상태 |
 | Éléments non résolus | 남은 것 (Remaining) | 항목 / 상태 / 다음 조치 |
 
-Il ne se déclenche qu'à la toute fin du raisonnement — jamais comme point d'étape en cours de tâche — et les tours de simple Q&R se terminent normalement sans lui. La spécification vit dans `boss.md § FINAL REPORT` ; le hook Stop `stop-final-report.js` la fait respecter.
+Il ne se déclenche qu'à la toute fin de la requête — jamais dans un tour qui lance ou relaie du travail en arrière-plan, jamais comme point d'étape en cours de tâche — et les tours de simple Q&R se terminent normalement sans lui. La spécification vit dans `boss.md § FINAL REPORT` ; le hook Stop `stop-final-report.js` la fait respecter.
 
 ### Workflows nommés
 

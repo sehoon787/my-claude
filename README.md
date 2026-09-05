@@ -203,7 +203,7 @@ Boss closes every working turn — any turn that edited files, made commits/PRs,
 | Commits/PRs produced | Deliverables | PR / Repo / Content / Status |
 | Anything unresolved | Remaining | Item / Status / Next step |
 
-It fires only at the very end of reasoning — never as a mid-task progress update — and pure Q&A turns end normally without it. The spec lives in `boss.md § FINAL REPORT`; the `stop-final-report.js` Stop hook enforces it (see [Hooks](#-briefing-vault)).
+It fires only at the very end of the request — never on a turn that launches or relays background work, never as a mid-task progress update — and pure Q&A turns end normally without it. The spec lives in `boss.md § FINAL REPORT`; the `stop-final-report.js` Stop hook enforces it (see [Hooks](#-briefing-vault)).
 
 ### Named Workflows
 
@@ -478,7 +478,7 @@ Run `/boss-briefing` during or at the end of a session to:
 
 The Stop hook checks whether `/boss-briefing` has run today. If not, it blocks session end with a reminder. The existing `stop-profile-update.js` continues to run as a fallback.
 
-A second Stop hook, `stop-final-report.js`, enforces Boss's FINAL REPORT: when a turn changed state (files edited, commits made, verification run) but the final message lacks the structured report tables defined in `boss.md § FINAL REPORT`, it blocks once with the spec as the reminder. It judges from the harness-provided `last_assistant_message` (no transcript parsing), blocks at most once per turn, and fails open on any error.
+A second Stop hook, `stop-final-report.js`, enforces Boss's FINAL REPORT: when a turn changed state (files edited, commits made, verification run) but the final message lacks the structured report tables defined in `boss.md § FINAL REPORT`, it blocks once with the spec as the reminder. It judges from the harness-provided `last_assistant_message` plus the turn's origin in the transcript: it enforces only on human-initiated turns that launched no background agent or workflow (notification-triggered turns and turns with pending background work just record a report if one is present), blocks at most once per turn, and fails open on any error.
 
 ---
 
