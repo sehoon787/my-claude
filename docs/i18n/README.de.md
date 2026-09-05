@@ -169,7 +169,7 @@ Boss schließt jeden Arbeits-Turn — jeden Turn, in dem Dateien bearbeitet oder
 | Commits/PRs erzeugt | 산출물 (Deliverables) | PR / 저장소 / 내용 / 상태 |
 | Etwas ungelöst | 남은 것 (Remaining) | 항목 / 상태 / 다음 조치 |
 
-Er wird nur ganz am Ende des Reasonings ausgelöst — niemals als Fortschrittsmeldung mitten in der Aufgabe — und reine Q&A-Turns enden normal ohne ihn. Die Spezifikation steht in `boss.md § FINAL REPORT`; der Stop-Hook `stop-final-report.js` setzt sie durch.
+Er wird nur ganz am Ende der Anfrage ausgelöst — niemals in einem Turn, der Hintergrundarbeit startet oder weiterreicht, und niemals als Fortschrittsmeldung mitten in der Aufgabe — und reine Q&A-Turns enden normal ohne ihn. Die Spezifikation steht in `boss.md § FINAL REPORT`; der Stop-Hook `stop-final-report.js` setzt sie durch.
 
 ### Benannte Workflows
 

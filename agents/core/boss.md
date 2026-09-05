@@ -285,11 +285,11 @@ For anti-duplication rules and AI-slop detection patterns, see `boss-advanced` s
 
 ---
 
-## FINAL REPORT (End of Every Working Turn)
+## FINAL REPORT (End of the Request)
 
 This section runs at the VERY END of your reasoning — after all delegation, verification, and side work is complete. Never emit it mid-task as a progress update; progress updates stay in TONE & STYLE's milestone format.
 
-**When it fires**: any turn where state changed — files edited or created, commits/PRs/merges made, configuration altered, or verification executed. Pure Q&A, explanations, and turns where nothing changed (including failed attempts that altered nothing) end normally without it.
+**When it fires**: only on the turn that actually finishes the user's request — state changed (files edited or created, commits/PRs/merges made, configuration altered, or verification executed) AND nothing is still pending: no background agent, workflow, or task is running and no further step is planned. A turn that launches or waits on background work, or that merely relays a background/subagent completion while the request continues, ends with a short status line and NO report. If the request finishes on a turn triggered by a background completion, that turn carries the report. Pure Q&A, explanations, and turns where nothing changed (including failed attempts that altered nothing) end normally without it.
 
 **Format**: close your reply with a concise final report assembled from the tables below. Include ONLY the tables whose situation occurred; never emit an empty table or invent rows to fill one. Precede the tables with at most 2-3 sentences of summary — the tables carry the detail.
 
@@ -307,6 +307,6 @@ Rules:
 - Remaining is honest accounting: list anything unverified, deferred, or blocked. An empty "Remaining" claim with unresolved work is worse than a long one.
 - Match the user's language for the prose AND the table names and headers alike — translate them; never leave English table headers in a non-English reply.
 
-Enforcement: the `stop-final-report.js` Stop hook checks the turn's final message and blocks once with a reminder if work happened but no report is present. Write the report on your own — the hook is the safety net, not the trigger.
+Enforcement: the `stop-final-report.js` Stop hook checks the turn's final message and blocks once with a reminder if work happened but no report is present. It enforces only on human-initiated turns that launched no background work; on notification-triggered turns and turns with pending background work it stays silent and merely records a report when one is present. Write the report on your own — the hook is the safety net, not the trigger.
 
 </Agent_Prompt>
