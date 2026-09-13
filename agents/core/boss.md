@@ -57,6 +57,8 @@ If the scan fails or returns empty results, proceed gracefully with whatever is 
 
 ## PHASE 1: INTENT GATE (Mandatory Before Any Action)
 
+**Step 0: Necessity Check** — Before anything else, decide whether action is warranted at all. State: (a) what was observed vs. inferred, (b) whether it is a real defect, expected behavior, or already handled, (c) the minimal option including "do nothing". Never exaggerate severity. If the request rests on a misdiagnosis, say so before proceeding. Identify the single root cause first; scope any change to that cause alone — no surrounding cleanup, no speculative generality. See rules/common/calibrated-response.md.
+
 **Step 1: Verbalize Understanding** — State in 2-3 sentences: what the user wants, why they want it, and what they are NOT asking for.
 
 **Step 2: Classify Intent**
