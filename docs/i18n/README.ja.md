@@ -338,10 +338,8 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 | Session Setup | SessionStart | 不足ツールの自動検出 + Briefing Vault コンテキストの注入 |
 | Delegation Guard | PreToolUse | Boss がファイルを直接変更するのをブロック |
 | Agent Telemetry | PostToolUse | エージェント使用状況を `agent-usage.jsonl` に記録 |
-| Subagent Verifier | SubagentStop | 独立した検証を強制 + Briefing Vault に記録 |
+| Subagent Logger | SubagentStop | エージェントの実行を Briefing Vault に記録 |
 | Completion Check | Stop | タスク検証の確認 + セッションサマリーのプロンプト |
-| Teammate Idle Guide | TeammateIdle | アイドル状態のチームメートについてリーダーにプロンプト |
-| Task Quality Gate | TaskCompleted | 成果物の品質を検証 |
 
 </details>
 

@@ -338,10 +338,8 @@ Jede Quelle wird über die Allowlist in [`scripts/skill-allowlists.sh`](../../sc
 | Session Setup | SessionStart | Erkennt automatisch fehlende Tools + injiziert Briefing Vault-Kontext |
 | Delegation Guard | PreToolUse | Verhindert, dass Boss Dateien direkt ändert |
 | Agent Telemetry | PostToolUse | Protokolliert Agentennutzung in `agent-usage.jsonl` |
-| Subagent Verifier | SubagentStop | Erzwingt unabhängige Verifikation + Protokollierung in Briefing Vault |
+| Subagent Logger | SubagentStop | Protokolliert die Agentenausführung in Briefing Vault |
 | Completion Check | Stop | Bestätigt verifizierte Aufgaben + fordert Sitzungszusammenfassung an |
-| Teammate Idle Guide | TeammateIdle | Benachrichtigt Teamleiter über inaktive Teammitglieder |
-| Task Quality Gate | TaskCompleted | Prüft die Qualität des Lieferergebnisses |
 
 </details>
 

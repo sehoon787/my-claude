@@ -338,10 +338,8 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 | Session Setup | SessionStart | 自动检测缺失工具 + 注入 Briefing Vault 上下文 |
 | Delegation Guard | PreToolUse | 阻止 Boss 直接修改文件 |
 | Agent Telemetry | PostToolUse | 将 Agent 使用情况记录到 `agent-usage.jsonl` |
-| Subagent Verifier | SubagentStop | 强制独立验证 + 记录到 Briefing Vault |
+| Subagent Logger | SubagentStop | 将 Agent 执行记录到 Briefing Vault |
 | Completion Check | Stop | 确认任务已验证 + 提示会话摘要 |
-| Teammate Idle Guide | TeammateIdle | 提示领导者关注空闲队友 |
-| Task Quality Gate | TaskCompleted | 验证交付物质量 |
 | Vault Reminder | UserPromptSubmit | 超过 5 条消息后提示运行 /boss-briefing |
 
 </details>
