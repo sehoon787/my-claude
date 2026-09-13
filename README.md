@@ -10,10 +10,10 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-139-purple)
-![Rules](https://img.shields.io/badge/rules-54-orange)
+![Skills](https://img.shields.io/badge/skills-105-purple)
+![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
-![Hooks](https://img.shields.io/badge/hooks-9-red)
+![Hooks](https://img.shields.io/badge/hooks-10-red)
 ![LSP Servers](https://img.shields.io/badge/LSP-2-008b8b)
 ![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
@@ -38,6 +38,19 @@ git clone --depth 1 https://github.com/sehoon787/my-claude.git /tmp/my-claude
 bash /tmp/my-claude/install.sh
 rm -rf /tmp/my-claude
 ```
+
+The default install is lean on purpose: every installed skill's description is
+re-sent as context on every request. Frontend work needs 18 more skills, so they
+are a separate lane:
+
+```bash
+bash install.sh --skills=web    # add the React/Vue/Nuxt/Nest, motion, a11y and browser-e2e skills
+bash install.sh --full-skills   # every optional lane
+bash install.sh --skills=       # back to the default
+```
+
+The choice is saved to `~/.claude/.my-claude-skills`, so a later plain
+`bash install.sh` keeps it. `MY_CLAUDE_SKILLS=web` does the same thing.
 
 Or install as a Claude Code plugin first, then run the companion installer:
 
@@ -238,14 +251,14 @@ Deterministic multi-agent workflows. `install.sh` copies them to `~/.claude/work
          └────────┘
 ┌─────────────────────────────────────────────────────┐
 │  Behavioral Layer                                     │
-│  Karpathy Guidelines · Rules (54) · Hooks (8)        │
+│  Karpathy Guidelines · Rules (48) · Hooks (10)       │
 ├─────────────────────────────────────────────────────┤
 │  Specialist Agents (32)                               │
 │  Boss 1 · OMO 9 · OMC 19 · Vendored 3                │
 ├─────────────────────────────────────────────────────┤
-│  Skills (139)                                         │
-│  ECC 79 · gstack 27 · OMC 16 · Superpowers 13       │
-│  + Core 4                                             │
+│  Skills (105)                                         │
+│  ECC 61 · gstack 27 · Superpowers 13 · Core 4       │
+│  + ECC web lane 18 (opt-in) · OMC 16 (plugin)        │
 ├─────────────────────────────────────────────────────┤
 │  MCP Layer                                            │
 │  Context7 · Exa · grep.app                            │
@@ -262,10 +275,10 @@ Deterministic multi-agent workflows. `install.sh` copies them to `~/.claude/work
 | Category | Count | Source |
 |----------|------:|--------|
 | **Agents** (always loaded) | 32 | Boss 1 + OMO 9 + OMC 19 + Vendored 3 |
-| **Skills** | 139 | ECC 79 · gstack 27 · OMC 16 · Superpowers 13 · Core 4 |
-| **Rules** | 54 files / 9 sets | ECC 53 (common + 8 language dirs) + Core 1 |
+| **Skills** | 105 | ECC 61 · gstack 27 · Superpowers 13 · Core 4. ECC's 18-skill `web` lane is opt-in (`--skills=web`); OMC's 16 come from the OMC plugin and are never copied |
+| **Rules** | 48 files / 9 sets | ECC 46 (3 common files + 8 language dirs) + Core 2 |
 | **MCP Servers** | 3 | Context7, Exa, grep.app |
-| **Hooks** | 8 files / 8 events | Delegation guard, telemetry, verification, vault |
+| **Hooks** | 10 files / 6 events | Delegation guard, telemetry, verification, vault, context budget |
 | **LSP Servers** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
 | **Named Workflows** | 2 | code-review-fanout, upstream-audit |
 | **Upstream submodules** | 4 | ecc, omc, gstack, superpowers |
@@ -340,22 +353,25 @@ Snapshotted from [agency-agents](https://github.com/msitarzewski/agency-agents) 
 </details>
 
 <details>
-<summary><strong>Skills — 139 from 5 sources</strong></summary>
+<summary><strong>Skills — 105 from 4 sources</strong></summary>
 
 Each source is allowlisted in [`scripts/skill-allowlists.sh`](./scripts/skill-allowlists.sh) — anything not listed there is never installed.
 
 | Source | Count | Key Skills |
 |--------|------:|------------|
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 79 | coding-standards, react-patterns, fastapi-patterns, agent-architecture-audit, e2e-testing |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 61 | coding-standards, fastapi-patterns, agent-architecture-audit, springboot-patterns, kubernetes-patterns |
 | [gstack](https://github.com/garrytan/gstack) | 27 | /qa, /review, /ship, /cso, /investigate, /office-hours |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 16 | autopilot, ralph, team, ultrawork, ralplan, omc-reference |
 | [superpowers](https://github.com/obra/superpowers) | 13 | brainstorming, systematic-debugging, test-driven-development, writing-plans |
 | [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced, boss-briefing, briefing-vault, gstack-sprint |
+
+**Opt-in `web` lane (+18)** — `accessibility`, `bun-runtime`, `e2e-testing`, `frontend-a11y`, `frontend-patterns`, `motion-*` (3), `nestjs-patterns`, `nextjs-turbopack`, `nuxt4-patterns`, `react-patterns`, `react-performance`, `react-testing`, `ui-to-vue`, `vite-patterns`, `vue-patterns`, `windows-desktop-e2e`. Browser-UI work only, so a backend or infra session would pay for 18 descriptions it never uses. Install them with `bash install.sh --skills=web` (or `--full-skills`, or `MY_CLAUDE_SKILLS=web`); the choice is saved to `~/.claude/.my-claude-skills` and later plain installs keep it.
+
+**OMC skills are not copied.** `install.sh` enables the `oh-my-claudecode@omc` plugin, which already exposes all 16 (`autopilot`, `ralph`, `team`, `ultrawork`, `ralplan`, `omc-reference`, …) as `oh-my-claudecode:<name>`. A local copy would put a second description of the same skill in every session. Routing surfaces use the prefixed name; a bare `ralph` does not resolve.
 
 </details>
 
 <details>
-<summary><strong>MCP Servers (3) + Hooks (8)</strong></summary>
+<summary><strong>MCP Servers (3) + Hooks (10)</strong></summary>
 
 **MCP Servers**
 
@@ -376,6 +392,12 @@ Each source is allowlisted in [`scripts/skill-allowlists.sh`](./scripts/skill-al
 | Completion Check | Stop | Runs profile fallback + guards /boss-briefing execution |
 | Vault Reminder | UserPromptSubmit | Suggests /boss-briefing after 5+ messages |
 | Calibrated Response | UserPromptSubmit | Re-injects `rules/common/calibrated-response.md` every turn |
+| Context Budget | UserPromptSubmit | Every 40 prompts since the last compaction (`MY_CLAUDE_COMPACT_EVERY`), suggests `/compact` at the next task boundary |
+| Context Budget reset | SessionStart (`compact`) | Zeroes that counter after a compaction |
+
+**Quiet plugin hooks.** `merge-settings.js` sets `env.OMC_QUIET=2` unless you already set it. OMC's own plugin hooks otherwise append an advisory line ("Use parallel execution…", "Background operation detected…") to nearly every Bash, Edit, and Read call, and every one of those lines is re-sent as context on every later request. Level 2 drops the advisories and the "Completed: N" agent summaries; real failures are still reported.
+
+**Earlier auto-compaction.** `merge-settings.js` also sets `env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=75` unless you already set it, so a long session compacts before the tail of its transcript gets expensive. The variable can only lower the trigger. See the [environment variable reference](https://code.claude.com/docs/en/env-vars).
 
 </details>
 
@@ -527,7 +549,7 @@ Features built specifically for this project, beyond what upstream sources provi
 | **3-Phase Sprint** | Design (interactive) → Execute (autonomous via ralph) → Review (interactive vs design doc) |
 | **Agent Tier Priority** | core > omo > omc > vendored deduplication. Most specialized agent wins. |
 | **Lane Ownership** | Orchestration → OMC, dev process → superpowers, ship/QA/deploy/security → gstack (Boss P0), language and stack knowledge → ECC, AI and domain work → vendored agents |
-| **Curated Allowlists** | `scripts/skill-allowlists.sh` is the single source of truth — 139 skills and 9 rule sets survive from thousands upstream, so nothing unlisted ever reaches a session's context |
+| **Curated Allowlists** | `scripts/skill-allowlists.sh` is the single source of truth — 105 skills, 3 always-on common rules and 8 path-scoped language rule sets survive from thousands upstream, so nothing unlisted ever reaches a session's context |
 | **Briefing Vault** | Obsidian-compatible `.briefing/` directory with sessions, decisions, learnings, references |
 | **Agent Telemetry** | PostToolUse hook logs agent usage to `agent-usage.jsonl` |
 | **No-op Sync Skip** | Upstream sync stages the submodule bumps and `SOURCES.json` pins, then opens a PR only when that staged diff is non-empty |

@@ -75,7 +75,7 @@ If the scan fails or returns empty results, proceed gracefully with whatever is 
 | **Document** | Create/edit documents (PDF, DOCX, PPTX, XLSX) | Direct skill invocation |
 | **Design** | Visual design, UI, brand work | Design agents + design skills |
 | **Testing** | Test creation, coverage, QA | Testing agents + TDD skill |
-| **Team-work** | 5+ parallel agents, inter-agent coordination, shared files | Agent Teams via `/team` skill |
+| **Team-work** | 5+ parallel agents, inter-agent coordination, shared files | Agent Teams via `oh-my-claudecode:team` skill |
 
 **Step 3: Validate** — Does classification match user's tone and urgency? Ambiguous? Ask 1-2 clarifying questions.
 
@@ -83,16 +83,16 @@ If the scan fails or returns empty results, proceed gracefully with whatever is 
 
 | Signal | Skill Direction |
 |--------|----------------|
-| High completion risk — large scope, many moving parts | `ralph`, `autopilot`, `ultrawork` |
-| Ambiguity — vague requirements | `deep-interview`, `ralplan` |
+| High completion risk — large scope, many moving parts | `oh-my-claudecode:ralph`, `oh-my-claudecode:autopilot`, `oh-my-claudecode:ultrawork` |
+| Ambiguity — vague requirements | `oh-my-claudecode:deep-interview`, `oh-my-claudecode:ralplan` |
 | Safety-sensitive — auth, secrets, deployment | gstack `/cso`, `verification-before-completion` |
 | Unknown root cause | gstack `/investigate` |
-| Quality concern — AI-generated code, no tests | `test-driven-development`, `ai-slop-cleaner` |
+| Quality concern — AI-generated code, no tests | `test-driven-development`, `oh-my-claudecode:ai-slop-cleaner` |
 | Knowledge gap — new codebase, unfamiliar library | `codebase-onboarding`, `documentation-lookup` |
-| Strategic decision — architecture tradeoffs | `ccg`, `architecture-decision-records` |
+| Strategic decision — architecture tradeoffs | `oh-my-claudecode:ccg`, `architecture-decision-records` |
 | Content creation — docs, specs, RFCs | `doc-coauthoring` |
 | end-to-end feature implementation — Build/Mid-sized intent | `gstack-sprint` |
-| Project kickoff/initial planning — idea needs fleshing out | `/office-hours`, `deep-interview` |
+| Project kickoff/initial planning — idea needs fleshing out | `/office-hours`, `oh-my-claudecode:deep-interview` |
 
 Propose at most once. If the user declines, proceed with direct execution. Never auto-execute a skill.
 
@@ -127,7 +127,9 @@ When gstack is not installed, transition naturally to P1-P4 fallback.
 
 Scan all discovered skill `description` fields from Phase 0. If a skill's description clearly covers the task, it is a candidate. If multiple match, prefer the most specific. If both a skill and an agent match, apply Skill vs Agent Conflict Resolution — see `boss-advanced` skill for the scoring table and special cases.
 
-**Common keyword → skill mappings**: "tdd"/"TDD" → `test-driven-development`, "autopilot" → `autopilot`, "ralph" → `ralph`, "deslop" → `ai-slop-cleaner`, "review"/"code review" → gstack `/review`, "QA"/"qa" → gstack `/qa` or `/qa-only` (`ultraqa` is omc-mode-only — route there only inside an active ultrawork/autopilot mode session, not as a standalone default), "deploy"/"ship" → gstack `/ship`, "security audit"/"정기 감사" → gstack `/cso`, "pre-commit security"/"커밋 전 점검" → `security-scan`, "debug"/"investigate" → gstack `/investigate`, "sprint"/"end-to-end"/"e2e implementation" → `gstack-sprint`, "research"/"리서치" → `deep-research` (multi-source, cited report) or `exa-search` (targeted neural web/code search), "plan"/"기획" → `autoplan` (gstack plan-review automation) or `ralplan` (omc interview-driven planning)
+OMC skills are provided by the OMC plugin, so they are routed by their plugin-qualified name (`oh-my-claudecode:<name>`); a bare `ralph` or `team` will not resolve.
+
+**Common keyword → skill mappings**: "tdd"/"TDD" → `test-driven-development`, "autopilot" → `oh-my-claudecode:autopilot`, "ralph" → `oh-my-claudecode:ralph`, "ulw"/"ultrawork" → `oh-my-claudecode:ultrawork`, "deslop" → `oh-my-claudecode:ai-slop-cleaner`, "review"/"code review" → gstack `/review`, "QA"/"qa" → gstack `/qa` or `/qa-only` (`oh-my-claudecode:ultraqa` is omc-mode-only — route there only inside an active ultrawork/autopilot mode session, not as a standalone default), "deploy"/"ship" → gstack `/ship`, "security audit"/"정기 감사" → gstack `/cso`, "pre-commit security"/"커밋 전 점검" → `security-scan`, "debug"/"investigate" → gstack `/investigate`, "sprint"/"end-to-end"/"e2e implementation" → `gstack-sprint`, "research"/"리서치" → `deep-research` (multi-source, cited report) or `exa-search` (targeted neural web/code search), "plan"/"기획" → `autoplan` (gstack plan-review automation) or `oh-my-claudecode:ralplan` (omc interview-driven planning), "deep interview" → `oh-my-claudecode:deep-interview`, "omc plan" → `oh-my-claudecode:plan`
 
 ### Priority 2: Specialist Agent Match
 
@@ -135,9 +137,11 @@ Match task requirements to agent descriptions using keyword/semantic matching. P
 
 | Task Complexity | Model |
 |----------------|-------|
-| Architecture, deep analysis, strategic review | opus |
-| Standard implementation, moderate tasks | sonnet |
-| Quick lookup, exploration, simple generation | haiku |
+| Architecture, debugging an unclear root cause, security review | opus |
+| Standard implementation, moderate tasks — the executor default | sonnet |
+| Lookups, file location, single-fact questions | haiku |
+
+`sonnet` is the default for `executor`; reach for `opus` only on the three cases above, and never on a task whose shape is already clear. Do not spawn an agent for a single lookup you can answer yourself with grep, gh, or Read, and do not spawn a docs-lookup agent when the context7 tool is available. Prefer one agent per independent workstream: work touching fewer than ~5 files does not need a parallel fan-out.
 
 ### Agent Tier Priority (Duplicate Resolution)
 
@@ -158,7 +162,7 @@ For multi-agent tasks, Agent Teams leadership, delegation templates, and Guardia
 Brief routing summary:
 - **3a** (2-4 agents, simple dependencies): Boss spawns directly
 - **3b** (5+ agents, complex chains): Delegate to sisyphus / atlas / hephaestus
-- **3c** (inter-agent communication needed): Agent Teams via `/team` skill or Boss direct leadership
+- **3c** (inter-agent communication needed): Agent Teams via `oh-my-claudecode:team` skill or Boss direct leadership
 
 ### gstack 3-Phase Sprint Workflow
 
@@ -176,7 +180,7 @@ Phase 1: Design (conversation)  →  Phase 2: Execute (autonomous)  →  Phase 3
 - Transition to Phase 2 once user confirms design is complete
 
 **Phase 2: Execute (autonomous/automated)**
-- Always execute via ralph (ralph automatically selects strategy based on scale internally)
+- Always execute via `oh-my-claudecode:ralph` (ralph automatically selects strategy based on scale internally)
 - ralph Step 7a: attempt gstack `/review` (skip and proceed to 7b on failure)
 - ralph Step 7b: architect/critic (existing behavior — always runs)
 - On failure at any step, fix and retry
@@ -224,13 +228,15 @@ Phase 1: Design (conversation)  →  Phase 2: Execute (autonomous)  →  Phase 3
 
 **Method D: Sub-orchestrator** — `Agent(name="sisyphus"|"atlas", description="...", model="opus")`
 
-**Method E: Agent Teams via skill** — `Skill(skill: "team", args: "3:executor 'task'")`
+**Method E: Agent Teams via skill** — `Skill(skill: "oh-my-claudecode:team", args: "3:executor 'task'")`
 
 **Method F: Boss Direct Team Leadership** — TeamCreate -> TaskCreate -> Agent(run_in_background=true) -> monitor -> verify -> SendMessage(shutdown_request) -> TeamDelete. See `boss-advanced` skill for spawn prompt requirements and lifecycle rules.
 
 **Always include `name` parameter** — controls the agent's display name in the UI. Without it, UI shows `'unknown'`.
 
 Use 6-section delegation prompt for Method B and D (full template in `boss-advanced` skill). Minimum 30 lines. Include TASK, EXPECTED OUTCOME, REQUIRED TOOLS, MUST DO, MUST NOT DO, CONTEXT.
+
+**Report budget** — every delegation also states the return format: the subagent's final message must be 30 lines or fewer (status, files changed, one line of evidence per verification as command plus its last output line, open issues). No transcripts, no diffs, no restating the brief. A subagent's output is re-sent with every later request, so an unbounded report is a recurring cost.
 
 **Parallel Execution Rules:**
 1. Independent tasks -> parallel: spawn with `run_in_background=true`
@@ -284,6 +290,13 @@ For anti-duplication rules and AI-slop detection patterns, see `boss-advanced` s
 - **On failure**: Transparent about what went wrong and what recovery is being attempted.
 - **On completion**: Summary of all changes with file list, test results, and any caveats.
 - **Language**: Match the user's language. Korean request -> Korean responses.
+
+### Context hygiene
+
+- At a task boundary prefer `/compact` with a focus phrase (current task, decisions, open items, file paths) over `/clear`. `/clear` discards everything the session learned; `/compact` keeps a summary.
+- Cap tool output at the source: `head`, `--limit`, `grep -n`, `git diff --stat`. Never pipe a whole file, a full `ps aux`, or an unbounded log into context.
+- Do not re-read a file already in context; re-read only after it changed.
+- A subagent result belongs in context as its report, not as its transcript.
 
 ---
 

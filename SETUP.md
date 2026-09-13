@@ -165,22 +165,29 @@ This installs skills to `~/.agents/skills/` and auto-symlinks them to `~/.claude
 | Category | Count | Details |
 |----------|------:|---------|
 | **Agents** (always loaded) | 32 | Boss (1) + OMO sub-orchestrators (9) + OMC specialists (19) + vendored engineering agents (3) |
-| **Skills** | 139 | ECC (79) + gstack (27) + OMC (16) + Superpowers (13) + Core (4) |
-| **Rules** | 54 files / 9 sets | ECC (53) + Core (1) |
-| **Hooks** | 8 files / 8 events | SessionStart, PreToolUse, PostToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop, UserPromptSubmit |
+| **Skills** | 105 | ECC (61) + gstack (27) + Superpowers (13) + Core (4). ECC's `web` lane (18) is opt-in; OMC's 16 come from the OMC plugin and are not copied |
+| **Rules** | 48 files / 9 sets | ECC (46) + Core (2) |
+| **Hooks** | 10 files / 6 events | SessionStart, PreToolUse, PostToolUse, SubagentStop, Stop, UserPromptSubmit |
 | **MCP Servers** | 3 | Context7, Exa, grep.app (registered globally) |
 | **LSP Servers** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) — declared in `.lsp.json`, started on demand for diagnostics and code navigation |
 | **Named Workflows** | 2 | code-review-fanout, upstream-audit — copied to `~/.claude/workflows/`, invocable from any project via the Workflow tool |
 
 Skills and rules are installed from an explicit allowlist (`scripts/skill-allowlists.sh`). Upstream ships far more — 278 ECC skills, 59 gstack skills, 41 OMC skills — and everything unlisted is deliberately left out to keep session context lean. Anthropic's official document skills are installed separately (see [Section 4](#4-companion-tools)) and add to the skill count.
 
+Two lanes are deliberately not in the default install:
+
+- **ECC `web` (18 skills)** — React/Vue/Nuxt/Nest, motion, a11y and browser e2e. Add them with `bash install.sh --skills=web` (or `--full-skills`, or `MY_CLAUDE_SKILLS=web`). The choice is saved to `~/.claude/.my-claude-skills`, so later plain installs keep it; `--skills=` clears it.
+- **OMC (16 skills)** — the OMC plugin already exposes all of them as `oh-my-claudecode:<name>`, so copying them would put a second description of the same skill in every session. Routing surfaces use the prefixed name.
+
+Every rule file under `rules/common` is injected into every session, so that directory is allowlisted per file (`coding-style.md`, `git-workflow.md`, `security.md` plus this repo's own two). The language rule dirs are `paths:`-scoped and cost nothing until a matching file is opened, so they stay whole.
+
 ### File layout after install
 
 ```
 ~/.claude/
 ├── agents/          ← 32 agents (always loaded by Claude Code)
-├── skills/          ← 139 skill directories
-├── rules/           ← 54 rule files in 9 rule sets
+├── skills/          ← 105 skill directories
+├── rules/           ← 48 rule files in 9 rule sets
 ├── hooks/           ← hooks.json + 7 hook scripts
 ├── workflows/       ← 2 named workflows (code-review-fanout.js, upstream-audit.js)
 ├── docs/nexus/      ← Agent Teams reference (not parsed as an agent)
@@ -305,8 +312,8 @@ echo "Version:          $(cat ~/.claude/.my-claude-version 2>/dev/null || echo '
 
 ```
 Agents:           32
-Skills (total):   139 or more (Anthropic document skills add to this)
-Skills (my-claude): 139
+Skills (total):   105 or more (Anthropic document skills add to this)
+Skills (my-claude): 105
 Rules:            54
 Anthropic skills: 2 key skills (pdf, docx)
 Manifest:         315 entries

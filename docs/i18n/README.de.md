@@ -10,10 +10,10 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-139-purple)
-![Rules](https://img.shields.io/badge/rules-54-orange)
+![Skills](https://img.shields.io/badge/skills-105-purple)
+![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
-![Hooks](https://img.shields.io/badge/hooks-9-red)
+![Hooks](https://img.shields.io/badge/hooks-10-red)
 ![LSP Servers](https://img.shields.io/badge/LSP-2-008b8b)
 ![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
@@ -204,13 +204,13 @@ Deterministische Multi-Agenten-Workflows. `install.sh` kopiert sie nach `~/.clau
          └────────┘
 ┌─────────────────────────────────────────────────────┐
 │  Behavioral Layer                                     │
-│  Karpathy Guidelines · Rules (54) · Hooks (8)        │
+│  Karpathy Guidelines · Rules (48) · Hooks (10)        │
 ├─────────────────────────────────────────────────────┤
 │  Specialist Agents (32)                               │
 │  Boss 1 · OMO 9 · OMC 19 · Vendored 3                │
 ├─────────────────────────────────────────────────────┤
-│  Skills (139)                                         │
-│  ECC 79 · gstack 27 · OMC 16 · Superpowers 13       │
+│  Skills (105)                                         │
+│  ECC 61 · gstack 27 · Superpowers 13            │
 │  + Core 4                                             │
 ├─────────────────────────────────────────────────────┤
 │  MCP Layer                                            │
@@ -228,10 +228,10 @@ Deterministische Multi-Agenten-Workflows. `install.sh` kopiert sie nach `~/.clau
 | Kategorie | Anzahl | Quelle |
 |-----------|-------:|--------|
 | **Agenten** (immer geladen) | 32 | Boss 1 + OMO 9 + OMC 19 + Vendored 3 |
-| **Skills** | 139 | ECC 79 · gstack 27 · OMC 16 · Superpowers 13 · Core 4 |
-| **Regeln** | 54 Dateien / 9 Regelsätze | ECC 53 (common + 8 Sprachverzeichnisse) + Core 1 |
+| **Skills** | 105 | ECC 61 · gstack 27 · Superpowers 13 · Core 4 |
+| **Regeln** | 48 Dateien / 9 Regelsätze | ECC 46 (common + 8 Sprachverzeichnisse) + Core 2 |
 | **MCP-Server** | 3 | Context7, Exa, grep.app |
-| **Hooks** | 8 Dateien / 8 Events | Delegationswächter, Telemetrie, Verifikation, Vault |
+| **Hooks** | 10 Dateien / 6 Events | Delegationswächter, Telemetrie, Verifikation, Vault |
 | **LSP-Server** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
 | **Benannte Workflows** | 2 | code-review-fanout, upstream-audit |
 | **Upstream-Submodule** | 4 | ecc, omc, gstack, superpowers |
@@ -306,7 +306,7 @@ Am 2026-07-27 aus [agency-agents](https://github.com/msitarzewski/agency-agents)
 </details>
 
 <details>
-<summary><strong>Skills — 139 aus 5 Quellen</strong></summary>
+<summary><strong>Skills — 105 aus 4 Quellen</strong></summary>
 
 Jede Quelle wird über die Allowlist in [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) gesteuert — was dort nicht steht, wird nie installiert.
 
@@ -321,7 +321,7 @@ Jede Quelle wird über die Allowlist in [`scripts/skill-allowlists.sh`](../../sc
 </details>
 
 <details>
-<summary><strong>MCP-Server (3) + Hooks (8)</strong></summary>
+<summary><strong>MCP-Server (3) + Hooks (10)</strong></summary>
 
 **MCP-Server**
 
@@ -476,7 +476,7 @@ Funktionen, die speziell für dieses Projekt entwickelt wurden und über das hin
 | **3-Phasen-Sprint** | Design (interaktiv) → Ausführung (autonom über ralph) → Review (interaktiv vs. Design-Dokument) |
 | **Agenten-Tier-Priorität** | core > omo > omc > vendored-Deduplizierung. Der speziellste Agent gewinnt. |
 | **Lane-Zuständigkeit** | Orchestrierung → OMC, Entwicklungsprozess → superpowers, Release/QA/Deployment/Sicherheit → gstack (Boss P0), Sprach- und Stack-Wissen → ECC, KI und Domäne → vendored Agenten |
-| **Kuratierte Allowlists** | `scripts/skill-allowlists.sh` ist die einzige Quelle der Wahrheit — von Tausenden Upstream-Einträgen bleiben 139 Skills und 9 Regelsätze übrig; nichts Ungelistetes erreicht je den Sitzungskontext |
+| **Kuratierte Allowlists** | `scripts/skill-allowlists.sh` ist die einzige Quelle der Wahrheit — von Tausenden Upstream-Einträgen bleiben 105 Skills und 9 Regelsätze übrig; nichts Ungelistetes erreicht je den Sitzungskontext |
 | **Briefing Vault** | Obsidian-kompatibles `.briefing/`-Verzeichnis mit Sitzungen, Entscheidungen, Lernnotizen und Referenzen |
 | **Agenten-Telemetrie** | PostToolUse-Hook protokolliert Agentennutzung in `agent-usage.jsonl` |
 | **Smart Packs** | Projekttypenerkennung empfiehlt relevante Agenten-Packs beim Sitzungsstart |

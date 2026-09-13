@@ -62,12 +62,12 @@ teammate communication patterns, and Known Limitations & Workarounds referenced 
 | Subagent (Agent tool) | Single task delegation | No | Low | 1–4 independent tasks (Priority 3a) |
 | sisyphus/atlas (sub-agents) | Complex workflow delegation | No | Medium–High | 5+ agents, complex dependencies (Priority 3b) |
 | Agent Teams (Boss as direct leader) | Requires mutual communication | Yes | High | peer-to-peer communication, mutual checks needed (Priority 3c-DIRECT) |
-| /team skill | Pipeline orchestration | Yes | High | Structured plan→exec→verify (Priority 3c) |
-| /ralph | Completion-guarantee loop | No | Medium | Iterative tasks requiring verification |
-| /autopilot | Full automation | Internal use | High | Idea→code fully automated |
-| /ultrawork | Parallel execution engine | No | Medium | Large-scale parallel execution of independent tasks |
+| `oh-my-claudecode:team` skill | Pipeline orchestration | Yes | High | Structured plan→exec→verify (Priority 3c) |
+| `oh-my-claudecode:ralph` | Completion-guarantee loop | No | Medium | Iterative tasks requiring verification |
+| `oh-my-claudecode:autopilot` | Full automation | Internal use | High | Idea→code fully automated |
+| `oh-my-claudecode:ultrawork` | Parallel execution engine | No | Medium | Large-scale parallel execution of independent tasks |
 
-**Containment**: `autopilot ⊃ ralph ⊃ ultrawork` — each wraps the one below. /team is a separate path (native team infrastructure).
+**Containment**: `autopilot ⊃ ralph ⊃ ultrawork` — each wraps the one below. The team skill is a separate path (native team infrastructure). All four are OMC plugin skills, routed as `oh-my-claudecode:<name>`.
 
 ---
 
