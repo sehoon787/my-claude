@@ -9,8 +9,8 @@
     "path": "upstream/ecc",
     "method": "submodule + plugin-add",
     "note": "ECC plugin install attempted first, submodule as fallback",
-    "pinned_sha": "f8640355e454b5942fa671e0a6297d3ecd050f69",
-    "pinned_date": "2026-09-10",
+    "pinned_sha": "8321021c54d670126ce3b2969d5deb880b4b0c2a",
+    "pinned_date": "2026-09-13",
     "license": "MIT"
   },
   "oh-my-claudecode": {
@@ -18,8 +18,8 @@
     "path": "upstream/omc",
     "method": "submodule + npm-cli",
     "package": "oh-my-claude-sisyphus",
-    "pinned_sha": "4820f5641828cb980b7eb488a3c187f3d01459c3",
-    "pinned_date": "2026-09-10",
+    "pinned_sha": "5281b19e0d64f8e6dc6767f2130299a88af2dc71",
+    "pinned_date": "2026-09-13",
     "license": "MIT"
   },
   "gstack": {
