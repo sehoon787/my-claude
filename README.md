@@ -377,6 +377,7 @@ Each source is allowlisted in [`scripts/skill-allowlists.sh`](./scripts/skill-al
 | Teammate Idle Guide | TeammateIdle | Prompts leader on idle teammates |
 | Task Quality Gate | TaskCompleted | Verifies deliverable quality |
 | Vault Reminder | UserPromptSubmit | Suggests /boss-briefing after 5+ messages |
+| Calibrated Response | UserPromptSubmit | Re-injects `rules/common/calibrated-response.md` every turn |
 
 </details>
 

@@ -168,6 +168,12 @@
             "command": "node \"$HOME/.claude/hooks/session-sync.js\" prompt",
             "timeout": 5000,
             "description": "BriefingVault v2: track prompts and refresh auto scaffolds"
+          },
+          {
+            "type": "command",
+            "command": "node -e \"try{console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'UserPromptSubmit',additionalContext:'[CalibratedResponse] Before acting: is a change actually needed? State evidence-backed confidence, no exaggeration, no reflexive fixes, push back on misdiagnosis.'}}))}catch(e){}\"",
+            "timeout": 5000,
+            "description": "Calibrated Response: re-injects rules/common/calibrated-response.md every turn, not just at session start"
           }
         ]
       }

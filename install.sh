@@ -608,6 +608,10 @@ echo "  [5d] Karpathy guidelines..."
 # accumulated in the wild). The checksum below pins the download for supply
 # chain safety and plays no part in this guard.
 KARPATHY_MARKER="<!-- my-claude:karpathy-guidelines -->"
+# Sweep up the copies those pre-marker installs already appended (13 of them on
+# one real machine). Runs from $SCRIPT_DIR like the other install-time node
+# helpers; it never needs to exist in ~/.claude. Non-fatal under `set -e`.
+node "$SCRIPT_DIR/scripts/dedupe-karpathy.js" "$HOME/.claude/CLAUDE.md" || true
 if grep -qF "$KARPATHY_MARKER" "$HOME/.claude/CLAUDE.md" 2>/dev/null; then
   echo "    Karpathy guidelines already present"
 else
