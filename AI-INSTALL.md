@@ -1,7 +1,7 @@
 # my-claude AI Installation Guide
 
 You are an AI agent setting up a Claude Code multi-agent orchestration environment.
-The plugin bundles 32 curated agents, 139 curated skills, 54 rule files (9 rule sets), 9 hooks, 3 MCP servers, and 2 LSP servers.
+The plugin bundles 32 curated agents, 105 curated skills (plus an opt-in 18-skill `web` lane), 48 rule files (9 rule sets), 10 hooks, 3 MCP servers, and 2 LSP servers.
 `install.sh` additionally copies 2 named workflows to `~/.claude/workflows/` and installs the LSP binaries.
 Only 2-3 steps are needed.
 
@@ -93,9 +93,9 @@ A stale marketplace cache (path 1) is only the cause when you have **no** user-l
 
 This installs:
 - 32 agents in ~/.claude/agents/ (always loaded): Boss 1 + OMO 9 + OMC 19 + vendored 3
-- 139 skills (79 ECC + 27 gstack + 16 OMC + 13 Superpowers + 4 Core)
+- 105 skills (61 ECC + 27 gstack + 13 Superpowers + 4 Core). ECC's 18-skill `web` lane is opt-in via `--skills=web`; OMC's 16 skills come from the OMC plugin and are not copied
   Note: gstack skills are installed separately — run Step 1b (`install.sh`) for those.
-- 54 rule files across 9 rule sets
+- 48 rule files across 9 rule sets
 - 9 behavioral hooks across 8 events (SessionStart, PreToolUse, PostToolUse, SubagentStop, TeammateIdle, TaskCompleted, Stop, UserPromptSubmit)
   - The SessionStart hook auto-creates a `.briefing/` vault per-project (with `INDEX.md`) on first session. This provides persistent project context, decision logs, and session summaries.
 - 3 MCP servers globally (Context7, Exa, grep.app) — available in all projects
@@ -126,8 +126,8 @@ rm -rf /tmp/my-claude
 
 This installs everything in one step:
 - 32 agents (Boss + OMO + OMC + vendored)
-- 139 skills (ECC + gstack + OMC + Superpowers + Core)
-- 54 rule files (9 rule sets), 9 hooks
+- 105 skills (ECC + gstack + Superpowers + Core)
+- 48 rule files (9 rule sets), 10 hooks
 - 3 MCP servers (Context7, Exa, grep.app)
 - 2 named workflows in `~/.claude/workflows/` (code-review-fanout, upstream-audit) — usable from any project via the Workflow tool
 - 2 LSP server binaries (`typescript-language-server`, `pyright-langserver`) — installed non-fatally, a missing binary only disables that one server
@@ -205,8 +205,8 @@ echo "Boss model:       $(grep '^model:' ~/.claude/agents/boss.md 2>/dev/null ||
 
 Expected:
 - Agents: 32
-- Skills (total): 139 or more — Anthropic's document skills add to this
-- Skills (my-claude): 139
+- Skills (total): 105 or more — Anthropic's document skills add to this
+- Skills (my-claude): 105
 - Rules: 54
 - Anthropic skills: 2 key skills (pdf, docx)
 - Manifest: 315 entries

@@ -14,6 +14,17 @@
             "timeout": 30000
           }
         ]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/context-budget.js\" reset",
+            "timeout": 5000,
+            "description": "ContextBudget: zero the prompts-since-compaction counter. SessionStart fires with source=\"compact\" after a compaction; the matcher is matched against that source."
+          }
+        ]
       }
     ],
     "PreToolUse": [
@@ -147,6 +158,12 @@
             "command": "node -e \"try{console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'UserPromptSubmit',additionalContext:'[CalibratedResponse] Before acting: is a change actually needed? Find the single root cause; fix only that. Evidence-backed confidence, no exaggeration, no scope creep, push back on misdiagnosis.'}}))}catch(e){}\"",
             "timeout": 5000,
             "description": "Calibrated Response: re-injects rules/common/calibrated-response.md every turn, not just at session start"
+          },
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/context-budget.js\"",
+            "timeout": 5000,
+            "description": "ContextBudget: every MY_CLAUDE_COMPACT_EVERY prompts (default 40) since the last compaction, suggest /compact with a focus phrase at the next task boundary"
           }
         ]
       }

@@ -70,7 +70,12 @@ agents_vendored="$(ls agents/vendored)"
 # source list into one clean space-joined string (same idiom install.sh uses
 # for SUPERPOWERS_SKILL_EXCLUDE matching). Strip .md so basenames compare
 # clean against routing-file references.
-INSTALLABLE="$(echo $ECC_SKILL_ALLOWLIST $GSTACK_SKILL_ALLOWLIST $OMC_SKILL_ALLOWLIST \
+# ECC optional lanes count as installable: `--skills=web` provides them, and a
+# routing surface may legitimately name one. OMC skills are provided by the OMC
+# plugin rather than copied, so they are matched after the
+# `oh-my-claudecode:` prefix is stripped below.
+INSTALLABLE="$(echo $ECC_SKILL_ALLOWLIST $ECC_SKILL_OPTIONAL_WEB $GSTACK_SKILL_ALLOWLIST \
+  $OMC_PLUGIN_SKILL_NAMES \
   $skills_core gstack $superpowers pdf docx pptx xlsx doc-coauthoring \
   $agents_core $agents_omo $agents_vendored $omc_agents | sed 's/\.md//g')"
 
@@ -87,6 +92,8 @@ for f in $FILES; do
   while IFS=: read -r lineno match; do
     [ -n "${lineno:-}" ] || continue
     name="${match#\`}"; name="${name%\`}"; name="${name#/}"
+    # OMC skills are routed by their plugin-qualified name; compare the bare one.
+    name="${name#oh-my-claudecode:}"
     [ -n "$name" ] || continue
     checked=$((checked + 1))
     in_list "$name" "$INSTALLABLE" && continue
@@ -94,7 +101,7 @@ for f in $FILES; do
       echo "DANGLING $f:$lineno: '$name' is referenced but not installable"
       fail=1
     fi
-  done < <(grep -noE '`[a-z0-9][a-z0-9-]+`|/[a-z0-9][a-z0-9-]+' "$f")
+  done < <(grep -noE '`(oh-my-claudecode:)?[a-z0-9][a-z0-9-]+`|/[a-z0-9][a-z0-9-]+' "$f")
 done
 
 if [ "$fail" -eq 1 ]; then

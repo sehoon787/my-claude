@@ -10,10 +10,10 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-139-purple)
-![Rules](https://img.shields.io/badge/rules-54-orange)
+![Skills](https://img.shields.io/badge/skills-105-purple)
+![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
-![Hooks](https://img.shields.io/badge/hooks-9-red)
+![Hooks](https://img.shields.io/badge/hooks-10-red)
 ![LSP Servers](https://img.shields.io/badge/LSP-2-008b8b)
 ![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
@@ -118,7 +118,7 @@ Boss는 my-claude의 핵심에 있는 메타 오케스트레이터입니다. 코
 - **grep.app**: GitHub 오픈소스 코드 검색
 
 ### 통합 생태계
-- 플러그인 하나로 **32 에이전트, 139 스킬, 54 룰**을 한 환경에 구성
+- 플러그인 하나로 **32 에이전트, 105 스킬, 48 룰**을 한 환경에 구성
 - 7개 오픈소스 도구(OMC, omo, ECC, gstack, superpowers, Karpathy, codeburn)를 하나로 통합. Anthropic 공식 문서 스킬은 `install.sh`가 별도로 추가
 
 ---
@@ -243,13 +243,13 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
          └────────┘
 ┌─────────────────────────────────────────────────────┐
 │  Behavioral Layer                                     │
-│  Karpathy Guidelines · Rules (54) · Hooks (8)        │
+│  Karpathy Guidelines · Rules (48) · Hooks (10)        │
 ├─────────────────────────────────────────────────────┤
 │  Specialist Agents (32)                               │
 │  Boss 1 · OMO 9 · OMC 19 · Vendored 3                │
 ├─────────────────────────────────────────────────────┤
-│  Skills (139)                                         │
-│  ECC 79 · gstack 27 · OMC 16 · Superpowers 13       │
+│  Skills (105)                                         │
+│  ECC 61 · gstack 27 · Superpowers 13            │
 │  + Core 4                                             │
 ├─────────────────────────────────────────────────────┤
 │  MCP Layer                                            │
@@ -267,10 +267,10 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 | 카테고리 | 수량 | 출처 |
 |----------|------:|--------|
 | **에이전트** (항상 로드됨) | 32 | Boss 1 + OMO 9 + OMC 19 + 벤더링 3 |
-| **스킬** | 139 | ECC 79 · gstack 27 · OMC 16 · Superpowers 13 · Core 4 |
-| **규칙** | 54개 파일 / 9개 룰셋 | ECC 53 (common + 8개 언어 디렉터리) + Core 1 |
+| **스킬** | 105 | ECC 61 · gstack 27 · Superpowers 13 · Core 4 |
+| **규칙** | 48개 파일 / 9개 룰셋 | ECC 46 (common + 8개 언어 디렉터리) + Core 2 |
 | **MCP 서버** | 3 | Context7, Exa, grep.app |
-| **훅** | 8개 파일 / 8개 이벤트 | 위임 가드, 텔레메트리, 검증, 지식 금고 |
+| **훅** | 10개 파일 / 6개 이벤트 | 위임 가드, 텔레메트리, 검증, 지식 금고 |
 | **LSP 서버** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
 | **네임드 워크플로** | 2 | code-review-fanout, upstream-audit |
 | **업스트림 서브모듈** | 4 | ecc, omc, gstack, superpowers |
@@ -345,7 +345,7 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 </details>
 
 <details>
-<summary><strong>스킬 — 5개 출처에서 139개</strong></summary>
+<summary><strong>스킬 — 4개 출처에서 105개</strong></summary>
 
 각 출처는 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh)의 허용목록으로 관리되며, 목록에 없는 스킬은 설치되지 않습니다.
 
@@ -515,7 +515,7 @@ my-claude는 MIT 라이선스 업스트림 저장소 4개를 git 서브모듈로
 | **3단계 스프린트** | 설계 (대화형) → 실행 (ralph를 통한 자율) → 리뷰 (설계 문서와 대화형 비교) |
 | **에이전트 티어 우선순위** | core > omo > omc > vendored 중복 제거. 가장 특화된 에이전트가 선택됩니다. |
 | **레인 소유권** | 오케스트레이션 → OMC, 개발 프로세스 → superpowers, 배포·QA·보안 → gstack (Boss P0), 언어·스택 지식 → ECC, AI·도메인 → 벤더링 에이전트 |
-| **큐레이션 허용목록** | `scripts/skill-allowlists.sh`가 단일 진실 공급원 — 업스트림 수천 개 중 스킬 139개와 룰셋 9개만 살아남아, 목록에 없는 것은 세션 컨텍스트에 절대 올라오지 않습니다 |
+| **큐레이션 허용목록** | `scripts/skill-allowlists.sh`가 단일 진실 공급원 — 업스트림 수천 개 중 스킬 105개와 룰셋 9개만 살아남아, 목록에 없는 것은 세션 컨텍스트에 절대 올라오지 않습니다 |
 | **Briefing Vault** | 세션, 의사결정, 학습, 참조를 포함하는 Obsidian 호환 `.briefing/` 디렉터리 |
 | **에이전트 텔레메트리** | PostToolUse 훅이 에이전트 사용량을 `agent-usage.jsonl`에 기록 |
 | **무변경 동기화 스킵** | 업스트림 동기화는 서브모듈 범프와 `SOURCES.json` 핀을 스테이징한 뒤, 그 diff가 비어 있지 않을 때만 PR을 생성 |

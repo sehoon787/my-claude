@@ -13,10 +13,10 @@ Boss discovers capabilities at runtime. This is the ownership map for resolving 
 | Lane | Owner | Contents |
 |------|-------|----------|
 | Core orchestration | this repo (`skills/core/`) | boss-advanced, boss-briefing, briefing-vault, gstack-sprint (4) |
-| Execution modes | OMC | autopilot, ralph, ultrawork, ultraqa, team, ralplan, cancel, ccg, ask, deep-interview, ai-slop-cleaner, hud, omc-reference, omc-setup, omc-doctor, setup (16) |
+| Execution modes | OMC plugin | autopilot, ralph, ultrawork, ultraqa, team, ralplan, cancel, ccg, ask, deep-interview, ai-slop-cleaner, hud, omc-reference, omc-setup, omc-doctor, setup (16) — routed as `oh-my-claudecode:<name>`, never copied into `~/.claude/skills/` |
 | Dev discipline | superpowers | test-driven-development, systematic-debugging, brainstorming, writing-plans, executing-plans, requesting/receiving-code-review, verification-before-completion, using-git-worktrees, subagent-driven-development, writing-skills, using-superpowers, finishing-a-development-branch (13) |
 | P0 workflows | gstack | 26 skills + the `gstack` root router (27) — see the Priority 0 table in boss.md |
-| Stack + AI knowledge | ECC | 79 skills — language/framework patterns, agent and LLM engineering, codebase tooling |
+| Stack + AI knowledge | ECC | 61 skills by default — language/framework patterns, agent and LLM engineering, codebase tooling. The 18-skill `web` lane (React/Vue/Nuxt/Nest, motion, a11y, browser e2e) installs only with `install.sh --skills=web` |
 | Document deliverables | Anthropic doc skills | pdf, docx, pptx, xlsx |
 | Agents | this repo + OMC | 32 total: boss (core) + omo 9 + omc 19 + vendored AI-lane 3 |
 
@@ -108,7 +108,7 @@ When 5+ agents needed OR complex dependency chains OR iterative planning require
 
 When teammates need to **communicate directly** with each other, share intermediate results,
 or coordinate on overlapping files across long-running work:
-- Invoke the team skill: `Skill(skill: "team")` or with args for specific configuration
+- Invoke the team skill: `Skill(skill: "oh-my-claudecode:team")` or with args for specific configuration
 - The team skill handles all orchestration: TeamCreate, teammate spawning, shared task list, SendMessage, shutdown, cleanup
 - Boss acts as the **team leader** automatically (via `"agent": "boss"` in settings.json)
 
@@ -150,7 +150,7 @@ or coordinate on overlapping files across long-running work:
 
 ## Priority 3c-DIRECT: Boss as Direct Team Leader
 
-When Boss leads an Agent Team directly (instead of delegating to `/team` skill),
+When Boss leads an Agent Team directly (instead of delegating to the `oh-my-claudecode:team` skill),
 these rules govern teammate selection, communication, and lifecycle.
 
 **A. Teammate Compatibility — Hard Blockers**
@@ -248,6 +248,8 @@ see `agent-teams-reference.md`.
 
 Every delegation using Method B or D MUST include all 6 sections. Minimum 30 lines.
 
+The prompt is long on purpose; the **report back is not**. A subagent's whole transcript would otherwise land in Boss's context and be re-sent on every later request, so every delegation states the report budget explicitly — see REPORT FORMAT below.
+
 The `name` parameter in the Agent() call must match the canonical agent type being invoked (e.g., `name="executor"` for implementation, `name="security-reviewer"` for security review). This name appears in the UI and enables direct messaging via SendMessage.
 
 ```
@@ -271,7 +273,20 @@ The `name` parameter in the Agent() call must match the canonical agent type bei
 [Relevant code snippets, file paths, patterns to follow]
 Recommended skills: [skills matched in Phase 2, e.g. /test-driven-development, /cso]
 Recommended agents: [agents matched in Phase 2, e.g. test-engineer (sonnet)]
+
+**REPORT FORMAT** (copy this section verbatim into every delegation):
+Your final message is the deliverable and must be 30 lines or fewer:
+- status (done / blocked / partial)
+- files changed, absolute paths, one per line
+- one line of evidence per verification: the command, then its last line of output
+- open issues and anything you deliberately left out
+Do not restate this brief, do not paste transcripts, diffs, or full file contents,
+and do not include code unless the exact text is the finding.
 ```
+
+**Model routing**: `sonnet` is the default for `executor` and for ordinary implementation. Use `opus` only for architecture decisions, debugging where the root cause is still unknown, and security review. Use `haiku` for lookups. Do not spawn an agent for a single lookup answerable with grep, gh, or Read, and do not spawn a docs-lookup agent when the context7 tool is available.
+
+**Fan-out discipline**: one agent per independent workstream. Work touching fewer than about 5 files does not earn a parallel fan-out — the coordination and report overhead costs more than it saves.
 
 **Capability Handoff Rule**: When delegating to sub-orchestrators (sisyphus, atlas, hephaestus)
 or any agent that may further delegate work, include recommended skills and agents in CONTEXT.

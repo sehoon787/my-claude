@@ -35,6 +35,10 @@ SKIP_ECC=0
 SKIP_OMC=0
 SKIP_GSTACK=0
 SKIP_SUPERPOWERS=0
+# Optional skill lanes (see scripts/skill-allowlists.sh). Empty = default install.
+# Precedence: CLI flag > MY_CLAUDE_SKILLS env > ~/.claude/.my-claude-skills.
+SKILL_LANES=""
+SKILL_LANES_SET=0
 for arg in "$@"; do
   case "$arg" in
     --skip-ecc)        SKIP_ECC=1 ;;
@@ -42,6 +46,8 @@ for arg in "$@"; do
     --skip-gstack)     SKIP_GSTACK=1 ;;
     --skip-superpowers) SKIP_SUPERPOWERS=1 ;;
     --self-only)       SKIP_ECC=1; SKIP_OMC=1; SKIP_GSTACK=1; SKIP_SUPERPOWERS=1 ;;
+    --skills=*)        SKILL_LANES="${arg#--skills=}"; SKILL_LANES_SET=1 ;;
+    --full-skills)     SKILL_LANES="$ECC_SKILL_OPTIONAL_LANES"; SKILL_LANES_SET=1 ;;
     --with-codeburn-guard) WITH_CODEBURN_GUARD=1 ;;
     -h|--help)
       cat <<'EOF'
@@ -54,11 +60,47 @@ Options:
   --skip-gstack           Skip gstack upstream install
   --skip-superpowers      Skip superpowers upstream install
   --self-only             Install only self-owned files (implies all --skip-* flags)
+  --skills=<lane[,lane]>  Also install optional skill lanes (available: web)
+  --full-skills           Install every optional skill lane
+  --with-codeburn-guard   Install the opt-in codeburn budget-guard hooks
+
+Environment:
+  MY_CLAUDE_SKILLS=web    Same as --skills=web
+
+The chosen lanes are saved to ~/.claude/.my-claude-skills, so a later plain
+`bash install.sh` keeps them. Pass --skills= (empty) to go back to the default.
 EOF
       exit 0
       ;;
   esac
 done
+
+# ── Optional skill lanes ──
+# A choice made on any earlier run is remembered; an explicit flag or env var on
+# this run replaces it (including `--skills=` to clear it back to the default).
+SKILL_LANES_FILE="$HOME/.claude/.my-claude-skills"
+if [ "$SKILL_LANES_SET" = "0" ]; then
+  if [ -n "${MY_CLAUDE_SKILLS:-}" ]; then
+    SKILL_LANES="$MY_CLAUDE_SKILLS"
+    SKILL_LANES_SET=1
+  elif [ -f "$SKILL_LANES_FILE" ]; then
+    SKILL_LANES=$(head -1 "$SKILL_LANES_FILE" 2>/dev/null || echo "")
+  fi
+fi
+# Expand the comma list into the concrete extra skill names.
+ECC_EXTRA_SKILLS=""
+for _lane in $(printf '%s' "$SKILL_LANES" | tr ',' ' '); do
+  case "$_lane" in
+    web) ECC_EXTRA_SKILLS="$ECC_EXTRA_SKILLS $ECC_SKILL_OPTIONAL_WEB" ;;
+    "")  ;;
+    *)   echo "  WARNING: unknown skill lane '$_lane' (available: $ECC_SKILL_OPTIONAL_LANES)" ;;
+  esac
+done
+if [ -n "$(printf '%s' "$ECC_EXTRA_SKILLS" | tr -d '[:space:]')" ]; then
+  echo "  Optional skill lanes: $SKILL_LANES"
+else
+  echo "  Optional skill lanes: none (default install; add with --skills=web)"
+fi
 
 # ── Version info ──
 INSTALLING_VERSION=$(node "$SCRIPT_DIR/scripts/get-version.js" "$SCRIPT_DIR/.claude-plugin/plugin.json" 2>/dev/null)
@@ -239,7 +281,7 @@ if [ "$SKIP_ECC" = "0" ]; then
   if ! claude plugin add affaan-m/everything-claude-code 2>/dev/null; then
     if init_upstream "ecc" "https://github.com/affaan-m/everything-claude-code"; then
       # Allowlisted skills only — $ECC_SKILL_ALLOWLIST (scripts/skill-allowlists.sh)
-      for name in $ECC_SKILL_ALLOWLIST; do
+      for name in $ECC_SKILL_ALLOWLIST $ECC_EXTRA_SKILLS; do
         src="$UPSTREAM_DIR/skills/$name"
         [ -d "$src" ] || continue
         target="$HOME/.claude/skills/$name"
@@ -253,13 +295,24 @@ if [ "$SKIP_ECC" = "0" ]; then
       # continuous-learning v1 is self-declared deprecated in favor of v2; never
       # allowlisted — this also clears copies left by pre-allowlist installs.
       rm -rf "$HOME/.claude/skills/continuous-learning"
-      # Allowlisted rule sets only — $ECC_RULES_ALLOWLIST
+      # Allowlisted language rule dirs only — $ECC_RULES_ALLOWLIST
       for name in $ECC_RULES_ALLOWLIST; do
         src="$UPSTREAM_DIR/rules/$name"
         [ -d "$src" ] || continue
         cp -r "$src" "$HOME/.claude/rules/"
         manifest_dir "rules/$name"
       done
+      # rules/common is injected into every session, so it is allowlisted per
+      # file — $ECC_RULES_COMMON_ALLOWLIST — not copied wholesale. Files dropped
+      # from that list are manifest-owned and disappear on the next install.
+      if [ -d "$UPSTREAM_DIR/rules/common" ]; then
+        mkdir -p "$HOME/.claude/rules/common"
+        for rule_file in $ECC_RULES_COMMON_ALLOWLIST; do
+          [ -f "$UPSTREAM_DIR/rules/common/$rule_file" ] || continue
+          cp "$UPSTREAM_DIR/rules/common/$rule_file" "$HOME/.claude/rules/common/"
+          echo "rules/common/$rule_file" >> "$MANIFEST_TMP"
+        done
+      fi
     else
       echo "  WARNING: ECC install failed"
     fi
@@ -292,23 +345,17 @@ if [ "$SKIP_OMC" = "0" ]; then
       done
     fi
     if [ "$_omc_plugin_active" = "1" ]; then
-      echo "  [omc] Plugin detected — skipping file copy (plugin provides agents/skills)"
+      echo "  [omc] Plugin detected — skipping agent file copy (plugin provides agents)"
     else
       find "$UPSTREAM_DIR/agents" -maxdepth 1 -name '*.md' -exec cp {} "$HOME/.claude/agents/" \;
       find "$UPSTREAM_DIR/agents" -maxdepth 1 -name '*.md' -exec sh -c 'echo "agents/$(basename "$1")"' _ {} \; >> "$MANIFEST_TMP"
-      # Allowlisted skills only — $OMC_SKILL_ALLOWLIST (scripts/skill-allowlists.sh)
-      for name in $OMC_SKILL_ALLOWLIST; do
-        src="$UPSTREAM_DIR/skills/$name"
-        [ -d "$src" ] || continue
-        target="$HOME/.claude/skills/$name"
-        # Pre-clean: resolve file/symlink vs directory conflicts
-        if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
-          rm -f "$target"
-        fi
-        cp -r "$src" "$HOME/.claude/skills/"
-        manifest_dir "skills/$name"
-      done
     fi
+    # OMC skills are never copied into ~/.claude/skills/. The OMC plugin exposes
+    # all of them as `oh-my-claudecode:<name>`; a bare local copy would add a
+    # second description of the same skill to every session's context. See
+    # $OMC_PLUGIN_SKILL_NAMES in scripts/skill-allowlists.sh for the routing
+    # names. Copies left by older installs are manifest-owned and are removed by
+    # the cleanup at the top of step 1.
   else
     echo "  WARNING: OMC install failed"
   fi
@@ -481,7 +528,8 @@ cp "$SCRIPT_DIR/hooks/persona-rule.js"             "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/briefing-runtime.js"         "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/session-sync.js"             "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/session-end.js"              "$HOME/.claude/hooks/"
-for f in hooks.json session-start.sh stop-profile-update.js stop-session-enforcement.js stop-final-report.js persona-rule.js briefing-runtime.js session-sync.js session-end.js; do
+cp "$SCRIPT_DIR/hooks/context-budget.js"           "$HOME/.claude/hooks/"
+for f in hooks.json session-start.sh stop-profile-update.js stop-session-enforcement.js stop-final-report.js persona-rule.js briefing-runtime.js session-sync.js session-end.js context-budget.js; do
   echo "hooks/$f" >> "$MANIFEST_TMP"
 done
 mkdir -p "$HOME/.claude/scripts"
@@ -651,6 +699,8 @@ sort -u "$MANIFEST_TMP" | while IFS= read -r rel_path; do
 done > "$HOME/.claude/.my-claude-manifest"
 echo "  Manifest saved ($(wc -l < "$HOME/.claude/.my-claude-manifest") entries)"
 echo "$SCRIPT_DIR" > "$HOME/.claude/.my-claude-repo-path" 2>/dev/null || true
+# Remember the optional skill lanes so a later plain `bash install.sh` keeps them.
+printf '%s\n' "$SKILL_LANES" > "$SKILL_LANES_FILE" 2>/dev/null || true
 
 # ── 6. Verification ──
 echo ""
@@ -658,6 +708,7 @@ echo "[6/6] Verification"
 echo "  agents (core):    $(find "$HOME/.claude/agents" -name '*.md' 2>/dev/null | wc -l | tr -d ' ') files"
 echo "  skills:           $(find "$HOME/.claude/skills" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ') installed"
 echo "  rules:            $(find "$HOME/.claude/rules"  -name '*.md' 2>/dev/null | wc -l | tr -d ' ') files"
+echo "  skill lanes:      ${SKILL_LANES:-default}"
 echo "  hooks:            $(find "$HOME/.claude/hooks"  -type f      2>/dev/null | wc -l | tr -d ' ') files"
 echo "  omc:              $(command -v omc            >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
