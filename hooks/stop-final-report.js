@@ -56,8 +56,9 @@ try {
 
   // Walk the transcript backwards to the entry that started this turn.
   //   human      — the turn began with a human prompt (origin.kind === 'human';
-  //                notification / auto-continuation entries carry other kinds,
-  //                and their text is recognisable as a fallback).
+  //                notification / auto-continuation / teammate-message entries
+  //                carry other kinds, and their text is recognisable as a
+  //                fallback when origin is absent).
   //   background — a tool result in this turn launched background work
   //                (Agent run_in_background / Workflow / Bash background).
   function inspectTurn(transcriptPath) {
@@ -81,7 +82,7 @@ try {
           res.human = kind === 'human';
         } else {
           var text = typeof c === 'string' ? c : JSON.stringify(c || '');
-          res.human = !/<task-notification>|\[SYSTEM NOTIFICATION|<cross-session-message/.test(text);
+          res.human = !/<task-notification>|\[SYSTEM NOTIFICATION|<cross-session-message|<teammate-message|^Another Claude session sent a message:/.test(text);
         }
         break;
       }
