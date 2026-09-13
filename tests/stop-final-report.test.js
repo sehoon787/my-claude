@@ -9,6 +9,7 @@ const REPORT = '완료.\n\n## 변경 대조 (Changes)\n\n| 대상 | Before | Aft
 const human = (t) => ({ type: 'user', origin: { kind: 'human' }, message: { role: 'user', content: t } });
 const notif = (t) => ({ type: 'user', origin: { kind: 'task-notification' }, message: { role: 'user', content: '<task-notification>' + t + '</task-notification>' } });
 const notifNoOrigin = (t) => ({ type: 'user', message: { role: 'user', content: '<task-notification>' + t + '</task-notification>' } });
+const teammate = (t) => ({ type: 'user', message: { role: 'user', content: 'Another Claude session sent a message:\n<teammate-message teammate_id="peer" color="blue">\n' + t + '\n</teammate-message>' } });
 const tool = (t) => ({ type: 'user', message: { role: 'user', content: [{ type: 'tool_result', content: t }] } });
 const asst = () => ({ type: 'assistant', message: { role: 'assistant', content: [{ type: 'text', text: 'ok' }] } });
 
@@ -41,6 +42,8 @@ const results = [
   run('no new work → pass', { entries: [human('hi'), asst()], lam: NO_REPORT, workCounter: 5, acked: 5 }, { blocked: false, ack: 5 }),
   run('second Stop after a block (loop guard) → pass + ack', { entries: [human('do x'), tool('edited'), asst()], lam: NO_REPORT, blockedPromptId: 'p1' }, { blocked: false, ack: 5 }),
   run('missing transcript → falls back to enforcing', { entries: [], lam: NO_REPORT }, { blocked: true }),
+  run('teammate-message turn, work, no report → pass (mid-request)', { entries: [human('do x'), asst(), teammate('idle_notification'), asst()], lam: NO_REPORT }, { blocked: false, ack: 0 }),
+  run('teammate-message turn, report present → pass + ack', { entries: [human('do x'), teammate('idle_notification'), asst()], lam: REPORT }, { blocked: false, ack: 5 }),
 ];
 const failed = results.filter((r) => !r).length;
 console.log(failed ? `${failed} FAILED` : 'ALL PASSED');
