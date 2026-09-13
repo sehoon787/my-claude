@@ -16,6 +16,30 @@ const settings = fs.existsSync(settingsPath)
 settings.env = Object.assign({}, settings.env, {
   CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: '1'
 });
+
+// OMC's pre-tool-enforcer/post-tool-verifier plugin hooks append an advisory line
+// ("Use parallel execution...", "Background operation detected...") to almost every
+// Bash/Edit/Read call. Those lines are re-sent as context on every subsequent
+// request, so they are a recurring per-call cost for advice Boss already has in its
+// prompt. Level 2 suppresses them and the "Completed: N" agent summaries while
+// still reporting real failures (detectBashFailure / detectWriteFailure and the
+// team-routing error are not gated on the quiet level). An explicit user setting
+// always wins.
+if (!settings.env.OMC_QUIET) {
+  settings.env.OMC_QUIET = '2';
+}
+
+// Auto-compact earlier than the default. Every request re-sends the whole
+// transcript, so the tail of a long session is where cached-token cost
+// concentrates; compacting sooner cuts that and loses less than the /clear people
+// reach for instead. The variable only lowers the trigger — values above the
+// default are ignored — and a value the user set already wins.
+// Documented at https://code.claude.com/docs/en/env-vars
+// (CLAUDE_AUTOCOMPACT_PCT_OVERRIDE: percentage 1-100 of the auto-compact window
+// at which auto-compaction triggers).
+if (!settings.env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE) {
+  settings.env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = '75';
+}
 settings.agent = settings.agent || 'boss';
 // Earlier installs wrote teammateMode 'tmux'; normalise it back to in-process unless the
 // user explicitly opts in with MY_CLAUDE_TEAMMATE_MODE=tmux.

@@ -59,7 +59,7 @@ gstack-sprint enforces the three-phase contract: user-confirmed design → autom
 
 ## Phase 2: Execute (autonomous/automated — ralph)
 
-Phase 2 runs as an independent skill invocation, not nested within gstack-sprint's prompt context. Boss invokes `Skill(skill: "ralph")` for this phase.
+Phase 2 runs as an independent skill invocation, not nested within gstack-sprint's prompt context. Boss invokes `Skill(skill: "oh-my-claudecode:ralph")` for this phase.
 
 1. **Invoke the ralph skill** — ralph internally selects its execution strategy based on scale:
    - Parallel multi-agent (ultrawork) for large, multi-story work

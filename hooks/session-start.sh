@@ -49,6 +49,16 @@ else
     _needs_regen=1
   elif [ -d ".claude/agents" ] && find ".claude/agents" ".claude/skills" -name "*.md" -newer "$REGISTRY_FILE" 2>/dev/null | grep -q .; then
     _needs_regen=1
+  elif grep -q '"agents":\[\]' "$REGISTRY_FILE" 2>/dev/null \
+    && find "$HOME/.claude/agents" -name "*.md" 2>/dev/null | grep -q .; then
+    # Cached "no agents at all" while agent files exist on disk. That pairing is
+    # never true in a settled install — it is left behind by a scan that ran
+    # while ~/.claude/agents was momentarily empty (install.sh deletes every
+    # manifest-owned agent at the start of step 1 and re-copies it seconds
+    # later). Boss PHASE 0 trusts a present registry and skips its own scan, so
+    # a poisoned cache costs it every agent until some agent file is touched
+    # again. Rescan instead of trusting it.
+    _needs_regen=1
   fi
 fi
 if [ "$_needs_regen" -eq 1 ]; then
@@ -94,9 +104,17 @@ $(grep -o '"[^"]*"[[:space:]]*:' "$_sf" 2>/dev/null | sed -n '/mcpServers/,/}/p'
 EOF
   done
   _mcp_json="${_mcp_json}]"
-  printf '{"generated_at":"%s","agents":%s,"skills":%s,"mcp_servers":%s,"recommended_packs":%s}\n' \
-    "$_ts" "$_agents_json" "$_skills_json" "$_mcp_json" "$_recommended_packs" > "$REGISTRY_FILE" 2>/dev/null \
-    && REGISTRY_STATUS="regenerated" || REGISTRY_STATUS="failed"
+  # Never persist an empty agent list on top of an existing cache: a scan that
+  # lands inside install.sh's delete-then-copy window sees zero agents, and the
+  # result would be trusted by Boss until an agent file changed again. Keeping
+  # the previous registry is always the better of the two wrong answers.
+  if [ "$_first_agent" -eq 1 ] && [ -f "$REGISTRY_FILE" ]; then
+    REGISTRY_STATUS="kept (no agents visible during scan)"
+  else
+    printf '{"generated_at":"%s","agents":%s,"skills":%s,"mcp_servers":%s,"recommended_packs":%s}\n' \
+      "$_ts" "$_agents_json" "$_skills_json" "$_mcp_json" "$_recommended_packs" > "$REGISTRY_FILE" 2>/dev/null \
+      && REGISTRY_STATUS="regenerated" || REGISTRY_STATUS="failed"
+  fi
 fi
 
 # 5b. .knowledge → .briefing migration (one-time, backward compat)

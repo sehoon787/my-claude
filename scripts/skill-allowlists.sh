@@ -22,8 +22,15 @@
 #   3. Generic codebase tooling — onboarding, tours, ADRs, research, lookup.
 # Everything else upstream (mobile, other languages, ops/marketing/domain packs,
 # and orchestration skills that duplicate OMC/gstack) stays out.
+# Lanes:
+#   $ECC_SKILL_ALLOWLIST      — the default install (always copied).
+#   $ECC_SKILL_OPTIONAL_WEB   — the "web" lane, opt-in via `install.sh
+#                               --skills=web`, `--full-skills`, or
+#                               MY_CLAUDE_SKILLS=web. Browser-UI work only
+#                               (React/Vue/Nuxt/Nest, motion, a11y, browser
+#                               e2e) — 18 skill descriptions that every
+#                               non-frontend session would otherwise pay for.
 ECC_SKILL_ALLOWLIST="
-accessibility
 agent-architecture-audit
 agent-harness-construction
 agent-introspection-debugging
@@ -34,7 +41,6 @@ api-design
 architecture-decision-records
 backend-patterns
 benchmark-optimization-loop
-bun-runtime
 click-path-audit
 code-tour
 codebase-onboarding
@@ -53,13 +59,10 @@ django-tdd
 django-verification
 docker-patterns
 documentation-lookup
-e2e-testing
 error-handling
 eval-harness
 exa-search
 fastapi-patterns
-frontend-a11y
-frontend-patterns
 generating-python-installer
 github-ops
 hexagonal-architecture
@@ -75,21 +78,12 @@ kotlin-testing
 kubernetes-patterns
 latency-critical-systems
 mcp-server-patterns
-motion-advanced
-motion-foundations
-motion-patterns
 mysql-patterns
-nestjs-patterns
-nextjs-turbopack
-nuxt4-patterns
 postgres-patterns
 prisma-patterns
 prompt-optimizer
 python-patterns
 python-testing
-react-patterns
-react-performance
-react-testing
 redis-patterns
 regex-vs-llm-structured-text
 repo-scan
@@ -98,17 +92,43 @@ springboot-patterns
 springboot-security
 springboot-tdd
 springboot-verification
+"
+
+# ── ECC optional lane: web / frontend ──
+# Not installed by default. Opt in with `bash install.sh --skills=web` (or
+# --full-skills / MY_CLAUDE_SKILLS=web); the choice is persisted to
+# ~/.claude/.my-claude-skills so later reinstalls keep it.
+ECC_SKILL_OPTIONAL_WEB="
+accessibility
+bun-runtime
+e2e-testing
+frontend-a11y
+frontend-patterns
+motion-advanced
+motion-foundations
+motion-patterns
+nestjs-patterns
+nextjs-turbopack
+nuxt4-patterns
+react-patterns
+react-performance
+react-testing
 ui-to-vue
 vite-patterns
 vue-patterns
 windows-desktop-e2e
 "
 
+# Every optional lane name, in install order. Add a lane here and define the
+# matching ECC_SKILL_OPTIONAL_<UPPER> variable above.
+ECC_SKILL_OPTIONAL_LANES="web"
+
 # ── ECC rule sets ──
-# rules/common is universal; language dirs are installed only for stacks kept
-# in ECC_SKILL_ALLOWLIST above.
+# Language dirs only. Each upstream language rule file carries a `paths:` scope,
+# so it costs nothing until a matching file is opened — the whole set stays.
+# rules/common is the opposite: every file in it is injected into every session,
+# so it is allowlisted per file below instead of by directory.
 ECC_RULES_ALLOWLIST="
-common
 java
 kotlin
 nuxt
@@ -117,6 +137,21 @@ react
 typescript
 vue
 web
+"
+
+# ── ECC rules/common — per-file allowlist ──
+# These three are always-on context, so only universally true guidance stays.
+# Deliberately dropped: agents.md (names agents this stack does not install —
+# tdd-guide, rust-reviewer, …), code-review.md and development-workflow.md
+# (duplicated by boss.md Phase 4 and the gstack 3-Phase Sprint), hooks.md,
+# patterns.md, performance.md (stale harness advice), and testing.md (its
+# mandatory-TDD framing conflicts with Boss routing "tdd" to the
+# test-driven-development skill on request). Dropped files are manifest-owned,
+# so an existing install loses them on the next `bash install.sh`.
+ECC_RULES_COMMON_ALLOWLIST="
+coding-style.md
+git-workflow.md
+security.md
 "
 
 # ── gstack skills ──
@@ -152,9 +187,13 @@ unfreeze
 "
 
 # ── OMC (oh-my-claudecode) skills ──
-# The 16 skills wired into CLAUDE.md Tier-0 routing and OMC setup/doctor flows.
-# OMC agents are unaffected by this list.
-OMC_SKILL_ALLOWLIST="
+# Deliberately NOT copied into ~/.claude/skills/. install.sh enables the OMC
+# plugin (enabledPlugins["oh-my-claudecode@omc"]), which already exposes every
+# one of these as `oh-my-claudecode:<name>`. A local copy adds a second, bare
+# description of the same skill to every session's context for no new
+# capability. Routing targets therefore use the prefixed plugin name. Kept here
+# as documentation of which names Boss routes to; install.sh never reads it.
+OMC_PLUGIN_SKILL_NAMES="
 ai-slop-cleaner
 ask
 autopilot

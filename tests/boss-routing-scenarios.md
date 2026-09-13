@@ -24,6 +24,13 @@ frontend-patterns, backend-patterns, internal-comms, iterative-retrieval, karpat
 postgres-patterns, slack-gif-creator, strategic-compact, theme-factory, verification-loop,
 web-artifacts-builder, webapp-testing
 
+### OMC skill names
+OMC execution-mode skills (ralph, autopilot, ultrawork, ultraqa, team, ralplan, ccg,
+deep-interview, ai-slop-cleaner, cancel, ask, hud, setup, omc-setup, omc-doctor,
+omc-reference) come from the OMC plugin and are routed as `oh-my-claudecode:<name>`.
+A bare name does not resolve. Where the scenarios below name one in prose, the
+routing target is the prefixed form.
+
 ### Verified Agent Registry (32 global)
 analyst, architect, atlas, boss, code-reviewer, code-simplifier, critic, debugger,
 designer, document-specialist, executor, explore, git-master, hephaestus, librarian,
@@ -402,7 +409,7 @@ engineering-multi-agent-systems-architect (vendored, model inherited)
 
 ### Scenario 187: gstack-sprint 미트리거 — 순수 설계/기획
 - **Input**: "새 프로젝트 아이디어가 있는데 같이 검토해줘"
-- **Expected**: Boss → Intent Gate (Collaborative/Architecture) → /office-hours 또는 deep-interview 제안
+- **Expected**: Boss → Intent Gate (Collaborative/Architecture) → `/office-hours` 또는 `oh-my-claudecode:deep-interview` 제안
 - **Verify**: gstack-sprint이 트리거되지 않음
 - **Not Expected**: gstack-sprint 호출
 
