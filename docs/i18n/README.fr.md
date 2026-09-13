@@ -348,10 +348,8 @@ Chaque source est pilotée par la liste d'autorisation de [`scripts/skill-allowl
 | Session Setup | SessionStart | Détecte les outils manquants + injecte le contexte Briefing Vault |
 | Delegation Guard | PreToolUse | Empêche Boss de modifier directement des fichiers |
 | Agent Telemetry | PostToolUse | Enregistre l'utilisation des agents dans `agent-usage.jsonl` |
-| Subagent Verifier | SubagentStop | Force la vérification indépendante + enregistre dans Briefing Vault |
+| Subagent Logger | SubagentStop | Enregistre l'exécution des agents dans Briefing Vault |
 | Completion Check | Stop | Confirme que les tâches sont vérifiées + invite au résumé de session |
-| Teammate Idle Guide | TeammateIdle | Invite le responsable sur les coéquipiers inactifs |
-| Task Quality Gate | TaskCompleted | Vérifie la qualité du livrable |
 
 </details>
 

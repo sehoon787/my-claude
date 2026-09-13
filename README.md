@@ -372,10 +372,8 @@ Each source is allowlisted in [`scripts/skill-allowlists.sh`](./scripts/skill-al
 | Session Setup | SessionStart | Auto-detects missing tools + injects Briefing Vault context |
 | Delegation Guard | PreToolUse | Blocks Boss from directly modifying files |
 | Agent Telemetry | PostToolUse | Logs agent usage to `agent-usage.jsonl` |
-| Subagent Verifier | SubagentStop | Forces independent verification + logs to Briefing Vault |
+| Subagent Logger | SubagentStop | Logs agent execution to Briefing Vault |
 | Completion Check | Stop | Runs profile fallback + guards /boss-briefing execution |
-| Teammate Idle Guide | TeammateIdle | Prompts leader on idle teammates |
-| Task Quality Gate | TaskCompleted | Verifies deliverable quality |
 | Vault Reminder | UserPromptSubmit | Suggests /boss-briefing after 5+ messages |
 | Calibrated Response | UserPromptSubmit | Re-injects `rules/common/calibrated-response.md` every turn |
 

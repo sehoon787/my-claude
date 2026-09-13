@@ -377,10 +377,8 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 | Session Setup | SessionStart | 누락된 도구 자동 감지 + Briefing Vault 컨텍스트 주입 |
 | Delegation Guard | PreToolUse | Boss가 파일을 직접 수정하지 못하도록 차단 |
 | Agent Telemetry | PostToolUse | 에이전트 사용 기록을 `agent-usage.jsonl`에 저장 |
-| Subagent Verifier | SubagentStop | 독립적인 검증 강제 + Briefing Vault에 기록 |
+| Subagent Logger | SubagentStop | 에이전트 실행을 Briefing Vault에 기록 |
 | Completion Check | Stop | 작업 검증 확인 + 세션 요약 프롬프트 |
-| Teammate Idle Guide | TeammateIdle | 유휴 팀원에 대해 리더에게 알림 |
-| Task Quality Gate | TaskCompleted | 결과물 품질 검증 |
 
 </details>
 
