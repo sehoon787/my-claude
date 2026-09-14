@@ -529,7 +529,8 @@ cp "$SCRIPT_DIR/hooks/briefing-runtime.js"         "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/session-sync.js"             "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/session-end.js"              "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/context-budget.js"           "$HOME/.claude/hooks/"
-for f in hooks.json session-start.sh stop-profile-update.js stop-session-enforcement.js stop-final-report.js persona-rule.js briefing-runtime.js session-sync.js session-end.js context-budget.js; do
+cp "$SCRIPT_DIR/hooks/vault-enforcer.js"           "$HOME/.claude/hooks/"
+for f in hooks.json session-start.sh stop-profile-update.js stop-session-enforcement.js stop-final-report.js persona-rule.js briefing-runtime.js session-sync.js session-end.js context-budget.js vault-enforcer.js; do
   echo "hooks/$f" >> "$MANIFEST_TMP"
 done
 mkdir -p "$HOME/.claude/scripts"
