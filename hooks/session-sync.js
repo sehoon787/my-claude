@@ -79,10 +79,11 @@ function updateProfileIfNeeded(payload, force) {
   });
 }
 
-function emitAdditionalContext(message) {
+function emitAdditionalContext(message, eventName) {
   if (!message) return;
   process.stdout.write(JSON.stringify({
     hookSpecificOutput: {
+      hookEventName: eventName,
       additionalContext: message
     }
   }) + '\n');
@@ -249,7 +250,7 @@ function main() {
   runtime.writeState(state);
   updateProfileIfNeeded({ agent_id: 'user-prompt-submit', agent_type: 'throttled-update' }, false);
   updateScaffolds({ agent_id: 'user-prompt-submit', agent_type: 'mid-session-sync' });
-  emitAdditionalContext(reminderText(runtime.readState()));
+  emitAdditionalContext(reminderText(runtime.readState()), 'UserPromptSubmit');
 }
 
 main();
