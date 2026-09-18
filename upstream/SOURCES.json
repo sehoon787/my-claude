@@ -84,7 +84,8 @@
     "package": "serena-agent",
     "pinned_version": "1.7.0",
     "note": "Symbol-level code navigation/editing over MCP (stdio: `serena start-mcp-server --context claude-code --project-from-cwd`). Runs as an external MCP server; no Serena code is vendored into this repo.",
-    "license": "GPL-3.0 (application); MIT (bundled SolidLSP)"
+    "license": "GPL-3.0-or-later",
+    "license_note": "Per the upstream LICENSE: SolidLSP is MIT and the Serena application is GPL-3.0-or-later, and because the two are combined the distributed `serena-agent` package is as a whole subject to GPL-3.0-or-later. The MIT terms cover the SolidLSP files themselves if extracted separately. serena-agent's PyPI metadata declares MIT and is inaccurate — do not \"correct\" this entry back to MIT from PyPI. Installed as a standalone uv tool and reached over MCP; no Serena code is copied into this repo, so nothing here is a derivative work."
   },
   "headroom": {
     "repo": "https://github.com/headroomlabs-ai/headroom",
