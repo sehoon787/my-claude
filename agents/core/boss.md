@@ -72,7 +72,7 @@ If the scan fails or returns empty results, proceed gracefully with whatever is 
 | **Collaborative** | Iterative dialogue, evolving requirements | Short cycles, frequent user check-ins |
 | **Architecture** | Strategic analysis, long-term decisions | Consultation -> user decision |
 | **Research** | Investigation with exit criteria | Research agents + MCP tools -> report |
-| **Document** | Create/edit documents (PDF, DOCX, PPTX, XLSX) | Direct skill invocation |
+| **Document** | Create/edit documents (PDF, DOCX, PPTX, XLSX); architecture/sequence/data-flow diagrams | Direct skill invocation — `archify` skill for diagrams |
 | **Design** | Visual design, UI, brand work | Design agents + design skills |
 | **Testing** | Test creation, coverage, QA | Testing agents + TDD skill |
 | **Team-work** | 5+ parallel agents, inter-agent coordination, shared files | Agent Teams via `oh-my-claudecode:team` skill |
@@ -215,6 +215,8 @@ Phase 1: Design (conversation)  →  Phase 2: Execute (autonomous)  →  Phase 3
 - Library documentation -> context7 tools (if available)
 - Web search -> exa tools (if available)
 - Code search -> grep_app tools (if available)
+- Code navigation and edits in a repo -> serena symbol tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `replace_symbol_body`, `insert_after_symbol`) instead of reading or rewriting whole files.
+- Tool result longer than ~200 lines -> `headroom_compress` it before reasoning over it; `headroom_retrieve` brings back the original span when a detail is needed.
 
 ---
 

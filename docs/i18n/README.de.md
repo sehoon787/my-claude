@@ -235,7 +235,7 @@ Deterministische Multi-Agenten-Workflows. `install.sh` kopiert sie nach `~/.clau
 | **LSP-Server** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
 | **Benannte Workflows** | 2 | code-review-fanout, upstream-audit |
 | **Upstream-Submodule** | 4 | ecc, omc, gstack, superpowers |
-| **CLI-Tools** | 5 | omc, omo, ast-grep, comment-checker, codeburn |
+| **CLI-Tools** | 7 | omc, omo, ast-grep, comment-checker, codeburn, serena, headroom |
 
 Alle oben genannten Agenten, Skills und Regeln stehen auf der Allowlist in [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) und werden im Installationsmanifest verfolgt. Anthropics offizielle Dokument-Skills (pdf, docx usw.) werden separat über `claude plugin add anthropics/skills` installiert und bewusst nicht im Manifest verfolgt.
 
@@ -431,7 +431,7 @@ Beim Sitzungsstart wird der aktuelle git-HEAD in `.briefing/.session-start-head`
 
 ## Upstream Open-Source-Quellen
 
-my-claude verknüpft 4 MIT-lizenzierte Upstream-Repositories als git-Submodule, jedes auf einen expliziten SHA festgelegt:
+my-claude verknüpft 5 MIT-lizenzierte Upstream-Repositories als git-Submodule, jedes auf einen expliziten SHA festgelegt:
 
 | # | Quelle | Was bereitgestellt wird |
 |---|--------|------------------------|
@@ -439,6 +439,7 @@ my-claude verknüpft 4 MIT-lizenzierte Upstream-Repositories als git-Submodule, 
 | 2 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 19 Spezialisten-Agenten + 16 installierte Skills. Orchestrierungs-Lane: autopilot, ralph, team. |
 | 3 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | 27 installierte Skills für Release, QA, Deployment und Sicherheitsreview (Boss-P0-Lane). Enthält Playwright-Browser-Daemon. |
 | 4 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 13 installierte Skills für die Entwicklungsprozess-Lane: Brainstorming, TDD, systematisches Debuggen, Planerstellung. |
+| 5 | <img src="https://github.com/tt-a1i.png?size=32" width="20" height="20" align="center"/> **[archify](https://github.com/tt-a1i/archify)** — tt-a1i | 1 installierter Skill, auf Tag `v2.9.0` festgelegt. Architektur-, Workflow-, Sequenz-, Datenfluss- und Lebenszyklusdiagramme als eigenständiges HTML. |
 
 Keine Submodule, aber Teil des Stacks:
 
@@ -448,7 +449,18 @@ Keine Submodule, aber Teil des Stacks:
 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | Submodul am 2026-07-27 entfernt. 3 Engineering-Agenten mit Herkunftsnachweis nach `agents/vendored/` übernommen. |
 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | Von `install.sh` über `claude plugin add anthropics/skills` installiert (pdf, docx und weitere). Nicht im Manifest verfolgt. |
 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 KI-Coding-Verhaltensrichtlinien, angehängt an `~/.claude/CLAUDE.md`. |
+
+Begleitende CLIs und MCP-Server, die `install.sh` mitbringt, jeweils auf eine exakte Version festgelegt:
+
+| Quelle | Wie sie eingebunden ist |
+|--------|-------------------------|
+| <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0`, registriert als stdio-MCP-Server `serena`. Symbolgenaue Codenavigation und -bearbeitung. Anwendung GPL-3.0, SolidLSP MIT; wird als externer Server genutzt, nie vendored. |
+| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"`, registriert als stdio-MCP-Server `headroom` (`headroom mcp serve`). Komprimierung von Tool-Ausgaben. Apache-2.0. Der Proxy-/Wrap-Modus wird bewusst nicht genutzt. |
 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | npm CLI (MIT). Local-first Token-/Kosten-Tracker — liest die Sitzungsdateien, die Claude Code ohnehin schreibt, nur lesend und schlüsselt die Ausgaben nach Modell, Projekt und Aufgabe auf. Kein Proxy, kein API-Key, kein Upload. Wird von `install.sh` als `codeburn@0.9.23` gepinnt installiert und in `upstream/SOURCES.json` als `method: npm-cli` geführt. Budget-Guard-Hooks per `--with-codeburn-guard` opt-in. Die Dollarbeträge sind Schätzungen — Token-Zahlen zu API-Listenpreisen; codeburn selbst ist kostenlos und berechnet nichts (bei einem Abo ein Nutzungsindikator). Der Hard Cap des Guards (Standard $15/Sitzung) blockiert jeden Tool-Aufruf dieser Sitzung, auch das aufhebende `codeburn guard allow` (in einem externen Terminal ausführen) — deshalb bleibt er opt-in. Ergänzt das OMC HUD (Kontext und Kontingent der aktuellen Sitzung) um die sitzungsübergreifende Kostenverteilung. |
+| <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`. Strukturelle (AST-bewusste) Codesuche und -umschreibung. |
+| <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | Gehosteter MCP-Server unter `https://mcp.context7.com/mcp`. Aktuelle Bibliotheksdokumentation. |
+| <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | Gehosteter MCP-Server unter `https://mcp.exa.ai/mcp`. Neuronale Websuche. |
+| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://grep.app/)** — grep.app | Gehosteter MCP-Server unter `https://mcp.grep.app`. Codesuche über öffentliche GitHub-Repositories hinweg. |
 
 ---
 

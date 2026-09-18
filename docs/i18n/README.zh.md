@@ -235,7 +235,7 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 | **LSP 服务器** | 2 | typescript（`typescript-language-server`）、python（`pyright-langserver`） |
 | **具名工作流** | 2 | code-review-fanout、upstream-audit |
 | **上游子模块** | 4 | ecc、omc、gstack、superpowers |
-| **CLI 工具** | 5 | omc、omo、ast-grep、comment-checker、codeburn |
+| **CLI 工具** | 7 | omc、omo、ast-grep、comment-checker、codeburn、serena、headroom |
 
 以上 Agent、Skills、规则全部登记在 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) 的白名单中，并由安装清单跟踪。Anthropic 官方文档 Skills（pdf、docx 等）通过 `claude plugin add anthropics/skills` 单独安装，有意不纳入清单跟踪。
 
@@ -432,7 +432,7 @@ BriefingVault v2 融合了三种知识管理方法论：
 
 ## 上游开源来源
 
-my-claude 以 git 子模块方式关联 4 个 MIT 授权的上游仓库，每个都固定在明确的 SHA 上：
+my-claude 以 git 子模块方式关联 5 个 MIT 授权的上游仓库，每个都固定在明确的 SHA 上：
 
 | # | 来源 | 提供的内容 |
 |---|--------|-----------------|
@@ -440,6 +440,7 @@ my-claude 以 git 子模块方式关联 4 个 MIT 授权的上游仓库，每个
 | 2 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 19 个专家 Agent + 安装 16 个 skills。编排通道：autopilot、ralph、team。 |
 | 3 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | 安装 27 个 skills，用于发布、QA、部署与安全审查（Boss P0 通道）。含 Playwright 浏览器守护进程。 |
 | 4 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 安装 13 个 skills，覆盖开发流程通道：头脑风暴、TDD、系统化调试、计划撰写。 |
+| 5 | <img src="https://github.com/tt-a1i.png?size=32" width="20" height="20" align="center"/> **[archify](https://github.com/tt-a1i/archify)** — tt-a1i | 安装 1 个 skill，固定在标签 `v2.9.0` 上。以自包含 HTML 生成架构、工作流、时序、数据流与生命周期图。 |
 
 并非子模块，但同属这套技术栈：
 
@@ -449,7 +450,18 @@ my-claude 以 git 子模块方式关联 4 个 MIT 授权的上游仓库，每个
 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 2026-07-27 移除子模块。3 个工程 Agent 连同署名一并 vendored 到 `agents/vendored/`。 |
 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | 由 `install.sh` 通过 `claude plugin add anthropics/skills` 安装（pdf、docx 等）。不纳入清单跟踪。 |
 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 条 AI 编码行为准则，追加到 `~/.claude/CLAUDE.md`。 |
+
+`install.sh` 一并引入的配套 CLI 与 MCP 服务器，每个都固定在确切版本上：
+
+| 来源 | 接入方式 |
+|--------|----------------|
+| <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0` 安装，并注册为 `serena` stdio MCP 服务器。符号级代码导航与编辑。应用为 GPL-3.0，SolidLSP 为 MIT；仅作为外部服务器使用，不 vendored。 |
+| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"` 安装，并注册为 `headroom` stdio MCP 服务器（`headroom mcp serve`）。工具输出压缩。Apache-2.0。代理/wrap 模式刻意不启用。 |
 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | npm CLI (MIT)。本地优先的 token/成本追踪器 — 只读解析 Claude Code 已写出的会话文件，按模型、项目、任务汇总花费。无代理、无 API 密钥、不上传。由 `install.sh` 以 `codeburn@0.9.23` 固定版本安装，并在 `upstream/SOURCES.json` 中以 `method: npm-cli` 登记。预算守卫钩子通过 `--with-codeburn-guard` 选择启用。显示的美元金额是按 API 标价折算 token 数的估算值，codeburn 本身免费且不收取任何费用（订阅计划下仅作用量参考）。守卫的 hard cap（默认 $15/会话）会阻断该会话的所有工具调用，包括解除命令 `codeburn guard allow`（需在外部终端运行），因此保持为可选。与 OMC HUD（当前会话的上下文与配额）互补，展示跨会话的花费去向。 |
+| <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`。结构化（AST 感知）代码搜索与重写。 |
+| <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | 位于 `https://mcp.context7.com/mcp` 的托管 MCP 服务器。最新的库文档。 |
+| <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | 位于 `https://mcp.exa.ai/mcp` 的托管 MCP 服务器。神经网络网页搜索。 |
+| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://grep.app/)** — grep.app | 位于 `https://mcp.grep.app` 的托管 MCP 服务器。跨公开 GitHub 仓库的代码搜索。 |
 
 ---
 

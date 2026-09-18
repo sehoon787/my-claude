@@ -1,16 +1,26 @@
 {
   "mcpServers": {
     "context7": {
-      "type": "url",
+      "type": "http",
       "url": "https://mcp.context7.com/mcp"
     },
     "exa": {
-      "type": "url",
+      "type": "http",
       "url": "https://mcp.exa.ai/mcp?tools=web_search_exa"
     },
     "grep_app": {
-      "type": "url",
+      "type": "http",
       "url": "https://mcp.grep.app"
+    },
+    "serena": {
+      "type": "stdio",
+      "command": "serena",
+      "args": ["start-mcp-server", "--context", "claude-code", "--project-from-cwd"]
+    },
+    "headroom": {
+      "type": "stdio",
+      "command": "headroom",
+      "args": ["mcp", "serve"]
     }
   }
 }

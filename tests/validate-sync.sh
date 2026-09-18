@@ -27,7 +27,7 @@ if [ "$MODE" = "repo" ]; then
   # 2. Submodules initialized — check each
   echo ""
   echo "=== Submodule Validation ==="
-  for sub in ecc omc gstack superpowers; do
+  for sub in ecc omc gstack superpowers archify; do
     subdir="upstream/$sub"
     if [ ! -d "$subdir" ] || [ -z "$(ls -A "$subdir" 2>/dev/null)" ]; then
       echo "SKIP: $subdir not initialized (run: git submodule update --init)"
@@ -52,6 +52,16 @@ if [ "$MODE" = "repo" ]; then
         # v6.2.0 ships no agents/ dir — skills are the only contract.
         SKILL_COUNT=$({ find "$subdir/skills" -name 'SKILL.md' 2>/dev/null || true; } | wc -l | tr -d ' ')
         [ "$SKILL_COUNT" -ge 10 ] && echo "OK: $sub — $SKILL_COUNT skills" || { echo "FAIL: $sub has $SKILL_COUNT skills (expected >= 10)"; ERRORS=$((ERRORS + 1)); }
+        ;;
+      archify)
+        # One skill directory at the repo root; the renderers it invokes live
+        # beside SKILL.md, so both are part of the contract.
+        test -f "$subdir/archify/SKILL.md" \
+          && echo "OK: $sub — archify/SKILL.md present" \
+          || { echo "FAIL: $sub is missing archify/SKILL.md"; ERRORS=$((ERRORS + 1)); }
+        test -f "$subdir/archify/bin/archify.mjs" \
+          && echo "OK: $sub — renderer entrypoint present" \
+          || { echo "FAIL: $sub is missing archify/bin/archify.mjs"; ERRORS=$((ERRORS + 1)); }
         ;;
     esac
   done
@@ -87,6 +97,7 @@ elif [ "$MODE" = "installed" ]; then
   SKILL_COUNT=$(find "$HOME/.claude/skills" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
   [ "$SKILL_COUNT" -ge 5 ] && echo "OK: skills — $SKILL_COUNT installed" || { echo "FAIL: skills has $SKILL_COUNT (expected >= 5)"; ERRORS=$((ERRORS + 1)); }
 
+  [ -f "$HOME/.claude/skills/archify/SKILL.md" ] && echo "OK: archify skill installed" || { echo "FAIL: ~/.claude/skills/archify/SKILL.md missing"; ERRORS=$((ERRORS + 1)); }
   [ -f "$HOME/.claude/hooks/hooks.json" ] && echo "OK: hooks.json present" || { echo "FAIL: hooks.json missing"; ERRORS=$((ERRORS + 1)); }
   [ -f "$HOME/.claude/settings.json" ] && echo "OK: settings.json present" || { echo "FAIL: settings.json missing"; ERRORS=$((ERRORS + 1)); }
   [ -f "$HOME/.claude/.my-claude-manifest" ] && echo "OK: manifest present" || { echo "FAIL: manifest missing"; ERRORS=$((ERRORS + 1)); }
@@ -114,6 +125,34 @@ elif [ "$MODE" = "installed" ]; then
   command -v omc >/dev/null 2>&1 && echo "OK: omc" || echo "WARN: omc not found"
   command -v oh-my-opencode >/dev/null 2>&1 && echo "OK: omo" || echo "WARN: omo not found"
   command -v ast-grep >/dev/null 2>&1 && echo "OK: ast-grep" || echo "WARN: ast-grep not found"
+  command -v serena   >/dev/null 2>&1 && echo "OK: serena ($(serena --version 2>/dev/null))"     || echo "WARN: serena not found"
+  command -v headroom >/dev/null 2>&1 && echo "OK: headroom ($(headroom --version 2>/dev/null))" || echo "WARN: headroom not found"
+
+  # MCP registration. `claude` is absent in CI, so a missing CLI skips rather
+  # than fails; the settings.json check runs either way.
+  echo ""
+  echo "=== MCP Servers ==="
+  for _srv in serena headroom; do
+    node -e "
+      const fs = require('fs');
+      const p = process.env.HOME + '/.claude/settings.json';
+      const s = fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : {};
+      process.exit((s.mcpServers || {})['$_srv'] ? 0 : 1);
+    " 2>/dev/null \
+      && echo "OK: settings.json mcpServers.$_srv" \
+      || { echo "FAIL: settings.json has no mcpServers.$_srv"; ERRORS=$((ERRORS + 1)); }
+  done
+  if command -v claude >/dev/null 2>&1; then
+    MCP_LIST=$(claude mcp list 2>/dev/null || echo "")
+    for _srv in serena headroom; do
+      case "$MCP_LIST" in
+        *"$_srv"*) echo "OK: claude mcp list reports $_srv" ;;
+        *) echo "WARN: claude mcp list does not report $_srv" ;;
+      esac
+    done
+  else
+    echo "SKIP: claude CLI not available — cannot check \`claude mcp list\`"
+  fi
 fi
 
 # Summary

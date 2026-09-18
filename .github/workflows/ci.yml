@@ -44,7 +44,7 @@ jobs:
           echo "OK: skills/core — $COUNT skills"
       - name: Validate upstream submodule file counts
         run: |
-          for sub in ecc omc gstack superpowers; do
+          for sub in ecc omc gstack superpowers archify; do
             subdir="upstream/$sub"
             [ -d "$subdir" ] && [ -n "$(ls -A "$subdir" 2>/dev/null)" ] || { echo "SKIP: $subdir not initialized"; continue; }
             case "$sub" in
@@ -64,6 +64,10 @@ jobs:
                 COUNT=$(find "$subdir/skills" -name '*.md' | wc -l)
                 [ "$COUNT" -ge 1 ] || (echo "FAIL: $sub has $COUNT skills" && exit 1)
                 echo "OK: $sub — $COUNT skills" ;;
+              archify)
+                test -f "$subdir/archify/SKILL.md" || (echo "FAIL: $sub missing archify/SKILL.md" && exit 1)
+                test -f "$subdir/archify/bin/archify.mjs" || (echo "FAIL: $sub missing archify/bin/archify.mjs" && exit 1)
+                echo "OK: $sub — skill directory present" ;;
             esac
           done
       - name: Lint YAML workflows
