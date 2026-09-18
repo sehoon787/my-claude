@@ -91,7 +91,7 @@
     "method": "uv-tool",
     "package": "headroom-ai[all]",
     "pinned_version": "0.37.0",
-    "note": "Tool-output compression over MCP (stdio: `headroom mcp serve`) exposing headroom_compress / headroom_retrieve / headroom_stats. The `headroom wrap` proxy mode is deliberately unused: it authenticates with an Anthropic API key, which an OAuth subscription login does not have.",
+    "note": "Tool-output compression over MCP (stdio: `headroom mcp serve`) exposing headroom_compress / headroom_retrieve / headroom_stats. Proxy mode (`headroom proxy` + ANTHROPIC_BASE_URL) also works on a subscription login but is a documented manual opt-in, never started by install.sh: Claude Code cannot connect while the proxy is down.",
     "license": "Apache-2.0"
   },
   "ast-grep": {
