@@ -107,6 +107,18 @@ Jesse Vincent's development-process skill library. my-claude installs 13 of its 
 
 Local-first AI token and cost tracker. Reads the session files Claude Code already writes (`~/.claude/projects/**/*.jsonl`) and breaks spend down by model, project, and task — no proxy, no API key, nothing leaves the machine. Installed as a companion CLI (`codeburn`, pinned in `install.sh`); the budget-guard hooks are opt-in via `bash install.sh --with-codeburn-guard` because they add a PreToolUse hook on every tool call. The dollar figures are estimates — token counts priced at API list rates; codeburn itself is free and bills nothing, so on a subscription plan they are a usage proxy. The guard's hard cap ($15/session by default) blocks every tool call in that session, including the `codeburn guard allow` that lifts it (run it from an external terminal), which is why it stays opt-in. Complements the OMC HUD: the HUD shows this session's context and quota, codeburn shows where money went across sessions.
 
+### 9. [Serena](https://github.com/oraios/serena)
+
+A coding-agent toolkit that exposes a language server's symbol graph over MCP. Instead of reading a whole file to change one function, agents call `find_symbol`, `get_symbols_overview`, `find_referencing_symbols`, `replace_symbol_body`, and `insert_after_symbol` — the tokens spent scale with the symbol, not the file. `install.sh` installs the pinned `serena-agent` CLI with uv and registers it as a user-scope stdio MCP server (`serena start-mcp-server --context claude-code --project-from-cwd`); no Serena code is vendored into this repository. A local dashboard at `http://localhost:24282/dashboard/index.html` shows logs and per-tool call counts, and per-project memories are written to `.serena/` in the repository being worked on. The installer turns off the dashboard's launch-time browser pop-up, so the tab only opens when you ask for it.
+
+### 10. [Headroom](https://github.com/headroomlabs-ai/headroom)
+
+A context-optimization layer for LLM applications. my-claude uses it in MCP mode only: `headroom mcp serve` exposes `headroom_compress`, `headroom_retrieve`, and `headroom_stats`, so a long tool result can be compressed before it enters the transcript and the original recovered on demand. Headroom's other mode — the `headroom wrap` / `headroom proxy` pair that routes all traffic through a local proxy — is deliberately **not** used: it authenticates with an Anthropic API key, which a subscription/OAuth login does not have. That is also why `headroom doctor` reports the proxy as unreachable on this stack; the MCP tools work without it.
+
+### 11. [Archify](https://github.com/tt-a1i/archify)
+
+An agent skill that draws architecture, workflow, sequence, data-flow, and lifecycle diagrams as self-contained HTML files — inline SVG, a dark/light theme toggle, and a built-in PNG/JPEG/WebP/SVG export menu, with no runtime dependencies in the generated file. It also accepts pasted Mermaid as an input dialect and lays the diagram out from scratch in archify style. Pinned as a submodule at tag `v2.9.0`; `install.sh` copies the upstream `archify/` skill directory to `~/.claude/skills/archify`, so no `npx skills add` runs at install time.
+
 ---
 
 ## How Boss Works
@@ -503,9 +515,23 @@ A second Stop hook, `stop-final-report.js`, enforces Boss's FINAL REPORT: when a
 
 ---
 
+## Where to See Results
+
+Every tool in this stack writes its output somewhere. This is where.
+
+| Tool | What It Does | How to Run | Where to Look |
+|------|--------------|-----------|---------------|
+| **codeburn** | Token and cost accounting across every past session | `codeburn` (interactive TUI) · `codeburn report --period week --format json` for a non-interactive dump | Reads `~/.claude/projects/**/*.jsonl` read-only. Dollar figures are **estimates**: token counts priced at API list rates, so on a subscription plan they are a usage proxy, not a bill. |
+| **Serena** | Symbol-level code navigation and editing | Starts automatically as an MCP server; call `get_symbols_overview` / `find_symbol` from any session | Dashboard at `http://localhost:24282/dashboard/index.html` while a server is running (logs + per-tool call counts). Per-project memories land in `.serena/` inside the repository you are working on; the global config is `~/.serena/serena_config.yml`. |
+| **Headroom** | Compresses oversized tool results before they enter the transcript | MCP tools `headroom_compress` / `headroom_retrieve` / `headroom_stats` · `headroom --version` to confirm the CLI | `headroom_stats` reports compression counts for the running server. `headroom doctor` and `headroom perf` describe the **proxy**, which this stack does not run — both reporting "not reachable" / "no performance data" is the expected state here. |
+| **Archify** | Architecture, workflow, sequence, data-flow, and lifecycle diagrams | Ask for a diagram and Boss routes to the `archify` skill. Manually, from `~/.claude/skills/archify`: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | The generated `out.html` — open it in any browser. It is self-contained (inline SVG, theme toggle, export menu) and has no runtime dependencies. Validate one with `node bin/archify.mjs check out.html`. |
+| **OMC HUD** | Live context, quota, and mode readout | Installed as the statusline by `install.sh`; `/oh-my-claudecode:hud` reconfigures it | The Claude Code statusline at the bottom of the session. Complements codeburn: the HUD is this session, codeburn is every session. |
+
+---
+
 ## Upstream Open-Source Sources
 
-my-claude links 4 MIT-licensed upstream repositories as git submodules, each pinned to an explicit SHA:
+my-claude links 5 MIT-licensed upstream repositories as git submodules, each pinned to an explicit SHA:
 
 | # | Source | What It Provides |
 |---|--------|-----------------|
@@ -513,6 +539,7 @@ my-claude links 4 MIT-licensed upstream repositories as git submodules, each pin
 | 2 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 19 specialist agents + 16 installed skills. Orchestration lane: autopilot, ralph, team. |
 | 3 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | 27 installed skills for ship, QA, deploy, and security review (Boss P0 lane). Includes Playwright browser daemon. |
 | 4 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 13 installed skills covering the dev-process lane: brainstorming, TDD, systematic debugging, plan writing. |
+| 5 | <img src="https://github.com/tt-a1i.png?size=32" width="20" height="20" align="center"/> **[archify](https://github.com/tt-a1i/archify)** — tt-a1i | 1 installed skill, pinned at tag `v2.9.0`. Architecture, workflow, sequence, data-flow, and lifecycle diagrams as self-contained HTML. |
 
 Not submodules, but part of the stack:
 
@@ -522,6 +549,18 @@ Not submodules, but part of the stack:
 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | Submodule removed 2026-07-27. 3 engineering agents vendored into `agents/vendored/` with attribution. |
 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | Installed by `install.sh` via `claude plugin add anthropics/skills` (pdf, docx, and friends). Not manifest-tracked. |
 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 AI coding behavioral guidelines appended to `~/.claude/CLAUDE.md`. |
+
+Companion CLIs and MCP servers `install.sh` brings in, each pinned to an exact version:
+
+| Source | How It Arrives |
+|--------|----------------|
+| <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0`, registered as the `serena` stdio MCP server. Symbol-level code navigation and editing. GPL-3.0 application, MIT SolidLSP; used as an external server, never vendored. |
+| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"`, registered as the `headroom` stdio MCP server (`headroom mcp serve`). Tool-output compression. Apache-2.0. Proxy/wrap mode is intentionally unused. |
+| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | `npm i -g codeburn@0.9.23`. Local-first token and cost tracking over the session files Claude Code already writes. |
+| <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`. Structural (AST-aware) code search and rewrite. |
+| <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | Hosted MCP server at `https://mcp.context7.com/mcp`. Up-to-date library documentation. |
+| <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | Hosted MCP server at `https://mcp.exa.ai/mcp`. Neural web search. |
+| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://grep.app/)** — grep.app | Hosted MCP server at `https://mcp.grep.app`. Code search across public GitHub repositories. |
 
 ---
 
@@ -567,6 +606,7 @@ Linked via git submodules. Pinned commits are tracked natively by `.gitmodules` 
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `590fb98` | 2026-07-27 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/590fb98...HEAD) |
 | [gstack](https://github.com/garrytan/gstack) | `7c9df1c` | 2026-07-27 | [compare](https://github.com/garrytan/gstack/compare/7c9df1c...HEAD) |
 | [superpowers](https://github.com/obra/superpowers) | `3dcbd5c` | 2026-07-27 | [compare](https://github.com/obra/superpowers/compare/3dcbd5c...HEAD) |
+| [archify](https://github.com/tt-a1i/archify) | `62904f3` (`v2.9.0`) | 2026-09-19 | [compare](https://github.com/tt-a1i/archify/compare/62904f3...HEAD) |
 
 ---
 
@@ -576,7 +616,7 @@ Issues and PRs are welcome. When adding a new agent, add a `.md` file to `agents
 
 ## Credits
 
-Built on the work of: [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) (Yeachan Heo), [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) (code-yeongyu), [everything-claude-code](https://github.com/affaan-m/everything-claude-code) (affaan-m), [gstack](https://github.com/garrytan/gstack) (garrytan), [superpowers](https://github.com/obra/superpowers) (Jesse Vincent), [agency-agents](https://github.com/msitarzewski/agency-agents) (msitarzewski — 3 vendored agents), [anthropic/skills](https://github.com/anthropics/skills) (Anthropic), [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) (forrestchang).
+Built on the work of: [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) (Yeachan Heo), [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) (code-yeongyu), [everything-claude-code](https://github.com/affaan-m/everything-claude-code) (affaan-m), [gstack](https://github.com/garrytan/gstack) (garrytan), [superpowers](https://github.com/obra/superpowers) (Jesse Vincent), [agency-agents](https://github.com/msitarzewski/agency-agents) (msitarzewski — 3 vendored agents), [anthropic/skills](https://github.com/anthropics/skills) (Anthropic), [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) (forrestchang), [serena](https://github.com/oraios/serena) (oraios), [headroom](https://github.com/headroomlabs-ai/headroom) (Headroom Labs), [archify](https://github.com/tt-a1i/archify) (tt-a1i), [codeburn](https://github.com/getagentseal/codeburn) (getagentseal).
 
 ## License
 

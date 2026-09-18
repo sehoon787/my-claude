@@ -431,7 +431,7 @@ BriefingVault v2 は 3 つの知識管理手法を統合しています：
 
 ## アップストリームのオープンソースソース
 
-my-claude は 4 つの MIT ライセンスのアップストリームリポジトリを git サブモジュールとしてリンクし、それぞれ明示的な SHA に固定しています:
+my-claude は 5 つの MIT ライセンスのアップストリームリポジトリを git サブモジュールとしてリンクし、それぞれ明示的な SHA に固定しています:
 
 | # | ソース | 提供内容 |
 |---|--------|-----------------|
@@ -439,6 +439,7 @@ my-claude は 4 つの MIT ライセンスのアップストリームリポジ�
 | 2 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 19 のスペシャリストエージェント + インストールされる 16 スキル。オーケストレーションのレーン: autopilot、ralph、team。 |
 | 3 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | リリース・QA・デプロイ・セキュリティレビュー（Boss P0 レーン）向けにインストールされる 27 スキル。Playwright ブラウザデーモンを含む。 |
 | 4 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 開発プロセスのレーン向けにインストールされる 13 スキル: ブレインストーミング、TDD、体系的デバッグ、計画作成。 |
+| 5 | <img src="https://github.com/tt-a1i.png?size=32" width="20" height="20" align="center"/> **[archify](https://github.com/tt-a1i/archify)** — tt-a1i | インストールされる 1 スキル、タグ `v2.9.0` に固定。アーキテクチャ・ワークフロー・シーケンス・データフロー・ライフサイクルの図を自己完結型 HTML として生成。 |
 
 サブモジュールではないが、スタックの一部:
 
@@ -448,7 +449,18 @@ my-claude は 4 つの MIT ライセンスのアップストリームリポジ�
 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 2026-07-27 にサブモジュールを削除。エンジニアリングエージェント 3 個を帰属表示付きで `agents/vendored/` に vendored。 |
 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | `install.sh` が `claude plugin add anthropics/skills` でインストール（pdf、docx など）。マニフェスト追跡の対象外。 |
 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 つの AI コーディング行動ガイドラインを `~/.claude/CLAUDE.md` に追記。 |
-| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | npm CLI (MIT)。ローカルファーストのトークン/コストトラッカー — Claude Code が既に書き出すセッションファイルを読み取り専用で解析し、モデル・プロジェクト・タスク別にコストを集計します。プロキシ・API キー・アップロード不要。`install.sh` が `codeburn@0.9.23` に固定してインストールし、`upstream/SOURCES.json` に `method: npm-cli` として登録。予算ガードフックは `--with-codeburn-guard` でオプトイン。表示されるドル金額はトークン数を API 定価で換算した推定値で、codeburn 自体は無料で何も課金しません（サブスクリプションでは使用量の目安）。ガードの hard cap（既定 $15/セッション）は解除コマンド `codeburn guard allow` を含むそのセッションの全ツール呼び出しをブロックするため（外部ターミナルから実行）、オプトインのままにしています。OMC HUD（現在のセッションのコンテキストとクォータ）を補完し、セッション横断のコストの行き先を示します。 |
+
+`install.sh` が一緒に導入するコンパニオン CLI と MCP サーバー。それぞれ正確なバージョンに固定されています:
+
+| ソース | 取り込み方法 |
+|--------|----------------|
+| <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0` でインストールし、`serena` stdio MCP サーバーとして登録。シンボル単位のコードナビゲーションと編集。アプリケーションは GPL-3.0、SolidLSP は MIT。外部サーバーとして利用し、vendored はしません。 |
+| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"` でインストールし、`headroom` stdio MCP サーバー（`headroom mcp serve`）として登録。ツール出力の圧縮。Apache-2.0。プロキシ/wrap モードは意図的に未使用。 |
+| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | `npm i -g codeburn@0.9.23`。Claude Code が既に書き出すセッションファイルを対象としたローカルファーストのトークン/コスト追跡。 |
+| <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`。構造的（AST を理解する）コード検索と書き換え。 |
+| <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | `https://mcp.context7.com/mcp` のホスト型 MCP サーバー。最新のライブラリドキュメント。 |
+| <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | `https://mcp.exa.ai/mcp` のホスト型 MCP サーバー。ニューラルウェブ検索。 |
+| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://grep.app/)** — grep.app | `https://mcp.grep.app` のホスト型 MCP サーバー。パブリック GitHub リポジトリ横断のコード検索。 |
 
 ---
 

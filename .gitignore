@@ -1,5 +1,7 @@
 .omc/
 .briefing/
+# Serena writes per-project config and memories here (see install.sh step [5e]).
+.serena/
 node_modules/
 PROMOTION.md
 

@@ -11,6 +11,16 @@
     "grep_app": {
       "type": "url",
       "url": "https://mcp.grep.app"
+    },
+    "serena": {
+      "type": "stdio",
+      "command": "serena",
+      "args": ["start-mcp-server", "--context", "claude-code", "--project-from-cwd"]
+    },
+    "headroom": {
+      "type": "stdio",
+      "command": "headroom",
+      "args": ["mcp", "serve"]
     }
   }
 }

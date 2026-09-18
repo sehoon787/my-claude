@@ -35,6 +35,7 @@ SKIP_ECC=0
 SKIP_OMC=0
 SKIP_GSTACK=0
 SKIP_SUPERPOWERS=0
+SKIP_ARCHIFY=0
 # Optional skill lanes (see scripts/skill-allowlists.sh). Empty = default install.
 # Precedence: CLI flag > MY_CLAUDE_SKILLS env > ~/.claude/.my-claude-skills.
 SKILL_LANES=""
@@ -45,7 +46,8 @@ for arg in "$@"; do
     --skip-omc)        SKIP_OMC=1 ;;
     --skip-gstack)     SKIP_GSTACK=1 ;;
     --skip-superpowers) SKIP_SUPERPOWERS=1 ;;
-    --self-only)       SKIP_ECC=1; SKIP_OMC=1; SKIP_GSTACK=1; SKIP_SUPERPOWERS=1 ;;
+    --skip-archify)    SKIP_ARCHIFY=1 ;;
+    --self-only)       SKIP_ECC=1; SKIP_OMC=1; SKIP_GSTACK=1; SKIP_SUPERPOWERS=1; SKIP_ARCHIFY=1 ;;
     --skills=*)        SKILL_LANES="${arg#--skills=}"; SKILL_LANES_SET=1 ;;
     --full-skills)     SKILL_LANES="$ECC_SKILL_OPTIONAL_LANES"; SKILL_LANES_SET=1 ;;
     --with-codeburn-guard) WITH_CODEBURN_GUARD=1 ;;
@@ -59,6 +61,7 @@ Options:
   --skip-omc              Skip oh-my-claudecode upstream install
   --skip-gstack           Skip gstack upstream install
   --skip-superpowers      Skip superpowers upstream install
+  --skip-archify          Skip the archify diagram skill install
   --self-only             Install only self-owned files (implies all --skip-* flags)
   --skills=<lane[,lane]>  Also install optional skill lanes (available: web)
   --full-skills           Install every optional skill lane
@@ -489,6 +492,28 @@ if [ "$SKIP_SUPERPOWERS" = "0" ]; then
   fi
 fi
 
+# ── 1g. archify upstream (one skill directory) ──
+if [ "$SKIP_ARCHIFY" = "0" ]; then
+  echo "  [archify] Installing archify skill..."
+  if init_upstream "archify" "https://github.com/tt-a1i/archify"; then
+    src="$UPSTREAM_DIR/$ARCHIFY_SKILL_SRC_DIR"
+    target="$HOME/.claude/skills/$ARCHIFY_SKILL_NAME"
+    if [ -d "$src" ]; then
+      # Pre-clean: resolve file/symlink vs directory conflicts
+      if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
+        rm -f "$target"
+      fi
+      mkdir -p "$target"
+      cp -r "$src/." "$target/" 2>/dev/null || true
+      manifest_dir "skills/$ARCHIFY_SKILL_NAME"
+    else
+      echo "  WARNING: archify skill directory not found at $src"
+    fi
+  else
+    echo "  WARNING: archify install failed"
+  fi
+fi
+
 # Dedup: remove agents/skills that duplicate OMC plugin-provided content
 if [ -d "$HOME/.claude/plugins/cache/omc/oh-my-claudecode" ]; then
   _omc_has_version=0
@@ -544,6 +569,9 @@ claude mcp add-from-claude-json "$SCRIPT_DIR/.mcp.json" 2>/dev/null || {
   claude mcp add context7  --transport http --scope user "https://mcp.context7.com/mcp" 2>/dev/null || true
   claude mcp add exa       --transport http --scope user "https://mcp.exa.ai/mcp?tools=web_search_exa" 2>/dev/null || true
   claude mcp add grep_app  --transport http --scope user "https://mcp.grep.app" 2>/dev/null || true
+  # stdio servers — the CLIs are installed by step [5e] below.
+  claude mcp add --scope user serena   -- serena start-mcp-server --context claude-code --project-from-cwd 2>/dev/null || true
+  claude mcp add --scope user headroom -- headroom mcp serve 2>/dev/null || true
 }
 echo "  MCP servers registered"
 
@@ -688,6 +716,70 @@ else
   fi
 fi
 
+# 5e. uv + MCP tool CLIs (serena, headroom)
+# Both MCP servers registered in step [3] are stdio servers that run a local
+# Python CLI, so the harness has to bring its own uv and install them itself —
+# a clone of this repo plus `bash install.sh` is the whole prerequisite list.
+# Every command here is non-fatal: a missing CLI disables one MCP server, it
+# does not break the install.
+echo "  [5e] uv + MCP tool CLIs (serena, headroom)..."
+if ! command -v uv >/dev/null 2>&1; then
+  echo "    uv not found, installing via the official installer..."
+  curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1 || echo "    WARNING: uv install failed"
+fi
+# The uv installer drops uv and every `uv tool` shim in ~/.local/bin, which is
+# not on PATH in a non-login shell. Prepend it for the rest of this script.
+case ":$PATH:" in
+  *":$HOME/.local/bin:"*) ;;
+  *) PATH="$HOME/.local/bin:$PATH"; export PATH ;;
+esac
+
+if command -v uv >/dev/null 2>&1; then
+  _UV_TOOLS="$(uv tool list 2>/dev/null || echo "")"
+  # serena-agent — symbol-level code navigation and editing (LSP-backed).
+  case "$_UV_TOOLS" in
+    *"serena-agent v1.7.0"*) echo "    serena-agent 1.7.0 already installed" ;;
+    *) uv tool install -p 3.13 serena-agent==1.7.0 >/dev/null 2>&1 \
+         && echo "    serena-agent 1.7.0 installed" \
+         || echo "    WARNING: serena-agent install failed" ;;
+  esac
+  # headroom-ai — tool-output compression exposed over MCP. The `headroom wrap`
+  # proxy is deliberately NOT used: it authenticates with an Anthropic API key,
+  # which a subscription/OAuth login does not have. MCP mode needs no key.
+  case "$_UV_TOOLS" in
+    *"headroom-ai v0.37.0"*) echo "    headroom-ai 0.37.0 already installed" ;;
+    *) uv tool install --python 3.13 "headroom-ai[all]==0.37.0" >/dev/null 2>&1 \
+         && echo "    headroom-ai 0.37.0 installed" \
+         || echo "    WARNING: headroom-ai install failed" ;;
+  esac
+
+  # Serena keeps a global config; create it once and turn off the launch-time
+  # browser pop-up, which would otherwise open a dashboard tab on every MCP
+  # server start. Only written when this run creates the file, so a config the
+  # user has already tuned is never rewritten.
+  SERENA_CONFIG="$HOME/.serena/serena_config.yml"
+  if command -v serena >/dev/null 2>&1 && [ ! -f "$SERENA_CONFIG" ]; then
+    serena init >/dev/null 2>&1 || true
+    if [ -f "$SERENA_CONFIG" ]; then
+      # `serena config` only offers an interactive `edit`, so patch the key.
+      sed -i.bak 's/^web_dashboard_open_on_launch: true$/web_dashboard_open_on_launch: false/' "$SERENA_CONFIG" \
+        && rm -f "$SERENA_CONFIG.bak"
+      echo "    serena config created (dashboard auto-open off)"
+    fi
+  fi
+
+  # `uv tool` shims live in ~/.local/bin. Claude Code launches the stdio MCP
+  # servers by bare command name, so that directory has to be on the PATH the
+  # editor inherits. This script prepended it for itself above; tell the user
+  # how to make it permanent rather than editing their shell profile for them.
+  for _cli in serena headroom; do
+    command -v "$_cli" >/dev/null 2>&1 \
+      || echo "    WARNING: $_cli not on PATH — run 'uv tool update-shell' so its MCP server can start"
+  done
+else
+  echo "    WARNING: uv unavailable — serena and headroom MCP servers will not start"
+fi
+
 # Write the manifest from provenance-tracked entries (MANIFEST_TMP), not from
 # scanning $HOME/.claude directories. A directory scan would also pick up
 # user-owned files that happen to sit in the same folders (a custom agent
@@ -715,6 +807,10 @@ echo "  omc:              $(command -v omc            >/dev/null 2>&1 && echo 'O
 echo "  omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  ast-grep:         $(command -v ast-grep       >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  codeburn:         $(command -v codeburn       >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
+echo "  uv:               $(command -v uv >/dev/null 2>&1 && echo "OK ($(uv --version 2>/dev/null))" || echo 'MISSING')"
+echo "  serena (MCP):     $(command -v serena   >/dev/null 2>&1 && echo "OK ($(serena --version 2>/dev/null))" || echo 'MISSING')"
+echo "  headroom (MCP):   $(command -v headroom >/dev/null 2>&1 && echo "OK ($(headroom --version 2>/dev/null))" || echo 'MISSING')"
+echo "  archify (skill):  $(test -f "$HOME/.claude/skills/archify/SKILL.md" && echo 'OK' || echo 'MISSING')"
 echo "  tmux:             $(command -v tmux >/dev/null 2>&1 && echo "OK ($(tmux -V))" || echo 'NOT INSTALLED (optional)')"
 echo "  hud:              $(test -f "$HOME/.claude/hud/omc-hud.mjs" && echo 'OK' || echo 'MISSING')"
 TEAMMATE_MODE=$(node -e "try{const h=process.env.HOME||process.env.USERPROFILE;console.log(JSON.parse(require('fs').readFileSync(h+'/.claude/settings.json','utf8')).teammateMode||'in-process (default)')}catch(e){console.log('auto')}")

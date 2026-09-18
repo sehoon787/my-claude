@@ -47,10 +47,22 @@ if (settings.teammateMode === 'tmux' && process.env.MY_CLAUDE_TEAMMATE_MODE !== 
   settings.teammateMode = 'in-process';
   console.log('  teammateMode: tmux -> in-process (set MY_CLAUDE_TEAMMATE_MODE=tmux to keep tmux)');
 }
+// Kept byte-for-byte in step with .mcp.json — install.sh registers from that
+// file first and only falls back to `claude mcp add`, so a server that exists
+// in one place and not the other silently disappears on one of the two paths.
+// serena and headroom are stdio servers whose CLIs step [5e] of install.sh
+// installs with uv; headroom runs in MCP mode only (the `headroom wrap` proxy
+// needs an Anthropic API key, which an OAuth subscription login does not have).
 settings.mcpServers = Object.assign({}, settings.mcpServers, {
   context7: { type: 'url', url: 'https://mcp.context7.com/mcp' },
   exa: { type: 'url', url: 'https://mcp.exa.ai/mcp?tools=web_search_exa' },
-  grep_app: { type: 'url', url: 'https://mcp.grep.app' }
+  grep_app: { type: 'url', url: 'https://mcp.grep.app' },
+  serena: {
+    type: 'stdio',
+    command: 'serena',
+    args: ['start-mcp-server', '--context', 'claude-code', '--project-from-cwd']
+  },
+  headroom: { type: 'stdio', command: 'headroom', args: ['mcp', 'serve'] }
 });
 
 // HUD statusLine (only add if not already configured)
