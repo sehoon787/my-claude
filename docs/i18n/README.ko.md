@@ -274,7 +274,7 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 | **LSP 서버** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
 | **네임드 워크플로** | 2 | code-review-fanout, upstream-audit |
 | **업스트림 서브모듈** | 4 | ecc, omc, gstack, superpowers |
-| **CLI 도구** | 5 | omc, omo, ast-grep, comment-checker, codeburn |
+| **CLI 도구** | 7 | omc, omo, ast-grep, comment-checker, codeburn, serena, headroom |
 
 위의 에이전트·스킬·룰은 모두 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh)의 허용목록에 등재되어 설치 매니페스트로 추적됩니다. Anthropic 공식 문서 스킬(pdf, docx 등)은 `claude plugin add anthropics/skills`로 별도 설치되며 의도적으로 매니페스트에서 제외됩니다.
 
@@ -495,7 +495,7 @@ my-claude는 MIT 라이선스 업스트림 저장소 5개를 git 서브모듈로
 |--------|----------------|
 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0`으로 설치하고 `serena` stdio MCP 서버로 등록. 심볼 단위 코드 탐색·편집. 애플리케이션은 GPL-3.0, SolidLSP는 MIT이며, 외부 서버로만 사용하고 벤더링하지 않습니다. |
 | <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"`으로 설치하고 `headroom` stdio MCP 서버(`headroom mcp serve`)로 등록. 툴 출력 압축. Apache-2.0. 프록시/wrap 모드는 의도적으로 사용하지 않습니다. |
-| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | `npm i -g codeburn@0.9.23`. Claude Code가 이미 기록하는 세션 파일을 기반으로 한 로컬 우선 토큰·비용 추적. |
+| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | npm CLI (MIT). 로컬 우선 토큰/비용 추적기 — Claude Code가 이미 기록하는 세션 파일을 읽기 전용으로 파싱해 모델·프로젝트·작업별 비용을 집계합니다. 프록시·API 키·업로드 없음. `install.sh`가 `codeburn@0.9.23`으로 고정 설치하며 `upstream/SOURCES.json`에 `method: npm-cli`로 등재. 예산 가드 훅은 `--with-codeburn-guard`로 opt-in. 표시되는 달러 금액은 토큰 수를 API 정가로 환산한 추정치이며 codeburn 자체는 무료로 아무것도 청구하지 않습니다(구독 플랜에서는 사용량 지표). 가드의 hard cap(기본 $15/세션)은 해제 명령 `codeburn guard allow`를 포함한 그 세션의 모든 툴 호출을 차단하므로(외부 터미널에서 실행) opt-in으로 둡니다. OMC HUD(현재 세션의 컨텍스트·한도)를 보완해 세션 전체의 비용 흐름을 보여줍니다. |
 | <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`. 구조적(AST 인식) 코드 검색 및 치환. |
 | <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | `https://mcp.context7.com/mcp`의 호스팅 MCP 서버. 최신 라이브러리 문서. |
 | <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | `https://mcp.exa.ai/mcp`의 호스팅 MCP 서버. 뉴럴 웹 검색. |

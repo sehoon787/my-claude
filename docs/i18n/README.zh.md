@@ -235,7 +235,7 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 | **LSP 服务器** | 2 | typescript（`typescript-language-server`）、python（`pyright-langserver`） |
 | **具名工作流** | 2 | code-review-fanout、upstream-audit |
 | **上游子模块** | 4 | ecc、omc、gstack、superpowers |
-| **CLI 工具** | 5 | omc、omo、ast-grep、comment-checker、codeburn |
+| **CLI 工具** | 7 | omc、omo、ast-grep、comment-checker、codeburn、serena、headroom |
 
 以上 Agent、Skills、规则全部登记在 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) 的白名单中，并由安装清单跟踪。Anthropic 官方文档 Skills（pdf、docx 等）通过 `claude plugin add anthropics/skills` 单独安装，有意不纳入清单跟踪。
 
@@ -457,7 +457,7 @@ my-claude 以 git 子模块方式关联 5 个 MIT 授权的上游仓库，每个
 |--------|----------------|
 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0` 安装，并注册为 `serena` stdio MCP 服务器。符号级代码导航与编辑。应用为 GPL-3.0，SolidLSP 为 MIT；仅作为外部服务器使用，不 vendored。 |
 | <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"` 安装，并注册为 `headroom` stdio MCP 服务器（`headroom mcp serve`）。工具输出压缩。Apache-2.0。代理/wrap 模式刻意不启用。 |
-| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | `npm i -g codeburn@0.9.23`。基于 Claude Code 已写出的会话文件的本地优先 token/成本追踪。 |
+| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | npm CLI (MIT)。本地优先的 token/成本追踪器 — 只读解析 Claude Code 已写出的会话文件，按模型、项目、任务汇总花费。无代理、无 API 密钥、不上传。由 `install.sh` 以 `codeburn@0.9.23` 固定版本安装，并在 `upstream/SOURCES.json` 中以 `method: npm-cli` 登记。预算守卫钩子通过 `--with-codeburn-guard` 选择启用。显示的美元金额是按 API 标价折算 token 数的估算值，codeburn 本身免费且不收取任何费用（订阅计划下仅作用量参考）。守卫的 hard cap（默认 $15/会话）会阻断该会话的所有工具调用，包括解除命令 `codeburn guard allow`（需在外部终端运行），因此保持为可选。与 OMC HUD（当前会话的上下文与配额）互补，展示跨会话的花费去向。 |
 | <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`。结构化（AST 感知）代码搜索与重写。 |
 | <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | 位于 `https://mcp.context7.com/mcp` 的托管 MCP 服务器。最新的库文档。 |
 | <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | 位于 `https://mcp.exa.ai/mcp` 的托管 MCP 服务器。神经网络网页搜索。 |

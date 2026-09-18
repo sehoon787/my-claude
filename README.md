@@ -294,7 +294,7 @@ Deterministic multi-agent workflows. `install.sh` copies them to `~/.claude/work
 | **LSP Servers** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
 | **Named Workflows** | 2 | code-review-fanout, upstream-audit |
 | **Upstream submodules** | 4 | ecc, omc, gstack, superpowers |
-| **CLI Tools** | 5 | omc, omo, ast-grep, comment-checker, codeburn |
+| **CLI Tools** | 7 | omc, omo, ast-grep, comment-checker, codeburn, serena, headroom |
 
 Every agent, skill, and rule above is allowlisted in [`scripts/skill-allowlists.sh`](./scripts/skill-allowlists.sh) and tracked in the install manifest. Anthropic's official document skills (pdf, docx, …) are added separately via `claude plugin add anthropics/skills` and are deliberately not manifest-tracked.
 

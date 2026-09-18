@@ -235,7 +235,7 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 | **LSP サーバー** | 2 | typescript（`typescript-language-server`）、python（`pyright-langserver`） |
 | **名前付きワークフロー** | 2 | code-review-fanout、upstream-audit |
 | **アップストリームサブモジュール** | 4 | ecc、omc、gstack、superpowers |
-| **CLI ツール** | 5 | omc、omo、ast-grep、comment-checker、codeburn |
+| **CLI ツール** | 7 | omc、omo、ast-grep、comment-checker、codeburn、serena、headroom |
 
 上記のエージェント・スキル・ルールはすべて [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) の許可リストに登録され、インストールマニフェストで追跡されます。Anthropic 公式のドキュメントスキル（pdf、docx など）は `claude plugin add anthropics/skills` で別途インストールされ、意図的にマニフェスト追跡の対象外です。
 
@@ -456,7 +456,7 @@ my-claude は 5 つの MIT ライセンスのアップストリームリポジ�
 |--------|----------------|
 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0` でインストールし、`serena` stdio MCP サーバーとして登録。シンボル単位のコードナビゲーションと編集。アプリケーションは GPL-3.0、SolidLSP は MIT。外部サーバーとして利用し、vendored はしません。 |
 | <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"` でインストールし、`headroom` stdio MCP サーバー（`headroom mcp serve`）として登録。ツール出力の圧縮。Apache-2.0。プロキシ/wrap モードは意図的に未使用。 |
-| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | `npm i -g codeburn@0.9.23`。Claude Code が既に書き出すセッションファイルを対象としたローカルファーストのトークン/コスト追跡。 |
+| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | npm CLI (MIT)。ローカルファーストのトークン/コストトラッカー — Claude Code が既に書き出すセッションファイルを読み取り専用で解析し、モデル・プロジェクト・タスク別にコストを集計します。プロキシ・API キー・アップロード不要。`install.sh` が `codeburn@0.9.23` に固定してインストールし、`upstream/SOURCES.json` に `method: npm-cli` として登録。予算ガードフックは `--with-codeburn-guard` でオプトイン。表示されるドル金額はトークン数を API 定価で換算した推定値で、codeburn 自体は無料で何も課金しません（サブスクリプションでは使用量の目安）。ガードの hard cap（既定 $15/セッション）は解除コマンド `codeburn guard allow` を含むそのセッションの全ツール呼び出しをブロックするため（外部ターミナルから実行）、オプトインのままにしています。OMC HUD（現在のセッションのコンテキストとクォータ）を補完し、セッション横断のコストの行き先を示します。 |
 | <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`。構造的（AST を理解する）コード検索と書き換え。 |
 | <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | `https://mcp.context7.com/mcp` のホスト型 MCP サーバー。最新のライブラリドキュメント。 |
 | <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | `https://mcp.exa.ai/mcp` のホスト型 MCP サーバー。ニューラルウェブ検索。 |
