@@ -47,9 +47,10 @@ if (settings.teammateMode === 'tmux' && process.env.MY_CLAUDE_TEAMMATE_MODE !== 
   settings.teammateMode = 'in-process';
   console.log('  teammateMode: tmux -> in-process (set MY_CLAUDE_TEAMMATE_MODE=tmux to keep tmux)');
 }
-// Kept byte-for-byte in step with .mcp.json — install.sh registers from that
-// file first and only falls back to `claude mcp add`, so a server that exists
-// in one place and not the other silently disappears on one of the two paths.
+// Kept byte-for-byte in step with .mcp.json and with the `claude mcp add`
+// calls in install.sh step [3]. Those three are independent registrations of
+// the same set — there is no bulk import from .mcp.json — so a server that
+// exists in one place and not the others silently disappears on that path.
 // serena and headroom are stdio servers whose CLIs step [5e] of install.sh
 // installs with uv. headroom is wired up in MCP mode only; its proxy mode is a
 // documented manual opt-in, because Claude Code cannot connect while the proxy
@@ -61,7 +62,16 @@ settings.mcpServers = Object.assign({}, settings.mcpServers, {
   serena: {
     type: 'stdio',
     command: 'serena',
-    args: ['start-mcp-server', '--context', 'claude-code', '--project-from-cwd']
+    args: [
+      'start-mcp-server',
+      '--context',
+      'claude-code',
+      '--project-from-cwd',
+      // Claude Code spawns this server; a dashboard tab opening on every
+      // session start is noise. The dashboard itself keeps running.
+      '--open-web-dashboard',
+      'False'
+    ]
   },
   headroom: { type: 'stdio', command: 'headroom', args: ['mcp', 'serve'] }
 });

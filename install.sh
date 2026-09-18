@@ -168,6 +168,10 @@ MANIFEST_TMP="$CLONE_TMPDIR/new-manifest.txt"
 # unmanaged: the manifest-diff cleanup below deleted the SKILL.md and left the
 # rest behind as husk directories on every update. Paths are emitted relative
 # to $HOME/.claude with forward slashes — the exact format the cleanup reads.
+# It enumerates the destination subtree immediately after the copy, which only
+# stays equivalent to the source while nothing else writes into that directory.
+# A skill the agent runs `npm install` inside (archify) manifests from its
+# source tree instead, so runtime files there stay user-owned.
 manifest_dir() {
   local rel="$1"
   [ -d "$HOME/.claude/$rel" ] || return 0
@@ -176,7 +180,7 @@ manifest_dir() {
 
 UPSTREAM_DIR=""
 init_upstream() {
-  local name="$1" url="$2"
+  local name="$1" url="$2" pinned_ref="${3:-}"
   local submod_path="$SCRIPT_DIR/upstream/$name"
   if [ -d "$submod_path/.git" ] || [ -f "$submod_path/.git" ]; then
     # Use the checked-out (pinned) submodule SHA as-is. Upstream updates land
@@ -191,7 +195,13 @@ init_upstream() {
   fi
   echo "  WARNING: submodule init failed for $name, falling back to git clone..."
   UPSTREAM_DIR="$CLONE_TMPDIR/$name"
-  git clone --depth 1 "$url" "$UPSTREAM_DIR" 2>/dev/null || return 1
+  # A tag-pinned upstream keeps its pin on this path too: cloning the default
+  # branch here would quietly install a different release than the submodule.
+  if [ -n "$pinned_ref" ]; then
+    git clone --depth 1 --branch "$pinned_ref" "$url" "$UPSTREAM_DIR" 2>/dev/null || return 1
+  else
+    git clone --depth 1 "$url" "$UPSTREAM_DIR" 2>/dev/null || return 1
+  fi
 }
 
 # ── 1. Plugin files (agents, skills, rules) ──
@@ -495,7 +505,7 @@ fi
 # ── 1g. archify upstream (one skill directory) ──
 if [ "$SKIP_ARCHIFY" = "0" ]; then
   echo "  [archify] Installing archify skill..."
-  if init_upstream "archify" "https://github.com/tt-a1i/archify"; then
+  if init_upstream "archify" "https://github.com/tt-a1i/archify" "$ARCHIFY_PINNED_TAG"; then
     src="$UPSTREAM_DIR/$ARCHIFY_SKILL_SRC_DIR"
     target="$HOME/.claude/skills/$ARCHIFY_SKILL_NAME"
     if [ -d "$src" ]; then
@@ -505,7 +515,15 @@ if [ "$SKIP_ARCHIFY" = "0" ]; then
       fi
       mkdir -p "$target"
       cp -r "$src/." "$target/" 2>/dev/null || true
-      manifest_dir "skills/$ARCHIFY_SKILL_NAME"
+      # Manifest from the SOURCE tree, not manifest_dir on the destination:
+      # archify's SKILL.md tells the agent to run `npm install` inside the
+      # installed skill, so the destination also holds node_modules/ and
+      # rendered diagrams. Those runtime files are user-owned — never
+      # manifest-owned, so the cleanup above never deletes them.
+      # `|| true` for the same reason manifest_dir carries one: a find that
+      # trips on an unreadable path must not abort the install under `set -e`.
+      ( cd "$src" && find . -type f ) \
+        | sed "s|^\./|skills/$ARCHIFY_SKILL_NAME/|" >> "$MANIFEST_TMP" || true
     else
       echo "  WARNING: archify skill directory not found at $src"
     fi
@@ -564,15 +582,18 @@ echo "  Hooks installed"
 
 # ── 3. MCP servers ──
 echo "[3/6] Registering MCP servers..."
-claude mcp add-from-claude-json "$SCRIPT_DIR/.mcp.json" 2>/dev/null || {
-  # Fallback: register individually if bulk add unavailable
-  claude mcp add context7  --transport http --scope user "https://mcp.context7.com/mcp" 2>/dev/null || true
-  claude mcp add exa       --transport http --scope user "https://mcp.exa.ai/mcp?tools=web_search_exa" 2>/dev/null || true
-  claude mcp add grep_app  --transport http --scope user "https://mcp.grep.app" 2>/dev/null || true
-  # stdio servers — the CLIs are installed by step [5e] below.
-  claude mcp add --scope user serena   -- serena start-mcp-server --context claude-code --project-from-cwd 2>/dev/null || true
-  claude mcp add --scope user headroom -- headroom mcp serve 2>/dev/null || true
-}
+# One `claude mcp add` per server. There is no bulk "import this .mcp.json"
+# subcommand in Claude Code, so these calls are the registration, not a
+# fallback. .mcp.json stays as the project-scope declaration of the same set;
+# scripts/merge-settings.js writes the user-scope copy into settings.json.
+claude mcp add context7  --transport http --scope user "https://mcp.context7.com/mcp" 2>/dev/null || true
+claude mcp add exa       --transport http --scope user "https://mcp.exa.ai/mcp?tools=web_search_exa" 2>/dev/null || true
+claude mcp add grep_app  --transport http --scope user "https://mcp.grep.app" 2>/dev/null || true
+# stdio servers — the CLIs are installed by step [5e] below.
+# --open-web-dashboard False: Claude Code spawns this server, so a browser tab
+# popping open on every session start is noise; the dashboard still runs.
+claude mcp add --scope user serena   -- serena start-mcp-server --context claude-code --project-from-cwd --open-web-dashboard False 2>/dev/null || true
+claude mcp add --scope user headroom -- headroom mcp serve 2>/dev/null || true
 echo "  MCP servers registered"
 
 # ── 4. Merge settings.json ──
@@ -756,9 +777,11 @@ if command -v uv >/dev/null 2>&1; then
   esac
 
   # Serena keeps a global config; create it once and turn off the launch-time
-  # browser pop-up, which would otherwise open a dashboard tab on every MCP
-  # server start. Only written when this run creates the file, so a config the
-  # user has already tuned is never rewritten.
+  # browser pop-up there too. The registered server passes
+  # `--open-web-dashboard False`, which overrides this setting, so the config
+  # write is belt-and-braces for servers started by hand. Only written when
+  # this run creates the file, so a config the user has tuned is never
+  # rewritten.
   SERENA_CONFIG="$HOME/.serena/serena_config.yml"
   if command -v serena >/dev/null 2>&1 && [ ! -f "$SERENA_CONFIG" ]; then
     serena init >/dev/null 2>&1 || true
@@ -766,7 +789,14 @@ if command -v uv >/dev/null 2>&1; then
       # `serena config` only offers an interactive `edit`, so patch the key.
       sed -i.bak 's/^web_dashboard_open_on_launch: true$/web_dashboard_open_on_launch: false/' "$SERENA_CONFIG" \
         && rm -f "$SERENA_CONFIG.bak"
-      echo "    serena config created (dashboard auto-open off)"
+      # Report what actually landed: a future serena release that renames or
+      # drops the key would leave the sed a no-op, and claiming success then
+      # hides it.
+      if grep -q '^web_dashboard_open_on_launch: false$' "$SERENA_CONFIG"; then
+        echo "    serena config created (dashboard auto-open off)"
+      else
+        echo "    serena config created, but web_dashboard_open_on_launch not found — the MCP server still passes --open-web-dashboard False"
+      fi
     fi
   fi
 
