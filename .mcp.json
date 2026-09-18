@@ -1,15 +1,15 @@
 {
   "mcpServers": {
     "context7": {
-      "type": "url",
+      "type": "http",
       "url": "https://mcp.context7.com/mcp"
     },
     "exa": {
-      "type": "url",
+      "type": "http",
       "url": "https://mcp.exa.ai/mcp?tools=web_search_exa"
     },
     "grep_app": {
-      "type": "url",
+      "type": "http",
       "url": "https://mcp.grep.app"
     },
     "serena": {

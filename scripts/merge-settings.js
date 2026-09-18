@@ -55,9 +55,9 @@ if (settings.teammateMode === 'tmux' && process.env.MY_CLAUDE_TEAMMATE_MODE !== 
 // documented manual opt-in, because Claude Code cannot connect while the proxy
 // is down.
 settings.mcpServers = Object.assign({}, settings.mcpServers, {
-  context7: { type: 'url', url: 'https://mcp.context7.com/mcp' },
-  exa: { type: 'url', url: 'https://mcp.exa.ai/mcp?tools=web_search_exa' },
-  grep_app: { type: 'url', url: 'https://mcp.grep.app' },
+  context7: { type: 'http', url: 'https://mcp.context7.com/mcp' },
+  exa: { type: 'http', url: 'https://mcp.exa.ai/mcp?tools=web_search_exa' },
+  grep_app: { type: 'http', url: 'https://mcp.grep.app' },
   serena: {
     type: 'stdio',
     command: 'serena',
