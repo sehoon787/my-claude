@@ -592,7 +592,13 @@ claude mcp add grep_app  --transport http --scope user "https://mcp.grep.app" 2>
 # stdio servers — the CLIs are installed by step [5e] below.
 # --open-web-dashboard False: Claude Code spawns this server, so a browser tab
 # popping open on every session start is noise; the dashboard still runs.
+# `claude mcp add` is not an upsert: if the name already exists it errors and
+# the 2>/dev/null||true below swallows that, so a changed argument list never
+# reaches an already-installed machine. This harness owns these two
+# registrations, so remove any existing one first and re-add with current args.
+claude mcp remove serena -s user 2>/dev/null || true
 claude mcp add --scope user serena   -- serena start-mcp-server --context claude-code --project-from-cwd --open-web-dashboard False 2>/dev/null || true
+claude mcp remove headroom -s user 2>/dev/null || true
 claude mcp add --scope user headroom -- headroom mcp serve 2>/dev/null || true
 echo "  MCP servers registered"
 
