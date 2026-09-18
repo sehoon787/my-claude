@@ -113,7 +113,11 @@ A coding-agent toolkit that exposes a language server's symbol graph over MCP. I
 
 ### 10. [Headroom](https://github.com/headroomlabs-ai/headroom)
 
-A context-optimization layer for LLM applications. my-claude uses it in MCP mode only: `headroom mcp serve` exposes `headroom_compress`, `headroom_retrieve`, and `headroom_stats`, so a long tool result can be compressed before it enters the transcript and the original recovered on demand. Headroom's other mode — the `headroom wrap` / `headroom proxy` pair that routes all traffic through a local proxy — is deliberately **not** used: it authenticates with an Anthropic API key, which a subscription/OAuth login does not have. That is also why `headroom doctor` reports the proxy as unreachable on this stack; the MCP tools work without it.
+A context-optimization layer for LLM applications. my-claude uses it in MCP mode only: `headroom mcp serve` exposes `headroom_compress`, `headroom_retrieve`, and `headroom_stats`, so a long tool result can be compressed before it enters the transcript and the original recovered on demand. Headroom's other mode routes all traffic through a local proxy. It works on a subscription login too, but `install.sh` never starts it, because Claude Code cannot connect while the proxy is down — that is a session-breaking dependency to take on by default, and it is why `headroom doctor` reports the proxy as unreachable here. The MCP tools work without it. To opt in manually:
+
+1. `headroom proxy --port 8787` in a separate terminal, and leave it running.
+2. `ANTHROPIC_BASE_URL=http://127.0.0.1:8787 claude` to route a session through it.
+3. Savings at `http://127.0.0.1:8787/stats`, or `headroom dashboard` to open it in a browser.
 
 ### 11. [Archify](https://github.com/tt-a1i/archify)
 
@@ -521,9 +525,9 @@ Every tool in this stack writes its output somewhere. This is where.
 
 | Tool | What It Does | How to Run | Where to Look |
 |------|--------------|-----------|---------------|
-| **codeburn** | Token and cost accounting across every past session | `codeburn` (interactive TUI) · `codeburn report --period week --format json` for a non-interactive dump | Reads `~/.claude/projects/**/*.jsonl` read-only. Dollar figures are **estimates**: token counts priced at API list rates, so on a subscription plan they are a usage proxy, not a bill. |
+| **codeburn** | Token and cost accounting across every past session | `codeburn` (interactive TUI) · `codeburn report --format json --period week` for a non-interactive dump (also `--day`, `--from`/`--to`, `--provider claude`) | Reads `~/.claude/projects/**/*.jsonl` read-only. Dollar figures are **estimates**: token counts priced at API list rates, so on a subscription plan they are a usage proxy, not a bill. |
 | **Serena** | Symbol-level code navigation and editing | Starts automatically as an MCP server; call `get_symbols_overview` / `find_symbol` from any session | Dashboard at `http://localhost:24282/dashboard/index.html` while a server is running (logs + per-tool call counts). Per-project memories land in `.serena/` inside the repository you are working on; the global config is `~/.serena/serena_config.yml`. |
-| **Headroom** | Compresses oversized tool results before they enter the transcript | MCP tools `headroom_compress` / `headroom_retrieve` / `headroom_stats` · `headroom --version` to confirm the CLI | `headroom_stats` reports compression counts for the running server. `headroom doctor` and `headroom perf` describe the **proxy**, which this stack does not run — both reporting "not reachable" / "no performance data" is the expected state here. |
+| **Headroom** | Compresses oversized tool results before they enter the transcript | MCP tools `headroom_compress` / `headroom_retrieve` / `headroom_stats` · optional proxy: `headroom proxy --port 8787`, then `ANTHROPIC_BASE_URL=http://127.0.0.1:8787 claude` | `headroom_stats` reports compression counts for the running server. With the proxy opted into, `http://127.0.0.1:8787/stats` and `headroom dashboard`. Without it, `headroom doctor` and `headroom perf` report "not reachable" / "no performance data" — expected, since they describe the proxy. |
 | **Archify** | Architecture, workflow, sequence, data-flow, and lifecycle diagrams | Ask for a diagram and Boss routes to the `archify` skill. Manually, from `~/.claude/skills/archify`: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | The generated `out.html` — open it in any browser. It is self-contained (inline SVG, theme toggle, export menu) and has no runtime dependencies. Validate one with `node bin/archify.mjs check out.html`. |
 | **OMC HUD** | Live context, quota, and mode readout | Installed as the statusline by `install.sh`; `/oh-my-claudecode:hud` reconfigures it | The Claude Code statusline at the bottom of the session. Complements codeburn: the HUD is this session, codeburn is every session. |
 

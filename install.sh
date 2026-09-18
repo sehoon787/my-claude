@@ -743,9 +743,11 @@ if command -v uv >/dev/null 2>&1; then
          && echo "    serena-agent 1.7.0 installed" \
          || echo "    WARNING: serena-agent install failed" ;;
   esac
-  # headroom-ai — tool-output compression exposed over MCP. The `headroom wrap`
-  # proxy is deliberately NOT used: it authenticates with an Anthropic API key,
-  # which a subscription/OAuth login does not have. MCP mode needs no key.
+  # headroom-ai — tool-output compression exposed over MCP. The proxy mode
+  # (`headroom proxy` + ANTHROPIC_BASE_URL) works on a subscription login too,
+  # but it is left to the user: Claude Code cannot connect while the proxy is
+  # down, so starting one automatically would be a new way to break a session.
+  # MCP mode has no such failure mode and is what this installer wires up.
   case "$_UV_TOOLS" in
     *"headroom-ai v0.37.0"*) echo "    headroom-ai 0.37.0 already installed" ;;
     *) uv tool install --python 3.13 "headroom-ai[all]==0.37.0" >/dev/null 2>&1 \
