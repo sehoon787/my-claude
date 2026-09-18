@@ -13,4 +13,3 @@
 [submodule "upstream/archify"]
 	path = upstream/archify
 	url = https://github.com/tt-a1i/archify
-	branch = main

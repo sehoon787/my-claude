@@ -8,6 +8,10 @@
  * manual array wrapping, key order — stays byte-identical and sync PRs show a
  * two-line diff per bumped submodule instead of a full reformat.
  *
+ * Entries that also carry a "pinned_tag" are tag-pinned: the tag is validated
+ * against the checked-out commit and never rewritten. A submodule that has
+ * drifted off its tag exits 1 instead of being re-pinned silently.
+ *
  * Usage: node scripts/refresh-sources-pins.js [--check]
  *   --check  exit 1 if any pin is stale instead of writing
  */
@@ -31,13 +35,10 @@ function headSha(submodulePath) {
   }
 }
 
-// Tag-pinned submodules (archify) also carry "pinned_tag". Left alone it would
-// keep naming the old release after a sync moved the pointer, so resolve the
-// tag that points at the new HEAD and write that instead — or "null" when the
-// new commit is not tagged at all.
-function headTag(submodulePath) {
+// Commit a tag resolves to, or null when the tag is not present locally.
+function tagSha(submodulePath, tag) {
   try {
-    return execFileSync('git', ['-C', submodulePath, 'describe', '--tags', '--exact-match', 'HEAD'], {
+    return execFileSync('git', ['-C', submodulePath, 'rev-parse', `${tag}^{commit}`], {
       cwd: REPO_ROOT,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
@@ -53,16 +54,46 @@ const today = new Date().toISOString().slice(0, 10);
 
 // entry name -> resolved HEAD sha, for entries that declare a submodule path
 const pins = {};
-const tagPins = {};
+// Entries carrying "pinned_tag" (archify) are pinned to a release, not to a
+// branch: the tag is the source of truth and is never rewritten here. Silently
+// renaming it — or nulling it — would erase the pin the moment a sync moved the
+// pointer, so a submodule that no longer sits on its tag is a hard error the
+// caller has to resolve by bumping the tag deliberately.
+const tagDrift = [];
 for (const [name, entry] of Object.entries(sources)) {
   if (!entry || typeof entry !== 'object' || !entry.path) continue;
-  const sha = headSha(path.join(REPO_ROOT, entry.path));
+  const submodule = path.join(REPO_ROOT, entry.path);
+  const sha = headSha(submodule);
   if (!sha) {
     console.warn(`[refresh-sources-pins] skipping ${name}: cannot read HEAD of ${entry.path}`);
     continue;
   }
+  if (typeof entry.pinned_tag === 'string') {
+    const tagged = tagSha(submodule, entry.pinned_tag);
+    if (!tagged) {
+      console.warn(
+        `[refresh-sources-pins] ${name}: cannot resolve tag ${entry.pinned_tag} in ${entry.path} ` +
+          '(tags not fetched?) — pin left unverified'
+      );
+      continue;
+    }
+    if (tagged !== sha) {
+      tagDrift.push(
+        `${name}: ${entry.path} is at ${sha.slice(0, 12)} but ${entry.pinned_tag} is ${tagged.slice(0, 12)}`
+      );
+      continue;
+    }
+  }
   pins[name] = sha;
-  if ('pinned_tag' in entry) tagPins[name] = headTag(path.join(REPO_ROOT, entry.path));
+}
+
+if (tagDrift.length) {
+  console.error(
+    '[refresh-sources-pins] tag-pinned submodule moved off its tag:\n  ' +
+      tagDrift.join('\n  ') +
+      '\n  Re-check out the pinned tag, or bump pinned_tag/pinned_sha deliberately.'
+  );
+  process.exit(1);
 }
 
 const lines = raw.split('\n');
@@ -81,13 +112,6 @@ for (let i = 0; i < lines.length; i++) {
   if (shaLine && shaLine[2] !== pins[current]) {
     lines[i] = shaLine[1] + pins[current] + shaLine[3];
     changed.push(`${current}: ${shaLine[2].slice(0, 12)} -> ${pins[current].slice(0, 12)}`);
-    continue;
-  }
-
-  const tagLine = lines[i].match(/^(\s*"pinned_tag": )(?:"[^"]*"|null)(,?)$/);
-  if (tagLine && current in tagPins) {
-    const value = tagPins[current] === null ? 'null' : JSON.stringify(tagPins[current]);
-    lines[i] = tagLine[1] + value + tagLine[2];
     continue;
   }
 
