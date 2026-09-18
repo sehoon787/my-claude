@@ -75,7 +75,7 @@ agents_vendored="$(ls agents/vendored)"
 # plugin rather than copied, so they are matched after the
 # `oh-my-claudecode:` prefix is stripped below.
 INSTALLABLE="$(echo $ECC_SKILL_ALLOWLIST $ECC_SKILL_OPTIONAL_WEB $GSTACK_SKILL_ALLOWLIST \
-  $OMC_PLUGIN_SKILL_NAMES \
+  $OMC_PLUGIN_SKILL_NAMES $ARCHIFY_SKILL_NAME \
   $skills_core gstack $superpowers pdf docx pptx xlsx doc-coauthoring \
   $agents_core $agents_omo $agents_vendored $omc_agents | sed 's/\.md//g')"
 

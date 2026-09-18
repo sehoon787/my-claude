@@ -218,3 +218,13 @@ ultrawork
 SUPERPOWERS_SKILL_EXCLUDE="
 dispatching-parallel-agents
 "
+
+# ── archify skill ──
+# The archify upstream ships one agent skill directory at its repo root
+# (`archify/SKILL.md` plus the renderers, schemas, and examples it reads).
+# That is exactly the directory `npx skills add tt-a1i/archify -g` installs;
+# install.sh copies it from the pinned submodule instead, so no package
+# manager runs at install time. Name it here so the routing-reference check
+# and the installer read the same single source of truth.
+ARCHIFY_SKILL_NAME="archify"
+ARCHIFY_SKILL_SRC_DIR="archify"

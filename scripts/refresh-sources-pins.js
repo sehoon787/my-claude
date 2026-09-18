@@ -31,12 +31,29 @@ function headSha(submodulePath) {
   }
 }
 
+// Tag-pinned submodules (archify) also carry "pinned_tag". Left alone it would
+// keep naming the old release after a sync moved the pointer, so resolve the
+// tag that points at the new HEAD and write that instead — or "null" when the
+// new commit is not tagged at all.
+function headTag(submodulePath) {
+  try {
+    return execFileSync('git', ['-C', submodulePath, 'describe', '--tags', '--exact-match', 'HEAD'], {
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+
 const raw = fs.readFileSync(SOURCES_FILE, 'utf8');
 const sources = JSON.parse(raw);
 const today = new Date().toISOString().slice(0, 10);
 
 // entry name -> resolved HEAD sha, for entries that declare a submodule path
 const pins = {};
+const tagPins = {};
 for (const [name, entry] of Object.entries(sources)) {
   if (!entry || typeof entry !== 'object' || !entry.path) continue;
   const sha = headSha(path.join(REPO_ROOT, entry.path));
@@ -45,6 +62,7 @@ for (const [name, entry] of Object.entries(sources)) {
     continue;
   }
   pins[name] = sha;
+  if ('pinned_tag' in entry) tagPins[name] = headTag(path.join(REPO_ROOT, entry.path));
 }
 
 const lines = raw.split('\n');
@@ -63,6 +81,13 @@ for (let i = 0; i < lines.length; i++) {
   if (shaLine && shaLine[2] !== pins[current]) {
     lines[i] = shaLine[1] + pins[current] + shaLine[3];
     changed.push(`${current}: ${shaLine[2].slice(0, 12)} -> ${pins[current].slice(0, 12)}`);
+    continue;
+  }
+
+  const tagLine = lines[i].match(/^(\s*"pinned_tag": )(?:"[^"]*"|null)(,?)$/);
+  if (tagLine && current in tagPins) {
+    const value = tagPins[current] === null ? 'null' : JSON.stringify(tagPins[current]);
+    lines[i] = tagLine[1] + value + tagLine[2];
     continue;
   }
 

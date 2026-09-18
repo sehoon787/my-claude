@@ -59,6 +59,17 @@
     "pinned_date": "2026-08-31",
     "license": "MIT"
   },
+  "archify": {
+    "repo": "https://github.com/tt-a1i/archify",
+    "path": "upstream/archify",
+    "method": "submodule",
+    "package": "archify/ (skill directory)",
+    "pinned_tag": "v2.9.0",
+    "pinned_sha": "62904f3b73dc469ceb1f1fd500ff44c8dee70b06",
+    "pinned_date": "2026-09-19",
+    "note": "Diagram skill (architecture/workflow/sequence/dataflow/lifecycle -> self-contained HTML). The repo-root archify/ directory is copied to ~/.claude/skills/archify; no `npx skills add` runs at install time.",
+    "license": "MIT"
+  },
   "codeburn": {
     "repo": "https://github.com/getagentseal/codeburn",
     "method": "npm-cli",
@@ -66,6 +77,22 @@
     "pinned_version": "0.9.23",
     "note": "Local-first AI token/cost tracker; reads session files read-only, no proxy, no upload. Budget-guard hooks are opt-in (--with-codeburn-guard).",
     "license": "MIT"
+  },
+  "serena": {
+    "repo": "https://github.com/oraios/serena",
+    "method": "uv-tool",
+    "package": "serena-agent",
+    "pinned_version": "1.7.0",
+    "note": "Symbol-level code navigation/editing over MCP (stdio: `serena start-mcp-server --context claude-code --project-from-cwd`). Runs as an external MCP server; no Serena code is vendored into this repo.",
+    "license": "GPL-3.0 (application); MIT (bundled SolidLSP)"
+  },
+  "headroom": {
+    "repo": "https://github.com/headroomlabs-ai/headroom",
+    "method": "uv-tool",
+    "package": "headroom-ai[all]",
+    "pinned_version": "0.37.0",
+    "note": "Tool-output compression over MCP (stdio: `headroom mcp serve`) exposing headroom_compress / headroom_retrieve / headroom_stats. The `headroom wrap` proxy mode is deliberately unused: it authenticates with an Anthropic API key, which an OAuth subscription login does not have.",
+    "license": "Apache-2.0"
   },
   "ast-grep": {
     "repo": "https://github.com/ast-grep/ast-grep",

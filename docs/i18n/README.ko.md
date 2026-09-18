@@ -274,7 +274,7 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 | **LSP 서버** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
 | **네임드 워크플로** | 2 | code-review-fanout, upstream-audit |
 | **업스트림 서브모듈** | 4 | ecc, omc, gstack, superpowers |
-| **CLI 도구** | 5 | omc, omo, ast-grep, comment-checker, codeburn |
+| **CLI 도구** | 7 | omc, omo, ast-grep, comment-checker, codeburn, serena, headroom |
 
 위의 에이전트·스킬·룰은 모두 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh)의 허용목록에 등재되어 설치 매니페스트로 추적됩니다. Anthropic 공식 문서 스킬(pdf, docx 등)은 `claude plugin add anthropics/skills`로 별도 설치되며 의도적으로 매니페스트에서 제외됩니다.
 
@@ -470,7 +470,7 @@ BriefingVault v2는 세 가지 지식 관리 방법론을 통합합니다:
 
 ## 업스트림 오픈소스 출처
 
-my-claude는 MIT 라이선스 업스트림 저장소 4개를 git 서브모듈로 연결하며, 각각 명시적인 SHA에 고정되어 있습니다:
+my-claude는 MIT 라이선스 업스트림 저장소 5개를 git 서브모듈로 연결하며, 각각 명시적인 SHA에 고정되어 있습니다:
 
 | # | 출처 | 제공 내용 |
 |---|--------|-----------------|
@@ -478,6 +478,7 @@ my-claude는 MIT 라이선스 업스트림 저장소 4개를 git 서브모듈로
 | 2 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 전문가 에이전트 19개 + 설치 스킬 16개. 오케스트레이션 레인: autopilot, ralph, team. |
 | 3 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | 배포·QA·보안 리뷰(Boss P0 레인)를 위한 설치 스킬 27개. Playwright 브라우저 데몬 포함. |
 | 4 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 개발 프로세스 레인 설치 스킬 13개: 브레인스토밍, TDD, 체계적 디버깅, 계획 작성. |
+| 5 | <img src="https://github.com/tt-a1i.png?size=32" width="20" height="20" align="center"/> **[archify](https://github.com/tt-a1i/archify)** — tt-a1i | 설치 스킬 1개, 태그 `v2.9.0`에 고정. 아키텍처·워크플로·시퀀스·데이터 흐름·라이프사이클 다이어그램을 자체 완결형 HTML로 생성. |
 
 서브모듈은 아니지만 스택의 일부인 출처:
 
@@ -487,7 +488,18 @@ my-claude는 MIT 라이선스 업스트림 저장소 4개를 git 서브모듈로
 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 2026-07-27 서브모듈 제거. 엔지니어링 에이전트 3개를 출처 표기와 함께 `agents/vendored/`로 벤더링. |
 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | `install.sh`가 `claude plugin add anthropics/skills`로 설치(pdf, docx 등). 매니페스트 추적 대상 아님. |
 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | AI 코딩 행동 가이드라인 4가지를 `~/.claude/CLAUDE.md`에 추가. |
+
+`install.sh`가 함께 가져오는 컴패니언 CLI와 MCP 서버. 각각 정확한 버전에 고정되어 있습니다:
+
+| 출처 | 편입 방식 |
+|--------|----------------|
+| <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0`으로 설치하고 `serena` stdio MCP 서버로 등록. 심볼 단위 코드 탐색·편집. 애플리케이션은 GPL-3.0, SolidLSP는 MIT이며, 외부 서버로만 사용하고 벤더링하지 않습니다. |
+| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"`으로 설치하고 `headroom` stdio MCP 서버(`headroom mcp serve`)로 등록. 툴 출력 압축. Apache-2.0. 프록시/wrap 모드는 의도적으로 사용하지 않습니다. |
 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | npm CLI (MIT). 로컬 우선 토큰/비용 추적기 — Claude Code가 이미 기록하는 세션 파일을 읽기 전용으로 파싱해 모델·프로젝트·작업별 비용을 집계합니다. 프록시·API 키·업로드 없음. `install.sh`가 `codeburn@0.9.23`으로 고정 설치하며 `upstream/SOURCES.json`에 `method: npm-cli`로 등재. 예산 가드 훅은 `--with-codeburn-guard`로 opt-in. 표시되는 달러 금액은 토큰 수를 API 정가로 환산한 추정치이며 codeburn 자체는 무료로 아무것도 청구하지 않습니다(구독 플랜에서는 사용량 지표). 가드의 hard cap(기본 $15/세션)은 해제 명령 `codeburn guard allow`를 포함한 그 세션의 모든 툴 호출을 차단하므로(외부 터미널에서 실행) opt-in으로 둡니다. OMC HUD(현재 세션의 컨텍스트·한도)를 보완해 세션 전체의 비용 흐름을 보여줍니다. |
+| <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`. 구조적(AST 인식) 코드 검색 및 치환. |
+| <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | `https://mcp.context7.com/mcp`의 호스팅 MCP 서버. 최신 라이브러리 문서. |
+| <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | `https://mcp.exa.ai/mcp`의 호스팅 MCP 서버. 뉴럴 웹 검색. |
+| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://grep.app/)** — grep.app | `https://mcp.grep.app`의 호스팅 MCP 서버. 공개 GitHub 저장소 전반의 코드 검색. |
 
 ---
 
