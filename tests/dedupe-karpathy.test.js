@@ -160,6 +160,99 @@ const results = [
     return true;
   }),
 ];
+
+// --- --install mode -------------------------------------------------------
+// The block install.sh owns has to track the pinned content: a bumped
+// KARPATHY_SHA must reach a machine that already carries the block, without
+// duplicating it or disturbing a byte the user wrote around it.
+
+const END_MARKER = '<!-- /my-claude:karpathy-guidelines -->';
+// What a pin bump looks like: same headings and closing line, one changed
+// sentence, so a stale copy shows up as a missing '(v2)'.
+const KARPATHY_V2 = KARPATHY.replace('For trivial tasks, use judgment.', 'For trivial tasks, use judgment. (v2)');
+const USER_TOP = ['# My own notes', '', 'Keep this exactly as it is.'].join('\n');
+const USER_BOTTOM = ['# Later section', '', 'Also mine.'].join('\n');
+const count = (s, needle) => s.split(needle).length - 1;
+
+// Runs one scenario in its own temp dir. `install(content)` hands the script a
+// content file the way install.sh hands over a checksum-verified download.
+function scenario(name, body) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kr-'));
+  const file = path.join(dir, 'CLAUDE.md');
+  const install = (content) => {
+    const pinned = path.join(dir, 'pinned.md');
+    fs.writeFileSync(pinned, content);
+    const out = cp.spawnSync('node', [SCRIPT, '--install', file, pinned], { encoding: 'utf8' });
+    return { stdout: out.stdout, stderr: out.stderr, status: out.status, after: fs.readFileSync(file, 'utf8') };
+  };
+  let ok = false, detail = '';
+  try {
+    body({ install, write: (t) => fs.writeFileSync(file, t) });
+    ok = true;
+  } catch (e) {
+    detail = e.message;
+  }
+  console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${ok ? '' : '  → ' + detail}`);
+  fs.rmSync(dir, { recursive: true, force: true });
+  return ok;
+}
+
+results.push(
+  scenario('(f) marker absent → appended below the user content', ({ install, write }) => {
+    write(USER_TOP + '\n');
+    const r = install(KARPATHY);
+    assert(r.status === 0, 'exit status ' + r.status + ' ' + r.stderr);
+    assert(r.stdout.trim() === 'Karpathy guidelines appended', 'stdout: ' + JSON.stringify(r.stdout));
+    assert(r.after.startsWith(USER_TOP + '\n'), 'user content was disturbed');
+    assert(countBlocks(r.after) === 1, 'expected 1 block, got ' + countBlocks(r.after));
+    assert(count(r.after, MARKER) === 1 && count(r.after, END_MARKER) === 1, 'markers not written exactly once');
+    assert(r.after.endsWith(END_MARKER + '\n'), 'block does not end at the end marker');
+  }),
+  scenario('(g) same pin re-run → byte-identical, no write', ({ install, write }) => {
+    write(USER_TOP + '\n');
+    const first = install(KARPATHY).after;
+    const r = install(KARPATHY);
+    assert(r.after === first, 'file changed on a re-run at the same pin');
+    assert(r.stdout.trim() === 'Karpathy guidelines already current', 'stdout: ' + JSON.stringify(r.stdout));
+    assert(r.status === 0, 'exit status ' + r.status + ' ' + r.stderr);
+  }),
+  scenario('(h) changed pin, marked block → replaced once, user text intact', ({ install, write }) => {
+    write([USER_TOP, '', MARKER, '', KARPATHY, '', END_MARKER, '', USER_BOTTOM, ''].join('\n'));
+    const r = install(KARPATHY_V2);
+    assert(r.stdout.trim() === 'Karpathy guidelines refreshed', 'stdout: ' + JSON.stringify(r.stdout));
+    assert(countBlocks(r.after) === 1, 'expected 1 block, got ' + countBlocks(r.after));
+    assert(count(r.after, '(v2)') === 1, 'expected exactly one refreshed copy');
+    assert(count(r.after, MARKER) === 1 && count(r.after, END_MARKER) === 1, 'markers duplicated');
+    assert(r.after.startsWith(USER_TOP + '\n'), 'text above the block changed');
+    assert(r.after.endsWith('\n' + USER_BOTTOM + '\n'), 'text below the block changed');
+    assert(install(KARPATHY_V2).after === r.after, 'a second run at the new pin rewrote the file');
+  }),
+  scenario('(i) legacy block, no end marker → refreshed in place, then idempotent', ({ install, write }) => {
+    write([USER_TOP, '', MARKER, '', KARPATHY, '', USER_BOTTOM, ''].join('\n'));
+    const r = install(KARPATHY);
+    assert(r.stdout.trim() === 'Karpathy guidelines refreshed', 'stdout: ' + JSON.stringify(r.stdout));
+    assert(countBlocks(r.after) === 1, 'expected 1 block, got ' + countBlocks(r.after));
+    assert(count(r.after, END_MARKER) === 1, 'end marker not added exactly once');
+    assert(r.after.includes(KARPATHY), 'the pinned body was altered');
+    assert(r.after.startsWith(USER_TOP + '\n'), 'text above the block changed');
+    assert(r.after.endsWith('\n' + USER_BOTTOM + '\n'), 'text below the block changed');
+    const second = install(KARPATHY);
+    assert(second.after === r.after, 'the second run rewrote the file');
+    assert(second.stdout.trim() === 'Karpathy guidelines already current', 'stdout: ' + JSON.stringify(second.stdout));
+  }),
+  scenario('(j) legacy body that no longer matches → replaced up to the user heading', ({ install, write }) => {
+    const stale = ['# CLAUDE.md', '', 'Some older wording that no longer matches.', '', 'More of it.'].join('\n');
+    write([USER_TOP, '', MARKER, '', stale, '', USER_BOTTOM, ''].join('\n'));
+    const r = install(KARPATHY);
+    assert(!r.after.includes('older wording'), 'the stale body survived');
+    assert(countBlocks(r.after) === 1, 'expected 1 block, got ' + countBlocks(r.after));
+    assert(count(r.after, MARKER) === 1 && count(r.after, END_MARKER) === 1, 'markers duplicated');
+    assert(r.after.startsWith(USER_TOP + '\n'), 'text above the block changed');
+    assert(r.after.endsWith('\n' + USER_BOTTOM + '\n'), 'text below the block changed');
+    assert(install(KARPATHY).after === r.after, 'the second run rewrote the file');
+  }),
+);
+
 const failed = results.filter((r) => !r).length;
 console.log(failed ? `${failed} FAILED` : 'ALL PASSED');
 process.exit(failed ? 1 : 0);
