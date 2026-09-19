@@ -65,6 +65,8 @@ bash /tmp/my-claude/install.sh
 rm -rf /tmp/my-claude
 ```
 
+If you use both routes, `install.sh` also refreshes the `my-claude` plugin (marketplace update + plugin update) so its hooks stay in sync with this script's install.
+
 ### For AI Agents
 
 ```

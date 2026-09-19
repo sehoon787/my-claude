@@ -818,6 +818,33 @@ else
   echo "    WARNING: uv unavailable — serena and headroom MCP servers will not start"
 fi
 
+# 5f. my-claude plugin refresh (keep the two install routes in sync)
+# my-claude can be installed via this script (copies files into ~/.claude and
+# merges hooks into settings.json) or via the Claude Code plugin system
+# (`/plugin marketplace add` + `/plugin install`, which registers
+# hooks/hooks.json on its own). If both routes were used and the plugin clone
+# is stale, it keeps re-registering hooks this repo has already removed — so
+# refresh it here too, best-effort, whenever it is present.
+echo "  [5f] my-claude plugin (marketplace route, if installed)..."
+PLUGIN_REFRESH_STATUS="not installed (skipped)"
+if command -v claude >/dev/null 2>&1; then
+  _PLUGIN_LIST="$(claude plugin list 2>/dev/null || true)"
+  case "$_PLUGIN_LIST" in
+    *my-claude@my-claude*)
+      claude plugin marketplace update my-claude 2>/dev/null || true
+      claude plugin update my-claude@my-claude 2>/dev/null || true
+      _PLUGIN_LIST_AFTER="$(claude plugin list 2>/dev/null || true)"
+      _PLUGIN_VERSION="$(printf '%s\n' "$_PLUGIN_LIST_AFTER" | awk '/my-claude@my-claude/{found=1; next} found && /Version:/{print $2; exit}')"
+      if [ -n "$_PLUGIN_VERSION" ]; then
+        PLUGIN_REFRESH_STATUS="refreshed to $_PLUGIN_VERSION"
+      else
+        PLUGIN_REFRESH_STATUS="refreshed"
+      fi
+      ;;
+  esac
+fi
+echo "  my-claude plugin: $PLUGIN_REFRESH_STATUS"
+
 # Write the manifest from provenance-tracked entries (MANIFEST_TMP), not from
 # scanning $HOME/.claude directories. A directory scan would also pick up
 # user-owned files that happen to sit in the same folders (a custom agent
@@ -851,6 +878,7 @@ echo "  headroom (MCP):   $(command -v headroom >/dev/null 2>&1 && echo "OK ($(h
 echo "  archify (skill):  $(test -f "$HOME/.claude/skills/archify/SKILL.md" && echo 'OK' || echo 'MISSING')"
 echo "  tmux:             $(command -v tmux >/dev/null 2>&1 && echo "OK ($(tmux -V))" || echo 'NOT INSTALLED (optional)')"
 echo "  hud:              $(test -f "$HOME/.claude/hud/omc-hud.mjs" && echo 'OK' || echo 'MISSING')"
+echo "  my-claude plugin: $PLUGIN_REFRESH_STATUS"
 TEAMMATE_MODE=$(node -e "try{const h=process.env.HOME||process.env.USERPROFILE;console.log(JSON.parse(require('fs').readFileSync(h+'/.claude/settings.json','utf8')).teammateMode||'in-process (default)')}catch(e){console.log('auto')}")
 echo "  version:          v${INSTALLING_VERSION}"
 echo "  teammateMode:     $TEAMMATE_MODE"
