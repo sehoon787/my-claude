@@ -704,43 +704,40 @@ echo "  [5c-lsp] Language servers (typescript-language-server, pyright)..."
 command -v typescript-language-server >/dev/null 2>&1 || npm i -g typescript-language-server typescript 2>/dev/null || true
 command -v pyright-langserver >/dev/null 2>&1 || npm i -g pyright 2>/dev/null || true
 
-# 5d. Karpathy guidelines (append to CLAUDE.md)
+# 5d. Karpathy guidelines (a marked block in CLAUDE.md)
 echo "  [5d] Karpathy guidelines..."
-# Idempotency is keyed on a marker WE write, not on the fetched text: the
+# The block is found by a marker WE write, not by the fetched text: the
 # upstream guidelines never contain the word "karpathy", so the old content
 # sniff never matched and every install re-appended the whole block (10 copies
-# accumulated in the wild). The checksum below pins the download for supply
-# chain safety and plays no part in this guard.
-KARPATHY_MARKER="<!-- my-claude:karpathy-guidelines -->"
+# accumulated in the wild).
 # Sweep up the copies those pre-marker installs already appended (13 of them on
 # one real machine). Runs from $SCRIPT_DIR like the other install-time node
 # helpers; it never needs to exist in ~/.claude. Non-fatal under `set -e`.
 node "$SCRIPT_DIR/scripts/dedupe-karpathy.js" "$HOME/.claude/CLAUDE.md" || true
-if grep -qF "$KARPATHY_MARKER" "$HOME/.claude/CLAUDE.md" 2>/dev/null; then
-  echo "    Karpathy guidelines already present"
-else
-  # Pinned to a specific commit SHA + checksum to prevent supply chain attacks.
-  # To upgrade: update SHA and EXPECTED_CHECKSUM together.
-  KARPATHY_SHA="aa4467f0b33e1e80d11c7c043d4b27e7c79a73a3"
-  KARPATHY_URL="https://raw.githubusercontent.com/forrestchang/andrej-karpathy-skills/${KARPATHY_SHA}/CLAUDE.md"
-  KARPATHY_EXPECTED_CHECKSUM="694a2d721e41c385f3db492838c23299826df5ba9809e3b0721aac70021e196a"
-  _tmp_karpathy=$(mktemp)
-  trap 'rm -f "$_tmp_karpathy"' EXIT
-  if curl -sL "$KARPATHY_URL" -o "$_tmp_karpathy" 2>/dev/null; then
-    ACTUAL_CHECKSUM=$(sha256 "$_tmp_karpathy")
-    if [ "$ACTUAL_CHECKSUM" = "$KARPATHY_EXPECTED_CHECKSUM" ]; then
-      # The upstream file has no trailing newline; the leading blank line and
-      # the trailing newline keep repeated sections from running together.
-      {
-        printf '\n%s\n\n' "$KARPATHY_MARKER"
-        cat "$_tmp_karpathy"
-        printf '\n'
-      } >> "$HOME/.claude/CLAUDE.md"
-      echo "    Karpathy guidelines appended"
-    else
-      echo "    WARNING: Checksum mismatch, skipping Karpathy guidelines"
-    fi
+# Pinned to a specific commit SHA + checksum to prevent supply chain attacks.
+# To upgrade: update SHA and EXPECTED_CHECKSUM together. The fetch runs on
+# every install rather than only when the marker is missing, so a bumped pin
+# reaches a machine that already carries the block; only checksum-verified
+# content is ever written, and a failed download leaves the installed block
+# exactly where it is.
+KARPATHY_SHA="aa4467f0b33e1e80d11c7c043d4b27e7c79a73a3"
+KARPATHY_URL="https://raw.githubusercontent.com/forrestchang/andrej-karpathy-skills/${KARPATHY_SHA}/CLAUDE.md"
+KARPATHY_EXPECTED_CHECKSUM="694a2d721e41c385f3db492838c23299826df5ba9809e3b0721aac70021e196a"
+_tmp_karpathy=$(mktemp)
+trap 'rm -f "$_tmp_karpathy"' EXIT
+if curl -sL "$KARPATHY_URL" -o "$_tmp_karpathy" 2>/dev/null; then
+  ACTUAL_CHECKSUM=$(sha256 "$_tmp_karpathy")
+  if [ "$ACTUAL_CHECKSUM" = "$KARPATHY_EXPECTED_CHECKSUM" ]; then
+    # Replaces the marked block in place, or appends it when it is absent, and
+    # writes nothing when the file already holds this exact content.
+    node "$SCRIPT_DIR/scripts/dedupe-karpathy.js" --install \
+      "$HOME/.claude/CLAUDE.md" "$_tmp_karpathy" \
+      || echo "    WARNING: could not write the Karpathy guidelines"
+  else
+    echo "    WARNING: Checksum mismatch, skipping Karpathy guidelines"
   fi
+else
+  echo "    WARNING: download failed, keeping the installed Karpathy guidelines"
 fi
 
 # 5e. uv + MCP tool CLIs (serena, headroom)
