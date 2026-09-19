@@ -110,5 +110,12 @@
     "pinned_version": "0.7.0",
     "note": "Comment quality checker companion CLI",
     "license": "MIT"
+  },
+  "andrej-karpathy-skills": {
+    "repo": "https://github.com/forrestchang/andrej-karpathy-skills",
+    "method": "curl",
+    "pinned_sha": "aa4467f0b33e1e80d11c7c043d4b27e7c79a73a3",
+    "pinned_date": "2026-09-19",
+    "note": "Karpathy's LLM coding guidelines; install.sh [5d] curls CLAUDE.md at the pinned commit, checksum-verifies it against KARPATHY_EXPECTED_CHECKSUM, and appends it to ~/.claude/CLAUDE.md. No code vendored into this repo."
   }
 }
