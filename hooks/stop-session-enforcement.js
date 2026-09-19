@@ -67,8 +67,8 @@ try {
 
 // Block: meaningful work but no vault sync
 var reason = isKo
-  ? '[BriefingVault] /boss-briefing 미실행. 세션 종료 전 /boss-briefing을 실행하세요.'
-  : '[BriefingVault] Run /boss-briefing before ending the session to sync your vault.';
+  ? '[BriefingVault] /boss-briefing 미실행. 세션 종료 전 /boss-briefing을 실행하세요. 그 다음 최종 답변 전체(최종 보고 표 포함)를 마지막 메시지로 다시 보내세요.'
+  : '[BriefingVault] Run /boss-briefing before ending the session to sync your vault. Then repeat your full final answer (including the final-report tables) as your last message.';
 
 // Session exists but boss-briefing not run — pass silently and auto-set lastVaultSync
 // Fix 1: auto-set lastVaultSync so future Stop calls won't block
