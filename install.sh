@@ -815,14 +815,22 @@ else
   echo "    WARNING: uv unavailable — serena and headroom MCP servers will not start"
 fi
 
-# 5f. my-claude plugin refresh (keep the two install routes in sync)
+# 5f. Shared local dashboards (my-claude + my-codex)
+# The helper locks a cross-harness state directory, identifies an existing
+# service before reusing it, and never kills an unknown port owner. Failures are
+# diagnostic only: the CLI/MCP installation remains usable without dashboards.
+echo "  [5f] shared local dashboards (codeburn, Headroom)..."
+bash "$SCRIPT_DIR/scripts/ensure-shared-local-services.sh" || \
+  echo "    WARNING: shared local dashboard setup failed"
+
+# 5g. my-claude plugin refresh (keep the two install routes in sync)
 # my-claude can be installed via this script (copies files into ~/.claude and
 # merges hooks into settings.json) or via the Claude Code plugin system
 # (`/plugin marketplace add` + `/plugin install`, which registers
 # hooks/hooks.json on its own). If both routes were used and the plugin clone
 # is stale, it keeps re-registering hooks this repo has already removed — so
 # refresh it here too, best-effort, whenever it is present.
-echo "  [5f] my-claude plugin (marketplace route, if installed)..."
+echo "  [5g] my-claude plugin (marketplace route, if installed)..."
 PLUGIN_REFRESH_STATUS="not installed (skipped)"
 if command -v claude >/dev/null 2>&1; then
   _PLUGIN_LIST="$(claude plugin list 2>/dev/null || true)"
@@ -923,7 +931,9 @@ echo ""
 echo "Open these"
 echo "  Serena dashboard:   http://localhost:24282/dashboard/index.html"
 echo "                      (live whenever a Claude session has the serena MCP server up)"
-echo "  codeburn dashboard: run \`codeburn web\` — serves http://127.0.0.1:4747"
+echo "  codeburn dashboard: http://127.0.0.1:4747 (shared service started or reused above)"
+echo "  Headroom stats:      http://127.0.0.1:8787/stats"
+echo "                       (may be empty until a client explicitly routes through the proxy)"
 echo ""
 echo "  The serena and headroom MCP servers start automatically with each Claude Code session."
 echo ""

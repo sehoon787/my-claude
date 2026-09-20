@@ -52,6 +52,8 @@ bash /tmp/my-claude/install.sh
 rm -rf /tmp/my-claude
 ```
 
+安装程序为 my-claude 和 my-codex 提供一套共享的 codeburn 仪表盘与 Headroom 代理。后续安装会复用健康服务，不会重复启动。状态和启动日志位于 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services`；安装程序不会修改 `ANTHROPIC_BASE_URL` 或 `OPENAI_BASE_URL`。
+
 ### 面向 AI Agent
 
 ```bash
@@ -228,9 +230,9 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 
 | 服务器 | 用途 | 费用 |
 |--------|---------|------|
-| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://mcp.context7.com) | 实时库文档 | 免费 |
-| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://mcp.exa.ai) | 语义网页搜索 | 每月免费 1k 次请求 |
-| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://mcp.grep.app) | GitHub 代码搜索 | 免费 |
+| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://context7.com) | 实时库文档 | 免费 |
+| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://exa.ai) | 语义网页搜索 | 每月免费 1k 次请求 |
+| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://github.com/grep-app) | GitHub 代码搜索 | 免费 |
 
 **行为 Hooks**
 
@@ -308,9 +310,9 @@ my-claude 捆绑的工具会把结果写到不同位置 —— 下表列出各�
 
 | 工具 | 作用 | 运行方式 | 查看位置 |
 |------|------|-----------|---------------|
-| **codeburn** | 跨所有历史会话的 token 与成本核算 | `codeburn`（交互式 TUI）· `codeburn web` 启动浏览器仪表盘（`--no-open` 只打印 URL 而不启动浏览器）· `codeburn report --format json --period week` 输出非交互式转储（也支持 `--day`、`--from`/`--to`、`--provider claude`） | 只读解析 `~/.claude/projects/**/*.jsonl`。浏览器仪表盘位于 <http://127.0.0.1:4747>（`codeburn web`；端口被占用时回退到空闲端口）。美元金额为**估算值**：按 API 标价折算 token 数，因此在订阅计划下只是用量参考，而非账单。 |
+| **codeburn** | 跨所有历史会话的 token 与成本核算 | `install.sh` 启动或复用 `codeburn web --provider all --port 4747 --no-open` · `codeburn` 打开 TUI · `codeburn report --format json --period week` 生成非交互式输出 | 共享仪表盘位于 <http://127.0.0.1:4747/>。会话文件只读；美元金额是按 API 标价计算的估算值。启动日志：`${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`。 |
 | **Serena** | 符号级代码导航与编辑 | 作为 MCP 服务器自动启动；在任意会话中调用 `get_symbols_overview` / `find_symbol` | 服务器运行期间，仪表盘位于 <http://localhost:24282/dashboard/index.html>（日志 + 各工具调用计数）。按项目的记忆写入你正在工作的仓库内的 `.serena/`；全局配置为 `~/.serena/serena_config.yml`。 |
-| **Headroom** | 在超大工具结果进入对话记录之前将其压缩 | MCP 工具 `headroom_compress` / `headroom_retrieve` / `headroom_stats` · 可选代理：`headroom proxy --port 8787`，然后 `ANTHROPIC_BASE_URL=http://127.0.0.1:8787 claude` | `headroom_stats` 报告运行中服务器的压缩次数。启用代理后，可访问 <http://127.0.0.1:8787/stats> 和 `headroom dashboard`。未启用时，`headroom doctor` 与 `headroom perf` 会报告 "not reachable" / "no performance data" —— 这是预期行为，因为它们描述的正是代理。 |
+| **Headroom** | 在超大工具结果进入对话记录之前将其压缩 | MCP 工具 `headroom_compress` / `headroom_retrieve` / `headroom_stats`；`install.sh` 启动或复用共享代理配置 `agent-harness-shared` | 统计页面位于 <http://127.0.0.1:8787/stats>；在客户端显式通过代理路由前可能为空。安装程序不会设置 `ANTHROPIC_BASE_URL` 或 `OPENAI_BASE_URL`。启动日志：`${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`。 |
 | **Archify** | 架构、工作流、时序、数据流与生命周期图 | 请求绘图时 Boss 会路由到 `archify` skill。手动方式，从 `~/.claude/skills/archify` 运行：`node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 生成的 `out.html` —— 用任意浏览器打开。它是自包含的（内联 SVG、主题切换、导出菜单），没有运行时依赖。可用 `node bin/archify.mjs check out.html` 校验。 |
 | **OMC HUD** | 实时的上下文、配额与模式读数 | 由 `install.sh` 安装为状态栏；`/oh-my-claudecode:hud` 可重新配置 | 会话底部的 Claude Code 状态栏。与 codeburn 互补：HUD 看当前会话，codeburn 看所有会话。 |
 
@@ -342,12 +344,12 @@ my-claude 以 git 子模块方式关联 5 个 MIT 授权的上游仓库，每个
 | 来源 | 接入方式 |
 |--------|----------------|
 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0` 安装，并注册为 `serena` stdio MCP 服务器。符号级代码导航与编辑。分发的 `serena-agent` 包整体适用 GPL-3.0-or-later（MIT 的 SolidLSP 与 GPL-3.0-or-later 应用相结合）；PyPI 的 MIT classifier 有误。仅作为外部服务器使用，不 vendored。 |
-| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"` 安装，并注册为 `headroom` stdio MCP 服务器（`headroom mcp serve`）。工具输出压缩。Apache-2.0。代理/wrap 模式刻意不启用。 |
+| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"` 安装，并注册为 `headroom` stdio MCP 服务器（`headroom mcp serve`），同时以无配置改动的持久配置 `agent-harness-shared` 启动。工具输出压缩。Apache-2.0。 |
 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | npm CLI (MIT)。本地优先的 token/成本追踪器 — 只读解析 Claude Code 已写出的会话文件，按模型、项目、任务汇总花费。无代理、无 API 密钥、不上传。由 `install.sh` 以 `codeburn@0.9.23` 固定版本安装，并在 `upstream/SOURCES.json` 中以 `method: npm-cli` 登记。预算守卫钩子通过 `--with-codeburn-guard` 选择启用。显示的美元金额是按 API 标价折算 token 数的估算值，codeburn 本身免费且不收取任何费用（订阅计划下仅作用量参考）。守卫的 hard cap（默认 $15/会话）会阻断该会话的所有工具调用，包括解除命令 `codeburn guard allow`（需在外部终端运行），因此保持为可选。与 OMC HUD（当前会话的上下文与配额）互补，展示跨会话的花费去向。 |
 | <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`。结构化（AST 感知）代码搜索与重写。 |
 | <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | 位于 `https://mcp.context7.com/mcp` 的托管 MCP 服务器。最新的库文档。 |
 | <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | 位于 `https://mcp.exa.ai/mcp` 的托管 MCP 服务器。神经网络网页搜索。 |
-| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://grep.app/)** — grep.app | 位于 `https://mcp.grep.app` 的托管 MCP 服务器。跨公开 GitHub 仓库的代码搜索。 |
+| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://github.com/grep-app)** — grep.app | 位于 `https://mcp.grep.app` 的托管 MCP 服务器。跨公开 GitHub 仓库的代码搜索。 |
 
 ---
 

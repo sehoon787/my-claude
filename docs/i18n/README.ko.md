@@ -52,6 +52,8 @@ bash /tmp/my-claude/install.sh
 rm -rf /tmp/my-claude
 ```
 
+설치 프로그램은 my-claude와 my-codex가 함께 쓰는 codeburn 대시보드와 Headroom 프록시를 하나씩 준비합니다. 나중에 실행한 설치 프로그램은 정상 서비스에 연결하고 중복 실행하지 않습니다. 상태와 시작 로그는 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services`에 저장되며 `ANTHROPIC_BASE_URL`과 `OPENAI_BASE_URL`은 변경하지 않습니다.
+
 ### AI 에이전트를 위한 설치
 
 ```bash
@@ -242,9 +244,9 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 
 | 서버 | 목적 | 비용 |
 |--------|---------|------|
-| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://mcp.context7.com) | 실시간 라이브러리 문서 | 무료 |
-| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://mcp.exa.ai) | 시맨틱 웹 검색 | 월 1천 건 무료 |
-| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://mcp.grep.app) | GitHub 코드 검색 | 무료 |
+| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://context7.com) | 실시간 라이브러리 문서 | 무료 |
+| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://exa.ai) | 시맨틱 웹 검색 | 월 1천 건 무료 |
+| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://github.com/grep-app) | GitHub 코드 검색 | 무료 |
 
 **동작 훅**
 
@@ -321,9 +323,9 @@ BriefingVault v2는 세 가지 지식 관리 방법론을 통합합니다:
 
 | 도구 | 하는 일 | 실행 방법 | 확인 위치 |
 |------|--------------|-----------|---------------|
-| **codeburn** | 지난 모든 세션에 걸친 토큰·비용 집계 | `codeburn` (대화형 TUI) · 브라우저 대시보드는 `codeburn web` (`--no-open`을 붙이면 브라우저를 띄우는 대신 URL만 출력) · 비대화형 덤프는 `codeburn report --format json --period week` (`--day`, `--from`/`--to`, `--provider claude`도 사용 가능) | `~/.claude/projects/**/*.jsonl`을 읽기 전용으로 파싱합니다. 브라우저 대시보드는 <http://127.0.0.1:4747> (`codeburn web`; 포트가 사용 중이면 빈 포트로 대체). 달러 금액은 **추정치**입니다 — 토큰 수를 API 정가로 환산한 값이므로, 구독 플랜에서는 청구서가 아니라 사용량 지표입니다. |
+| **codeburn** | 지난 모든 세션에 걸친 토큰·비용 집계 | `install.sh`가 `codeburn web --provider all --port 4747 --no-open`을 시작하거나 재사용 · `codeburn`은 TUI 실행 · `codeburn report --format json --period week`은 비대화형 출력 | 공유 대시보드는 <http://127.0.0.1:4747/>. 세션 파일을 읽기 전용으로 읽으며 달러 금액은 API 정가 기준 추정치입니다. 시작 로그: `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`. |
 | **Serena** | 심볼 단위 코드 탐색 및 편집 | MCP 서버로 자동 시작됩니다. 어느 세션에서든 `get_symbols_overview` / `find_symbol`을 호출하세요 | 서버가 실행 중일 때 대시보드는 <http://localhost:24282/dashboard/index.html> (로그 + 도구별 호출 횟수). 프로젝트별 메모리는 작업 중인 저장소 안의 `.serena/`에 쌓이고, 전역 설정은 `~/.serena/serena_config.yml`입니다. |
-| **Headroom** | 과도하게 큰 도구 결과를 트랜스크립트에 들어가기 전에 압축 | MCP 도구 `headroom_compress` / `headroom_retrieve` / `headroom_stats` · 선택적 프록시: `headroom proxy --port 8787` 실행 후 `ANTHROPIC_BASE_URL=http://127.0.0.1:8787 claude` | `headroom_stats`가 실행 중인 서버의 압축 횟수를 보고합니다. 프록시를 켰다면 <http://127.0.0.1:8787/stats>와 `headroom dashboard`도 사용할 수 있습니다. 켜지 않았다면 `headroom doctor`와 `headroom perf`가 "not reachable" / "no performance data"를 보고하는데, 프록시를 설명하는 명령이므로 정상입니다. |
+| **Headroom** | 과도하게 큰 도구 결과를 트랜스크립트에 들어가기 전에 압축 | MCP 도구 `headroom_compress` / `headroom_retrieve` / `headroom_stats`; `install.sh`가 공유 프록시 프로필 `agent-harness-shared`를 시작하거나 재사용 | 통계는 <http://127.0.0.1:8787/stats>. 클라이언트가 명시적으로 프록시로 라우팅하기 전에는 비어 있을 수 있습니다. 설치 프로그램은 `ANTHROPIC_BASE_URL`이나 `OPENAI_BASE_URL`을 설정하지 않습니다. 시작 로그: `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`. |
 | **Archify** | 아키텍처·워크플로·시퀀스·데이터 흐름·라이프사이클 다이어그램 | 다이어그램을 요청하면 Boss가 `archify` 스킬로 라우팅합니다. 수동으로 하려면 `~/.claude/skills/archify`에서: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 생성된 `out.html` — 아무 브라우저에서나 열면 됩니다. 인라인 SVG, 테마 토글, 내보내기 메뉴를 포함한 자체 완결형이라 런타임 의존성이 없습니다. `node bin/archify.mjs check out.html`로 검증할 수 있습니다. |
 | **OMC HUD** | 실시간 컨텍스트·할당량·모드 표시 | `install.sh`가 스테이터스라인으로 설치합니다. `/oh-my-claudecode:hud`로 재설정할 수 있습니다 | 세션 하단의 Claude Code 스테이터스라인. codeburn을 보완합니다 — HUD는 현재 세션, codeburn은 모든 세션. |
 
@@ -355,12 +357,12 @@ my-claude는 MIT 라이선스 업스트림 저장소 5개를 git 서브모듈로
 | 출처 | 편입 방식 |
 |--------|----------------|
 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0`으로 설치하고 `serena` stdio MCP 서버로 등록. 심볼 단위 코드 탐색·편집. 배포되는 `serena-agent` 패키지는 전체가 GPL-3.0-or-later입니다(MIT인 SolidLSP와 GPL-3.0-or-later 애플리케이션의 결합). PyPI의 MIT classifier는 부정확합니다. 외부 서버로만 사용하고 벤더링하지 않습니다. |
-| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"`으로 설치하고 `headroom` stdio MCP 서버(`headroom mcp serve`)로 등록. 툴 출력 압축. Apache-2.0. 프록시/wrap 모드는 의도적으로 사용하지 않습니다. |
+| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"`으로 설치하고 `headroom` stdio MCP 서버(`headroom mcp serve`)로 등록하며 변경 없는 영구 프로필 `agent-harness-shared`로도 시작. 툴 출력 압축. Apache-2.0. |
 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | npm CLI (MIT). 로컬 우선 토큰/비용 추적기 — Claude Code가 이미 기록하는 세션 파일을 읽기 전용으로 파싱해 모델·프로젝트·작업별 비용을 집계합니다. 프록시·API 키·업로드 없음. `install.sh`가 `codeburn@0.9.23`으로 고정 설치하며 `upstream/SOURCES.json`에 `method: npm-cli`로 등재. 예산 가드 훅은 `--with-codeburn-guard`로 opt-in. 표시되는 달러 금액은 토큰 수를 API 정가로 환산한 추정치이며 codeburn 자체는 무료로 아무것도 청구하지 않습니다(구독 플랜에서는 사용량 지표). 가드의 hard cap(기본 $15/세션)은 해제 명령 `codeburn guard allow`를 포함한 그 세션의 모든 툴 호출을 차단하므로(외부 터미널에서 실행) opt-in으로 둡니다. OMC HUD(현재 세션의 컨텍스트·한도)를 보완해 세션 전체의 비용 흐름을 보여줍니다. |
 | <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`. 구조적(AST 인식) 코드 검색 및 치환. |
 | <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | `https://mcp.context7.com/mcp`의 호스팅 MCP 서버. 최신 라이브러리 문서. |
 | <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | `https://mcp.exa.ai/mcp`의 호스팅 MCP 서버. 뉴럴 웹 검색. |
-| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://grep.app/)** — grep.app | `https://mcp.grep.app`의 호스팅 MCP 서버. 공개 GitHub 저장소 전반의 코드 검색. |
+| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://github.com/grep-app)** — grep.app | `https://mcp.grep.app`의 호스팅 MCP 서버. 공개 GitHub 저장소 전반의 코드 검색. |
 
 ---
 
