@@ -36,6 +36,10 @@ SKIP_OMC=0
 SKIP_GSTACK=0
 SKIP_SUPERPOWERS=0
 SKIP_ARCHIFY=0
+# Companion CLI tools (serena, headroom, codeburn). Asked for interactively
+# below; these two flags answer the question up front.
+SKIP_TOOLS=0
+ASSUME_YES=0
 # Optional skill lanes (see scripts/skill-allowlists.sh). Empty = default install.
 # Precedence: CLI flag > MY_CLAUDE_SKILLS env > ~/.claude/.my-claude-skills.
 SKILL_LANES=""
@@ -47,6 +51,8 @@ for arg in "$@"; do
     --skip-gstack)     SKIP_GSTACK=1 ;;
     --skip-superpowers) SKIP_SUPERPOWERS=1 ;;
     --skip-archify)    SKIP_ARCHIFY=1 ;;
+    --skip-tools)      SKIP_TOOLS=1 ;;
+    --yes)             ASSUME_YES=1 ;;
     --self-only)       SKIP_ECC=1; SKIP_OMC=1; SKIP_GSTACK=1; SKIP_SUPERPOWERS=1; SKIP_ARCHIFY=1 ;;
     --skills=*)        SKILL_LANES="${arg#--skills=}"; SKILL_LANES_SET=1 ;;
     --full-skills)     SKILL_LANES="$ECC_SKILL_OPTIONAL_LANES"; SKILL_LANES_SET=1 ;;
@@ -62,7 +68,9 @@ Options:
   --skip-gstack           Skip gstack upstream install
   --skip-superpowers      Skip superpowers upstream install
   --skip-archify          Skip the archify diagram skill install
-  --self-only             Install only self-owned files (implies all --skip-* flags)
+  --skip-tools            Skip the companion tools (serena, headroom, codeburn)
+  --yes                   Install the companion tools without asking
+  --self-only             Install only self-owned files (implies all upstream --skip-* flags)
   --skills=<lane[,lane]>  Also install optional skill lanes (available: web)
   --full-skills           Install every optional skill lane
   --with-codeburn-guard   Install the opt-in codeburn budget-guard hooks
@@ -117,6 +125,31 @@ elif [ "$INSTALLED_VERSION" = "$INSTALLING_VERSION" ]; then
   echo "  Reinstalling: v${INSTALLING_VERSION} (same version)"
 else
   echo "  Updating: v${INSTALLED_VERSION} → v${INSTALLING_VERSION}"
+fi
+
+# ── Companion tools ──
+# Asked once, before any installation work, so that "no" costs nothing. The
+# prompt is skipped whenever an answer cannot be read back (no TTY, CI) or has
+# already been given (--yes / --skip-tools); the unattended default stays what
+# it has always been: install.
+if [ "$SKIP_TOOLS" = "0" ] && [ "$ASSUME_YES" = "0" ] && [ -t 0 ] && [ -z "${CI:-}" ]; then
+  echo ""
+  echo "Companion tools — optional; the harness works without them:"
+  echo "  serena    — symbol-level code navigation over MCP (uv tool, ~1 min)"
+  echo "  headroom  — tool-output compression over MCP (uv tool, ~1 min)"
+  echo "  codeburn  — token/cost tracking with a local dashboard on 4747 (npm)"
+  echo "Installing them also registers the serena and headroom MCP servers and"
+  echo "starts the shared local dashboards. Everything else installs either way."
+  printf "Install them? [Y/n] "
+  read -r _tools_answer || _tools_answer=""
+  case "$_tools_answer" in
+    [nN]|[nN][oO]) SKIP_TOOLS=1 ;;
+    *)             SKIP_TOOLS=0 ;;
+  esac
+  echo ""
+fi
+if [ "$SKIP_TOOLS" = "1" ]; then
+  echo "  Companion tools: skipped (serena, headroom, codeburn)"
 fi
 
 # ── 0b. tmux (optional — used by omc qa-tester; Agent Teams run in-process) ──
@@ -596,10 +629,12 @@ claude mcp add grep_app  --transport http --scope user "https://mcp.grep.app" 2>
 # the 2>/dev/null||true below swallows that, so a changed argument list never
 # reaches an already-installed machine. This harness owns these two
 # registrations, so remove any existing one first and re-add with current args.
-claude mcp remove serena -s user 2>/dev/null || true
-claude mcp add --scope user serena   -- serena start-mcp-server --context claude-code --project-from-cwd --open-web-dashboard False 2>/dev/null || true
-claude mcp remove headroom -s user 2>/dev/null || true
-claude mcp add --scope user headroom -- headroom mcp serve 2>/dev/null || true
+if [ "$SKIP_TOOLS" = "0" ]; then
+  claude mcp remove serena -s user 2>/dev/null || true
+  claude mcp add --scope user serena   -- serena start-mcp-server --context claude-code --project-from-cwd --open-web-dashboard False 2>/dev/null || true
+  claude mcp remove headroom -s user 2>/dev/null || true
+  claude mcp add --scope user headroom -- headroom mcp serve 2>/dev/null || true
+fi
 echo "  MCP servers registered"
 
 # ── 4. Merge settings.json ──
@@ -691,7 +726,12 @@ else
   oh-my-opencode install --no-tui --claude=yes --openai=no --gemini=no --copilot=no 2>/dev/null || true
   echo "    omo installed"
 fi
-npm i -g @ast-grep/cli@0.42.0 @code-yeongyu/comment-checker@0.7.0 codeburn@0.9.23 2>/dev/null || true
+# codeburn is a companion tool; the other two are always installed.
+if [ "$SKIP_TOOLS" = "0" ]; then
+  npm i -g @ast-grep/cli@0.42.0 @code-yeongyu/comment-checker@0.7.0 codeburn@0.9.23 2>/dev/null || true
+else
+  npm i -g @ast-grep/cli@0.42.0 @code-yeongyu/comment-checker@0.7.0 2>/dev/null || true
+fi
 # codeburn budget guard is opt-in: it adds a PreToolUse hook on every tool call.
 if [ "${WITH_CODEBURN_GUARD:-0}" = "1" ] && command -v codeburn >/dev/null 2>&1; then
   codeburn guard install 2>/dev/null && echo "  codeburn guard hooks installed" || echo "  WARNING: codeburn guard install failed"
@@ -746,82 +786,90 @@ fi
 # a clone of this repo plus `bash install.sh` is the whole prerequisite list.
 # Every command here is non-fatal: a missing CLI disables one MCP server, it
 # does not break the install.
-echo "  [5e] uv + MCP tool CLIs (serena, headroom)..."
-if ! command -v uv >/dev/null 2>&1; then
-  echo "    uv not found, installing via the official installer..."
-  curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1 || echo "    WARNING: uv install failed"
-fi
-# The uv installer drops uv and every `uv tool` shim in ~/.local/bin, which is
-# not on PATH in a non-login shell. Prepend it for the rest of this script.
-case ":$PATH:" in
-  *":$HOME/.local/bin:"*) ;;
-  *) PATH="$HOME/.local/bin:$PATH"; export PATH ;;
-esac
-
-if command -v uv >/dev/null 2>&1; then
-  _UV_TOOLS="$(uv tool list 2>/dev/null || echo "")"
-  # serena-agent — symbol-level code navigation and editing (LSP-backed).
-  case "$_UV_TOOLS" in
-    *"serena-agent v1.7.0"*) echo "    serena-agent 1.7.0 already installed" ;;
-    *) uv tool install -p 3.13 serena-agent==1.7.0 >/dev/null 2>&1 \
-         && echo "    serena-agent 1.7.0 installed" \
-         || echo "    WARNING: serena-agent install failed" ;;
-  esac
-  # headroom-ai — tool-output compression exposed over MCP. The proxy mode
-  # (`headroom proxy` + ANTHROPIC_BASE_URL) works on a subscription login too,
-  # but it is left to the user: Claude Code cannot connect while the proxy is
-  # down, so starting one automatically would be a new way to break a session.
-  # MCP mode has no such failure mode and is what this installer wires up.
-  case "$_UV_TOOLS" in
-    *"headroom-ai v0.37.0"*) echo "    headroom-ai 0.37.0 already installed" ;;
-    *) uv tool install --python 3.13 "headroom-ai[all]==0.37.0" >/dev/null 2>&1 \
-         && echo "    headroom-ai 0.37.0 installed" \
-         || echo "    WARNING: headroom-ai install failed" ;;
+if [ "$SKIP_TOOLS" = "1" ]; then
+  echo "  [5e] uv + MCP tool CLIs: SKIPPED (--skip-tools)"
+else
+  echo "  [5e] uv + MCP tool CLIs (serena, headroom)..."
+  if ! command -v uv >/dev/null 2>&1; then
+    echo "    uv not found, installing via the official installer..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1 || echo "    WARNING: uv install failed"
+  fi
+  # The uv installer drops uv and every `uv tool` shim in ~/.local/bin, which is
+  # not on PATH in a non-login shell. Prepend it for the rest of this script.
+  case ":$PATH:" in
+    *":$HOME/.local/bin:"*) ;;
+    *) PATH="$HOME/.local/bin:$PATH"; export PATH ;;
   esac
 
-  # Serena keeps a global config; create it once and turn off the launch-time
-  # browser pop-up there too. The registered server passes
-  # `--open-web-dashboard False`, which overrides this setting, so the config
-  # write is belt-and-braces for servers started by hand. Only written when
-  # this run creates the file, so a config the user has tuned is never
-  # rewritten.
-  SERENA_CONFIG="$HOME/.serena/serena_config.yml"
-  if command -v serena >/dev/null 2>&1 && [ ! -f "$SERENA_CONFIG" ]; then
-    serena init >/dev/null 2>&1 || true
-    if [ -f "$SERENA_CONFIG" ]; then
-      # `serena config` only offers an interactive `edit`, so patch the key.
-      sed -i.bak 's/^web_dashboard_open_on_launch: true$/web_dashboard_open_on_launch: false/' "$SERENA_CONFIG" \
-        && rm -f "$SERENA_CONFIG.bak"
-      # Report what actually landed: a future serena release that renames or
-      # drops the key would leave the sed a no-op, and claiming success then
-      # hides it.
-      if grep -q '^web_dashboard_open_on_launch: false$' "$SERENA_CONFIG"; then
-        echo "    serena config created (dashboard auto-open off)"
-      else
-        echo "    serena config created, but web_dashboard_open_on_launch not found — the MCP server still passes --open-web-dashboard False"
+  if command -v uv >/dev/null 2>&1; then
+    _UV_TOOLS="$(uv tool list 2>/dev/null || echo "")"
+    # serena-agent — symbol-level code navigation and editing (LSP-backed).
+    case "$_UV_TOOLS" in
+      *"serena-agent v1.7.0"*) echo "    serena-agent 1.7.0 already installed" ;;
+      *) uv tool install -p 3.13 serena-agent==1.7.0 >/dev/null 2>&1 \
+           && echo "    serena-agent 1.7.0 installed" \
+           || echo "    WARNING: serena-agent install failed" ;;
+    esac
+    # headroom-ai — tool-output compression exposed over MCP. The proxy mode
+    # (`headroom proxy` + ANTHROPIC_BASE_URL) works on a subscription login too,
+    # but it is left to the user: Claude Code cannot connect while the proxy is
+    # down, so starting one automatically would be a new way to break a session.
+    # MCP mode has no such failure mode and is what this installer wires up.
+    case "$_UV_TOOLS" in
+      *"headroom-ai v0.37.0"*) echo "    headroom-ai 0.37.0 already installed" ;;
+      *) uv tool install --python 3.13 "headroom-ai[all]==0.37.0" >/dev/null 2>&1 \
+           && echo "    headroom-ai 0.37.0 installed" \
+           || echo "    WARNING: headroom-ai install failed" ;;
+    esac
+
+    # Serena keeps a global config; create it once and turn off the launch-time
+    # browser pop-up there too. The registered server passes
+    # `--open-web-dashboard False`, which overrides this setting, so the config
+    # write is belt-and-braces for servers started by hand. Only written when
+    # this run creates the file, so a config the user has tuned is never
+    # rewritten.
+    SERENA_CONFIG="$HOME/.serena/serena_config.yml"
+    if command -v serena >/dev/null 2>&1 && [ ! -f "$SERENA_CONFIG" ]; then
+      serena init >/dev/null 2>&1 || true
+      if [ -f "$SERENA_CONFIG" ]; then
+        # `serena config` only offers an interactive `edit`, so patch the key.
+        sed -i.bak 's/^web_dashboard_open_on_launch: true$/web_dashboard_open_on_launch: false/' "$SERENA_CONFIG" \
+          && rm -f "$SERENA_CONFIG.bak"
+        # Report what actually landed: a future serena release that renames or
+        # drops the key would leave the sed a no-op, and claiming success then
+        # hides it.
+        if grep -q '^web_dashboard_open_on_launch: false$' "$SERENA_CONFIG"; then
+          echo "    serena config created (dashboard auto-open off)"
+        else
+          echo "    serena config created, but web_dashboard_open_on_launch not found — the MCP server still passes --open-web-dashboard False"
+        fi
       fi
     fi
-  fi
 
-  # `uv tool` shims live in ~/.local/bin. Claude Code launches the stdio MCP
-  # servers by bare command name, so that directory has to be on the PATH the
-  # editor inherits. This script prepended it for itself above; tell the user
-  # how to make it permanent rather than editing their shell profile for them.
-  for _cli in serena headroom; do
-    command -v "$_cli" >/dev/null 2>&1 \
-      || echo "    WARNING: $_cli not on PATH — run 'uv tool update-shell' so its MCP server can start"
-  done
-else
-  echo "    WARNING: uv unavailable — serena and headroom MCP servers will not start"
+    # `uv tool` shims live in ~/.local/bin. Claude Code launches the stdio MCP
+    # servers by bare command name, so that directory has to be on the PATH the
+    # editor inherits. This script prepended it for itself above; tell the user
+    # how to make it permanent rather than editing their shell profile for them.
+    for _cli in serena headroom; do
+      command -v "$_cli" >/dev/null 2>&1 \
+        || echo "    WARNING: $_cli not on PATH — run 'uv tool update-shell' so its MCP server can start"
+    done
+  else
+    echo "    WARNING: uv unavailable — serena and headroom MCP servers will not start"
+  fi
 fi
 
 # 5f. Shared local dashboards (my-claude + my-codex)
 # The helper locks a cross-harness state directory, identifies an existing
 # service before reusing it, and never kills an unknown port owner. Failures are
 # diagnostic only: the CLI/MCP installation remains usable without dashboards.
-echo "  [5f] shared local dashboards (codeburn, Headroom)..."
-bash "$SCRIPT_DIR/scripts/ensure-shared-local-services.sh" || \
-  echo "    WARNING: shared local dashboard setup failed"
+if [ "$SKIP_TOOLS" = "1" ]; then
+  echo "  [5f] shared local dashboards: SKIPPED (--skip-tools)"
+else
+  echo "  [5f] shared local dashboards (codeburn, Headroom)..."
+  bash "$SCRIPT_DIR/scripts/ensure-shared-local-services.sh" || \
+    echo "    WARNING: shared local dashboard setup failed"
+fi
 
 # 5g. my-claude plugin refresh (keep the two install routes in sync)
 # my-claude can be installed via this script (copies files into ~/.claude and
@@ -916,10 +964,17 @@ echo "  hooks:            $(find "$HOME/.claude/hooks"  -type f      2>/dev/null
 echo "  omc:              $(command -v omc            >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  ast-grep:         $(command -v ast-grep       >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
-echo "  codeburn:         $(probe codeburn codeburn report --format json --period today)"
-echo "  uv:               $(command -v uv >/dev/null 2>&1 && echo "OK ($(uv --version 2>/dev/null))" || echo 'MISSING')"
-echo "  serena (MCP):     $(probe serena serena --version)"
-echo "  headroom (MCP):   $(probe headroom headroom --version)"
+if [ "$SKIP_TOOLS" = "1" ]; then
+  echo "  codeburn:         SKIPPED (--skip-tools)"
+  echo "  uv:               SKIPPED (--skip-tools)"
+  echo "  serena (MCP):     SKIPPED (--skip-tools)"
+  echo "  headroom (MCP):   SKIPPED (--skip-tools)"
+else
+  echo "  codeburn:         $(probe codeburn codeburn report --format json --period today)"
+  echo "  uv:               $(command -v uv >/dev/null 2>&1 && echo "OK ($(uv --version 2>/dev/null))" || echo 'MISSING')"
+  echo "  serena (MCP):     $(probe serena serena --version)"
+  echo "  headroom (MCP):   $(probe headroom headroom --version)"
+fi
 echo "  archify (skill):  $(probe_archify)"
 echo "  tmux:             $(command -v tmux >/dev/null 2>&1 && echo "OK ($(tmux -V))" || echo 'NOT INSTALLED (optional)')"
 echo "  hud:              $(test -f "$HOME/.claude/hud/omc-hud.mjs" && echo 'OK' || echo 'MISSING')"
@@ -928,15 +983,20 @@ TEAMMATE_MODE=$(node -e "try{const h=process.env.HOME||process.env.USERPROFILE;c
 echo "  version:          v${INSTALLING_VERSION}"
 echo "  teammateMode:     $TEAMMATE_MODE"
 echo ""
-echo "Open these"
-echo "  Serena dashboard:   http://localhost:24282/dashboard/index.html"
-echo "                      (live whenever a Claude session has the serena MCP server up)"
-echo "  codeburn dashboard: http://127.0.0.1:4747 (shared service started or reused above)"
-echo "  Headroom stats:      http://127.0.0.1:8787/stats"
-echo "                       (may be empty until a client explicitly routes through the proxy)"
-echo ""
-echo "  The serena and headroom MCP servers start automatically with each Claude Code session."
-echo ""
+if [ "$SKIP_TOOLS" = "1" ]; then
+  echo "  Companion tools were skipped; re-run with --yes to install them."
+  echo ""
+else
+  echo "Open these"
+  echo "  Serena dashboard:   http://localhost:24282/dashboard/index.html"
+  echo "                      (live whenever a Claude session has the serena MCP server up)"
+  echo "  codeburn dashboard: http://127.0.0.1:4747 (shared service started or reused above)"
+  echo "  Headroom stats:      http://127.0.0.1:8787/stats"
+  echo "                       (may be empty until a client explicitly routes through the proxy)"
+  echo ""
+  echo "  The serena and headroom MCP servers start automatically with each Claude Code session."
+  echo ""
+fi
 # Record installed version
 echo "$INSTALLING_VERSION" > "$HOME/.claude/.my-claude-version"
 git -C "$SCRIPT_DIR" rev-parse --short=12 HEAD 2>/dev/null > "$HOME/.claude/.my-claude-installed-sha" || true
