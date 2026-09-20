@@ -52,6 +52,8 @@ bash /tmp/my-claude/install.sh
 rm -rf /tmp/my-claude
 ```
 
+L'installeur met à disposition un tableau de bord codeburn et un proxy Headroom partagés par my-claude et my-codex. Une installation ultérieure réutilise les services sains au lieu de créer des doublons. L'état et les journaux de démarrage se trouvent sous `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services` ; ni `ANTHROPIC_BASE_URL` ni `OPENAI_BASE_URL` ne sont modifiés.
+
 ### Pour les agents IA
 
 ```bash
@@ -228,9 +230,9 @@ Chaque source est pilotée par la liste d'autorisation de [`scripts/skill-allowl
 
 | Serveur | Objectif | Coût |
 |--------|---------|------|
-| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://mcp.context7.com) | Documentation de bibliothèques en temps réel | Gratuit |
-| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://mcp.exa.ai) | Recherche web sémantique | Gratuit 1k req/mois |
-| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://mcp.grep.app) | Recherche de code GitHub | Gratuit |
+| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://context7.com) | Documentation de bibliothèques en temps réel | Gratuit |
+| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://exa.ai) | Recherche web sémantique | Gratuit 1k req/mois |
+| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://github.com/grep-app) | Recherche de code GitHub | Gratuit |
 
 **Hooks comportementaux**
 
@@ -307,9 +309,9 @@ Chaque outil de la stack écrit ses résultats quelque part — voici où les tr
 
 | Outil | Ce qu'il fait | Comment l'exécuter | Où regarder |
 |------|--------------|-----------|---------------|
-| **codeburn** | Comptabilité des tokens et des coûts sur l'ensemble des sessions passées | `codeburn` (TUI interactif) · `codeburn web` pour un tableau de bord dans le navigateur (`--no-open` pour afficher l'URL au lieu de lancer un navigateur) · `codeburn report --format json --period week` pour un export non interactif (également `--day`, `--from`/`--to`, `--provider claude`) | Lit `~/.claude/projects/**/*.jsonl` en lecture seule. Tableau de bord navigateur sur <http://127.0.0.1:4747> (`codeburn web` ; bascule sur un port libre si celui-ci est pris). Les montants en dollars sont des **estimations** : nombre de tokens valorisé au tarif API public, donc sur un abonnement c'est un indicateur d'usage, pas une facture. |
+| **codeburn** | Comptabilité des tokens et des coûts sur l'ensemble des sessions passées | `install.sh` démarre ou réutilise `codeburn web --provider all --port 4747 --no-open` · `codeburn` ouvre la TUI · `codeburn report --format json --period week` produit un export non interactif | Tableau de bord partagé sur <http://127.0.0.1:4747/>. Les fichiers de session sont lus en lecture seule ; les montants sont des estimations aux tarifs API publics. Journal de démarrage : `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`. |
 | **Serena** | Navigation et édition de code au niveau des symboles | Démarre automatiquement comme serveur MCP ; appelez `get_symbols_overview` / `find_symbol` depuis n'importe quelle session | Tableau de bord sur <http://localhost:24282/dashboard/index.html> tant qu'un serveur tourne (logs + nombre d'appels par outil). Les mémoires par projet atterrissent dans `.serena/` à l'intérieur du dépôt sur lequel vous travaillez ; la configuration globale est `~/.serena/serena_config.yml`. |
-| **Headroom** | Compresse les résultats d'outils surdimensionnés avant leur entrée dans la transcription | Outils MCP `headroom_compress` / `headroom_retrieve` / `headroom_stats` · proxy optionnel : `headroom proxy --port 8787`, puis `ANTHROPIC_BASE_URL=http://127.0.0.1:8787 claude` | `headroom_stats` rapporte le nombre de compressions du serveur en cours d'exécution. Avec le proxy activé, <http://127.0.0.1:8787/stats> et `headroom dashboard`. Sans lui, `headroom doctor` et `headroom perf` rapportent « not reachable » / « no performance data » — attendu, puisqu'ils décrivent le proxy. |
+| **Headroom** | Compresse les résultats d'outils surdimensionnés avant leur entrée dans la transcription | Outils MCP `headroom_compress` / `headroom_retrieve` / `headroom_stats` ; `install.sh` démarre ou réutilise le profil proxy partagé `agent-harness-shared` | Statistiques sur <http://127.0.0.1:8787/stats> ; elles peuvent rester vides jusqu'à ce qu'un client soit explicitement routé via le proxy. L'installeur ne définit jamais `ANTHROPIC_BASE_URL` ni `OPENAI_BASE_URL`. Journal de démarrage : `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`. |
 | **Archify** | Diagrammes d'architecture, de workflow, de séquence, de flux de données et de cycle de vie | Demandez un diagramme et Boss route vers le skill `archify`. Manuellement, depuis `~/.claude/skills/archify` : `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | Le fichier `out.html` généré — ouvrez-le dans n'importe quel navigateur. Il est autonome (SVG inline, bascule de thème, menu d'export) et n'a aucune dépendance à l'exécution. Validez-en un avec `node bin/archify.mjs check out.html`. |
 | **OMC HUD** | Lecture en direct du contexte, du quota et du mode | Installé comme statusline par `install.sh` ; `/oh-my-claudecode:hud` le reconfigure | La statusline de Claude Code en bas de la session. Complète codeburn : le HUD, c'est cette session ; codeburn, c'est toutes les sessions. |
 
@@ -341,12 +343,12 @@ CLIs compagnons et serveurs MCP apportés par `install.sh`, chacun épinglé à 
 | Source | Mode d'intégration |
 |--------|--------------------|
 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0`, enregistré comme serveur MCP stdio `serena`. Navigation et édition de code au niveau des symboles. Le paquet `serena-agent` distribué est sous GPL-3.0-or-later dans son ensemble (SolidLSP MIT combiné à une application GPL-3.0-or-later) ; le classifieur MIT de PyPI est erroné. Utilisé comme serveur externe, jamais vendorisé. |
-| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"`, enregistré comme serveur MCP stdio `headroom` (`headroom mcp serve`). Compression des sorties d'outils. Apache-2.0. Le mode proxy/wrap n'est volontairement pas utilisé. |
+| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"`, enregistré comme serveur MCP stdio `headroom` (`headroom mcp serve`) et démarré avec le profil persistant sans mutation `agent-harness-shared`. Compression des sorties d'outils. Apache-2.0. |
 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | CLI npm (MIT). Suivi local-first des tokens et des coûts — lit en lecture seule les fichiers de session que Claude Code écrit déjà et ventile les dépenses par modèle, projet et tâche. Pas de proxy, pas de clé API, rien ne quitte la machine. Installé par `install.sh` épinglé en `codeburn@0.9.23` et enregistré dans `upstream/SOURCES.json` en `method: npm-cli`. Les hooks de garde budgétaire sont opt-in via `--with-codeburn-guard`. Les montants en dollars sont des estimations — nombre de tokens au tarif API public ; codeburn est gratuit et ne facture rien (sur abonnement, c'est un indicateur d'usage). Le hard cap du garde ($15/session par défaut) bloque tous les appels d'outils de la session, y compris `codeburn guard allow` qui le lève (à lancer depuis un terminal externe), d'où son maintien en opt-in. Complète le HUD OMC (contexte et quota de la session courante) en montrant où va l'argent entre les sessions. |
 | <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`. Recherche et réécriture de code structurelles (compréhension de l'AST). |
 | <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | Serveur MCP hébergé sur `https://mcp.context7.com/mcp`. Documentation de bibliothèques à jour. |
 | <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | Serveur MCP hébergé sur `https://mcp.exa.ai/mcp`. Recherche web neuronale. |
-| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://grep.app/)** — grep.app | Serveur MCP hébergé sur `https://mcp.grep.app`. Recherche de code dans les dépôts GitHub publics. |
+| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://github.com/grep-app)** — grep.app | Serveur MCP hébergé sur `https://mcp.grep.app`. Recherche de code dans les dépôts GitHub publics. |
 
 ---
 
