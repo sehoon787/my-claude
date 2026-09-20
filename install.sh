@@ -858,6 +858,46 @@ echo "$SCRIPT_DIR" > "$HOME/.claude/.my-claude-repo-path" 2>/dev/null || true
 printf '%s\n' "$SKILL_LANES" > "$SKILL_LANES_FILE" 2>/dev/null || true
 
 # ── 6. Verification ──
+# `command -v` only proves a file sits on PATH. Each probe below actually runs
+# the tool: a cheap local call — no network, no server, no browser, well under
+# a second. Every probe is non-fatal under `set -euo pipefail`; a FAIL is
+# reported and the install still completes.
+probe() {  # probe <binary> <command...>
+  _probe_bin="$1"; shift
+  command -v "$_probe_bin" >/dev/null 2>&1 || { echo "MISSING (not on PATH)"; return 0; }
+  _probe_cmd="$*"
+  if _probe_out=$("$@" 2>/dev/null); then
+    # A one-line banner (`serena --version`) is the most useful thing to show;
+    # anything longer (a JSON report) is summarised by the command that ran.
+    _probe_lines=$(printf '%s\n' "$_probe_out" | wc -l | tr -d ' ')
+    if [ "$_probe_lines" = "1" ] && [ -n "$_probe_out" ] && [ ${#_probe_out} -le 40 ]; then
+      echo "OK ($_probe_out)"
+    else
+      echo "OK (ran \`$_probe_cmd\`)"
+    fi
+  else
+    echo "FAIL (\`$_probe_cmd\` exited non-zero)"
+  fi
+}
+
+# archify ships as a skill, not a binary: render its own bundled example into a
+# temp file and require a non-empty result, then drop the file.
+probe_archify() {
+  _ar_dir="$HOME/.claude/skills/archify"
+  [ -f "$_ar_dir/SKILL.md" ] || { echo "MISSING (skill not installed)"; return 0; }
+  if [ ! -f "$_ar_dir/bin/archify.mjs" ] || [ ! -f "$_ar_dir/examples/agent-run.lifecycle.json" ]; then
+    echo "SKIPPED (SKILL.md present, renderer or example missing)"
+    return 0
+  fi
+  _ar_out="${TMPDIR:-/tmp}/my-claude-archify-probe.$$.html"
+  if ( cd "$_ar_dir" && node bin/archify.mjs render lifecycle examples/agent-run.lifecycle.json "$_ar_out" ) >/dev/null 2>&1 && [ -s "$_ar_out" ]; then
+    echo "OK (rendered examples/agent-run.lifecycle.json, $(wc -c < "$_ar_out" | tr -d ' ') bytes)"
+  else
+    echo "FAIL (bin/archify.mjs render produced no output)"
+  fi
+  rm -f "$_ar_out"
+}
+
 echo ""
 echo "[6/6] Verification"
 echo "  agents (core):    $(find "$HOME/.claude/agents" -name '*.md' 2>/dev/null | wc -l | tr -d ' ') files"
@@ -868,17 +908,24 @@ echo "  hooks:            $(find "$HOME/.claude/hooks"  -type f      2>/dev/null
 echo "  omc:              $(command -v omc            >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  ast-grep:         $(command -v ast-grep       >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
-echo "  codeburn:         $(command -v codeburn       >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
+echo "  codeburn:         $(probe codeburn codeburn report --format json --period today)"
 echo "  uv:               $(command -v uv >/dev/null 2>&1 && echo "OK ($(uv --version 2>/dev/null))" || echo 'MISSING')"
-echo "  serena (MCP):     $(command -v serena   >/dev/null 2>&1 && echo "OK ($(serena --version 2>/dev/null))" || echo 'MISSING')"
-echo "  headroom (MCP):   $(command -v headroom >/dev/null 2>&1 && echo "OK ($(headroom --version 2>/dev/null))" || echo 'MISSING')"
-echo "  archify (skill):  $(test -f "$HOME/.claude/skills/archify/SKILL.md" && echo 'OK' || echo 'MISSING')"
+echo "  serena (MCP):     $(probe serena serena --version)"
+echo "  headroom (MCP):   $(probe headroom headroom --version)"
+echo "  archify (skill):  $(probe_archify)"
 echo "  tmux:             $(command -v tmux >/dev/null 2>&1 && echo "OK ($(tmux -V))" || echo 'NOT INSTALLED (optional)')"
 echo "  hud:              $(test -f "$HOME/.claude/hud/omc-hud.mjs" && echo 'OK' || echo 'MISSING')"
 echo "  my-claude plugin: $PLUGIN_REFRESH_STATUS"
 TEAMMATE_MODE=$(node -e "try{const h=process.env.HOME||process.env.USERPROFILE;console.log(JSON.parse(require('fs').readFileSync(h+'/.claude/settings.json','utf8')).teammateMode||'in-process (default)')}catch(e){console.log('auto')}")
 echo "  version:          v${INSTALLING_VERSION}"
 echo "  teammateMode:     $TEAMMATE_MODE"
+echo ""
+echo "Open these"
+echo "  Serena dashboard:   http://localhost:24282/dashboard/index.html"
+echo "                      (live whenever a Claude session has the serena MCP server up)"
+echo "  codeburn dashboard: run \`codeburn web\` — serves http://127.0.0.1:4747"
+echo ""
+echo "  The serena and headroom MCP servers start automatically with each Claude Code session."
 echo ""
 # Record installed version
 echo "$INSTALLING_VERSION" > "$HOME/.claude/.my-claude-version"

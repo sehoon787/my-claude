@@ -66,51 +66,13 @@ Lisez la TOTALITÉ de la sortie, puis exécutez chaque étape dans l'ordre. Util
 
 Boss est le méta-orchestrateur au cœur de my-claude. Il n'écrit jamais de code — il découvre, classe, associe, délègue et vérifie.
 
-```
-Requête utilisateur
-     │
-     ▼
-┌─────────────────────────────────────────────┐
-│  Phase 0 · DÉCOUVERTE                       │
-│  Analyse agents, skills, MCP, hooks au      │
-│  démarrage → Construit le registre des      │
-│  capacités en direct                        │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 1 · FILTRE D'INTENTION               │
-│  Classer : trivial | build | refactor |     │
-│  moyen | architecture | recherche | ...     │
-│  → Proposer un skill alternatif si plus     │
-│  adapté                                     │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 2 · CORRESPONDANCE DE CAPACITÉS      │
-│  P0: skill gstack (si installé)             │
-│  P1: Correspondance exacte de skill         │
-│  P2: Agent spécialiste (32)                 │
-│  P3: Orchestration multi-agents             │
-│  P4: Repli généraliste                      │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 3 · DÉLÉGATION                       │
-│  Prompt structuré en 6 sections au          │
-│  spécialiste                                │
-│  TÂCHE / RÉSULTAT / OUTILS / FAIRE /       │
-│  NE PAS FAIRE / CTX                         │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 4 · VÉRIFICATION                     │
-│  Lecture indépendante des fichiers modifiés │
-│  Exécution des tests, lint, build           │
-│  Recoupement avec l'intention d'origine     │
-│  → Jusqu'à 3 nouvelles tentatives en cas   │
-│  d'échec                                    │
-└─────────────────────────────────────────────┘
-```
+| Phase | Ce qui se passe |
+|-------|-----------------|
+| **0 · DISCOVERY** | Analyse les agents, skills, MCP et hooks à l'exécution pour construire un registre des capacités en direct |
+| **1 · INTENT GATE** | Classe la requête (trivial, build, refactor, mid-sized, architecture, research, …) et contre-propose un skill lorsqu'un skill convient mieux |
+| **2 · CAPABILITY MATCHING** | Fait cascader la chaîne de priorités ci-dessous (P0 skill gstack → P1 correspondance exacte de skill → P2 agent spécialiste → P3 orchestration multi-agents → P4 repli généraliste) |
+| **3 · DELEGATION** | Envoie au spécialiste un prompt structuré en 6 sections : TASK / OUTCOME / TOOLS / DO / DON'T / CTX |
+| **4 · VERIFICATION** | Relit indépendamment les fichiers modifiés, exécute les tests, le lint et le build, recoupe avec l'intention d'origine, et réessaie jusqu'à 3× en cas d'échec |
 
 ### Routage par priorité
 
@@ -153,17 +115,11 @@ Ordre de priorité : `CLAUDE_CODE_EFFORT_LEVEL` (variable d'environnement) > fro
 
 Pour l'implémentation de fonctionnalités de bout en bout, Boss orchestre un sprint structuré :
 
-```
-Phase 1 : CONCEPTION    Phase 2 : EXÉCUTION     Phase 3 : RÉVISION
-(interactive)            (autonome)               (interactive)
-─────────────────────   ─────────────────────   ─────────────────────
-L'utilisateur définit   ralph exécute           Comparer avec le doc
-la portée               Révision de code auto   de conception
-Révision technique      Vérification architect  Présenter le tableau
-Confirmer "conception   comparatif              comparatif
-terminée"               User : approuver /      User : approuver /
-                        améliorer               améliorer
-```
+| Phase | Mode | Ce qui se passe |
+|-------|------|-----------------|
+| **1 · DESIGN** | interactif | l'utilisateur définit la portée · révision technique · confirmer « conception terminée » |
+| **2 · EXECUTE** | autonome | ralph exécute · révision de code automatique · vérification architect |
+| **3 · REVIEW** | interactif | comparer avec le doc de conception · présenter le tableau comparatif · l'utilisateur approuve ou demande une amélioration |
 
 ### Rapport final structuré
 
@@ -190,49 +146,6 @@ Des workflows multi-agents déterministes. `install.sh` les copie dans `~/.claud
 
 ---
 
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────┐
-│                    Requête utilisateur                │
-└───────────────────────┬─────────────────────────────┘
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│  Boss · Méta-Orchestrateur (Fable)                    │
-│  Découverte → Classification → Correspondance →       │
-│  Délégation                                           │
-└──┬──────────┬──────────┬──────────┬─────────────────┘
-   │          │          │          │
-   ▼          ▼          ▼          ▼
-┌──────┐ ┌────────┐ ┌────────┐ ┌────────┐
-│ P3a  │ │  P3b   │ │  P3c   │ │  P1/P2 │
-│Direct│ │Sous-   │ │Équipes │ │ Skill/ │
-│2-4   │ │orch    │ │d'agents│ │ Agent  │
-│agents│ │Sisyphus│ │  P2P   │ │ Direct │
-└──────┘ │Atlas   │ └────────┘ └────────┘
-         │Hephaes│
-         └────────┘
-┌─────────────────────────────────────────────────────┐
-│  Couche comportementale                               │
-│  Principes Karpathy · Règles (48) · Hooks (10)        │
-├─────────────────────────────────────────────────────┤
-│  Agents spécialistes (32)                             │
-│  Boss 1 · OMO 9 · OMC 19 · Vendored 3                │
-├─────────────────────────────────────────────────────┤
-│  Skills (105)                                         │
-│  ECC 61 · gstack 27 · Superpowers 13            │
-│  + Core 4                                             │
-├─────────────────────────────────────────────────────┤
-│  Couche MCP                                           │
-│  Context7 · Exa · grep.app                            │
-├─────────────────────────────────────────────────────┤
-│  Couche outillage                                     │
-│  LSP (2) · Workflows nommés (2)                       │
-└─────────────────────────────────────────────────────┘
-```
-
----
-
 ## Ce qui est inclus
 
 | Catégorie | Nombre | Source |
@@ -250,68 +163,46 @@ Des workflows multi-agents déterministes. `install.sh` les copie dans `~/.claud
 Chaque agent, skill et règle ci-dessus figure dans la liste d'autorisation de [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) et est suivi par le manifeste d'installation. Les skills documentaires officiels d'Anthropic (pdf, docx, etc.) sont installés séparément via `claude plugin add anthropics/skills` et volontairement exclus du manifeste.
 
 <details>
-<summary><strong>Agent principal — Méta-orchestrateur Boss (1)</strong></summary>
+<summary><strong>Agents spécialistes — 32 répartis sur 4 niveaux</strong></summary>
 
-| Agent | Modèle | Rôle | Source |
-|-------|-------|------|--------|
-| Boss | Fable | Découverte dynamique à l'exécution → correspondance de capacités → routage optimal. N'écrit jamais de code. | my-claude |
+Les modèles utilisés par agent sont listés dans le tableau de routage par modèle ci-dessus.
 
-</details>
+Les agents vendorisés ont été capturés depuis [agency-agents](https://github.com/msitarzewski/agency-agents) (MIT) le 2026-07-27, lors de la suppression de ce sous-module. Seuls les agents d'ingénierie sans équivalent ailleurs dans la stack ont été conservés ; chaque fichier porte son attribution d'origine.
 
-<details>
-<summary><strong>Agents OMO — Sous-orchestrateurs et spécialistes (9)</strong></summary>
-
-| Agent | Modèle | Rôle | Source |
-|-------|-------|------|--------|
-| Sisyphus | Opus | Classification d'intention → délégation aux spécialistes → vérification | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
-| Hephaestus | Opus | Exploration autonome → planification → exécution → vérification | oh-my-openagent |
-| Atlas | Opus | Décomposition de tâches + vérification QA en 4 étapes | oh-my-openagent |
-| Oracle | Opus | Conseil technique stratégique (lecture seule) | oh-my-openagent |
-| Metis | Opus | Analyse d'intention, détection d'ambiguïté | oh-my-openagent |
-| Momus | Opus | Révision de faisabilité des plans | oh-my-openagent |
-| Prometheus | Opus | Planification détaillée par entretien | oh-my-openagent |
-| Librarian | Sonnet | Recherche de documentation open source via MCP | oh-my-openagent |
-| Multimodal-Looker | Sonnet | Analyse d'images, captures d'écran et diagrammes | oh-my-openagent |
-
-</details>
-
-<details>
-<summary><strong>Agents OMC — Agents spécialistes (19)</strong></summary>
-
-| Agent | Rôle | Source |
-|-------|------|--------|
-| analyst | Pré-analyse avant planification | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) |
-| architect | Conception et architecture système | oh-my-claudecode |
-| code-reviewer | Révision de code ciblée | oh-my-claudecode |
-| code-simplifier | Simplification et nettoyage du code | oh-my-claudecode |
-| critic | Analyse critique, propositions alternatives | oh-my-claudecode |
-| debugger | Débogage ciblé | oh-my-claudecode |
-| designer | Conseils de conception UI/UX | oh-my-claudecode |
-| document-specialist | Rédaction de documentation | oh-my-claudecode |
-| executor | Exécution de tâches | oh-my-claudecode |
-| explore | Exploration de code source | oh-my-claudecode |
-| git-master | Gestion du workflow Git | oh-my-claudecode |
-| planner | Planification rapide | oh-my-claudecode |
-| qa-tester | Tests d'assurance qualité | oh-my-claudecode |
-| scientist | Recherche et expérimentation | oh-my-claudecode |
-| security-reviewer | Révision de sécurité | oh-my-claudecode |
-| test-engineer | Écriture et maintenance des tests | oh-my-claudecode |
-| tracer | Traçage et analyse d'exécution | oh-my-claudecode |
-| verifier | Vérification finale | oh-my-claudecode |
-| writer | Contenu et documentation | oh-my-claudecode |
-
-</details>
-
-<details>
-<summary><strong>Agents vendorisés — Spécialistes IA et infrastructure (3)</strong></summary>
-
-Capturés depuis [agency-agents](https://github.com/msitarzewski/agency-agents) (MIT) le 2026-07-27, lors de la suppression de ce sous-module. Seuls les agents d'ingénierie sans équivalent ailleurs dans la stack ont été conservés ; chaque fichier porte son attribution d'origine.
-
-| Agent | Rôle | Source |
-|-------|------|--------|
-| AI Engineer | Ingénierie IA/ML, intégration de modèles, pipelines de données | agency-agents (vendorisé) |
-| DevOps Automator | Automatisation d'infrastructure, CI/CD, opérations cloud | agency-agents (vendorisé) |
-| Multi-Agent Systems Architect | Topologie d'agents, gestion du contexte, reprise sur incident | agency-agents (vendorisé) |
+| Agent | Niveau | Rôle | Source |
+|-------|--------|------|--------|
+| Boss | core | Découverte dynamique à l'exécution → correspondance de capacités → routage optimal. N'écrit jamais de code. | my-claude |
+| Sisyphus | omo | Classification d'intention → délégation aux spécialistes → vérification | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
+| Hephaestus | omo | Exploration autonome → planification → exécution → vérification | oh-my-openagent |
+| Atlas | omo | Décomposition de tâches + vérification QA en 4 étapes | oh-my-openagent |
+| Oracle | omo | Conseil technique stratégique (lecture seule) | oh-my-openagent |
+| Metis | omo | Analyse d'intention, détection d'ambiguïté | oh-my-openagent |
+| Momus | omo | Révision de faisabilité des plans | oh-my-openagent |
+| Prometheus | omo | Planification détaillée par entretien | oh-my-openagent |
+| Librarian | omo | Recherche de documentation open source via MCP | oh-my-openagent |
+| Multimodal-Looker | omo | Analyse d'images, captures d'écran et diagrammes | oh-my-openagent |
+| analyst | omc | Pré-analyse avant planification | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) |
+| architect | omc | Conception et architecture système | oh-my-claudecode |
+| code-reviewer | omc | Révision de code ciblée | oh-my-claudecode |
+| code-simplifier | omc | Simplification et nettoyage du code | oh-my-claudecode |
+| critic | omc | Analyse critique, propositions alternatives | oh-my-claudecode |
+| debugger | omc | Débogage ciblé | oh-my-claudecode |
+| designer | omc | Conseils de conception UI/UX | oh-my-claudecode |
+| document-specialist | omc | Rédaction de documentation | oh-my-claudecode |
+| executor | omc | Exécution de tâches | oh-my-claudecode |
+| explore | omc | Exploration de code source | oh-my-claudecode |
+| git-master | omc | Gestion du workflow Git | oh-my-claudecode |
+| planner | omc | Planification rapide | oh-my-claudecode |
+| qa-tester | omc | Tests d'assurance qualité | oh-my-claudecode |
+| scientist | omc | Recherche et expérimentation | oh-my-claudecode |
+| security-reviewer | omc | Révision de sécurité | oh-my-claudecode |
+| test-engineer | omc | Écriture et maintenance des tests | oh-my-claudecode |
+| tracer | omc | Traçage et analyse d'exécution | oh-my-claudecode |
+| verifier | omc | Vérification finale | oh-my-claudecode |
+| writer | omc | Contenu et documentation | oh-my-claudecode |
+| AI Engineer | vendored | Ingénierie IA/ML, intégration de modèles, pipelines de données | agency-agents (vendorisé) |
+| DevOps Automator | vendored | Automatisation d'infrastructure, CI/CD, opérations cloud | agency-agents (vendorisé) |
+| Multi-Agent Systems Architect | vendored | Topologie d'agents, gestion du contexte, reprise sur incident | agency-agents (vendorisé) |
 
 </details>
 
@@ -373,47 +264,18 @@ Le plugin déclare deux serveurs de langage dans `.lsp.json`. Claude Code les d�
 
 Mémoire persistante compatible Obsidian. Chaque projet maintient un répertoire `.briefing/` qui se remplit automatiquement entre les sessions.
 
-```
-.briefing/
-├── INDEX.md                          ← Contexte du projet (créé une seule fois)
-├── sessions/
-│   ├── YYYY-MM-DD-<topic>.md        ← Résumé de session écrit par l'IA (obligatoire)
-│   └── YYYY-MM-DD-auto.md           ← Scaffold auto-généré (diff git, stats d'agents)
-├── decisions/
-│   └── YYYY-MM-DD-<decision>.md     ← Décision écrite par l'IA (obligatoire)
-├── learnings/
-│   ├── YYYY-MM-DD-<pattern>.md      ← Note d'apprentissage écrite par l'IA
-│   └── YYYY-MM-DD-auto-session.md   ← Scaffold auto-généré (agents, fichiers)
-├── references/
-│   └── auto-links.md                ← URLs collectées automatiquement depuis les recherches web
-├── agents/
-│   ├── agent-log.jsonl              ← Télémétrie d'exécution des sous-agents
-│   └── YYYY-MM-DD-summary.md        ← Récapitulatif quotidien d'utilisation des agents
-├── persona/
-│   ├── profile.md                   ← Statistiques d'affinité d'agents (mis à jour auto)
-│   ├── suggestions.jsonl            ← Suggestions de routage (auto-générées)
-│   ├── rules/                       ← Préférences de routage acceptées
-│   └── skills/                      ← Skills persona acceptés
-├── archives/                        ← Notes terminées/inactives (30+ jours)
-│   ├── sessions/
-│   ├── decisions/
-│   └── learnings/
-└── wiki/                            ← Pages de concepts (suggestion automatique)
-    └── _schema.md
-```
-
 ### Sous-Vaults
 
 | Chemin | Description |
 |--------|-------------|
 | `INDEX.md` | Vue d'ensemble du projet avec liens vers les décisions et apprentissages récents. Créé automatiquement à la première session, rafraîchi périodiquement. |
 | `sessions/` | **Résumés de session.** `*-auto.md` — scaffold avec stats diff git et comptage d'agents. `<topic>.md` — résumé écrit par l'IA, imposé par les hooks. |
-| `decisions/` | **Décisions d'architecture et de conception** avec justification. Écrites par l'IA, imposées pendant le travail. |
-| `learnings/` | **Patterns, pièges, solutions non évidentes.** `*-auto-session.md` — scaffold avec listes de fichiers. `<topic>.md` — écrit par l'IA. |
+| `decisions/` | **Décisions d'architecture et de conception** avec justification. `YYYY-MM-DD-<decision>.md` — écrite par l'IA, imposée pendant le travail. |
+| `learnings/` | **Patterns, pièges, solutions non évidentes.** `YYYY-MM-DD-auto-session.md` — scaffold avec listes de fichiers. `YYYY-MM-DD-<pattern>.md` — écrit par l'IA. |
 | `references/` | **URLs de recherche web.** `auto-links.md` — collectées automatiquement lors des appels WebSearch/WebFetch. |
 | `agents/` | **Télémétrie des agents.** `agent-log.jsonl` — log par appel. `YYYY-MM-DD-summary.md` — récapitulatif quotidien d'utilisation. |
 | `persona/` | **Profil de style de travail.** `profile.md` — statistiques d'affinité d'outils. `suggestions.jsonl` — recommandations de routage. `rules/`, `skills/` — préférences acceptées. |
-| `archives/` | **Notes terminées/inactives.** Les notes de plus de 30 jours sont candidates à l'archivage. Concept Archives de PARA. Structure plate — le champ `type:` du frontmatter identifie la catégorie d'origine. |
+| `archives/` | **Notes terminées/inactives.** Sous-répertoires `sessions/`, `decisions/`, `learnings/`. Les notes de plus de 30 jours sont candidates à l'archivage. Concept Archives de PARA. Structure plate — le champ `type:` du frontmatter identifie la catégorie d'origine. |
 | `wiki/` | **Pages wiki de concepts.** Les mots-clés apparaissant 3 fois ou plus déclenchent une suggestion automatique. Concept LLM-wiki. Format défini via `_schema.md`. |
 
 ### Gestion des connaissances (v2)
@@ -436,6 +298,20 @@ Au début de la session, le git HEAD courant est enregistré dans `.briefing/.se
 2. Les notes apparaissent dans la vue graphique, liées par `[[wiki-links]]`
 3. Le frontmatter YAML (`date`, `type`, `tags`) permet une recherche structurée
 4. La chronologie des décisions et apprentissages se construit automatiquement entre les sessions
+
+---
+
+## Où voir les résultats
+
+Chaque outil de la stack écrit ses résultats quelque part — voici où les trouver.
+
+| Outil | Ce qu'il fait | Comment l'exécuter | Où regarder |
+|------|--------------|-----------|---------------|
+| **codeburn** | Comptabilité des tokens et des coûts sur l'ensemble des sessions passées | `codeburn` (TUI interactif) · `codeburn web` pour un tableau de bord dans le navigateur (`--no-open` pour afficher l'URL au lieu de lancer un navigateur) · `codeburn report --format json --period week` pour un export non interactif (également `--day`, `--from`/`--to`, `--provider claude`) | Lit `~/.claude/projects/**/*.jsonl` en lecture seule. Tableau de bord navigateur sur <http://127.0.0.1:4747> (`codeburn web` ; bascule sur un port libre si celui-ci est pris). Les montants en dollars sont des **estimations** : nombre de tokens valorisé au tarif API public, donc sur un abonnement c'est un indicateur d'usage, pas une facture. |
+| **Serena** | Navigation et édition de code au niveau des symboles | Démarre automatiquement comme serveur MCP ; appelez `get_symbols_overview` / `find_symbol` depuis n'importe quelle session | Tableau de bord sur <http://localhost:24282/dashboard/index.html> tant qu'un serveur tourne (logs + nombre d'appels par outil). Les mémoires par projet atterrissent dans `.serena/` à l'intérieur du dépôt sur lequel vous travaillez ; la configuration globale est `~/.serena/serena_config.yml`. |
+| **Headroom** | Compresse les résultats d'outils surdimensionnés avant leur entrée dans la transcription | Outils MCP `headroom_compress` / `headroom_retrieve` / `headroom_stats` · proxy optionnel : `headroom proxy --port 8787`, puis `ANTHROPIC_BASE_URL=http://127.0.0.1:8787 claude` | `headroom_stats` rapporte le nombre de compressions du serveur en cours d'exécution. Avec le proxy activé, <http://127.0.0.1:8787/stats> et `headroom dashboard`. Sans lui, `headroom doctor` et `headroom perf` rapportent « not reachable » / « no performance data » — attendu, puisqu'ils décrivent le proxy. |
+| **Archify** | Diagrammes d'architecture, de workflow, de séquence, de flux de données et de cycle de vie | Demandez un diagramme et Boss route vers le skill `archify`. Manuellement, depuis `~/.claude/skills/archify` : `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | Le fichier `out.html` généré — ouvrez-le dans n'importe quel navigateur. Il est autonome (SVG inline, bascule de thème, menu d'export) et n'a aucune dépendance à l'exécution. Validez-en un avec `node bin/archify.mjs check out.html`. |
+| **OMC HUD** | Lecture en direct du contexte, du quota et du mode | Installé comme statusline par `install.sh` ; `/oh-my-claudecode:hud` le reconfigure | La statusline de Claude Code en bas de la session. Complète codeburn : le HUD, c'est cette session ; codeburn, c'est toutes les sessions. |
 
 ---
 
