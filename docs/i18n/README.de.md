@@ -66,46 +66,13 @@ Lesen Sie die VOLLSTÄNDIGE Ausgabe, und führen Sie dann jeden Schritt der Reih
 
 Boss ist der Meta-Orchestrator im Kern von my-claude. Er schreibt niemals Code — er entdeckt, klassifiziert, ordnet zu, delegiert und verifiziert.
 
-```
-User Request
-     │
-     ▼
-┌─────────────────────────────────────────────┐
-│  Phase 0 · DISCOVERY                        │
-│  Scan agents, skills, MCP, hooks at runtime │
-│  → Build live capability registry           │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 1 · INTENT GATE                      │
-│  Classify: trivial | build | refactor |     │
-│  mid-sized | architecture | research | ...  │
-│  → Counter-propose skill if better fit      │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 2 · CAPABILITY MATCHING              │
-│  P0: gstack skill (if installed)            │
-│  P1: Exact skill match                      │
-│  P2: Specialist agent (32)                  │
-│  P3: Multi-agent orchestration              │
-│  P4: General-purpose fallback               │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 3 · DELEGATION                       │
-│  6-section structured prompt to specialist  │
-│  TASK / OUTCOME / TOOLS / DO / DON'T / CTX  │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 4 · VERIFICATION                     │
-│  Read changed files independently           │
-│  Run tests, lint, build                     │
-│  Cross-reference with original intent       │
-│  → Retry up to 3× on failure               │
-└─────────────────────────────────────────────┘
-```
+| Phase | Was passiert |
+|-------|--------------|
+| **0 · DISCOVERY** | Scannt Agenten, Skills, MCP und Hooks zur Laufzeit und baut daraus eine Live-Registry der Fähigkeiten auf |
+| **1 · INTENT GATE** | Klassifiziert die Anfrage (trivial, build, refactor, mid-sized, architecture, research, …) und schlägt als Gegenvorschlag eine Skill vor, wenn diese besser passt |
+| **2 · CAPABILITY MATCHING** | Durchläuft kaskadierend die Prioritätskette unten (P0 gstack-Skill → P1 exakter Skill-Treffer → P2 Spezialist-Agent → P3 Multi-Agenten-Orchestrierung → P4 General-Purpose-Fallback) |
+| **3 · DELEGATION** | Sendet einen strukturierten 6-Abschnitts-Prompt an den Spezialisten: TASK / OUTCOME / TOOLS / DO / DON'T / CTX |
+| **4 · VERIFICATION** | Liest die geänderten Dateien unabhängig, führt Tests, Lint und Build aus, gleicht mit der ursprünglichen Absicht ab und wiederholt bei Fehlschlag bis zu 3× |
 
 ### Prioritäts-Routing
 
@@ -148,14 +115,11 @@ Vorrang gilt in dieser Reihenfolge: `CLAUDE_CODE_EFFORT_LEVEL` (Umgebungsvariabl
 
 Für die Ende-zu-Ende-Funktionsimplementierung orchestriert Boss einen strukturierten Sprint:
 
-```
-Phase 1: DESIGN         Phase 2: EXECUTE        Phase 3: REVIEW
-(interactive)            (autonomous)             (interactive)
-─────────────────────   ─────────────────────   ─────────────────────
-User decides scope      ralph runs execution    Compare vs design doc
-Engineering review      Auto code review        Present comparison table
-Confirm "design done"   Architect verification  User: approve / improve
-```
+| Phase | Modus | Was passiert |
+|-------|-------|--------------|
+| **1 · DESIGN** | interaktiv | Nutzer legt den Umfang fest · Engineering-Review · „design done“ bestätigen |
+| **2 · EXECUTE** | autonom | ralph führt die Umsetzung aus · automatischer Code-Review · Architekt-Verifikation |
+| **3 · REVIEW** | interaktiv | Abgleich mit dem Design-Dokument · Vergleichstabelle präsentieren · Nutzer genehmigt oder fordert Verbesserung |
 
 ### Strukturierter Abschlussbericht
 
@@ -182,47 +146,6 @@ Deterministische Multi-Agenten-Workflows. `install.sh` kopiert sie nach `~/.clau
 
 ---
 
-## Architektur
-
-```
-┌─────────────────────────────────────────────────────┐
-│                    User Request                       │
-└───────────────────────┬─────────────────────────────┘
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│  Boss · Meta-Orchestrator (Fable)                     │
-│  Discovery → Classification → Matching → Delegation  │
-└──┬──────────┬──────────┬──────────┬─────────────────┘
-   │          │          │          │
-   ▼          ▼          ▼          ▼
-┌──────┐ ┌────────┐ ┌────────┐ ┌────────┐
-│ P3a  │ │  P3b   │ │  P3c   │ │  P1/P2 │
-│Direct│ │Sub-orch│ │ Agent  │ │ Skill/ │
-│2-4   │ │Sisyphus│ │ Teams  │ │ Agent  │
-│agents│ │Atlas   │ │  P2P   │ │ Direct │
-└──────┘ │Hephaes│ └────────┘ └────────┘
-         └────────┘
-┌─────────────────────────────────────────────────────┐
-│  Behavioral Layer                                     │
-│  Karpathy Guidelines · Rules (48) · Hooks (10)        │
-├─────────────────────────────────────────────────────┤
-│  Specialist Agents (32)                               │
-│  Boss 1 · OMO 9 · OMC 19 · Vendored 3                │
-├─────────────────────────────────────────────────────┤
-│  Skills (105)                                         │
-│  ECC 61 · gstack 27 · Superpowers 13            │
-│  + Core 4                                             │
-├─────────────────────────────────────────────────────┤
-│  MCP Layer                                            │
-│  Context7 · Exa · grep.app                            │
-├─────────────────────────────────────────────────────┤
-│  Tooling Layer                                        │
-│  LSP (2) · Named Workflows (2)                        │
-└─────────────────────────────────────────────────────┘
-```
-
----
-
 ## Was enthalten ist
 
 | Kategorie | Anzahl | Quelle |
@@ -240,68 +163,46 @@ Deterministische Multi-Agenten-Workflows. `install.sh` kopiert sie nach `~/.clau
 Alle oben genannten Agenten, Skills und Regeln stehen auf der Allowlist in [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) und werden im Installationsmanifest verfolgt. Anthropics offizielle Dokument-Skills (pdf, docx usw.) werden separat über `claude plugin add anthropics/skills` installiert und bewusst nicht im Manifest verfolgt.
 
 <details>
-<summary><strong>Kern-Agent — Boss Meta-Orchestrator (1)</strong></summary>
+<summary><strong>Spezialisten-Agenten — 32 in 4 Tiers</strong></summary>
 
-| Agent | Modell | Rolle | Quelle |
-|-------|--------|-------|--------|
-| Boss | Fable | Dynamische Laufzeitentdeckung → Fähigkeitsabgleich → optimales Routing. Schreibt niemals Code. | my-claude |
+Das Modell je Agent steht in der Tabelle **Modell-Routing** weiter oben.
 
-</details>
+Die Vendored-Agenten wurden am 2026-07-27 aus [agency-agents](https://github.com/msitarzewski/agency-agents) (MIT) übernommen, als dieses Submodul entfernt wurde. Behalten wurden nur die Engineering-Agenten ohne Entsprechung im übrigen Stack; jede Datei trägt ihren Herkunftsnachweis.
 
-<details>
-<summary><strong>OMO-Agenten — Sub-Orchestratoren und Spezialisten (9)</strong></summary>
-
-| Agent | Modell | Rolle | Quelle |
-|-------|--------|-------|--------|
-| Sisyphus | Opus | Absichtsklassifizierung → Spezialistendelegation → Verifikation | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
-| Hephaestus | Opus | Autonom erkunden → planen → ausführen → verifizieren | oh-my-openagent |
-| Atlas | Opus | Aufgabenzerlegung + 4-stufige QA-Verifikation | oh-my-openagent |
-| Oracle | Opus | Strategische technische Beratung (nur lesend) | oh-my-openagent |
-| Metis | Opus | Absichtsanalyse, Mehrdeutigkeitserkennung | oh-my-openagent |
-| Momus | Opus | Überprüfung der Planumsetzbarkeit | oh-my-openagent |
-| Prometheus | Opus | Interviewbasierte detaillierte Planung | oh-my-openagent |
-| Librarian | Sonnet | Open-Source-Dokumentationssuche über MCP | oh-my-openagent |
-| Multimodal-Looker | Sonnet | Bild-/Screenshot-/Diagrammanalyse | oh-my-openagent |
-
-</details>
-
-<details>
-<summary><strong>OMC-Agenten — Spezialistenmitarbeiter (19)</strong></summary>
-
-| Agent | Rolle | Quelle |
-|-------|-------|--------|
-| analyst | Voranalyse vor der Planung | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) |
-| architect | Systemdesign und Architektur | oh-my-claudecode |
-| code-reviewer | Fokussierter Code-Review | oh-my-claudecode |
-| code-simplifier | Code-Vereinfachung und -Bereinigung | oh-my-claudecode |
-| critic | Kritische Analyse, alternative Vorschläge | oh-my-claudecode |
-| debugger | Fokussiertes Debugging | oh-my-claudecode |
-| designer | UI/UX-Design-Anleitung | oh-my-claudecode |
-| document-specialist | Dokumentationserstellung | oh-my-claudecode |
-| executor | Aufgabenausführung | oh-my-claudecode |
-| explore | Codebasis-Erkundung | oh-my-claudecode |
-| git-master | Git-Workflow-Verwaltung | oh-my-claudecode |
-| planner | Schnelle Planung | oh-my-claudecode |
-| qa-tester | Qualitätssicherungstests | oh-my-claudecode |
-| scientist | Forschung und Experimente | oh-my-claudecode |
-| security-reviewer | Sicherheitsüberprüfung | oh-my-claudecode |
-| test-engineer | Test-Erstellung und -Pflege | oh-my-claudecode |
-| tracer | Ausführungs-Tracing und Analyse | oh-my-claudecode |
-| verifier | Abschließende Verifikation | oh-my-claudecode |
-| writer | Inhalte und Dokumentation | oh-my-claudecode |
-
-</details>
-
-<details>
-<summary><strong>Vendored Agenten — KI- und Infrastruktur-Spezialisten (3)</strong></summary>
-
-Am 2026-07-27 aus [agency-agents](https://github.com/msitarzewski/agency-agents) (MIT) übernommen, als dieses Submodul entfernt wurde. Behalten wurden nur die Engineering-Agenten ohne Entsprechung im übrigen Stack; jede Datei trägt ihren Herkunftsnachweis.
-
-| Agent | Rolle | Quelle |
-|-------|------|--------|
-| AI Engineer | KI/ML-Engineering, Modellintegration, Datenpipelines | agency-agents (vendored) |
-| DevOps Automator | Infrastrukturautomatisierung, CI/CD, Cloud-Betrieb | agency-agents (vendored) |
-| Multi-Agent Systems Architect | Agenten-Topologie, Kontextverwaltung, Fehlerbehebung | agency-agents (vendored) |
+| Agent | Tier | Rolle | Quelle |
+|-------|------|-------|--------|
+| Boss | `core` | Dynamische Laufzeitentdeckung → Fähigkeitsabgleich → optimales Routing. Schreibt niemals Code. | my-claude |
+| Sisyphus | `omo` | Absichtsklassifizierung → Spezialistendelegation → Verifikation | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
+| Hephaestus | `omo` | Autonom erkunden → planen → ausführen → verifizieren | oh-my-openagent |
+| Atlas | `omo` | Aufgabenzerlegung + 4-stufige QA-Verifikation | oh-my-openagent |
+| Oracle | `omo` | Strategische technische Beratung (nur lesend) | oh-my-openagent |
+| Metis | `omo` | Absichtsanalyse, Mehrdeutigkeitserkennung | oh-my-openagent |
+| Momus | `omo` | Überprüfung der Planumsetzbarkeit | oh-my-openagent |
+| Prometheus | `omo` | Interviewbasierte detaillierte Planung | oh-my-openagent |
+| Librarian | `omo` | Open-Source-Dokumentationssuche über MCP | oh-my-openagent |
+| Multimodal-Looker | `omo` | Bild-/Screenshot-/Diagrammanalyse | oh-my-openagent |
+| analyst | `omc` | Voranalyse vor der Planung | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) |
+| architect | `omc` | Systemdesign und Architektur | oh-my-claudecode |
+| code-reviewer | `omc` | Fokussierter Code-Review | oh-my-claudecode |
+| code-simplifier | `omc` | Code-Vereinfachung und -Bereinigung | oh-my-claudecode |
+| critic | `omc` | Kritische Analyse, alternative Vorschläge | oh-my-claudecode |
+| debugger | `omc` | Fokussiertes Debugging | oh-my-claudecode |
+| designer | `omc` | UI/UX-Design-Anleitung | oh-my-claudecode |
+| document-specialist | `omc` | Dokumentationserstellung | oh-my-claudecode |
+| executor | `omc` | Aufgabenausführung | oh-my-claudecode |
+| explore | `omc` | Codebasis-Erkundung | oh-my-claudecode |
+| git-master | `omc` | Git-Workflow-Verwaltung | oh-my-claudecode |
+| planner | `omc` | Schnelle Planung | oh-my-claudecode |
+| qa-tester | `omc` | Qualitätssicherungstests | oh-my-claudecode |
+| scientist | `omc` | Forschung und Experimente | oh-my-claudecode |
+| security-reviewer | `omc` | Sicherheitsüberprüfung | oh-my-claudecode |
+| test-engineer | `omc` | Test-Erstellung und -Pflege | oh-my-claudecode |
+| tracer | `omc` | Ausführungs-Tracing und Analyse | oh-my-claudecode |
+| verifier | `omc` | Abschließende Verifikation | oh-my-claudecode |
+| writer | `omc` | Inhalte und Dokumentation | oh-my-claudecode |
+| AI Engineer | `vendored` | KI/ML-Engineering, Modellintegration, Datenpipelines | agency-agents (vendored) |
+| DevOps Automator | `vendored` | Infrastrukturautomatisierung, CI/CD, Cloud-Betrieb | agency-agents (vendored) |
+| Multi-Agent Systems Architect | `vendored` | Agenten-Topologie, Kontextverwaltung, Fehlerbehebung | agency-agents (vendored) |
 
 </details>
 
@@ -363,47 +264,18 @@ Das Plugin deklariert in `.lsp.json` zwei Language Server. Claude Code startet s
 
 Obsidian-kompatibler persistenter Speicher. Jedes Projekt pflegt ein `.briefing/`-Verzeichnis, das sich über Sitzungen hinweg automatisch befüllt.
 
-```
-.briefing/
-├── INDEX.md                          ← Project context (auto-created once)
-├── sessions/
-│   ├── YYYY-MM-DD-<topic>.md        ← AI-written session summary (enforced)
-│   └── YYYY-MM-DD-auto.md           ← Auto-generated scaffold (git diff, agent stats)
-├── decisions/
-│   └── YYYY-MM-DD-<decision>.md     ← AI-written decision record (enforced)
-├── learnings/
-│   ├── YYYY-MM-DD-<pattern>.md      ← AI-written learning note
-│   └── YYYY-MM-DD-auto-session.md   ← Auto-generated scaffold (agents, files)
-├── references/
-│   └── auto-links.md                ← Auto-collected URLs from web searches
-├── agents/
-│   ├── agent-log.jsonl              ← Subagent execution telemetry
-│   └── YYYY-MM-DD-summary.md        ← Daily agent usage breakdown
-├── persona/
-│   ├── profile.md                   ← Agent affinity stats (auto-updated)
-│   ├── suggestions.jsonl            ← Routing suggestions (auto-generated)
-│   ├── rules/                       ← Accepted routing preferences
-│   └── skills/                      ← Accepted persona skills
-├── archives/                        ← Abgeschlossene/inaktive Notizen (30+ Tage)
-│   ├── sessions/
-│   ├── decisions/
-│   └── learnings/
-└── wiki/                            ← Konzeptseiten (automatisch vorgeschlagen)
-    └── _schema.md
-```
-
 ### Sub-Vaults
 
 | Pfad | Beschreibung |
 |------|-------------|
 | `INDEX.md` | Projektübersicht mit Links zu aktuellen Entscheidungen und Lernnotizen. Wird bei der ersten Sitzung automatisch erstellt, periodisch aktualisiert. |
-| `sessions/` | **Sitzungszusammenfassungen.** `*-auto.md` — Gerüst mit Git-Diff-Statistiken und Agentenzahlen. `<topic>.md` — KI-erstellte Zusammenfassung, durch Hooks erzwungen. |
-| `decisions/` | **Architektur- und Designentscheidungen** mit Begründung. KI-erstellt, während der Arbeit erzwungen. |
-| `learnings/` | **Muster, Stolperfallen, nicht offensichtliche Lösungen.** `*-auto-session.md` — Gerüst mit Dateilisten. `<topic>.md` — KI-erstellt. |
+| `sessions/` | **Sitzungszusammenfassungen.** `YYYY-MM-DD-auto.md` — Gerüst mit Git-Diff-Statistiken und Agentenzahlen. `YYYY-MM-DD-<topic>.md` — KI-erstellte Zusammenfassung, durch Hooks erzwungen. |
+| `decisions/` | **Architektur- und Designentscheidungen** mit Begründung. `YYYY-MM-DD-<decision>.md` — KI-erstellt, während der Arbeit erzwungen. |
+| `learnings/` | **Muster, Stolperfallen, nicht offensichtliche Lösungen.** `YYYY-MM-DD-auto-session.md` — Gerüst mit Dateilisten. `YYYY-MM-DD-<pattern>.md` — KI-erstellt. |
 | `references/` | **Web-Recherche-URLs.** `auto-links.md` — automatisch gesammelt bei WebSearch/WebFetch-Aufrufen. |
 | `agents/` | **Agenten-Telemetrie.** `agent-log.jsonl` — Protokoll pro Aufruf. `YYYY-MM-DD-summary.md` — tägliche Nutzungsübersicht. |
 | `persona/` | **Arbeitsstil-Profil.** `profile.md` — Tool-Affinitätsstatistiken. `suggestions.jsonl` — Routing-Vorschläge. `rules/`, `skills/` — akzeptierte Präferenzen. |
-| `archives/` | **Abgeschlossene/inaktive Notizen.** Notizen älter als 30 Tage sind Archivierungskandidaten. PARA-Archives-Konzept. Flache Struktur — das `type:`-Feld im Frontmatter identifiziert die ursprüngliche Kategorie. |
+| `archives/` | **Abgeschlossene/inaktive Notizen** (30+ Tage) in `sessions/`, `decisions/`, `learnings/`. Notizen älter als 30 Tage sind Archivierungskandidaten. PARA-Archives-Konzept. Flache Struktur — das `type:`-Feld im Frontmatter identifiziert die ursprüngliche Kategorie. |
 | `wiki/` | **Konzept-Wiki-Seiten.** Schlüsselwörter, die 3+ Mal vorkommen, werden automatisch vorgeschlagen. LLM-wiki-Konzept. Format wird über `_schema.md` definiert. |
 
 ### Wissensmanagement (v2)
@@ -426,6 +298,20 @@ Beim Sitzungsstart wird der aktuelle git-HEAD in `.briefing/.session-start-head`
 2. Notizen erscheinen in der Graphansicht, verknüpft durch `[[wiki-links]]`
 3. YAML-Frontmatter (`date`, `type`, `tags`) ermöglicht strukturierte Suche
 4. Eine Zeitleiste von Entscheidungen und Lernnotizen entsteht automatisch über Sitzungen hinweg
+
+---
+
+## Wo die Ergebnisse landen
+
+Wo die Arbeit der einzelnen Begleit-Tools tatsächlich sichtbar wird:
+
+| Tool | Was es tut | Aufruf | Wo es zu sehen ist |
+|------|------------|--------|--------------------|
+| **codeburn** | Token- und Kostenabrechnung über alle bisherigen Sitzungen hinweg | `codeburn` (interaktive TUI) · `codeburn web` für ein Browser-Dashboard (`--no-open` gibt stattdessen die URL aus, statt einen Browser zu starten) · `codeburn report --format json --period week` für einen nicht-interaktiven Dump (auch `--day`, `--from`/`--to`, `--provider claude`) | Liest `~/.claude/projects/**/*.jsonl` nur lesend. Browser-Dashboard unter <http://127.0.0.1:4747> (`codeburn web`; weicht auf einen freien Port aus, falls belegt). Die Dollarbeträge sind **Schätzungen**: Token-Zahlen zu API-Listenpreisen, bei einem Abo also ein Nutzungsindikator, keine Rechnung. |
+| **Serena** | Symbolgenaue Codenavigation und -bearbeitung | Startet automatisch als MCP-Server; `get_symbols_overview` / `find_symbol` aus jeder Sitzung aufrufen | Dashboard unter <http://localhost:24282/dashboard/index.html>, solange ein Server läuft (Logs + Aufrufzahlen pro Tool). Projektbezogene Memories landen in `.serena/` innerhalb des bearbeiteten Repositories; die globale Konfiguration ist `~/.serena/serena_config.yml`. |
+| **Headroom** | Komprimiert übergroße Tool-Ergebnisse, bevor sie ins Transkript gelangen | MCP-Tools `headroom_compress` / `headroom_retrieve` / `headroom_stats` · optionaler Proxy: `headroom proxy --port 8787`, dann `ANTHROPIC_BASE_URL=http://127.0.0.1:8787 claude` | `headroom_stats` meldet die Kompressionszahlen des laufenden Servers. Mit aktiviertem Proxy zusätzlich <http://127.0.0.1:8787/stats> und `headroom dashboard`. Ohne ihn melden `headroom doctor` und `headroom perf` „not reachable“ / „no performance data“ — erwartbar, da sie den Proxy beschreiben. |
+| **Archify** | Architektur-, Workflow-, Sequenz-, Datenfluss- und Lebenszyklusdiagramme | Nach einem Diagramm fragen — Boss leitet an die `archify`-Skill weiter. Manuell aus `~/.claude/skills/archify`: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | Die erzeugte `out.html` — in einem beliebigen Browser öffnen. Sie ist eigenständig (Inline-SVG, Theme-Umschalter, Export-Menü) und hat keine Laufzeitabhängigkeiten. Prüfen lässt sie sich mit `node bin/archify.mjs check out.html`. |
+| **OMC HUD** | Live-Anzeige von Kontext, Kontingent und Modus | Wird von `install.sh` als Statusline installiert; `/oh-my-claudecode:hud` konfiguriert sie neu | Die Claude Code-Statusline am unteren Rand der Sitzung. Ergänzt codeburn: Das HUD zeigt diese Sitzung, codeburn zeigt alle Sitzungen. |
 
 ---
 

@@ -66,46 +66,13 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 Boss 是 my-claude 的核心元编排器。它从不编写代码——它负责发现、分类、匹配、委派和验证。
 
-```
-User Request
-     │
-     ▼
-┌─────────────────────────────────────────────┐
-│  Phase 0 · DISCOVERY                        │
-│  Scan agents, skills, MCP, hooks at runtime │
-│  → Build live capability registry           │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 1 · INTENT GATE                      │
-│  Classify: trivial | build | refactor |     │
-│  mid-sized | architecture | research | ...  │
-│  → Counter-propose skill if better fit      │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 2 · CAPABILITY MATCHING              │
-│  P0: gstack skill (if installed)            │
-│  P1: Exact skill match                      │
-│  P2: Specialist agent (32)                  │
-│  P3: Multi-agent orchestration              │
-│  P4: General-purpose fallback               │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 3 · DELEGATION                       │
-│  6-section structured prompt to specialist  │
-│  TASK / OUTCOME / TOOLS / DO / DON'T / CTX  │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 4 · VERIFICATION                     │
-│  Read changed files independently           │
-│  Run tests, lint, build                     │
-│  Cross-reference with original intent       │
-│  → Retry up to 3× on failure               │
-└─────────────────────────────────────────────┘
-```
+| 阶段 | 执行内容 |
+|------|----------|
+| **0 · DISCOVERY** | 在运行时扫描 agents、skills、MCP、hooks，构建实时能力注册表 |
+| **1 · INTENT GATE** | 对请求进行分类（trivial、build、refactor、mid-sized、architecture、research 等），若某个 skill 更契合则反向提议 |
+| **2 · CAPABILITY MATCHING** | 按下方优先级链逐级匹配（P0 gstack skill → P1 精确 skill 匹配 → P2 专家 Agent → P3 多 Agent 编排 → P4 通用回退） |
+| **3 · DELEGATION** | 向专家发送 6 段式结构化提示：TASK / OUTCOME / TOOLS / DO / DON'T / CTX |
+| **4 · VERIFICATION** | 独立读取变更文件，运行测试、lint 与构建，与原始意图交叉比对，失败时最多重试 3 次 |
 
 ### 优先级路由
 
@@ -148,14 +115,11 @@ Skills 同样可以声明 effort —— `boss-briefing` 为 `medium`，`briefing
 
 对于端到端功能实现，Boss 编排结构化冲刺：
 
-```
-Phase 1: DESIGN         Phase 2: EXECUTE        Phase 3: REVIEW
-(interactive)            (autonomous)             (interactive)
-─────────────────────   ─────────────────────   ─────────────────────
-User decides scope      ralph runs execution    Compare vs design doc
-Engineering review      Auto code review        Present comparison table
-Confirm "design done"   Architect verification  User: approve / improve
-```
+| 阶段 | 模式 | 执行内容 |
+|------|------|----------|
+| **1 · DESIGN** | interactive | 用户决定范围 · 工程评审 · 确认 "design done" |
+| **2 · EXECUTE** | autonomous | ralph 执行实现 · 自动代码审查 · 架构师验证 |
+| **3 · REVIEW** | interactive | 与设计文档对比 · 呈现对比表格 · 用户批准或要求改进 |
 
 ### 结构化最终报告
 
@@ -182,47 +146,6 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 
 ---
 
-## 架构
-
-```
-┌─────────────────────────────────────────────────────┐
-│                    User Request                       │
-└───────────────────────┬─────────────────────────────┘
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│  Boss · Meta-Orchestrator (Fable)                     │
-│  Discovery → Classification → Matching → Delegation  │
-└──┬──────────┬──────────┬──────────┬─────────────────┘
-   │          │          │          │
-   ▼          ▼          ▼          ▼
-┌──────┐ ┌────────┐ ┌────────┐ ┌────────┐
-│ P3a  │ │  P3b   │ │  P3c   │ │  P1/P2 │
-│Direct│ │Sub-orch│ │ Agent  │ │ Skill/ │
-│2-4   │ │Sisyphus│ │ Teams  │ │ Agent  │
-│agents│ │Atlas   │ │  P2P   │ │ Direct │
-└──────┘ │Hephaes│ └────────┘ └────────┘
-         └────────┘
-┌─────────────────────────────────────────────────────┐
-│  Behavioral Layer                                     │
-│  Karpathy Guidelines · Rules (48) · Hooks (10)        │
-├─────────────────────────────────────────────────────┤
-│  Specialist Agents (32)                               │
-│  Boss 1 · OMO 9 · OMC 19 · Vendored 3                │
-├─────────────────────────────────────────────────────┤
-│  Skills (105)                                         │
-│  ECC 61 · gstack 27 · Superpowers 13            │
-│  + Core 4                                             │
-├─────────────────────────────────────────────────────┤
-│  MCP Layer                                            │
-│  Context7 · Exa · grep.app                            │
-├─────────────────────────────────────────────────────┤
-│  Tooling Layer                                        │
-│  LSP (2) · Named Workflows (2)                        │
-└─────────────────────────────────────────────────────┘
-```
-
----
-
 ## 内容一览
 
 | 类别 | 数量 | 来源 |
@@ -240,68 +163,46 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 以上 Agent、Skills、规则全部登记在 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) 的白名单中，并由安装清单跟踪。Anthropic 官方文档 Skills（pdf、docx 等）通过 `claude plugin add anthropics/skills` 单独安装，有意不纳入清单跟踪。
 
 <details>
-<summary><strong>核心 Agent — Boss 元编排器（1）</strong></summary>
+<summary><strong>专家 Agent — 4 个层级共 32 个</strong></summary>
 
-| Agent | 模型 | 角色 | 来源 |
-|-------|-------|------|--------|
-| Boss | Fable | 动态运行时发现 → 能力匹配 → 最优路由。从不编写代码。 | my-claude |
-
-</details>
-
-<details>
-<summary><strong>OMO Agents — 子编排器与专家（9）</strong></summary>
-
-| Agent | 模型 | 角色 | 来源 |
-|-------|-------|------|--------|
-| Sisyphus | Opus | 意图分类 → 专家委派 → 验证 | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
-| Hephaestus | Opus | 自主探索 → 规划 → 执行 → 验证 | oh-my-openagent |
-| Atlas | Opus | 任务分解 + 四阶段 QA 验证 | oh-my-openagent |
-| Oracle | Opus | 战略技术咨询（只读） | oh-my-openagent |
-| Metis | Opus | 意图分析、歧义检测 | oh-my-openagent |
-| Momus | Opus | 计划可行性评审 | oh-my-openagent |
-| Prometheus | Opus | 基于访谈的详细规划 | oh-my-openagent |
-| Librarian | Sonnet | 通过 MCP 搜索开源文档 | oh-my-openagent |
-| Multimodal-Looker | Sonnet | 图像 / 截图 / 图表分析 | oh-my-openagent |
-
-</details>
-
-<details>
-<summary><strong>OMC Agents — 专家工作者（19）</strong></summary>
-
-| Agent | 角色 | 来源 |
-|-------|------|--------|
-| analyst | 规划前预分析 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) |
-| architect | 系统设计与架构 | oh-my-claudecode |
-| code-reviewer | 专注代码审查 | oh-my-claudecode |
-| code-simplifier | 代码简化与清理 | oh-my-claudecode |
-| critic | 批判性分析、替代方案提议 | oh-my-claudecode |
-| debugger | 专注调试 | oh-my-claudecode |
-| designer | UI/UX 设计指导 | oh-my-claudecode |
-| document-specialist | 文档撰写 | oh-my-claudecode |
-| executor | 任务执行 | oh-my-claudecode |
-| explore | 代码库探索 | oh-my-claudecode |
-| git-master | Git 工作流管理 | oh-my-claudecode |
-| planner | 快速规划 | oh-my-claudecode |
-| qa-tester | 质量保证测试 | oh-my-claudecode |
-| scientist | 研究与实验 | oh-my-claudecode |
-| security-reviewer | 安全审查 | oh-my-claudecode |
-| test-engineer | 测试编写与维护 | oh-my-claudecode |
-| tracer | 执行追踪与分析 | oh-my-claudecode |
-| verifier | 最终验证 | oh-my-claudecode |
-| writer | 内容与文档 | oh-my-claudecode |
-
-</details>
-
-<details>
-<summary><strong>Vendored Agent — AI 与基础设施专家（3）</strong></summary>
+各 Agent 使用的模型见上方「模型路由」表。
 
 在 2026-07-27 移除 `agency-agents` 子模块时，从 [agency-agents](https://github.com/msitarzewski/agency-agents)（MIT）快照而来。仅保留栈内没有替代者的工程 Agent，每个文件都保留了上游署名。
 
-| Agent | 角色 | 来源 |
-|-------|------|--------|
-| AI Engineer | AI/ML 工程、模型集成、数据管道 | agency-agents（vendored） |
-| DevOps Automator | 基础设施自动化、CI/CD、云运维 | agency-agents（vendored） |
-| Multi-Agent Systems Architect | Agent 拓扑、上下文管理、故障恢复 | agency-agents（vendored） |
+| Agent | 层级 | 职责 | 来源 |
+|-------|------|------|--------|
+| Boss | core | 动态运行时发现 → 能力匹配 → 最优路由。从不编写代码。 | my-claude |
+| Sisyphus | omo | 意图分类 → 专家委派 → 验证 | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
+| Hephaestus | omo | 自主探索 → 规划 → 执行 → 验证 | oh-my-openagent |
+| Atlas | omo | 任务分解 + 四阶段 QA 验证 | oh-my-openagent |
+| Oracle | omo | 战略技术咨询（只读） | oh-my-openagent |
+| Metis | omo | 意图分析、歧义检测 | oh-my-openagent |
+| Momus | omo | 计划可行性评审 | oh-my-openagent |
+| Prometheus | omo | 基于访谈的详细规划 | oh-my-openagent |
+| Librarian | omo | 通过 MCP 搜索开源文档 | oh-my-openagent |
+| Multimodal-Looker | omo | 图像 / 截图 / 图表分析 | oh-my-openagent |
+| analyst | omc | 规划前预分析 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) |
+| architect | omc | 系统设计与架构 | oh-my-claudecode |
+| code-reviewer | omc | 专注代码审查 | oh-my-claudecode |
+| code-simplifier | omc | 代码简化与清理 | oh-my-claudecode |
+| critic | omc | 批判性分析、替代方案提议 | oh-my-claudecode |
+| debugger | omc | 专注调试 | oh-my-claudecode |
+| designer | omc | UI/UX 设计指导 | oh-my-claudecode |
+| document-specialist | omc | 文档撰写 | oh-my-claudecode |
+| executor | omc | 任务执行 | oh-my-claudecode |
+| explore | omc | 代码库探索 | oh-my-claudecode |
+| git-master | omc | Git 工作流管理 | oh-my-claudecode |
+| planner | omc | 快速规划 | oh-my-claudecode |
+| qa-tester | omc | 质量保证测试 | oh-my-claudecode |
+| scientist | omc | 研究与实验 | oh-my-claudecode |
+| security-reviewer | omc | 安全审查 | oh-my-claudecode |
+| test-engineer | omc | 测试编写与维护 | oh-my-claudecode |
+| tracer | omc | 执行追踪与分析 | oh-my-claudecode |
+| verifier | omc | 最终验证 | oh-my-claudecode |
+| writer | omc | 内容与文档 | oh-my-claudecode |
+| AI Engineer | vendored | AI/ML 工程、模型集成、数据管道 | agency-agents（vendored） |
+| DevOps Automator | vendored | 基础设施自动化、CI/CD、云运维 | agency-agents（vendored） |
+| Multi-Agent Systems Architect | vendored | Agent 拓扑、上下文管理、故障恢复 | agency-agents（vendored） |
 
 </details>
 
@@ -364,47 +265,18 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 
 兼容 Obsidian 的持久化记忆。每个项目维护一个 `.briefing/` 目录，跨会话自动填充。
 
-```
-.briefing/
-├── INDEX.md                          ← Project context (auto-created once)
-├── sessions/
-│   ├── YYYY-MM-DD-<topic>.md        ← AI-written session summary (enforced)
-│   └── YYYY-MM-DD-auto.md           ← Auto-generated scaffold (git diff, agent stats)
-├── decisions/
-│   └── YYYY-MM-DD-<decision>.md     ← AI-written decision record (enforced)
-├── learnings/
-│   ├── YYYY-MM-DD-<pattern>.md      ← AI-written learning note
-│   └── YYYY-MM-DD-auto-session.md   ← Auto-generated scaffold (agents, files)
-├── references/
-│   └── auto-links.md                ← Auto-collected URLs from web searches
-├── agents/
-│   ├── agent-log.jsonl              ← Subagent execution telemetry
-│   └── YYYY-MM-DD-summary.md        ← Daily agent usage breakdown
-├── persona/
-│   ├── profile.md                   ← Agent affinity stats (auto-updated)
-│   ├── suggestions.jsonl            ← Routing suggestions (auto-generated)
-│   ├── rules/                       ← Accepted routing preferences
-│   └── skills/                      ← Accepted persona skills
-├── archives/                        ← 已完成/不活跃的笔记 (30天+)
-│   ├── sessions/
-│   ├── decisions/
-│   └── learnings/
-└── wiki/                            ← 概念页面 (自动建议)
-    └── _schema.md
-```
-
 ### 子 Vault
 
 | 路径 | 说明 |
 |------|------|
 | `INDEX.md` | 项目概览，含最近决策和学习的链接。首次会话自动创建，定期刷新。 |
-| `sessions/` | **会话摘要。** `*-auto.md` — 含 git diff 统计和 Agent 计数的脚手架。`<topic>.md` — 由 hook 强制的 AI 撰写摘要。 |
-| `decisions/` | **架构和设计决策**，含理由。AI 撰写，工作期间强制。 |
-| `learnings/` | **模式、注意事项、非显而易见的解决方案。** `*-auto-session.md` — 文件列表脚手架。`<topic>.md` — AI 撰写。 |
+| `sessions/` | **会话摘要。** `YYYY-MM-DD-auto.md` — 含 git diff 统计和 Agent 计数的脚手架。`YYYY-MM-DD-<topic>.md` — 由 hook 强制的 AI 撰写摘要。 |
+| `decisions/` | **架构和设计决策**，含理由。`YYYY-MM-DD-<decision>.md` — AI 撰写，工作期间强制。 |
+| `learnings/` | **模式、注意事项、非显而易见的解决方案。** `YYYY-MM-DD-auto-session.md` — 文件列表脚手架。`YYYY-MM-DD-<pattern>.md` — AI 撰写。 |
 | `references/` | **网络调研 URL。** `auto-links.md` — 从 WebSearch/WebFetch 调用自动收集。 |
 | `agents/` | **Agent 遥测。** `agent-log.jsonl` — 每次调用日志。`YYYY-MM-DD-summary.md` — 每日使用汇总。 |
 | `persona/` | **用户工作风格档案。** `profile.md` — 工具偏好统计。`suggestions.jsonl` — 路由建议。`rules/`、`skills/` — 已接受的偏好。 |
-| `archives/` | **已完成/不活跃的笔记。** 超过 30 天的笔记为存档候选。PARA 方法中的 Archives 概念。扁平结构，通过 frontmatter 中的 `type:` 字段识别原始分类。 |
+| `archives/` | **已完成/不活跃的笔记。** 含 `sessions/`、`decisions/`、`learnings/` 子目录。超过 30 天的笔记为存档候选。PARA 方法中的 Archives 概念。扁平结构，通过 frontmatter 中的 `type:` 字段识别原始分类。 |
 | `wiki/` | **概念 Wiki 页面。** 出现 3 次以上的关键词会触发自动建议。采用 LLM-wiki 概念，`_schema.md` 定义格式规范。 |
 
 ### 知识管理 (v2)
@@ -427,6 +299,20 @@ BriefingVault v2 融合了三种知识管理方法论：
 2. 笔记显示在图谱视图中，通过 `[[wiki-links]]` 关联
 3. YAML frontmatter（`date`、`type`、`tags`）支持结构化搜索
 4. 决策与学习的时间线跨会话自动积累
+
+---
+
+## 在哪里查看结果
+
+my-claude 捆绑的工具会把结果写到不同位置 —— 下表列出各自的查看方式。
+
+| 工具 | 作用 | 运行方式 | 查看位置 |
+|------|------|-----------|---------------|
+| **codeburn** | 跨所有历史会话的 token 与成本核算 | `codeburn`（交互式 TUI）· `codeburn web` 启动浏览器仪表盘（`--no-open` 只打印 URL 而不启动浏览器）· `codeburn report --format json --period week` 输出非交互式转储（也支持 `--day`、`--from`/`--to`、`--provider claude`） | 只读解析 `~/.claude/projects/**/*.jsonl`。浏览器仪表盘位于 <http://127.0.0.1:4747>（`codeburn web`；端口被占用时回退到空闲端口）。美元金额为**估算值**：按 API 标价折算 token 数，因此在订阅计划下只是用量参考，而非账单。 |
+| **Serena** | 符号级代码导航与编辑 | 作为 MCP 服务器自动启动；在任意会话中调用 `get_symbols_overview` / `find_symbol` | 服务器运行期间，仪表盘位于 <http://localhost:24282/dashboard/index.html>（日志 + 各工具调用计数）。按项目的记忆写入你正在工作的仓库内的 `.serena/`；全局配置为 `~/.serena/serena_config.yml`。 |
+| **Headroom** | 在超大工具结果进入对话记录之前将其压缩 | MCP 工具 `headroom_compress` / `headroom_retrieve` / `headroom_stats` · 可选代理：`headroom proxy --port 8787`，然后 `ANTHROPIC_BASE_URL=http://127.0.0.1:8787 claude` | `headroom_stats` 报告运行中服务器的压缩次数。启用代理后，可访问 <http://127.0.0.1:8787/stats> 和 `headroom dashboard`。未启用时，`headroom doctor` 与 `headroom perf` 会报告 "not reachable" / "no performance data" —— 这是预期行为，因为它们描述的正是代理。 |
+| **Archify** | 架构、工作流、时序、数据流与生命周期图 | 请求绘图时 Boss 会路由到 `archify` skill。手动方式，从 `~/.claude/skills/archify` 运行：`node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 生成的 `out.html` —— 用任意浏览器打开。它是自包含的（内联 SVG、主题切换、导出菜单），没有运行时依赖。可用 `node bin/archify.mjs check out.html` 校验。 |
+| **OMC HUD** | 实时的上下文、配额与模式读数 | 由 `install.sh` 安装为状态栏；`/oh-my-claudecode:hud` 可重新配置 | 会话底部的 Claude Code 状态栏。与 codeburn 互补：HUD 看当前会话，codeburn 看所有会话。 |
 
 ---
 

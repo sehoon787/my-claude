@@ -66,46 +66,13 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 Boss는 my-claude의 핵심에 있는 메타 오케스트레이터입니다. 코드를 직접 작성하지 않고, 탐색하고 분류하고 매칭하고 위임하고 검증합니다.
 
-```
-사용자 요청
-     │
-     ▼
-┌─────────────────────────────────────────────┐
-│  Phase 0 · DISCOVERY                        │
-│  Scan agents, skills, MCP, hooks at runtime │
-│  → Build live capability registry           │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 1 · INTENT GATE                      │
-│  Classify: trivial | build | refactor |     │
-│  mid-sized | architecture | research | ...  │
-│  → Counter-propose skill if better fit      │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 2 · CAPABILITY MATCHING              │
-│  P0: gstack skill (if installed)            │
-│  P1: Exact skill match                      │
-│  P2: Specialist agent (32)                  │
-│  P3: Multi-agent orchestration              │
-│  P4: General-purpose fallback               │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 3 · DELEGATION                       │
-│  6-section structured prompt to specialist  │
-│  TASK / OUTCOME / TOOLS / DO / DON'T / CTX  │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 4 · VERIFICATION                     │
-│  Read changed files independently           │
-│  Run tests, lint, build                     │
-│  Cross-reference with original intent       │
-│  → Retry up to 3× on failure               │
-└─────────────────────────────────────────────┘
-```
+| 단계 | 동작 |
+|------|------|
+| **Phase 0 · DISCOVERY** | 런타임에 에이전트·스킬·MCP·훅을 스캔해 살아 있는 역량 레지스트리를 구축 |
+| **Phase 1 · INTENT GATE** | 요청을 분류(trivial, build, refactor, mid-sized, architecture, research, …)하고, 더 잘 맞는 스킬이 있으면 역제안 |
+| **Phase 2 · CAPABILITY MATCHING** | 아래 우선순위 체인을 순차적으로 적용 (P0 gstack 스킬 → P1 정확한 스킬 매칭 → P2 전문가 에이전트 → P3 멀티에이전트 오케스트레이션 → P4 범용 폴백) |
+| **Phase 3 · DELEGATION** | 전문가에게 6개 섹션으로 구조화된 프롬프트를 전달: TASK / OUTCOME / TOOLS / DO / DON'T / CTX |
+| **Phase 4 · VERIFICATION** | 변경된 파일을 독립적으로 읽고, 테스트·린트·빌드를 실행하며, 원래 의도와 교차 검증. 실패 시 최대 3회 재시도 |
 
 ### 런타임 행동 교정
 - **Delegation Guard** (PreToolUse): 오케스트레이터가 직접 파일 수정 시도 시 서브에이전트 위임을 강제
@@ -120,31 +87,6 @@ Boss는 my-claude의 핵심에 있는 메타 오케스트레이터입니다. 코
 ### 통합 생태계
 - 플러그인 하나로 **32 에이전트, 105 스킬, 48 룰**을 한 환경에 구성
 - 7개 오픈소스 도구(OMC, omo, ECC, gstack, superpowers, Karpathy, codeburn)를 하나로 통합. Anthropic 공식 문서 스킬은 `install.sh`가 별도로 추가
-
----
-
-## Core + OMO 에이전트
-
-**Boss**만 my-claude 고유 에이전트입니다. 나머지 9개는 Boss가 서브 오케스트레이터 및 전문가로 사용하는 [OMO 에이전트](https://github.com/code-yeongyu/oh-my-openagent)입니다. 플러그인은 **32개 에이전트** (Boss 1 + OMO 9 + OMC 19 + 벤더링 3)를 `~/.claude/agents/`에 항상 로드합니다. 온디맨드 에이전트 팩은 더 이상 존재하지 않습니다. Boss는 Priority 2 능력 매칭으로 전체 에이전트 풀에서 최적의 전문가를 선택합니다. 전체 목록은 아래 [구성 요소](#구성-요소)를 참고하세요.
-
-| 에이전트 | 출처 | 모델 | 역할 |
-|---------|------|------|------|
-| **Boss** | my-claude | Fable | 동적 메타 오케스트레이터. 런타임에 모든 에이전트/스킬/MCP를 자동 감지하고 최적의 전문가에게 라우팅 |
-| **Sisyphus** | OMO | Opus | 서브 오케스트레이터. 의도 분류와 검증 프로토콜로 복잡한 멀티스텝 워크플로우 관리 |
-| **Hephaestus** | OMO | Opus | 자율 딥 워커. 탐색 → 계획 → 실행 → 검증 사이클을 자율적으로 수행 |
-| **Metis** | OMO | Opus | 사전 의도 분석. AI-slop 방지를 위해 요청을 실행 전에 구조화 |
-| **Atlas** | OMO | Opus | 마스터 태스크 오케스트레이터. 4단계 QA 사이클로 복잡한 작업을 분해 및 조율 |
-| **Oracle** | OMO | Opus | 전략적 기술 자문가. 코드를 변경하지 않고 read-only로 분석하여 방향 제시 |
-| **Momus** | OMO | Opus | 작업 계획 검토자. 승인 편향적 관점에서 계획을 검토. read-only |
-| **Prometheus** | OMO | Opus | 인터뷰 기반 계획 수립 컨설턴트. 대화를 통해 요구사항을 명확화 |
-| **Librarian** | OMO | Sonnet | MCP를 활용한 오픈소스 문서 연구 에이전트 |
-| **Multimodal-Looker** | OMO | Sonnet | 시각 분석 에이전트. 이미지/스크린샷을 분석. read-only |
-
----
-
-## 벤더링 에이전트
-
-`agency-agents` 서브모듈은 2026-07-27에 제거되었습니다. 스택 내에 대체재가 없던 엔지니어링 에이전트 3개(ai-engineer, devops-automator, multi-agent-systems-architect)만 `agents/vendored/`로 스냅샷하여 항상 로드되는 32개에 포함시켰습니다. 각 파일에는 출처·라이선스·스냅샷 날짜가 명시되어 있습니다. 온디맨드 팩과 `--with-packs` 플래그는 더 이상 제공되지 않습니다.
 
 ### 우선순위 라우팅
 
@@ -187,14 +129,11 @@ Boss는 가장 적합한 매칭을 찾을 때까지 모든 요청을 우선순�
 
 엔드투엔드 기능 구현을 위해 Boss는 구조화된 스프린트를 오케스트레이션합니다:
 
-```
-Phase 1: DESIGN         Phase 2: EXECUTE        Phase 3: REVIEW
-(interactive)            (autonomous)             (interactive)
-─────────────────────   ─────────────────────   ─────────────────────
-User decides scope      ralph runs execution    Compare vs design doc
-Engineering review      Auto code review        Present comparison table
-Confirm "design done"   Architect verification  User: approve / improve
-```
+| 단계 | 모드 | 동작 |
+|------|------|------|
+| **1 · DESIGN** | interactive | 사용자가 범위를 결정 · 엔지니어링 리뷰 · "design done" 확인 |
+| **2 · EXECUTE** | autonomous | ralph가 실행을 수행 · 자동 코드 리뷰 · 아키텍트 검증 |
+| **3 · REVIEW** | interactive | 설계 문서와 대조 · 비교표 제시 · 사용자가 승인하거나 개선 요청 |
 
 ### 정형화된 최종 보고
 
@@ -221,47 +160,6 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 
 ---
 
-## 아키텍처
-
-```
-┌─────────────────────────────────────────────────────┐
-│                    User Request                       │
-└───────────────────────┬─────────────────────────────┘
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│  Boss · Meta-Orchestrator (Fable)                     │
-│  Discovery → Classification → Matching → Delegation  │
-└──┬──────────┬──────────┬──────────┬─────────────────┘
-   │          │          │          │
-   ▼          ▼          ▼          ▼
-┌──────┐ ┌────────┐ ┌────────┐ ┌────────┐
-│ P3a  │ │  P3b   │ │  P3c   │ │  P1/P2 │
-│Direct│ │Sub-orch│ │ Agent  │ │ Skill/ │
-│2-4   │ │Sisyphus│ │ Teams  │ │ Agent  │
-│agents│ │Atlas   │ │  P2P   │ │ Direct │
-└──────┘ │Hephaes│ └────────┘ └────────┘
-         └────────┘
-┌─────────────────────────────────────────────────────┐
-│  Behavioral Layer                                     │
-│  Karpathy Guidelines · Rules (48) · Hooks (10)        │
-├─────────────────────────────────────────────────────┤
-│  Specialist Agents (32)                               │
-│  Boss 1 · OMO 9 · OMC 19 · Vendored 3                │
-├─────────────────────────────────────────────────────┤
-│  Skills (105)                                         │
-│  ECC 61 · gstack 27 · Superpowers 13            │
-│  + Core 4                                             │
-├─────────────────────────────────────────────────────┤
-│  MCP Layer                                            │
-│  Context7 · Exa · grep.app                            │
-├─────────────────────────────────────────────────────┤
-│  Tooling Layer                                        │
-│  LSP (2) · Named Workflows (2)                        │
-└─────────────────────────────────────────────────────┘
-```
-
----
-
 ## 구성 요소
 
 | 카테고리 | 수량 | 출처 |
@@ -279,68 +177,46 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 위의 에이전트·스킬·룰은 모두 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh)의 허용목록에 등재되어 설치 매니페스트로 추적됩니다. Anthropic 공식 문서 스킬(pdf, docx 등)은 `claude plugin add anthropics/skills`로 별도 설치되며 의도적으로 매니페스트에서 제외됩니다.
 
 <details>
-<summary><strong>핵심 에이전트 — Boss 메타 오케스트레이터 (1)</strong></summary>
+<summary><strong>전문가 에이전트 — 4개 티어, 32개</strong></summary>
 
-| 에이전트 | 모델 | 역할 | 출처 |
-|-------|-------|------|--------|
-| Boss | Fable | 동적 런타임 탐색 → 역량 매칭 → 최적 라우팅. 코드를 직접 작성하지 않습니다. | my-claude |
-
-</details>
-
-<details>
-<summary><strong>OMO 에이전트 — 서브 오케스트레이터 및 전문가 (9)</strong></summary>
-
-| 에이전트 | 모델 | 역할 | 출처 |
-|-------|-------|------|--------|
-| Sisyphus | Opus | 의도 분류 → 전문가 위임 → 검증 | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
-| Hephaestus | Opus | 자율적 탐색 → 계획 → 실행 → 검증 | oh-my-openagent |
-| Atlas | Opus | 작업 분해 + 4단계 QA 검증 | oh-my-openagent |
-| Oracle | Opus | 전략적 기술 컨설팅 (읽기 전용) | oh-my-openagent |
-| Metis | Opus | 의도 분석, 모호성 탐지 | oh-my-openagent |
-| Momus | Opus | 계획 실현 가능성 검토 | oh-my-openagent |
-| Prometheus | Opus | 인터뷰 기반 세부 계획 수립 | oh-my-openagent |
-| Librarian | Sonnet | MCP를 통한 오픈소스 문서 검색 | oh-my-openagent |
-| Multimodal-Looker | Sonnet | 이미지/스크린샷/다이어그램 분석 | oh-my-openagent |
-
-</details>
-
-<details>
-<summary><strong>OMC 에이전트 — 전문가 작업자 (19)</strong></summary>
-
-| 에이전트 | 역할 | 출처 |
-|-------|------|--------|
-| analyst | 계획 전 사전 분석 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) |
-| architect | 시스템 설계 및 아키텍처 | oh-my-claudecode |
-| code-reviewer | 집중적인 코드 리뷰 | oh-my-claudecode |
-| code-simplifier | 코드 단순화 및 정리 | oh-my-claudecode |
-| critic | 비판적 분석, 대안 제안 | oh-my-claudecode |
-| debugger | 집중적인 디버깅 | oh-my-claudecode |
-| designer | UI/UX 디자인 가이드 | oh-my-claudecode |
-| document-specialist | 문서 작성 | oh-my-claudecode |
-| executor | 작업 실행 | oh-my-claudecode |
-| explore | 코드베이스 탐색 | oh-my-claudecode |
-| git-master | Git 워크플로 관리 | oh-my-claudecode |
-| planner | 신속한 계획 수립 | oh-my-claudecode |
-| qa-tester | 품질 보증 테스팅 | oh-my-claudecode |
-| scientist | 연구 및 실험 | oh-my-claudecode |
-| security-reviewer | 보안 리뷰 | oh-my-claudecode |
-| test-engineer | 테스트 작성 및 유지 관리 | oh-my-claudecode |
-| tracer | 실행 추적 및 분석 | oh-my-claudecode |
-| verifier | 최종 검증 | oh-my-claudecode |
-| writer | 콘텐츠 및 문서 작성 | oh-my-claudecode |
-
-</details>
-
-<details>
-<summary><strong>벤더링 에이전트 — AI·인프라 전문가 (3)</strong></summary>
+에이전트별 모델은 위의 모델 라우팅 표에 정리되어 있습니다. 32개 전부가 `~/.claude/agents/`에 항상 로드되며, 온디맨드 에이전트 팩과 `--with-packs` 플래그는 더 이상 제공되지 않습니다.
 
 `agency-agents` 서브모듈이 제거된 2026-07-27에 [agency-agents](https://github.com/msitarzewski/agency-agents)(MIT)에서 스냅샷했습니다. 스택 내 대체재가 없는 엔지니어링 에이전트만 남겼으며, 각 파일에 출처 표기가 포함되어 있습니다.
 
-| 에이전트 | 역할 | 출처 |
-|-------|------|--------|
-| AI Engineer | AI/ML 엔지니어링, 모델 통합, 데이터 파이프라인 | agency-agents (벤더링) |
-| DevOps Automator | 인프라 자동화, CI/CD, 클라우드 운영 | agency-agents (벤더링) |
-| Multi-Agent Systems Architect | 에이전트 토폴로지, 컨텍스트 관리, 장애 복구 | agency-agents (벤더링) |
+| 에이전트 | 티어 | 역할 | 출처 |
+|-------|------|------|--------|
+| Boss | core | 동적 런타임 탐색 → 역량 매칭 → 최적 라우팅. 코드를 직접 작성하지 않습니다. | my-claude |
+| Sisyphus | omo | 의도 분류 → 전문가 위임 → 검증 | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
+| Hephaestus | omo | 자율적 탐색 → 계획 → 실행 → 검증 | oh-my-openagent |
+| Atlas | omo | 작업 분해 + 4단계 QA 검증 | oh-my-openagent |
+| Oracle | omo | 전략적 기술 컨설팅 (읽기 전용) | oh-my-openagent |
+| Metis | omo | 의도 분석, 모호성 탐지 | oh-my-openagent |
+| Momus | omo | 계획 실현 가능성 검토 | oh-my-openagent |
+| Prometheus | omo | 인터뷰 기반 세부 계획 수립 | oh-my-openagent |
+| Librarian | omo | MCP를 통한 오픈소스 문서 검색 | oh-my-openagent |
+| Multimodal-Looker | omo | 이미지/스크린샷/다이어그램 분석 | oh-my-openagent |
+| analyst | omc | 계획 전 사전 분석 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) |
+| architect | omc | 시스템 설계 및 아키텍처 | oh-my-claudecode |
+| code-reviewer | omc | 집중적인 코드 리뷰 | oh-my-claudecode |
+| code-simplifier | omc | 코드 단순화 및 정리 | oh-my-claudecode |
+| critic | omc | 비판적 분석, 대안 제안 | oh-my-claudecode |
+| debugger | omc | 집중적인 디버깅 | oh-my-claudecode |
+| designer | omc | UI/UX 디자인 가이드 | oh-my-claudecode |
+| document-specialist | omc | 문서 작성 | oh-my-claudecode |
+| executor | omc | 작업 실행 | oh-my-claudecode |
+| explore | omc | 코드베이스 탐색 | oh-my-claudecode |
+| git-master | omc | Git 워크플로 관리 | oh-my-claudecode |
+| planner | omc | 신속한 계획 수립 | oh-my-claudecode |
+| qa-tester | omc | 품질 보증 테스팅 | oh-my-claudecode |
+| scientist | omc | 연구 및 실험 | oh-my-claudecode |
+| security-reviewer | omc | 보안 리뷰 | oh-my-claudecode |
+| test-engineer | omc | 테스트 작성 및 유지 관리 | oh-my-claudecode |
+| tracer | omc | 실행 추적 및 분석 | oh-my-claudecode |
+| verifier | omc | 최종 검증 | oh-my-claudecode |
+| writer | omc | 콘텐츠 및 문서 작성 | oh-my-claudecode |
+| AI Engineer | vendored | AI/ML 엔지니어링, 모델 통합, 데이터 파이프라인 | agency-agents (벤더링) |
+| DevOps Automator | vendored | 인프라 자동화, CI/CD, 클라우드 운영 | agency-agents (벤더링) |
+| Multi-Agent Systems Architect | vendored | 에이전트 토폴로지, 컨텍스트 관리, 장애 복구 | agency-agents (벤더링) |
 
 </details>
 
@@ -402,47 +278,18 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 
 Obsidian 호환 영구 메모리입니다. 모든 프로젝트는 세션에 걸쳐 자동으로 채워지는 `.briefing/` 디렉터리를 유지합니다.
 
-```
-.briefing/
-├── INDEX.md                          ← 프로젝트 컨텍스트 (최초 자동 생성)
-├── sessions/
-│   ├── YYYY-MM-DD-<topic>.md        ← AI가 작성한 세션 요약 (강제)
-│   └── YYYY-MM-DD-auto.md           ← 자동 생성 스캐폴드 (git diff, 에이전트 통계)
-├── decisions/
-│   └── YYYY-MM-DD-<decision>.md     ← AI가 작성한 의사결정 기록 (강제)
-├── learnings/
-│   ├── YYYY-MM-DD-<pattern>.md      ← AI가 작성한 학습 노트
-│   └── YYYY-MM-DD-auto-session.md   ← 자동 생성 스캐폴드 (에이전트, 파일)
-├── references/
-│   └── auto-links.md                ← 웹 검색에서 자동 수집된 URL
-├── agents/
-│   ├── agent-log.jsonl              ← 서브에이전트 실행 텔레메트리
-│   └── YYYY-MM-DD-summary.md        ← 일별 에이전트 사용 요약
-├── persona/
-│   ├── profile.md                   ← 에이전트 친화도 통계 (자동 업데이트)
-│   ├── suggestions.jsonl            ← 라우팅 제안 (자동 생성)
-│   ├── rules/                       ← 승인된 라우팅 선호도
-│   └── skills/                      ← 승인된 페르소나 스킬
-├── archives/                        ← 완료/비활성 노트 (30일+)
-│   ├── sessions/
-│   ├── decisions/
-│   └── learnings/
-└── wiki/                            ← 개념 페이지 (자동 제안)
-    └── _schema.md
-```
-
 ### 서브 Vault
 
 | 경로 | 설명 |
 |------|------|
 | `INDEX.md` | 프로젝트 개요와 최근 의사결정/학습 링크. 첫 세션에 자동 생성, 주기적으로 갱신. |
-| `sessions/` | **세션 요약.** `*-auto.md` — git diff 통계와 에이전트 수를 포함한 스캐폴드. `<topic>.md` — 훅에 의해 강제되는 AI 작성 요약. |
-| `decisions/` | **아키텍처 및 설계 의사결정** 기록과 근거. AI 작성, 작업 중 강제. |
-| `learnings/` | **패턴, 주의사항, 비자명한 해결책.** `*-auto-session.md` — 파일 목록 스캐폴드. `<topic>.md` — AI 작성. |
+| `sessions/` | **세션 요약.** `YYYY-MM-DD-auto.md` — git diff 통계와 에이전트 수를 포함한 스캐폴드. `YYYY-MM-DD-<topic>.md` — 훅에 의해 강제되는 AI 작성 요약. |
+| `decisions/` | **아키텍처 및 설계 의사결정** 기록과 근거. `YYYY-MM-DD-<decision>.md` — AI 작성, 작업 중 강제. |
+| `learnings/` | **패턴, 주의사항, 비자명한 해결책.** `YYYY-MM-DD-auto-session.md` — 파일 목록 스캐폴드. `YYYY-MM-DD-<pattern>.md` — AI 작성. |
 | `references/` | **웹 조사 URL.** `auto-links.md` — WebSearch/WebFetch 호출 시 자동 수집. |
 | `agents/` | **에이전트 텔레메트리.** `agent-log.jsonl` — 호출별 로그. `YYYY-MM-DD-summary.md` — 일별 사용 요약. |
 | `persona/` | **사용자 작업 스타일 프로필.** `profile.md` — 도구 친화도 통계. `suggestions.jsonl` — 라우팅 제안. `rules/`, `skills/` — 승인된 선호도. |
-| `archives/` | **완료/비활성 노트.** 30일 이상 지난 노트는 아카이브 후보. PARA의 Archives 개념. flat 구조이며 frontmatter의 `type:` 필드로 원본 카테고리를 식별. |
+| `archives/` | **완료/비활성 노트.** 30일 이상 지난 노트는 아카이브 후보. PARA의 Archives 개념. `sessions/`, `decisions/`, `learnings/` 하위로 보관하며, 각 노트는 frontmatter의 `type:` 필드로 원본 카테고리를 식별. |
 | `wiki/` | **개념 위키 페이지.** 3회 이상 반복 등장한 키워드는 자동 제안. LLM-wiki 개념 적용. `_schema.md`로 형식 정의. |
 
 ### 지식 관리 (v2)
@@ -465,6 +312,20 @@ BriefingVault v2는 세 가지 지식 관리 방법론을 통합합니다:
 2. 노트가 그래프 뷰에 `[[wiki-links]]`로 연결되어 표시됩니다
 3. YAML 프론트매터(`date`, `type`, `tags`)로 구조화 검색이 가능합니다
 4. 의사결정과 학습의 타임라인이 세션에 걸쳐 자동으로 쌓입니다
+
+---
+
+## 결과를 확인하는 곳
+
+설치된 도구들이 실제로 무엇을 만들어 내고, 그 결과를 어디에서 볼 수 있는지 정리했습니다.
+
+| 도구 | 하는 일 | 실행 방법 | 확인 위치 |
+|------|--------------|-----------|---------------|
+| **codeburn** | 지난 모든 세션에 걸친 토큰·비용 집계 | `codeburn` (대화형 TUI) · 브라우저 대시보드는 `codeburn web` (`--no-open`을 붙이면 브라우저를 띄우는 대신 URL만 출력) · 비대화형 덤프는 `codeburn report --format json --period week` (`--day`, `--from`/`--to`, `--provider claude`도 사용 가능) | `~/.claude/projects/**/*.jsonl`을 읽기 전용으로 파싱합니다. 브라우저 대시보드는 <http://127.0.0.1:4747> (`codeburn web`; 포트가 사용 중이면 빈 포트로 대체). 달러 금액은 **추정치**입니다 — 토큰 수를 API 정가로 환산한 값이므로, 구독 플랜에서는 청구서가 아니라 사용량 지표입니다. |
+| **Serena** | 심볼 단위 코드 탐색 및 편집 | MCP 서버로 자동 시작됩니다. 어느 세션에서든 `get_symbols_overview` / `find_symbol`을 호출하세요 | 서버가 실행 중일 때 대시보드는 <http://localhost:24282/dashboard/index.html> (로그 + 도구별 호출 횟수). 프로젝트별 메모리는 작업 중인 저장소 안의 `.serena/`에 쌓이고, 전역 설정은 `~/.serena/serena_config.yml`입니다. |
+| **Headroom** | 과도하게 큰 도구 결과를 트랜스크립트에 들어가기 전에 압축 | MCP 도구 `headroom_compress` / `headroom_retrieve` / `headroom_stats` · 선택적 프록시: `headroom proxy --port 8787` 실행 후 `ANTHROPIC_BASE_URL=http://127.0.0.1:8787 claude` | `headroom_stats`가 실행 중인 서버의 압축 횟수를 보고합니다. 프록시를 켰다면 <http://127.0.0.1:8787/stats>와 `headroom dashboard`도 사용할 수 있습니다. 켜지 않았다면 `headroom doctor`와 `headroom perf`가 "not reachable" / "no performance data"를 보고하는데, 프록시를 설명하는 명령이므로 정상입니다. |
+| **Archify** | 아키텍처·워크플로·시퀀스·데이터 흐름·라이프사이클 다이어그램 | 다이어그램을 요청하면 Boss가 `archify` 스킬로 라우팅합니다. 수동으로 하려면 `~/.claude/skills/archify`에서: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 생성된 `out.html` — 아무 브라우저에서나 열면 됩니다. 인라인 SVG, 테마 토글, 내보내기 메뉴를 포함한 자체 완결형이라 런타임 의존성이 없습니다. `node bin/archify.mjs check out.html`로 검증할 수 있습니다. |
+| **OMC HUD** | 실시간 컨텍스트·할당량·모드 표시 | `install.sh`가 스테이터스라인으로 설치합니다. `/oh-my-claudecode:hud`로 재설정할 수 있습니다 | 세션 하단의 Claude Code 스테이터스라인. codeburn을 보완합니다 — HUD는 현재 세션, codeburn은 모든 세션. |
 
 ---
 

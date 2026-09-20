@@ -66,46 +66,13 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 Boss は my-claude の中核にあるメタオーケストレーターです。コードを書くことはなく、検出・分類・マッチング・委任・検証を行います。
 
-```
-User Request
-     │
-     ▼
-┌─────────────────────────────────────────────┐
-│  Phase 0 · DISCOVERY                        │
-│  Scan agents, skills, MCP, hooks at runtime │
-│  → Build live capability registry           │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 1 · INTENT GATE                      │
-│  Classify: trivial | build | refactor |     │
-│  mid-sized | architecture | research | ...  │
-│  → Counter-propose skill if better fit      │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 2 · CAPABILITY MATCHING              │
-│  P0: gstack skill (if installed)            │
-│  P1: Exact skill match                      │
-│  P2: Specialist agent (32)                  │
-│  P3: Multi-agent orchestration              │
-│  P4: General-purpose fallback               │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 3 · DELEGATION                       │
-│  6-section structured prompt to specialist  │
-│  TASK / OUTCOME / TOOLS / DO / DON'T / CTX  │
-└──────────────────────┬──────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────┐
-│  Phase 4 · VERIFICATION                     │
-│  Read changed files independently           │
-│  Run tests, lint, build                     │
-│  Cross-reference with original intent       │
-│  → Retry up to 3× on failure               │
-└─────────────────────────────────────────────┘
-```
+| フェーズ | 動作 |
+|---------|------|
+| **0 · DISCOVERY** | エージェント、スキル、MCP、フックをランタイムでスキャンし、ライブのケイパビリティレジストリを構築します |
+| **1 · INTENT GATE** | リクエストを分類し（trivial、build、refactor、mid-sized、architecture、research、…）、より適したスキルがあればそちらを逆提案します |
+| **2 · CAPABILITY MATCHING** | 下記の優先チェーンをカスケードします（P0 gstack スキル → P1 スキル完全一致 → P2 スペシャリストエージェント → P3 マルチエージェントオーケストレーション → P4 汎用フォールバック） |
+| **3 · DELEGATION** | 6 セクション構成の構造化プロンプトをスペシャリストに送ります: TASK / OUTCOME / TOOLS / DO / DON'T / CTX |
+| **4 · VERIFICATION** | 変更されたファイルを独立して読み取り、テスト・lint・ビルドを実行し、元のインテントと突き合わせ、失敗時は最大 3 回まで再試行します |
 
 ### 優先ルーティング
 
@@ -148,14 +115,11 @@ Boss はすべてのリクエストを優先チェーンにカスケードし、
 
 エンドツーエンドの機能実装において、Boss は構造化されたスプリントをオーケストレートします:
 
-```
-Phase 1: DESIGN         Phase 2: EXECUTE        Phase 3: REVIEW
-(interactive)            (autonomous)             (interactive)
-─────────────────────   ─────────────────────   ─────────────────────
-User decides scope      ralph runs execution    Compare vs design doc
-Engineering review      Auto code review        Present comparison table
-Confirm "design done"   Architect verification  User: approve / improve
-```
+| フェーズ | モード | 動作 |
+|---------|--------|------|
+| **1 · DESIGN** | interactive | ユーザーがスコープを決定 · エンジニアリングレビュー · 「design done」を確認 |
+| **2 · EXECUTE** | autonomous | ralph が実行を担当 · 自動コードレビュー · architect による検証 |
+| **3 · REVIEW** | interactive | 設計書と比較 · 比較テーブルを提示 · ユーザーが承認または改善を要求 |
 
 ### 構造化された最終レポート
 
@@ -182,47 +146,6 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 
 ---
 
-## アーキテクチャ
-
-```
-┌─────────────────────────────────────────────────────┐
-│                    User Request                       │
-└───────────────────────┬─────────────────────────────┘
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│  Boss · Meta-Orchestrator (Fable)                     │
-│  Discovery → Classification → Matching → Delegation  │
-└──┬──────────┬──────────┬──────────┬─────────────────┘
-   │          │          │          │
-   ▼          ▼          ▼          ▼
-┌──────┐ ┌────────┐ ┌────────┐ ┌────────┐
-│ P3a  │ │  P3b   │ │  P3c   │ │  P1/P2 │
-│Direct│ │Sub-orch│ │ Agent  │ │ Skill/ │
-│2-4   │ │Sisyphus│ │ Teams  │ │ Agent  │
-│agents│ │Atlas   │ │  P2P   │ │ Direct │
-└──────┘ │Hephaes│ └────────┘ └────────┘
-         └────────┘
-┌─────────────────────────────────────────────────────┐
-│  Behavioral Layer                                     │
-│  Karpathy Guidelines · Rules (48) · Hooks (10)        │
-├─────────────────────────────────────────────────────┤
-│  Specialist Agents (32)                               │
-│  Boss 1 · OMO 9 · OMC 19 · Vendored 3                │
-├─────────────────────────────────────────────────────┤
-│  Skills (105)                                         │
-│  ECC 61 · gstack 27 · Superpowers 13            │
-│  + Core 4                                             │
-├─────────────────────────────────────────────────────┤
-│  MCP Layer                                            │
-│  Context7 · Exa · grep.app                            │
-├─────────────────────────────────────────────────────┤
-│  Tooling Layer                                        │
-│  LSP (2) · Named Workflows (2)                        │
-└─────────────────────────────────────────────────────┘
-```
-
----
-
 ## 含まれるもの
 
 | カテゴリ | 数 | ソース |
@@ -240,68 +163,46 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 上記のエージェント・スキル・ルールはすべて [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) の許可リストに登録され、インストールマニフェストで追跡されます。Anthropic 公式のドキュメントスキル（pdf、docx など）は `claude plugin add anthropics/skills` で別途インストールされ、意図的にマニフェスト追跡の対象外です。
 
 <details>
-<summary><strong>コアエージェント — Boss メタオーケストレーター (1)</strong></summary>
+<summary><strong>スペシャリストエージェント — 4 ティアで 32</strong></summary>
 
-| エージェント | モデル | 役割 | ソース |
-|-------|-------|------|--------|
-| Boss | Fable | ダイナミックランタイム検出 → ケイパビリティマッチング → 最適ルーティング。コードは書かない。 | my-claude |
+エージェントごとのモデルは上の「モデルルーティング」テーブルに記載されています。
 
-</details>
+Vendored エージェントは `agency-agents` サブモジュールを削除した 2026-07-27 に [agency-agents](https://github.com/msitarzewski/agency-agents)（MIT）からスナップショットしました。スタック内に代替のないエンジニアリングエージェントのみを残し、各ファイルに上流の帰属表示があります。
 
-<details>
-<summary><strong>OMO エージェント — サブオーケストレーターとスペシャリスト (9)</strong></summary>
-
-| エージェント | モデル | 役割 | ソース |
-|-------|-------|------|--------|
-| Sisyphus | Opus | インテント分類 → スペシャリスト委任 → 検証 | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
-| Hephaestus | Opus | 自律的な調査 → 計画 → 実行 → 検証 | oh-my-openagent |
-| Atlas | Opus | タスク分解 + 4 ステージ QA 検証 | oh-my-openagent |
-| Oracle | Opus | 戦略的技術コンサルティング（読み取り専用） | oh-my-openagent |
-| Metis | Opus | インテント分析、曖昧さ検出 | oh-my-openagent |
-| Momus | Opus | 計画実現可能性レビュー | oh-my-openagent |
-| Prometheus | Opus | インタビューベースの詳細計画立案 | oh-my-openagent |
-| Librarian | Sonnet | MCP 経由のオープンソースドキュメント検索 | oh-my-openagent |
-| Multimodal-Looker | Sonnet | 画像・スクリーンショット・図の分析 | oh-my-openagent |
-
-</details>
-
-<details>
-<summary><strong>OMC エージェント — スペシャリストワーカー (19)</strong></summary>
-
-| エージェント | 役割 | ソース |
-|-------|------|--------|
-| analyst | 計画前の事前分析 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) |
-| architect | システム設計とアーキテクチャ | oh-my-claudecode |
-| code-reviewer | 集中的なコードレビュー | oh-my-claudecode |
-| code-simplifier | コードの簡略化とクリーンアップ | oh-my-claudecode |
-| critic | 批判的分析、代替案の提案 | oh-my-claudecode |
-| debugger | 集中的なデバッグ | oh-my-claudecode |
-| designer | UI/UX デザインガイダンス | oh-my-claudecode |
-| document-specialist | ドキュメント作成 | oh-my-claudecode |
-| executor | タスク実行 | oh-my-claudecode |
-| explore | コードベースの調査 | oh-my-claudecode |
-| git-master | Git ワークフロー管理 | oh-my-claudecode |
-| planner | 迅速な計画立案 | oh-my-claudecode |
-| qa-tester | 品質保証テスト | oh-my-claudecode |
-| scientist | リサーチと実験 | oh-my-claudecode |
-| security-reviewer | セキュリティレビュー | oh-my-claudecode |
-| test-engineer | テスト作成と保守 | oh-my-claudecode |
-| tracer | 実行トレースと分析 | oh-my-claudecode |
-| verifier | 最終検証 | oh-my-claudecode |
-| writer | コンテンツとドキュメント | oh-my-claudecode |
-
-</details>
-
-<details>
-<summary><strong>Vendored エージェント — AI・インフラのスペシャリスト (3)</strong></summary>
-
-`agency-agents` サブモジュールを削除した 2026-07-27 に [agency-agents](https://github.com/msitarzewski/agency-agents)（MIT）からスナップショットしました。スタック内に代替のないエンジニアリングエージェントのみを残し、各ファイルに上流の帰属表示があります。
-
-| エージェント | 役割 | 出典 |
-|-------|------|--------|
-| AI Engineer | AI/ML エンジニアリング、モデル統合、データパイプライン | agency-agents (vendored) |
-| DevOps Automator | インフラ自動化、CI/CD、クラウド運用 | agency-agents (vendored) |
-| Multi-Agent Systems Architect | エージェントトポロジー、コンテキスト管理、障害復旧 | agency-agents (vendored) |
+| エージェント | ティア | 役割 | ソース |
+|-------|------|------|--------|
+| Boss | core | ダイナミックランタイム検出 → ケイパビリティマッチング → 最適ルーティング。コードは書かない。 | my-claude |
+| Sisyphus | omo | インテント分類 → スペシャリスト委任 → 検証 | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
+| Hephaestus | omo | 自律的な調査 → 計画 → 実行 → 検証 | oh-my-openagent |
+| Atlas | omo | タスク分解 + 4 ステージ QA 検証 | oh-my-openagent |
+| Oracle | omo | 戦略的技術コンサルティング（読み取り専用） | oh-my-openagent |
+| Metis | omo | インテント分析、曖昧さ検出 | oh-my-openagent |
+| Momus | omo | 計画実現可能性レビュー | oh-my-openagent |
+| Prometheus | omo | インタビューベースの詳細計画立案 | oh-my-openagent |
+| Librarian | omo | MCP 経由のオープンソースドキュメント検索 | oh-my-openagent |
+| Multimodal-Looker | omo | 画像・スクリーンショット・図の分析 | oh-my-openagent |
+| analyst | omc | 計画前の事前分析 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) |
+| architect | omc | システム設計とアーキテクチャ | oh-my-claudecode |
+| code-reviewer | omc | 集中的なコードレビュー | oh-my-claudecode |
+| code-simplifier | omc | コードの簡略化とクリーンアップ | oh-my-claudecode |
+| critic | omc | 批判的分析、代替案の提案 | oh-my-claudecode |
+| debugger | omc | 集中的なデバッグ | oh-my-claudecode |
+| designer | omc | UI/UX デザインガイダンス | oh-my-claudecode |
+| document-specialist | omc | ドキュメント作成 | oh-my-claudecode |
+| executor | omc | タスク実行 | oh-my-claudecode |
+| explore | omc | コードベースの調査 | oh-my-claudecode |
+| git-master | omc | Git ワークフロー管理 | oh-my-claudecode |
+| planner | omc | 迅速な計画立案 | oh-my-claudecode |
+| qa-tester | omc | 品質保証テスト | oh-my-claudecode |
+| scientist | omc | リサーチと実験 | oh-my-claudecode |
+| security-reviewer | omc | セキュリティレビュー | oh-my-claudecode |
+| test-engineer | omc | テスト作成と保守 | oh-my-claudecode |
+| tracer | omc | 実行トレースと分析 | oh-my-claudecode |
+| verifier | omc | 最終検証 | oh-my-claudecode |
+| writer | omc | コンテンツとドキュメント | oh-my-claudecode |
+| AI Engineer | vendored | AI/ML エンジニアリング、モデル統合、データパイプライン | agency-agents (vendored) |
+| DevOps Automator | vendored | インフラ自動化、CI/CD、クラウド運用 | agency-agents (vendored) |
+| Multi-Agent Systems Architect | vendored | エージェントトポロジー、コンテキスト管理、障害復旧 | agency-agents (vendored) |
 
 </details>
 
@@ -363,47 +264,18 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 
 Obsidian 互換の永続メモリ。各プロジェクトはセッション間で自動入力される `.briefing/` ディレクトリを維持します。
 
-```
-.briefing/
-├── INDEX.md                          ← Project context (auto-created once)
-├── sessions/
-│   ├── YYYY-MM-DD-<topic>.md        ← AI-written session summary (enforced)
-│   └── YYYY-MM-DD-auto.md           ← Auto-generated scaffold (git diff, agent stats)
-├── decisions/
-│   └── YYYY-MM-DD-<decision>.md     ← AI-written decision record (enforced)
-├── learnings/
-│   ├── YYYY-MM-DD-<pattern>.md      ← AI-written learning note
-│   └── YYYY-MM-DD-auto-session.md   ← Auto-generated scaffold (agents, files)
-├── references/
-│   └── auto-links.md                ← Auto-collected URLs from web searches
-├── agents/
-│   ├── agent-log.jsonl              ← Subagent execution telemetry
-│   └── YYYY-MM-DD-summary.md        ← Daily agent usage breakdown
-├── persona/
-│   ├── profile.md                   ← Agent affinity stats (auto-updated)
-│   ├── suggestions.jsonl            ← Routing suggestions (auto-generated)
-│   ├── rules/                       ← Accepted routing preferences
-│   └── skills/                      ← Accepted persona skills
-├── archives/                        ← 完了/非アクティブノート (30日以上)
-│   ├── sessions/
-│   ├── decisions/
-│   └── learnings/
-└── wiki/                            ← コンセプトページ (自動提案)
-    └── _schema.md
-```
-
 ### サブ Vault
 
 | パス | 説明 |
 |------|------|
 | `INDEX.md` | プロジェクト概要と最近の意思決定・学習へのリンク。初回セッションで自動作成、定期的に更新。 |
-| `sessions/` | **セッションサマリー。** `*-auto.md` — git diff 統計とエージェント数のスキャフォールド。`<topic>.md` — フックで強制される AI 記述サマリー。 |
-| `decisions/` | **アーキテクチャと設計の意思決定**記録と根拠。AI 記述、作業中に強制。 |
-| `learnings/` | **パターン、注意事項、非自明な解決策。** `*-auto-session.md` — ファイルリストのスキャフォールド。`<topic>.md` — AI 記述。 |
+| `sessions/` | **セッションサマリー。** `YYYY-MM-DD-auto.md` — git diff 統計とエージェント数のスキャフォールド。`YYYY-MM-DD-<topic>.md` — フックで強制される AI 記述サマリー。 |
+| `decisions/` | **アーキテクチャと設計の意思決定**記録と根拠。`YYYY-MM-DD-<decision>.md` — AI 記述、作業中に強制。 |
+| `learnings/` | **パターン、注意事項、非自明な解決策。** `YYYY-MM-DD-auto-session.md` — ファイルリストのスキャフォールド。`YYYY-MM-DD-<pattern>.md` — AI 記述。 |
 | `references/` | **ウェブ調査 URL。** `auto-links.md` — WebSearch/WebFetch 呼び出し時に自動収集。 |
 | `agents/` | **エージェントテレメトリー。** `agent-log.jsonl` — 呼び出しごとのログ。`YYYY-MM-DD-summary.md` — 日次使用状況。 |
 | `persona/` | **ユーザー作業スタイルプロファイル。** `profile.md` — ツール親和性統計。`suggestions.jsonl` — ルーティング提案。`rules/`、`skills/` — 承認済みの設定。 |
-| `archives/` | **完了・非アクティブなノート。** 30 日以上経過したノートはアーカイブ候補。PARA の Archives に対応。フラット構造で、frontmatter の `type:` フィールドで元のカテゴリを識別。 |
+| `archives/` | **完了・非アクティブなノート。** 30 日以上経過したノートはアーカイブ候補。PARA の Archives に対応。`sessions/`、`decisions/`、`learnings/` のサブディレクトリに分かれ、frontmatter の `type:` フィールドで元のカテゴリを識別。 |
 | `wiki/` | **コンセプト Wiki ページ。** 3 回以上繰り返し登場したキーワードは自動提案。LLM-wiki コンセプトを採用。`_schema.md` でフォーマットを定義。 |
 
 ### ナレッジマネジメント (v2)
@@ -426,6 +298,20 @@ BriefingVault v2 は 3 つの知識管理手法を統合しています：
 2. ノートはグラフビューに表示され、`[[wiki-links]]` でリンクされます
 3. YAML フロントマター（`date`、`type`、`tags`）で構造化検索が可能
 4. 意思決定と学習のタイムラインがセッションを重ねるごとに自動的に構築されます
+
+---
+
+## 結果を確認する場所
+
+スタックが生成した出力を実際に確認できる場所です:
+
+| ツール | 機能 | 実行方法 | 確認場所 |
+|------|--------------|-----------|---------------|
+| **codeburn** | 過去の全セッションにわたるトークンとコストの集計 | `codeburn`（インタラクティブ TUI）· ブラウザダッシュボードは `codeburn web`（`--no-open` でブラウザを起動せず URL を出力）· 非インタラクティブなダンプは `codeburn report --format json --period week`（`--day`、`--from`/`--to`、`--provider claude` も利用可） | `~/.claude/projects/**/*.jsonl` を読み取り専用で参照します。ブラウザダッシュボードは <http://127.0.0.1:4747>（`codeburn web`。ポートが使用中の場合は空きポートにフォールバック）。ドル金額は**推定値**です: トークン数を API 定価で換算しているため、サブスクリプションプランでは請求額ではなく使用量の目安になります。 |
+| **Serena** | シンボル単位のコードナビゲーションと編集 | MCP サーバーとして自動的に起動します。任意のセッションから `get_symbols_overview` / `find_symbol` を呼び出せます | サーバー稼働中はダッシュボードが <http://localhost:24282/dashboard/index.html> で利用できます（ログ + ツールごとの呼び出し回数）。プロジェクトごとのメモリは作業中のリポジトリ内の `.serena/` に保存され、グローバル設定は `~/.serena/serena_config.yml` です。 |
+| **Headroom** | 肥大化したツール実行結果を、トランスクリプトに入る前に圧縮します | MCP ツール `headroom_compress` / `headroom_retrieve` / `headroom_stats` · オプションのプロキシ: `headroom proxy --port 8787` を実行してから `ANTHROPIC_BASE_URL=http://127.0.0.1:8787 claude` | `headroom_stats` が稼働中サーバーの圧縮回数を報告します。プロキシをオプトインした場合は <http://127.0.0.1:8787/stats> と `headroom dashboard`。オプトインしていない場合、`headroom doctor` と `headroom perf` は "not reachable" / "no performance data" を報告します — これらはプロキシについての情報なので想定どおりの動作です。 |
+| **Archify** | アーキテクチャ、ワークフロー、シーケンス、データフロー、ライフサイクルの図 | 図を依頼すると Boss が `archify` スキルにルーティングします。手動で実行する場合は `~/.claude/skills/archify` から: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 生成された `out.html` — 任意のブラウザで開けます。自己完結型（インライン SVG、テーマトグル、エクスポートメニュー）で、ランタイム依存はありません。`node bin/archify.mjs check out.html` で検証できます。 |
+| **OMC HUD** | コンテキスト、クォータ、モードのライブ表示 | `install.sh` がステータスラインとしてインストールします。`/oh-my-claudecode:hud` で再設定できます | セッション下部の Claude Code ステータスライン。codeburn を補完します: HUD は現在のセッション、codeburn は全セッションを対象とします。 |
 
 ---
 
