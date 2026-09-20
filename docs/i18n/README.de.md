@@ -52,6 +52,8 @@ bash /tmp/my-claude/install.sh
 rm -rf /tmp/my-claude
 ```
 
+Der Installer stellt ein gemeinsames codeburn-Dashboard und einen gemeinsamen Headroom-Proxy für my-claude und my-codex bereit. Eine spätere Installation übernimmt gesunde Dienste, statt Duplikate zu starten. Status und Startprotokolle liegen unter `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services`; weder `ANTHROPIC_BASE_URL` noch `OPENAI_BASE_URL` werden geändert.
+
 ### Für KI-Agenten
 
 ```bash
@@ -228,9 +230,9 @@ Jede Quelle wird über die Allowlist in [`scripts/skill-allowlists.sh`](../../sc
 
 | Server | Zweck | Kosten |
 |--------|-------|--------|
-| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://mcp.context7.com) | Echtzeit-Bibliotheksdokumentation | Kostenlos |
-| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://mcp.exa.ai) | Semantische Websuche | Kostenlos 1k Anfragen/Monat |
-| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://mcp.grep.app) | GitHub-Code-Suche | Kostenlos |
+| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://context7.com) | Echtzeit-Bibliotheksdokumentation | Kostenlos |
+| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://exa.ai) | Semantische Websuche | Kostenlos 1k Anfragen/Monat |
+| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://github.com/grep-app) | GitHub-Code-Suche | Kostenlos |
 
 **Verhaltens-Hooks**
 
@@ -307,9 +309,9 @@ Wo die Arbeit der einzelnen Begleit-Tools tatsächlich sichtbar wird:
 
 | Tool | Was es tut | Aufruf | Wo es zu sehen ist |
 |------|------------|--------|--------------------|
-| **codeburn** | Token- und Kostenabrechnung über alle bisherigen Sitzungen hinweg | `codeburn` (interaktive TUI) · `codeburn web` für ein Browser-Dashboard (`--no-open` gibt stattdessen die URL aus, statt einen Browser zu starten) · `codeburn report --format json --period week` für einen nicht-interaktiven Dump (auch `--day`, `--from`/`--to`, `--provider claude`) | Liest `~/.claude/projects/**/*.jsonl` nur lesend. Browser-Dashboard unter <http://127.0.0.1:4747> (`codeburn web`; weicht auf einen freien Port aus, falls belegt). Die Dollarbeträge sind **Schätzungen**: Token-Zahlen zu API-Listenpreisen, bei einem Abo also ein Nutzungsindikator, keine Rechnung. |
+| **codeburn** | Token- und Kostenabrechnung über alle bisherigen Sitzungen hinweg | `install.sh` startet oder übernimmt `codeburn web --provider all --port 4747 --no-open` · `codeburn` öffnet die TUI · `codeburn report --format json --period week` erzeugt eine nicht interaktive Ausgabe | Gemeinsames Dashboard unter <http://127.0.0.1:4747/>. Sitzungsdateien werden nur gelesen; Dollarbeträge sind Schätzungen zu API-Listenpreisen. Startprotokoll: `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`. |
 | **Serena** | Symbolgenaue Codenavigation und -bearbeitung | Startet automatisch als MCP-Server; `get_symbols_overview` / `find_symbol` aus jeder Sitzung aufrufen | Dashboard unter <http://localhost:24282/dashboard/index.html>, solange ein Server läuft (Logs + Aufrufzahlen pro Tool). Projektbezogene Memories landen in `.serena/` innerhalb des bearbeiteten Repositories; die globale Konfiguration ist `~/.serena/serena_config.yml`. |
-| **Headroom** | Komprimiert übergroße Tool-Ergebnisse, bevor sie ins Transkript gelangen | MCP-Tools `headroom_compress` / `headroom_retrieve` / `headroom_stats` · optionaler Proxy: `headroom proxy --port 8787`, dann `ANTHROPIC_BASE_URL=http://127.0.0.1:8787 claude` | `headroom_stats` meldet die Kompressionszahlen des laufenden Servers. Mit aktiviertem Proxy zusätzlich <http://127.0.0.1:8787/stats> und `headroom dashboard`. Ohne ihn melden `headroom doctor` und `headroom perf` „not reachable“ / „no performance data“ — erwartbar, da sie den Proxy beschreiben. |
+| **Headroom** | Komprimiert übergroße Tool-Ergebnisse, bevor sie ins Transkript gelangen | MCP-Tools `headroom_compress` / `headroom_retrieve` / `headroom_stats`; `install.sh` startet oder übernimmt das gemeinsame Proxy-Profil `agent-harness-shared` | Statistiken unter <http://127.0.0.1:8787/stats>; sie können leer bleiben, bis ein Client ausdrücklich über den Proxy geleitet wird. Der Installer setzt weder `ANTHROPIC_BASE_URL` noch `OPENAI_BASE_URL`. Startprotokoll: `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`. |
 | **Archify** | Architektur-, Workflow-, Sequenz-, Datenfluss- und Lebenszyklusdiagramme | Nach einem Diagramm fragen — Boss leitet an die `archify`-Skill weiter. Manuell aus `~/.claude/skills/archify`: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | Die erzeugte `out.html` — in einem beliebigen Browser öffnen. Sie ist eigenständig (Inline-SVG, Theme-Umschalter, Export-Menü) und hat keine Laufzeitabhängigkeiten. Prüfen lässt sie sich mit `node bin/archify.mjs check out.html`. |
 | **OMC HUD** | Live-Anzeige von Kontext, Kontingent und Modus | Wird von `install.sh` als Statusline installiert; `/oh-my-claudecode:hud` konfiguriert sie neu | Die Claude Code-Statusline am unteren Rand der Sitzung. Ergänzt codeburn: Das HUD zeigt diese Sitzung, codeburn zeigt alle Sitzungen. |
 
@@ -341,12 +343,12 @@ Begleitende CLIs und MCP-Server, die `install.sh` mitbringt, jeweils auf eine ex
 | Quelle | Wie sie eingebunden ist |
 |--------|-------------------------|
 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0`, registriert als stdio-MCP-Server `serena`. Symbolgenaue Codenavigation und -bearbeitung. Das ausgelieferte Paket `serena-agent` steht als Ganzes unter GPL-3.0-or-later (MIT-SolidLSP kombiniert mit einer GPL-3.0-or-later-Anwendung); der MIT-Classifier auf PyPI ist falsch. Wird als externer Server genutzt, nie vendored. |
-| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"`, registriert als stdio-MCP-Server `headroom` (`headroom mcp serve`). Komprimierung von Tool-Ausgaben. Apache-2.0. Der Proxy-/Wrap-Modus wird bewusst nicht genutzt. |
+| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"`, registriert als stdio-MCP-Server `headroom` (`headroom mcp serve`) und als mutationsfreies persistentes Profil `agent-harness-shared` gestartet. Komprimierung von Tool-Ausgaben. Apache-2.0. |
 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | npm CLI (MIT). Local-first Token-/Kosten-Tracker — liest die Sitzungsdateien, die Claude Code ohnehin schreibt, nur lesend und schlüsselt die Ausgaben nach Modell, Projekt und Aufgabe auf. Kein Proxy, kein API-Key, kein Upload. Wird von `install.sh` als `codeburn@0.9.23` gepinnt installiert und in `upstream/SOURCES.json` als `method: npm-cli` geführt. Budget-Guard-Hooks per `--with-codeburn-guard` opt-in. Die Dollarbeträge sind Schätzungen — Token-Zahlen zu API-Listenpreisen; codeburn selbst ist kostenlos und berechnet nichts (bei einem Abo ein Nutzungsindikator). Der Hard Cap des Guards (Standard $15/Sitzung) blockiert jeden Tool-Aufruf dieser Sitzung, auch das aufhebende `codeburn guard allow` (in einem externen Terminal ausführen) — deshalb bleibt er opt-in. Ergänzt das OMC HUD (Kontext und Kontingent der aktuellen Sitzung) um die sitzungsübergreifende Kostenverteilung. |
 | <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`. Strukturelle (AST-bewusste) Codesuche und -umschreibung. |
 | <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | Gehosteter MCP-Server unter `https://mcp.context7.com/mcp`. Aktuelle Bibliotheksdokumentation. |
 | <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | Gehosteter MCP-Server unter `https://mcp.exa.ai/mcp`. Neuronale Websuche. |
-| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://grep.app/)** — grep.app | Gehosteter MCP-Server unter `https://mcp.grep.app`. Codesuche über öffentliche GitHub-Repositories hinweg. |
+| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://github.com/grep-app)** — grep.app | Gehosteter MCP-Server unter `https://mcp.grep.app`. Codesuche über öffentliche GitHub-Repositories hinweg. |
 
 ---
 

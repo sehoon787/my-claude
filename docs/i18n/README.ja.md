@@ -52,6 +52,8 @@ bash /tmp/my-claude/install.sh
 rm -rf /tmp/my-claude
 ```
 
+インストーラーは my-claude と my-codex で共有する codeburn ダッシュボードと Headroom プロキシを 1 つずつ用意します。後から実行したインストーラーは正常なサービスを再利用し、重複起動しません。状態と起動ログは `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services` に保存され、`ANTHROPIC_BASE_URL` と `OPENAI_BASE_URL` は変更しません。
+
 ### AI エージェント向け
 
 ```bash
@@ -228,9 +230,9 @@ Vendored エージェントは `agency-agents` サブモジュールを削除し
 
 | サーバー | 目的 | コスト |
 |--------|---------|------|
-| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://mcp.context7.com) | リアルタイムライブラリドキュメント | 無料 |
-| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://mcp.exa.ai) | セマンティックウェブ検索 | 月 1,000 リクエスト無料 |
-| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://mcp.grep.app) | GitHub コード検索 | 無料 |
+| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://context7.com) | リアルタイムライブラリドキュメント | 無料 |
+| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://exa.ai) | セマンティックウェブ検索 | 月 1,000 リクエスト無料 |
+| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://github.com/grep-app) | GitHub コード検索 | 無料 |
 
 **行動フック**
 
@@ -307,9 +309,9 @@ BriefingVault v2 は 3 つの知識管理手法を統合しています：
 
 | ツール | 機能 | 実行方法 | 確認場所 |
 |------|--------------|-----------|---------------|
-| **codeburn** | 過去の全セッションにわたるトークンとコストの集計 | `codeburn`（インタラクティブ TUI）· ブラウザダッシュボードは `codeburn web`（`--no-open` でブラウザを起動せず URL を出力）· 非インタラクティブなダンプは `codeburn report --format json --period week`（`--day`、`--from`/`--to`、`--provider claude` も利用可） | `~/.claude/projects/**/*.jsonl` を読み取り専用で参照します。ブラウザダッシュボードは <http://127.0.0.1:4747>（`codeburn web`。ポートが使用中の場合は空きポートにフォールバック）。ドル金額は**推定値**です: トークン数を API 定価で換算しているため、サブスクリプションプランでは請求額ではなく使用量の目安になります。 |
+| **codeburn** | 過去の全セッションにわたるトークンとコストの集計 | `install.sh` が `codeburn web --provider all --port 4747 --no-open` を起動または再利用 · `codeburn` は TUI を表示 · `codeburn report --format json --period week` は非対話形式で出力 | 共有ダッシュボードは <http://127.0.0.1:4747/>。セッションファイルは読み取り専用で、ドル金額は API 定価に基づく推定値です。起動ログ: `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`。 |
 | **Serena** | シンボル単位のコードナビゲーションと編集 | MCP サーバーとして自動的に起動します。任意のセッションから `get_symbols_overview` / `find_symbol` を呼び出せます | サーバー稼働中はダッシュボードが <http://localhost:24282/dashboard/index.html> で利用できます（ログ + ツールごとの呼び出し回数）。プロジェクトごとのメモリは作業中のリポジトリ内の `.serena/` に保存され、グローバル設定は `~/.serena/serena_config.yml` です。 |
-| **Headroom** | 肥大化したツール実行結果を、トランスクリプトに入る前に圧縮します | MCP ツール `headroom_compress` / `headroom_retrieve` / `headroom_stats` · オプションのプロキシ: `headroom proxy --port 8787` を実行してから `ANTHROPIC_BASE_URL=http://127.0.0.1:8787 claude` | `headroom_stats` が稼働中サーバーの圧縮回数を報告します。プロキシをオプトインした場合は <http://127.0.0.1:8787/stats> と `headroom dashboard`。オプトインしていない場合、`headroom doctor` と `headroom perf` は "not reachable" / "no performance data" を報告します — これらはプロキシについての情報なので想定どおりの動作です。 |
+| **Headroom** | 肥大化したツール実行結果を、トランスクリプトに入る前に圧縮します | MCP ツール `headroom_compress` / `headroom_retrieve` / `headroom_stats`。`install.sh` が共有プロキシプロファイル `agent-harness-shared` を起動または再利用 | 統計は <http://127.0.0.1:8787/stats>。クライアントが明示的にプロキシへルーティングするまでは空の場合があります。インストーラーは `ANTHROPIC_BASE_URL` と `OPENAI_BASE_URL` を設定しません。起動ログ: `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`。 |
 | **Archify** | アーキテクチャ、ワークフロー、シーケンス、データフロー、ライフサイクルの図 | 図を依頼すると Boss が `archify` スキルにルーティングします。手動で実行する場合は `~/.claude/skills/archify` から: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 生成された `out.html` — 任意のブラウザで開けます。自己完結型（インライン SVG、テーマトグル、エクスポートメニュー）で、ランタイム依存はありません。`node bin/archify.mjs check out.html` で検証できます。 |
 | **OMC HUD** | コンテキスト、クォータ、モードのライブ表示 | `install.sh` がステータスラインとしてインストールします。`/oh-my-claudecode:hud` で再設定できます | セッション下部の Claude Code ステータスライン。codeburn を補完します: HUD は現在のセッション、codeburn は全セッションを対象とします。 |
 
@@ -341,12 +343,12 @@ my-claude は 5 つの MIT ライセンスのアップストリームリポジ�
 | ソース | 取り込み方法 |
 |--------|----------------|
 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0` でインストールし、`serena` stdio MCP サーバーとして登録。シンボル単位のコードナビゲーションと編集。配布される `serena-agent` パッケージは全体として GPL-3.0-or-later です（MIT の SolidLSP と GPL-3.0-or-later のアプリケーションの結合）。PyPI の MIT classifier は誤りです。外部サーバーとして利用し、vendored はしません。 |
-| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"` でインストールし、`headroom` stdio MCP サーバー（`headroom mcp serve`）として登録。ツール出力の圧縮。Apache-2.0。プロキシ/wrap モードは意図的に未使用。 |
+| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"` でインストールし、`headroom` stdio MCP サーバー（`headroom mcp serve`）として登録。変更を伴わない永続プロファイル `agent-harness-shared` としても起動。ツール出力の圧縮。Apache-2.0。 |
 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | npm CLI (MIT)。ローカルファーストのトークン/コストトラッカー — Claude Code が既に書き出すセッションファイルを読み取り専用で解析し、モデル・プロジェクト・タスク別にコストを集計します。プロキシ・API キー・アップロード不要。`install.sh` が `codeburn@0.9.23` に固定してインストールし、`upstream/SOURCES.json` に `method: npm-cli` として登録。予算ガードフックは `--with-codeburn-guard` でオプトイン。表示されるドル金額はトークン数を API 定価で換算した推定値で、codeburn 自体は無料で何も課金しません（サブスクリプションでは使用量の目安）。ガードの hard cap（既定 $15/セッション）は解除コマンド `codeburn guard allow` を含むそのセッションの全ツール呼び出しをブロックするため（外部ターミナルから実行）、オプトインのままにしています。OMC HUD（現在のセッションのコンテキストとクォータ）を補完し、セッション横断のコストの行き先を示します。 |
 | <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`。構造的（AST を理解する）コード検索と書き換え。 |
 | <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | `https://mcp.context7.com/mcp` のホスト型 MCP サーバー。最新のライブラリドキュメント。 |
 | <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | `https://mcp.exa.ai/mcp` のホスト型 MCP サーバー。ニューラルウェブ検索。 |
-| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://grep.app/)** — grep.app | `https://mcp.grep.app` のホスト型 MCP サーバー。パブリック GitHub リポジトリ横断のコード検索。 |
+| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://github.com/grep-app)** — grep.app | `https://mcp.grep.app` のホスト型 MCP サーバー。パブリック GitHub リポジトリ横断のコード検索。 |
 
 ---
 

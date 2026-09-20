@@ -39,7 +39,8 @@ chmod +x "$SHIM/npm" "$SHIM/claude" "$SHIM/curl" "$SHIM/uv"
 FAKE_HOME="$TMP/home"
 mkdir -p "$FAKE_HOME"
 run_install() {
-  ( cd "$REPO" && PATH="$SHIM:$PATH" HOME="$FAKE_HOME" bash install.sh --self-only ) \
+  ( cd "$REPO" && PATH="$SHIM:$PATH" HOME="$FAKE_HOME" \
+      AGENT_HARNESS_SERVICES_SKIP=1 bash install.sh --self-only ) \
     > "$TMP/install.log" 2>&1
 }
 
@@ -48,7 +49,8 @@ run_install() {
 ARCHIFY_HOME="$TMP/archify-home"
 mkdir -p "$ARCHIFY_HOME"
 run_archify_install() {
-  ( cd "$REPO" && PATH="$SHIM:$PATH" HOME="$ARCHIFY_HOME" bash install.sh \
+  ( cd "$REPO" && PATH="$SHIM:$PATH" HOME="$ARCHIFY_HOME" \
+      AGENT_HARNESS_SERVICES_SKIP=1 bash install.sh \
       --skip-ecc --skip-omc --skip-gstack --skip-superpowers ) \
     > "$TMP/archify-install.log" 2>&1
 }
