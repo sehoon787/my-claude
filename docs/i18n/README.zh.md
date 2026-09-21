@@ -10,7 +10,7 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-106-purple)
+![Skills](https://img.shields.io/badge/skills-107-purple)
 ![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-10-red)
@@ -183,7 +183,7 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 | 类别 | 数量 | 来源 |
 |----------|------:|--------|
 | **Agent**（始终加载） | 32 | Boss 1 + OMO 9 + OMC 19 + Vendored 3 |
-| **Skills** | 106 | ECC 61 · gstack 27 · Superpowers 14 · Core 4 |
+| **Skills** | 107 | ECC 61 · gstack 27 · Superpowers 14 · Core 4 · Archify 1 |
 | **规则** | 48 个文件 / 9 个规则集 | ECC 46（common + 8 个语言目录）+ Core 2 |
 | **MCP 服务器** | 3 | Context7、Exa、grep.app |
 | **Hooks** | 10 个文件 / 6 个事件 | 委派守卫、遥测、验证、知识库 |
@@ -237,7 +237,7 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 </details>
 
 <details>
-<summary><strong>Skills — 106 个，来自 4 个来源</strong></summary>
+<summary><strong>Skills — 107 个，来自 5 个来源</strong></summary>
 
 每个来源都由 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) 白名单管理，未列入的 Skills 一律不安装。
 
@@ -248,6 +248,7 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 16（插件） | autopilot、ralph、team、ultrawork、ralplan、omc-reference |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming、systematic-debugging、test-driven-development、writing-plans |
 | [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced、boss-briefing、briefing-vault、gstack-sprint |
+| [archify](https://github.com/tt-a1i/archify) | 1 | archify |
 
 </details>
 
@@ -370,7 +371,7 @@ my-claude 捆绑的工具会把结果写到不同位置 —— 下表列出各�
 | **三阶段冲刺** | 设计（交互式）→ 执行（通过 ralph 自主进行）→ 审查（交互式对比设计文档） |
 | **Agent 层级优先级** | core > omo > omc > vendored 去重。最专业的 Agent 优先。 |
 | **通道归属** | 编排 → OMC，开发流程 → superpowers，发布/QA/部署/安全 → gstack（Boss P0），语言与技术栈知识 → ECC，AI 与领域 → vendored Agent |
-| **精选白名单** | `scripts/skill-allowlists.sh` 是唯一事实来源——上游数千项中只留下 106 个 Skills 和 9 个规则集，未列入的绝不进入会话上下文 |
+| **精选白名单** | `scripts/skill-allowlists.sh` 是唯一事实来源——上游数千项中只留下 107 个 Skills 和 9 个规则集，未列入的绝不进入会话上下文 |
 | **Briefing Vault** | 兼容 Obsidian 的 `.briefing/` 目录，含会话、决策、学习、参考资料 |
 | **Agent 遥测** | PostToolUse hook 将 Agent 使用情况记录到 `agent-usage.jsonl` |
 | **智能包** | 项目类型检测在会话开始时推荐相关 Agent 包 |

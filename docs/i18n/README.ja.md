@@ -10,7 +10,7 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-106-purple)
+![Skills](https://img.shields.io/badge/skills-107-purple)
 ![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-10-red)
@@ -183,7 +183,7 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 | カテゴリ | 数 | ソース |
 |----------|------:|--------|
 | **エージェント**（常時ロード） | 32 | Boss 1 + OMO 9 + OMC 19 + Vendored 3 |
-| **スキル** | 106 | ECC 61 · gstack 27 · Superpowers 14 · Core 4 |
+| **スキル** | 107 | ECC 61 · gstack 27 · Superpowers 14 · Core 4 · Archify 1 |
 | **ルール** | 48 ファイル / 9 ルールセット | ECC 46（common + 8 言語ディレクトリ）+ Core 2 |
 | **MCP サーバー** | 3 | Context7、Exa、grep.app |
 | **フック** | 10 ファイル / 6 イベント | 委任ガード、テレメトリー、検証、ナレッジ Vault |
@@ -237,7 +237,7 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 </details>
 
 <details>
-<summary><strong>スキル — 4 つのソースから 106</strong></summary>
+<summary><strong>スキル — 5 つのソースから 107</strong></summary>
 
 各ソースは [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) の許可リストで管理され、リストにないスキルはインストールされません。
 
@@ -248,6 +248,7 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 16（プラグイン） | autopilot、ralph、team、ultrawork、ralplan、omc-reference |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming、systematic-debugging、test-driven-development、writing-plans |
 | [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced、boss-briefing、briefing-vault、gstack-sprint |
+| [archify](https://github.com/tt-a1i/archify) | 1 | archify |
 
 </details>
 
@@ -369,7 +370,7 @@ BriefingVault v2 は 3 つの知識管理手法を統合しています：
 | **3 フェーズスプリント** | 設計（インタラクティブ）→ 実行（ralph による自律）→ レビュー（設計書との比較インタラクティブ） |
 | **エージェント層優先度** | core > omo > omc > vendored 重複排除。最も特化したエージェントが優先。 |
 | **レーン所有権** | オーケストレーション → OMC、開発プロセス → superpowers、リリース/QA/デプロイ/セキュリティ → gstack（Boss P0）、言語・スタック知識 → ECC、AI・ドメイン → vendored エージェント |
-| **厳選された許可リスト** | `scripts/skill-allowlists.sh` が唯一の正 — アップストリームの数千から 106 スキルと 9 ルールセットだけが残り、リストにないものはセッションのコンテキストに入りません |
+| **厳選された許可リスト** | `scripts/skill-allowlists.sh` が唯一の正 — アップストリームの数千から 107 スキルと 9 ルールセットだけが残り、リストにないものはセッションのコンテキストに入りません |
 | **Briefing Vault** | セッション、決定、学習、参照を含む Obsidian 互換の `.briefing/` ディレクトリ |
 | **エージェントテレメトリー** | PostToolUse フックがエージェント使用状況を `agent-usage.jsonl` に記録 |
 | **スマートパック** | プロジェクトタイプ検出がセッション開始時に関連エージェントパックを推奨 |

@@ -165,7 +165,7 @@ This installs skills to `~/.agents/skills/` and auto-symlinks them to `~/.claude
 | Category | Count | Details |
 |----------|------:|---------|
 | **Agents** (always loaded) | 32 | Boss (1) + OMO sub-orchestrators (9) + OMC specialists (19) + vendored engineering agents (3) |
-| **Skills** | 106 | ECC (61) + gstack (27) + Superpowers (14) + Core (4). ECC's `web` lane (18) is opt-in; OMC's 16 come from the OMC plugin and are not copied |
+| **Skills** | 107 | ECC (61) + gstack (27) + Superpowers (14) + Core (4) + Archify (1). ECC's `web` lane (18) is opt-in; OMC's 16 come from the OMC plugin and are not copied |
 | **Rules** | 48 files / 9 sets | ECC (46) + Core (2) |
 | **Hooks** | 10 files / 6 events | SessionStart, PreToolUse, PostToolUse, SubagentStop, Stop, UserPromptSubmit |
 | **MCP Servers** | 3 | Context7, Exa, grep.app (registered globally) |
@@ -186,7 +186,7 @@ Every rule file under `rules/common` is injected into every session, so that dir
 ```
 ~/.claude/
 ├── agents/          ← 32 agents (always loaded by Claude Code)
-├── skills/          ← 106 skill directories
+├── skills/          ← 107 skill directories
 ├── rules/           ← 48 rule files in 9 rule sets
 ├── hooks/           ← hooks.json + 10 hook scripts
 ├── workflows/       ← 2 named workflows (code-review-fanout.js, upstream-audit.js)
@@ -312,11 +312,11 @@ echo "Version:          $(cat ~/.claude/.my-claude-version 2>/dev/null || echo '
 
 ```
 Agents:           32
-Skills (total):   106 or more (Anthropic document skills add to this)
-Skills (my-claude): 106
+Skills (total):   126 (107 + Anthropic's 19 document/design skills)
+Skills (my-claude): 107
 Rules:            48
 Anthropic skills: 2 key skills (pdf, docx)
-Manifest:         315 entries
+Manifest:         318 entries
 Duplicates:       0 (should be 0)
 gstack:           OK
 omc:              OK
@@ -326,6 +326,8 @@ LSP (typescript): OK
 LSP (python):     OK
 Version:          <latest release tag>
 ```
+
+Note: if the OMC plugin is already installed, `install.sh` skips copying the 19 OMC agent files ("Plugin detected — skipping agent file copy"), so `Agents` reads 13 and `Manifest` 299; and any personal skills or rules already in `~/.claude` raise the totals above — both are expected.
 
 Non-zero duplicates: re-run `install.sh` (deduplicates automatically). gstack MISSING: install `bun` and re-run `install.sh`. LSP MISSING: install the binary yourself (`npm i -g typescript-language-server typescript` or `npm i -g pyright`) — the rest of the stack is unaffected.
 
