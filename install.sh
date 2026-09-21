@@ -173,6 +173,153 @@ tool_names_with() {
   printf '%s' "${_names#, }"
 }
 
+# The same question as an arrow-key checkbox menu. Everything below declines
+# quietly — and restores the terminal on every path out, including a Ctrl-C —
+# whenever the terminal cannot drive it; the type-in prompt is the fallback.
+_TOOLS_MENU_NAMES=(serena headroom codeburn)
+_TOOLS_MENU_DESCS=(
+  "symbol-level code navigation over MCP (uv tool)"
+  "tool-output compression over MCP (uv tool)"
+  "token/cost tracking with a local dashboard (npm)"
+)
+# How long to wait for the rest of an escape sequence. Whole seconds are the
+# only read timeout bash 3.2 (the macOS system bash) accepts, and that window
+# is long enough for a real keystroke to land in it — hence the byte-at-a-time
+# decoding below, which hands such a keystroke back instead of eating it. An
+# arrow key never waits at all: its bytes are already in the buffer.
+if [ "${BASH_VERSINFO[0]:-0}" -ge 4 ]; then
+  _TOOLS_MENU_ESC_WAIT=0.01
+else
+  _TOOLS_MENU_ESC_WAIT=1
+fi
+
+# Undo what the menu did to the terminal. Trapped before raw mode is entered so
+# an interrupt cannot leave the terminal unusable, and it stays repeatable on
+# purpose: interrupting `read` makes bash put its own raw settings back as it
+# unwinds, so the EXIT trap has to be able to undo that a second time.
+_tools_menu_restore() {
+  if [ -n "${_TOOLS_MENU_STTY:-}" ]; then
+    stty "$_TOOLS_MENU_STTY" 2>/dev/null || true
+  fi
+  if command -v tput >/dev/null 2>&1; then
+    tput cnorm 2>/dev/null || true
+  fi
+}
+
+# Whether this terminal can drive the menu at all.
+_tools_menu_supported() {
+  [ -t 0 ] || return 1
+  [ -z "${CI:-}" ] || return 1
+  case "${TERM:-}" in
+    ""|dumb) return 1 ;;
+  esac
+  command -v stty >/dev/null 2>&1 || return 1
+  stty -g >/dev/null 2>&1 || return 1
+}
+
+# Reprint the item lines in place, over the ones already on screen.
+_tools_menu_draw() {
+  local _i=0 _box _point
+  if [ "$_TOOLS_MENU_DRAWN" = "1" ]; then
+    printf '\033[%dA' "${#_TOOLS_MENU_NAMES[@]}"
+  fi
+  while [ "$_i" -lt "${#_TOOLS_MENU_NAMES[@]}" ]; do
+    if [ "${_TOOLS_MENU_CHECKED[$_i]}" = "1" ]; then _box="x"; else _box=" "; fi
+    if [ "$_i" = "$_TOOLS_MENU_CURSOR" ]; then _point=">"; else _point=" "; fi
+    printf '\033[2K%s [%s] %-9s %s\n' \
+      "$_point" "$_box" "${_TOOLS_MENU_NAMES[$_i]}" "${_TOOLS_MENU_DESCS[$_i]}"
+    _i=$((_i + 1))
+  done
+  _TOOLS_MENU_DRAWN=1
+}
+
+# Check ($1 = 1) or uncheck ($1 = 0) every item.
+_tools_menu_set_all() {
+  local _i=0
+  while [ "$_i" -lt "${#_TOOLS_MENU_NAMES[@]}" ]; do
+    _TOOLS_MENU_CHECKED[$_i]=$1
+    _i=$((_i + 1))
+  done
+}
+
+# Decode what follows an Esc, into _TOOLS_MENU_KEY: "UP"/"DOWN" for an arrow,
+# "NONE" for a lone Esc, or the single byte that was typed too soon after it —
+# which the caller then handles as the ordinary keystroke it is.
+_tools_menu_read_escape() {
+  local _b=""
+  _TOOLS_MENU_KEY="NONE"
+  IFS= read -rsn1 -t "$_TOOLS_MENU_ESC_WAIT" _b 2>/dev/null || return 0
+  case "$_b" in
+    "["|"O") ;;
+    *)       _TOOLS_MENU_KEY="$_b"; return 0 ;;
+  esac
+  IFS= read -rsn1 -t "$_TOOLS_MENU_ESC_WAIT" _b 2>/dev/null || return 0
+  case "$_b" in
+    A) _TOOLS_MENU_KEY="UP" ;;
+    B) _TOOLS_MENU_KEY="DOWN" ;;
+  esac
+}
+
+# Run the menu and leave the answer in the three INSTALL_* variables. Returns 1
+# without having printed anything when raw mode cannot be entered, so the caller
+# can still ask the question the old way. The cursor stops at the ends of the
+# list rather than wrapping.
+select_tools_menu() {
+  local _key _last=$(( ${#_TOOLS_MENU_NAMES[@]} - 1 ))
+  _TOOLS_MENU_CURSOR=0
+  _TOOLS_MENU_DRAWN=0
+  _TOOLS_MENU_CHECKED=(1 1 1)
+  _TOOLS_MENU_STTY=$(stty -g 2>/dev/null) || return 1
+  trap '_tools_menu_restore' EXIT
+  trap '_tools_menu_restore; exit 130' INT TERM
+  if ! stty -echo -icanon min 1 time 0 2>/dev/null; then
+    _tools_menu_restore
+    trap - EXIT INT TERM
+    return 1
+  fi
+  if command -v tput >/dev/null 2>&1; then
+    tput civis 2>/dev/null || true
+  fi
+  printf '\n'
+  printf 'Select companion tools  (↑↓ move · space toggle · a all · n none · enter confirm)\n'
+  printf '\n'
+  while :; do
+    _tools_menu_draw
+    # EOF is not an answer, so it confirms what is on screen — the same
+    # "closed stdin keeps the default" contract the type-in prompt has.
+    IFS= read -rsn1 _key || break
+    # Arrows arrive as ESC [ A / ESC [ B, so an Esc is resolved before the key
+    # is dispatched; "NONE" is a lone Esc and means do nothing.
+    if [ "$_key" = $'\033' ]; then
+      _tools_menu_read_escape
+      _key="$_TOOLS_MENU_KEY"
+    fi
+    case "$_key" in
+      NONE) ;;
+      ""|$'\r'|$'\n') break ;;
+      " ")
+        if [ "${_TOOLS_MENU_CHECKED[$_TOOLS_MENU_CURSOR]}" = "1" ]; then
+          _TOOLS_MENU_CHECKED[$_TOOLS_MENU_CURSOR]=0
+        else
+          _TOOLS_MENU_CHECKED[$_TOOLS_MENU_CURSOR]=1
+        fi
+        ;;
+      a|A) _tools_menu_set_all 1 ;;
+      n|N) _tools_menu_set_all 0 ;;
+      UP|k|K)   [ "$_TOOLS_MENU_CURSOR" -gt 0 ]       && _TOOLS_MENU_CURSOR=$((_TOOLS_MENU_CURSOR - 1)) || true ;;
+      DOWN|j|J) [ "$_TOOLS_MENU_CURSOR" -lt "$_last" ] && _TOOLS_MENU_CURSOR=$((_TOOLS_MENU_CURSOR + 1)) || true ;;
+    esac
+  done
+  _tools_menu_restore
+  trap - EXIT INT TERM
+  INSTALL_SERENA=${_TOOLS_MENU_CHECKED[0]}
+  INSTALL_HEADROOM=${_TOOLS_MENU_CHECKED[1]}
+  INSTALL_CODEBURN=${_TOOLS_MENU_CHECKED[2]}
+  # A terminal that went away mid-menu (the EOF above) cannot be written to any
+  # more; the selection it was showing still stands as the answer.
+  printf '\n' || true
+}
+
 # --tools= is the explicit answer; --skip-tools still means "none" and wins over
 # it, and --yes leaves the install-everything default alone.
 if [ -n "$TOOLS_SELECTION" ]; then
@@ -189,7 +336,16 @@ fi
 # The prompt is skipped whenever an answer cannot be read back (no TTY, CI) or
 # has already been given (--skip-tools / --yes / --tools=); the unattended
 # default stays what it has always been: install everything.
+_tools_ask=0
 if [ "$TOOLS_ANSWERED" = "0" ] && [ -t 0 ] && [ -z "${CI:-}" ]; then
+  _tools_ask=1
+fi
+# The checkbox menu is the interactive path. It declines on a terminal that
+# cannot drive it, and the type-in prompt below then asks the same question.
+if [ "$_tools_ask" = "1" ] && _tools_menu_supported && select_tools_menu; then
+  _tools_ask=0
+fi
+if [ "$_tools_ask" = "1" ]; then
   echo ""
   echo "Optional companion tools — the harness works without them:"
   echo "  1) serena    — symbol-level code navigation over MCP (uv tool)"
