@@ -129,11 +129,11 @@ Boss clôt chaque tour de travail — tout tour ayant édité ou créé des fich
 
 | Situation | Tableau | Colonnes |
 |-----------|-------|---------|
-| Fichiers/paramètres modifiés | 변경 대조 (Changes) | 대상 / Before / After / 근거 |
-| Plusieurs tâches terminées | 작업 요약 (Work summary) | 항목 / 결과 / 근거 |
-| Vérification exécutée | 검증 결과 (Verification) | 항목 / 기대 / 실제 / 판정 |
-| Commits/PR produits | 산출물 (Deliverables) | PR / 저장소 / 내용 / 상태 |
-| Éléments non résolus | 남은 것 (Remaining) | 항목 / 상태 / 다음 조치 |
+| Fichiers/paramètres modifiés | Changements (Changes) | Cible / Before / After / Justification |
+| Plusieurs tâches terminées | Résumé des travaux (Work summary) | Élément / Résultat / Preuve |
+| Vérification exécutée | Vérification (Verification) | Élément / Attendu / Réel / Verdict |
+| Commits/PR produits | Livrables (Deliverables) | PR / Dépôt / Contenu / Statut |
+| Éléments non résolus | Restant (Remaining) | Élément / Statut / Prochaine étape |
 
 Il ne se déclenche qu'à la toute fin de la requête — jamais dans un tour qui lance ou relaie du travail en arrière-plan, jamais comme point d'étape en cours de tâche — et les tours de simple Q&R se terminent normalement sans lui. La spécification vit dans `boss.md § FINAL REPORT` ; le hook Stop `stop-final-report.js` la fait respecter.
 
