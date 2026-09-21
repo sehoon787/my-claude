@@ -129,11 +129,11 @@ Boss schließt jeden Arbeits-Turn — jeden Turn, in dem Dateien bearbeitet oder
 
 | Situation | Tabelle | Spalten |
 |-----------|-------|---------|
-| Dateien/Einstellungen geändert | 변경 대조 (Changes) | 대상 / Before / After / 근거 |
-| Mehrere Aufgaben abgeschlossen | 작업 요약 (Work summary) | 항목 / 결과 / 근거 |
-| Verifikation ausgeführt | 검증 결과 (Verification) | 항목 / 기대 / 실제 / 판정 |
-| Commits/PRs erzeugt | 산출물 (Deliverables) | PR / 저장소 / 내용 / 상태 |
-| Etwas ungelöst | 남은 것 (Remaining) | 항목 / 상태 / 다음 조치 |
+| Dateien/Einstellungen geändert | Änderungen (Changes) | Ziel / Before / After / Begründung |
+| Mehrere Aufgaben abgeschlossen | Arbeitsübersicht (Work summary) | Punkt / Ergebnis / Nachweis |
+| Verifikation ausgeführt | Verifikation (Verification) | Punkt / Erwartet / Tatsächlich / Urteil |
+| Commits/PRs erzeugt | Ergebnisse (Deliverables) | PR / Repository / Inhalt / Status |
+| Etwas ungelöst | Offen (Remaining) | Punkt / Status / Nächster Schritt |
 
 Er wird nur ganz am Ende der Anfrage ausgelöst — niemals in einem Turn, der Hintergrundarbeit startet oder weiterreicht, und niemals als Fortschrittsmeldung mitten in der Aufgabe — und reine Q&A-Turns enden normal ohne ihn. Die Spezifikation steht in `boss.md § FINAL REPORT`; der Stop-Hook `stop-final-report.js` setzt sie durch.
 
