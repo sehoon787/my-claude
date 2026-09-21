@@ -13,6 +13,25 @@ url="${*: -1}"
 state="${SHIM_STATE:?}"
 case "$url" in
   http://127.0.0.1:4747/)
+    if [ -f "$state/codeburn-slow-response" ]; then
+      max_time=1
+      previous=""
+      for argument in "$@"; do
+        [ "$previous" = "--max-time" ] && max_time="$argument"
+        previous="$argument"
+      done
+      if python3 - "$max_time" <<'PY'
+import sys
+raise SystemExit(0 if float(sys.argv[1]) < 1.2 else 1)
+PY
+      then
+        python3 -c 'import sys,time; time.sleep(float(sys.argv[1]))' "$max_time"
+        exit 28
+      fi
+      sleep 1.2
+      printf '<html><title>CodeBurn - Local Dashboard</title></html>'
+      exit 0
+    fi
     if [ -f "$state/codeburn-healthy" ]; then
       printf '<html><title>CodeBurn - Local Dashboard</title></html>'
       exit 0
@@ -112,6 +131,18 @@ run_helper() {
     "$@" bash "$REPO/scripts/ensure-shared-local-services.sh" > "$_root/output" 2>&1
 }
 
+run_helper_with_timeout() {
+  _case="$1"
+  _timeout="$2"
+  shift 2
+  _root="$TMP/$_case"
+  mkdir -p "$_root/state"
+  env PATH="$SHIM:$PATH" SHIM_STATE="$_root/state" \
+    AGENT_HARNESS_STATE_DIR="$_root/shared" \
+    AGENT_HARNESS_SERVICE_TIMEOUT_SECONDS="$_timeout" \
+    "$@" bash "$REPO/scripts/ensure-shared-local-services.sh" > "$_root/output" 2>&1
+}
+
 cleanup_pid() {
   _file="$1"
   if [ -f "$_file" ]; then
@@ -166,6 +197,27 @@ assert_contains "$TMP/foreign/output" "codeburn web: FAIL (port 4747 belongs to 
 assert_contains "$TMP/foreign/output" "Headroom proxy: FAIL (port 8787 belongs to another service; left untouched"
 [ ! -e "$TMP/foreign/state/codeburn-calls" ] || fail "foreign port owner triggered codeburn"
 [ ! -e "$TMP/foreign/state/headroom-calls" ] || fail "foreign port owner triggered Headroom"
+
+# A genuinely running codeburn listener whose dashboard answers slower than the
+# 1-second identity probe must be reused, not misreported as a foreign owner
+# of port 4747. A larger overall timeout budget gives the retry room to catch
+# the listener's later, correctly identified response.
+mkdir -p "$TMP/slow-response-codeburn/state"
+touch "$TMP/slow-response-codeburn/state/codeburn-slow-response" \
+  "$TMP/slow-response-codeburn/state/codeburn-listener"
+run_helper_with_timeout slow-response-codeburn 3 env CODEBURN_SHIM_MODE=success HEADROOM_SHIM_MODE=native
+assert_contains "$TMP/slow-response-codeburn/output" "codeburn web: REUSED"
+[ ! -e "$TMP/slow-response-codeburn/state/codeburn-calls" ] \
+  || fail "slow healthy listener started duplicate codeburn"
+
+# A genuinely foreign listener on 4747 must still end in the existing FAIL
+# line and be left untouched, even though identity is now retried before that
+# verdict is reached. Reuses the same fixture as the "foreign" case above.
+mkdir -p "$TMP/foreign-retry/state"
+touch "$TMP/foreign-retry/state/codeburn-foreign" "$TMP/foreign-retry/state/codeburn-listener"
+run_helper foreign-retry env CODEBURN_SHIM_MODE=success HEADROOM_SHIM_MODE=native
+assert_contains "$TMP/foreign-retry/output" "codeburn web: FAIL (port 4747 belongs to another service; left untouched"
+[ ! -e "$TMP/foreign-retry/state/codeburn-calls" ] || fail "foreign port owner triggered codeburn during identity retry"
 
 # Non-HTTP listeners are also detected and never touched.
 mkdir -p "$TMP/non-http/state"
