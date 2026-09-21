@@ -10,7 +10,7 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-106-purple)
+![Skills](https://img.shields.io/badge/skills-107-purple)
 ![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-10-red)
@@ -183,7 +183,7 @@ Des workflows multi-agents déterministes. `install.sh` les copie dans `~/.claud
 | Catégorie | Nombre | Source |
 |----------|------:|--------|
 | **Agents** (toujours chargés) | 32 | Boss 1 + OMO 9 + OMC 19 + Vendored 3 |
-| **Skills** | 106 | ECC 61 · gstack 27 · Superpowers 14 · Core 4 |
+| **Skills** | 107 | ECC 61 · gstack 27 · Superpowers 14 · Core 4 · Archify 1 |
 | **Règles** | 48 fichiers / 9 jeux | ECC 46 (common + 8 répertoires de langages) + Core 2 |
 | **Serveurs MCP** | 3 | Context7, Exa, grep.app |
 | **Hooks** | 10 fichiers / 6 événements | Garde de délégation, télémétrie, vérification, vault |
@@ -237,7 +237,7 @@ Les modèles utilisés par agent sont listés dans le tableau de routage par mod
 </details>
 
 <details>
-<summary><strong>Skills — 106 issus de 4 sources</strong></summary>
+<summary><strong>Skills — 107 issus de 5 sources</strong></summary>
 
 Chaque source est pilotée par la liste d'autorisation de [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) : ce qui n'y figure pas n'est jamais installé.
 
@@ -248,6 +248,7 @@ Chaque source est pilotée par la liste d'autorisation de [`scripts/skill-allowl
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 16 (plugin) | autopilot, ralph, team, ultrawork, ralplan, omc-reference |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming, systematic-debugging, test-driven-development, writing-plans |
 | [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced, boss-briefing, briefing-vault, gstack-sprint |
+| [archify](https://github.com/tt-a1i/archify) | 1 | archify |
 
 </details>
 
@@ -369,7 +370,7 @@ Fonctionnalités construites spécifiquement pour ce projet, au-delà de ce que 
 | **Sprint 3 phases** | Conception (interactive) → Exécution (autonome via ralph) → Révision (interactive vs doc de conception) |
 | **Priorité par niveau d'agent** | core > omo > omc > déduplication vendored. L'agent le plus spécialisé l'emporte. |
 | **Répartition des voies** | Orchestration → OMC, processus de dev → superpowers, livraison/QA/déploiement/sécurité → gstack (Boss P0), connaissance langages et stack → ECC, IA et domaine → agents vendorisés |
-| **Listes d'autorisation curées** | `scripts/skill-allowlists.sh` fait autorité — sur des milliers d'entrées upstream, 106 skills et 9 jeux de règles survivent ; rien de non listé n'atteint le contexte de session |
+| **Listes d'autorisation curées** | `scripts/skill-allowlists.sh` fait autorité — sur des milliers d'entrées upstream, 107 skills et 9 jeux de règles survivent ; rien de non listé n'atteint le contexte de session |
 | **Briefing Vault** | Répertoire `.briefing/` compatible Obsidian avec sessions, décisions, apprentissages, références |
 | **Télémétrie des agents** | Le hook PostToolUse enregistre l'utilisation des agents dans `agent-usage.jsonl` |
 | **Smart Packs** | La détection du type de projet recommande les packs d'agents pertinents au démarrage de session |
