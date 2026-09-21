@@ -10,7 +10,7 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-105-purple)
+![Skills](https://img.shields.io/badge/skills-106-purple)
 ![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-10-red)
@@ -23,7 +23,7 @@
 Boss はランタイムですべてのエージェント、スキル、MCP ツールを自動検出し、<br>
 適切なスペシャリストにタスクをルーティングします。設定ファイルも、ボイラープレートも不要です。
 
-<img src="./assets/owl-claude-social.svg" alt="The Maestro Owl — my-claude" width="700">
+<img src="../../assets/owl-claude-social.svg" alt="The Maestro Owl — my-claude" width="700">
 
 </div>
 
@@ -61,6 +61,36 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 ```
 
 出力全文を読んでから、各ステップを順番に実行してください。`WebFetch` ではなく `curl` を使用してください。
+
+---
+
+<a id="open-source-tools-used"></a>
+
+## 使用しているオープンソースツール
+
+このスタックが土台にしているプロジェクトは、すべてここで一度だけ説明します。
+MIT ライセンスのアップストリーム 5 件は明示的な SHA に固定した git サブモジュールとしてリンクされ、
+残りはバージョン固定の CLI、ホスト型 MCP サーバー、または帰属表示付きで取り込んだファイルとして届きます。
+
+| # | プロジェクト | my-claude が取り入れているもの | 取り込み方法 |
+|---|--------------|--------------------------------|--------------|
+| 1 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** (OMC) — Yeachan Heo | 役割ごとに作業を分担する 19 のスペシャリストエージェント（architect、debugger、code reviewer、security reviewer、…）と、autopilot・ralph・team を含む 16 のオーケストレーションスキル。`autopilot:` のようなマジックキーワードが自動並列実行を起動します。 | サブモジュール `upstream/omc`、SHA 固定（「バンドルされたアップストリームバージョン」を参照）。`install.sh` が `npm i -g oh-my-claude-sisyphus@latest` を実行し、`oh-my-claudecode@omc` プラグインを有効化します。 |
+| 2 | <img src="https://github.com/code-yeongyu.png?size=32" width="20" height="20" align="center"/> **[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** (omo) — code-yeongyu | 8 プロバイダー（Claude、GPT、Gemini、…）へカテゴリ別にルーティングし、`claude-code-agent-loader` と `claude-code-plugin-loader` で Claude Code に橋渡しするマルチプラットフォームハーネス。その 9 エージェント（Sisyphus、Atlas、Oracle、…）を単体の `.md` ファイルとして取り込んでいます。 | サブモジュールではありません。9 エージェントは `agents/omo/` にあり、`install.sh` が `omo` CLI のために `npm i -g oh-my-opencode@latest` を実行します。 |
+| 3 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | AI コーディングの 4 つの行動指針 — Think Before Coding、Simplicity First、Surgical Changes、Goal-Driven Execution — が常時有効になります。 | `install.sh` が固定 SHA `aa4467f` の `CLAUDE.md` を curl で取得し、チェックサムを検証して `~/.claude/CLAUDE.md` に追記します。コードは取り込みません。 |
+| 4 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** (ECC) — affaan-m | アップストリームには 278 スキル + 67 エージェント + 94 コマンド + 言語ルール。my-claude は厳選した 61 スキル（オプトインの `web` レーンを足すと 79）— スタックパターン、AI/エージェントエンジニアリング、コードベースツール — に加えて 9 ルールセットと `/tdd`、`/plan`、`/code-review`、`/build-fix` などのスラッシュコマンドを導入します。 | サブモジュール `upstream/ecc`、SHA 固定。`install.sh` はまず `claude plugin add affaan-m/everything-claude-code` を試し、失敗した場合はサブモジュールにフォールバックします。 |
+| 5 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | Anthropic 公式のスキルリポジトリ: PDF 解析、Word/Excel/PowerPoint 操作、MCP サーバー作成。 | `install.sh` が `claude plugin add anthropics/skills` を実行します。意図的にマニフェスト追跡の対象外です。 |
+| 6 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | Garry Tan のスプリントプロセスハーネス: 26 スキルとルートルーター `gstack`（合計 27）— ブラウザ QA（`/qa`）、スコープドリフトのコードレビュー（`/review`）、セキュリティ監査（`/cso`）、および Plan→Review→QA→Ship の全工程（Boss P0 レーン）。実ブラウザテスト用にコンパイル済みの Playwright ブラウザデーモンを同梱します。 | サブモジュール `upstream/gstack`、SHA 固定。 |
+| 7 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | Jesse Vincent の開発プロセスライブラリ: 15 スキル中 14 — ブレインストーミング、体系的デバッグ、TDD、計画の作成と実行、コードレビューの作法。`dispatching-parallel-agents` は Boss と Agent Teams が既にその経路を担うため除外しています。 | サブモジュール `upstream/superpowers`、SHA 固定。 |
+| 8 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | Claude Code と Codex が既に書き出しているセッションファイルを読むローカルファーストのトークン・コスト追跡 — プロキシなし、API キーなし、マシンの外に何も出ません。予算ガードフックは `bash install.sh --with-codeburn-guard` によるオプトインのままです。ハードキャップ（既定で $15/セッション）が解除コマンド `codeburn guard allow` を含むそのセッションのすべてのツール呼び出しを止めるためです（解除は外部ターミナルから実行）。 | `npm i -g codeburn@0.9.23`。`install.sh` は両ハーネス共有のダッシュボードも起動または再利用します — 「結果を確認する場所」を参照。MIT。 |
+| 9 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | MCP 経由で使う言語サーバーのシンボルグラフ: `find_symbol`、`get_symbols_overview`、`find_referencing_symbols`、`replace_symbol_body`、`insert_after_symbol` — 消費トークンはファイルではなくシンボルの大きさに比例します。 | `uv tool install -p 3.13 serena-agent==1.7.0` でインストールし、ユーザースコープの stdio MCP サーバー（`serena start-mcp-server --context claude-code --project-from-cwd`）として登録します。配布パッケージは全体として GPL-3.0-or-later です（PyPI の MIT classifier は不正確）。外部サーバーとして利用し、コードは取り込みません。 |
+| 10 | <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | ツール出力の圧縮: `headroom mcp serve` が `headroom_compress`、`headroom_retrieve`、`headroom_stats` を公開し、肥大化したツール実行結果がそのままトランスクリプトに入らないようにします。 | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"` でインストールし、stdio MCP サーバー `headroom` として登録します。`install.sh` は変更を加えない永続プロファイル `agent-harness-shared` も起動または再利用します。Apache-2.0。 |
+| 11 | <img src="https://github.com/tt-a1i.png?size=32" width="20" height="20" align="center"/> **[archify](https://github.com/tt-a1i/archify)** — tt-a1i | アーキテクチャ、ワークフロー、シーケンス、データフロー、ライフサイクルの図を自己完結型 HTML として描くエージェントスキル — インライン SVG、ライト/ダークのテーマ切り替え、PNG/JPEG/WebP/SVG のエクスポートメニュー、生成ファイルにランタイム依存なし。貼り付けた Mermaid も入力方言として受け付けます。 | サブモジュール `upstream/archify`、タグ `v2.9.0` に固定。`install.sh` がアップストリームの `archify/` スキルディレクトリを `~/.claude/skills/archify` にコピーするため、インストール時に `npx skills add` は実行されません。 |
+| 12 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | スタック内に代替のないエンジニアリングエージェント 3 個: AI Engineer、DevOps Automator、Multi-Agent Systems Architect。 | サブモジュールは 2026-07-27 に削除。同日に 3 エージェントを `agents/vendored/` へスナップショットし、各ファイルに上流の帰属表示を付けています。MIT。 |
+| 13 | <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | 構文木を理解する構造的なコード検索・書き換え。エージェントは正規表現ではなくコードの形にマッチできます。 | `npm i -g @ast-grep/cli@0.42.0`。MIT。 |
+| 14 | <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | バージョンに忠実な最新のライブラリドキュメント。エージェントが記憶に頼らず実際の API を読めます。 | `https://mcp.context7.com/mcp` のホスト型 MCP サーバー。`install.sh` が登録します。 |
+| 15 | <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | キーワード検索では取りこぼす調査のためのニューラル（意味ベース）ウェブ検索。 | `https://mcp.exa.ai/mcp` のホスト型 MCP サーバー。`install.sh` が登録します。 |
+| 16 | <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://github.com/grep-app)** — grep.app | 公開 GitHub リポジトリ横断のコード検索。あるパターンが実際にどう使われているかを探せます。 | `https://mcp.grep.app` のホスト型 MCP サーバー。`install.sh` が登録します。 |
+
 
 ---
 
@@ -153,13 +183,13 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 | カテゴリ | 数 | ソース |
 |----------|------:|--------|
 | **エージェント**（常時ロード） | 32 | Boss 1 + OMO 9 + OMC 19 + Vendored 3 |
-| **スキル** | 105 | ECC 61 · gstack 27 · Superpowers 13 · Core 4 |
+| **スキル** | 106 | ECC 61 · gstack 27 · Superpowers 14 · Core 4 |
 | **ルール** | 48 ファイル / 9 ルールセット | ECC 46（common + 8 言語ディレクトリ）+ Core 2 |
 | **MCP サーバー** | 3 | Context7、Exa、grep.app |
 | **フック** | 10 ファイル / 6 イベント | 委任ガード、テレメトリー、検証、ナレッジ Vault |
 | **LSP サーバー** | 2 | typescript（`typescript-language-server`）、python（`pyright-langserver`） |
 | **名前付きワークフロー** | 2 | code-review-fanout、upstream-audit |
-| **アップストリームサブモジュール** | 4 | ecc、omc、gstack、superpowers |
+| **アップストリームサブモジュール** | 5 | ecc、omc、gstack、superpowers、archify |
 | **CLI ツール** | 7 | omc、omo、ast-grep、comment-checker、codeburn、serena、headroom |
 
 上記のエージェント・スキル・ルールはすべて [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) の許可リストに登録され、インストールマニフェストで追跡されます。Anthropic 公式のドキュメントスキル（pdf、docx など）は `claude plugin add anthropics/skills` で別途インストールされ、意図的にマニフェスト追跡の対象外です。
@@ -167,9 +197,7 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 <details>
 <summary><strong>スペシャリストエージェント — 4 ティアで 32</strong></summary>
 
-エージェントごとのモデルは上の「モデルルーティング」テーブルに記載されています。
-
-Vendored エージェントは `agency-agents` サブモジュールを削除した 2026-07-27 に [agency-agents](https://github.com/msitarzewski/agency-agents)（MIT）からスナップショットしました。スタック内に代替のないエンジニアリングエージェントのみを残し、各ファイルに上流の帰属表示があります。
+エージェントごとのモデルは上の「モデルルーティング」テーブルに記載されています。各ソースの出どころは [使用しているオープンソースツール](#open-source-tools-used) にあります。
 
 | エージェント | ティア | 役割 | ソース |
 |-------|------|------|--------|
@@ -209,16 +237,16 @@ Vendored エージェントは `agency-agents` サブモジュールを削除し
 </details>
 
 <details>
-<summary><strong>スキル — 5 つのソースから 105</strong></summary>
+<summary><strong>スキル — 4 つのソースから 106</strong></summary>
 
 各ソースは [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) の許可リストで管理され、リストにないスキルはインストールされません。
 
 | ソース | 数 | 主要スキル |
 |--------|------:|------------|
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 79 | coding-standards、react-patterns、fastapi-patterns、agent-architecture-audit、e2e-testing |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 61 | coding-standards、fastapi-patterns、agent-architecture-audit、springboot-patterns、kubernetes-patterns |
 | [gstack](https://github.com/garrytan/gstack) | 27 | /qa、/review、/ship、/cso、/investigate、/office-hours |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 16 | autopilot、ralph、team、ultrawork、ralplan、omc-reference |
-| [superpowers](https://github.com/obra/superpowers) | 13 | brainstorming、systematic-debugging、test-driven-development、writing-plans |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 16（プラグイン） | autopilot、ralph、team、ultrawork、ralplan、omc-reference |
+| [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming、systematic-debugging、test-driven-development、writing-plans |
 | [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced、boss-briefing、briefing-vault、gstack-sprint |
 
 </details>
@@ -226,13 +254,13 @@ Vendored エージェントは `agency-agents` サブモジュールを削除し
 <details>
 <summary><strong>MCP サーバー (3) + フック (8)</strong></summary>
 
-**MCP サーバー**
+**MCP サーバー** — それぞれの機能と登録方法は [使用しているオープンソースツール](#open-source-tools-used) にあります。
 
-| サーバー | 目的 | コスト |
-|--------|---------|------|
-| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://context7.com) | リアルタイムライブラリドキュメント | 無料 |
-| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://exa.ai) | セマンティックウェブ検索 | 月 1,000 リクエスト無料 |
-| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://github.com/grep-app) | GitHub コード検索 | 無料 |
+| サーバー | コスト |
+|--------|------|
+| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://context7.com) | 無料 |
+| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://exa.ai) | 月 1,000 リクエスト無料 |
+| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://github.com/grep-app) | 無料 |
 
 **行動フック**
 
@@ -305,50 +333,15 @@ BriefingVault v2 は 3 つの知識管理手法を統合しています：
 
 ## 結果を確認する場所
 
-スタックが生成した出力を実際に確認できる場所です:
+スタックが生成した出力を実際に確認できる場所です。各ツールが何であるかは [使用しているオープンソースツール](#open-source-tools-used) にあります:
 
-| ツール | 機能 | 実行方法 | 確認場所 |
-|------|--------------|-----------|---------------|
-| **codeburn** | 過去の全セッションにわたるトークンとコストの集計 | `install.sh` が `codeburn web --provider all --port 4747 --no-open` を起動または再利用 · `codeburn` は TUI を表示 · `codeburn report --format json --period week` は非対話形式で出力 | 共有ダッシュボードは <http://127.0.0.1:4747/>、起動ログは `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`。セッションファイルは読み取り専用で、ドル金額は API 定価に基づく推定値です。 |
-| **Serena** | シンボル単位のコードナビゲーションと編集 | MCP サーバーとして自動的に起動します。任意のセッションから `get_symbols_overview` / `find_symbol` を呼び出せます | サーバー稼働中はダッシュボードが <http://localhost:24282/dashboard/index.html> で利用できます（ログ + ツールごとの呼び出し回数）。プロジェクトごとのメモリは作業中のリポジトリ内の `.serena/` に保存され、グローバル設定は `~/.serena/serena_config.yml` です。 |
-| **Headroom** | 肥大化したツール実行結果を、トランスクリプトに入る前に圧縮します | MCP ツール `headroom_compress` / `headroom_retrieve` / `headroom_stats`。`install.sh` が共有プロキシプロファイル `agent-harness-shared` を起動または再利用 | 統計は <http://127.0.0.1:8787/stats>（プロキシ経由になるまで空の場合あり）、起動ログは `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`。インストーラーは `ANTHROPIC_BASE_URL` と `OPENAI_BASE_URL` を設定しません。 |
-| **Archify** | アーキテクチャ、ワークフロー、シーケンス、データフロー、ライフサイクルの図 | 図を依頼すると Boss が `archify` スキルにルーティングします。手動で実行する場合は `~/.claude/skills/archify` から: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 生成された `out.html` — 任意のブラウザで開けます。自己完結型（インライン SVG、テーマトグル、エクスポートメニュー）で、ランタイム依存はありません。`node bin/archify.mjs check out.html` で検証できます。 |
-| **OMC HUD** | コンテキスト、クォータ、モードのライブ表示 | `install.sh` がステータスラインとしてインストールします。`/oh-my-claudecode:hud` で再設定できます | セッション下部の Claude Code ステータスライン。codeburn を補完します: HUD は現在のセッション、codeburn は全セッションを対象とします。 |
-
----
-
-## アップストリームのオープンソースソース
-
-my-claude は 5 つの MIT ライセンスのアップストリームリポジトリを git サブモジュールとしてリンクし、それぞれ明示的な SHA に固定しています:
-
-| # | ソース | 提供内容 |
-|---|--------|-----------------|
-| 1 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** — affaan-m | インストールされる 79 スキル + 9 ルールセット。言語・スタック知識のレーン: TDD、セキュリティ、コーディング標準、フレームワークパターン。 |
-| 2 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 19 のスペシャリストエージェント + インストールされる 16 スキル。オーケストレーションのレーン: autopilot、ralph、team。 |
-| 3 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | リリース・QA・デプロイ・セキュリティレビュー（Boss P0 レーン）向けにインストールされる 27 スキル。Playwright ブラウザデーモンを含む。 |
-| 4 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 開発プロセスのレーン向けにインストールされる 13 スキル: ブレインストーミング、TDD、体系的デバッグ、計画作成。 |
-| 5 | <img src="https://github.com/tt-a1i.png?size=32" width="20" height="20" align="center"/> **[archify](https://github.com/tt-a1i/archify)** — tt-a1i | インストールされる 1 スキル、タグ `v2.9.0` に固定。アーキテクチャ・ワークフロー・シーケンス・データフロー・ライフサイクルの図を自己完結型 HTML として生成。 |
-
-サブモジュールではないが、スタックの一部:
-
-| ソース | 取り込み方法 |
-|--------|----------------|
-| <img src="https://github.com/code-yeongyu.png?size=32" width="20" height="20" align="center"/> **[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — code-yeongyu | 9 つの OMO エージェント（Sisyphus、Atlas、Oracle など）を、本リポジトリの `agents/omo/` に独立した `.md` エージェントとして移植。 |
-| <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 2026-07-27 にサブモジュールを削除。エンジニアリングエージェント 3 個を帰属表示付きで `agents/vendored/` に vendored。 |
-| <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | `install.sh` が `claude plugin add anthropics/skills` でインストール（pdf、docx など）。マニフェスト追跡の対象外。 |
-| <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 つの AI コーディング行動ガイドラインを `~/.claude/CLAUDE.md` に追記。 |
-
-`install.sh` が一緒に導入するコンパニオン CLI と MCP サーバー。それぞれ正確なバージョンに固定されています:
-
-| ソース | 取り込み方法 |
-|--------|----------------|
-| <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0` でインストールし、シンボル単位のコードナビゲーションと編集を行う `serena` stdio MCP サーバーとして登録します。配布パッケージは全体として GPL-3.0-or-later で（PyPI の MIT classifier は誤り）、外部サーバーとして利用し vendored はしません。 |
-| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"` でインストールし、`headroom` stdio MCP サーバー（`headroom mcp serve`）として登録し、変更を伴わない永続プロファイル `agent-harness-shared` としても起動。ツール出力の圧縮、Apache-2.0。 |
-| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | `npm i -g codeburn@0.9.23`（npm CLI、MIT、`upstream/SOURCES.json` に `method: npm-cli` として登録）で、Claude Code が既に書き出すセッションファイルからローカルファーストにトークンとコストを集計します（プロキシ・API キー・アップロード不要）。予算ガードフックは、hard cap（既定 $15/セッション）が解除コマンド `codeburn guard allow` を含むそのセッションの全ツール呼び出しをブロックするため、`--with-codeburn-guard` でのオプトインのままです（解除は外部ターミナルから実行）。 |
-| <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`。構造的（AST を理解する）コード検索と書き換え。 |
-| <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | `https://mcp.context7.com/mcp` のホスト型 MCP サーバー。最新のライブラリドキュメント。 |
-| <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | `https://mcp.exa.ai/mcp` のホスト型 MCP サーバー。ニューラルウェブ検索。 |
-| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://github.com/grep-app)** — grep.app | `https://mcp.grep.app` のホスト型 MCP サーバー。パブリック GitHub リポジトリ横断のコード検索。 |
+| ツール | 開く | 実行方法 | 確認場所 |
+|--------|------|----------|----------|
+| **codeburn** | <http://127.0.0.1:4747/> | `install.sh` が `codeburn web --provider all --port 4747 --no-open` を起動または再利用 · `codeburn` は TUI を表示 · `codeburn report --format json --period week` は非対話形式で出力 | 共有ダッシュボード。起動ログは `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`。セッションファイルは読み取り専用で、ドル金額は API 定価に基づく推定値です。 |
+| **Serena** | <http://localhost:24282/dashboard/index.html> | MCP サーバーとして自動的に起動します。任意のセッションから `get_symbols_overview` / `find_symbol` を呼び出せます | サーバー稼働中に使えるダッシュボード（ログ + ツールごとの呼び出し回数）。プロジェクトごとのメモリは作業中のリポジトリ内の `.serena/` に保存され、グローバル設定は `~/.serena/serena_config.yml` です。 |
+| **Headroom** | <http://127.0.0.1:8787/stats> | MCP ツール `headroom_compress` / `headroom_retrieve` / `headroom_stats`。`install.sh` が共有プロキシプロファイル `agent-harness-shared` を起動または再利用 | 圧縮統計。プロキシ経由になるまで空の場合があります。起動ログは `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`。 |
+| **Archify** | `out.html` | 図を依頼すると Boss が `archify` スキルにルーティングします。手動で実行する場合は `~/.claude/skills/archify` から: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 生成されたファイル — 任意のブラウザで開けます。`node bin/archify.mjs check out.html` で検証できます。 |
+| **OMC HUD** | Claude Code ステータスライン | `install.sh` がステータスラインとしてインストールします。`/oh-my-claudecode:hud` で再設定できます | セッション下部に、コンテキスト・クォータ・モードがライブ表示されます。codeburn を補完します: HUD は現在のセッション、codeburn は全セッションを対象とします。 |
 
 ---
 
@@ -376,7 +369,7 @@ my-claude は 5 つの MIT ライセンスのアップストリームリポジ�
 | **3 フェーズスプリント** | 設計（インタラクティブ）→ 実行（ralph による自律）→ レビュー（設計書との比較インタラクティブ） |
 | **エージェント層優先度** | core > omo > omc > vendored 重複排除。最も特化したエージェントが優先。 |
 | **レーン所有権** | オーケストレーション → OMC、開発プロセス → superpowers、リリース/QA/デプロイ/セキュリティ → gstack（Boss P0）、言語・スタック知識 → ECC、AI・ドメイン → vendored エージェント |
-| **厳選された許可リスト** | `scripts/skill-allowlists.sh` が唯一の正 — アップストリームの数千から 105 スキルと 9 ルールセットだけが残り、リストにないものはセッションのコンテキストに入りません |
+| **厳選された許可リスト** | `scripts/skill-allowlists.sh` が唯一の正 — アップストリームの数千から 106 スキルと 9 ルールセットだけが残り、リストにないものはセッションのコンテキストに入りません |
 | **Briefing Vault** | セッション、決定、学習、参照を含む Obsidian 互換の `.briefing/` ディレクトリ |
 | **エージェントテレメトリー** | PostToolUse フックがエージェント使用状況を `agent-usage.jsonl` に記録 |
 | **スマートパック** | プロジェクトタイプ検出がセッション開始時に関連エージェントパックを推奨 |
@@ -391,10 +384,11 @@ git サブモジュール経由でリンク。ピン留めされたコミット�
 
 | ソース | SHA | 日付 | 差分 |
 |--------|-----|------|------|
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `4092795` | 2026-07-27 | [compare](https://github.com/affaan-m/everything-claude-code/compare/4092795...HEAD) |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `590fb98` | 2026-07-27 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/590fb98...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | `7c9df1c` | 2026-07-27 | [compare](https://github.com/garrytan/gstack/compare/7c9df1c...HEAD) |
-| [superpowers](https://github.com/obra/superpowers) | `3dcbd5c` | 2026-07-27 | [compare](https://github.com/obra/superpowers/compare/3dcbd5c...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `07756ce` | 2026-09-19 | [compare](https://github.com/affaan-m/everything-claude-code/compare/07756ce...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `5281b19` | 2026-09-13 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/5281b19...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `a6b3a57` | 2026-09-16 | [compare](https://github.com/garrytan/gstack/compare/a6b3a57...HEAD) |
+| [superpowers](https://github.com/obra/superpowers) | `5bf4e78` | 2026-09-19 | [compare](https://github.com/obra/superpowers/compare/5bf4e78...HEAD) |
+| [archify](https://github.com/tt-a1i/archify) | `62904f3` (`v2.9.0`) | 2026-09-19 | [compare](https://github.com/tt-a1i/archify/compare/62904f3...HEAD) |
 
 ---
 
@@ -404,8 +398,8 @@ Issues と PR を歓迎します。新しいエージェントを追加する際
 
 ## クレジット
 
-以下の成果物の上に構築されています: [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) (Yeachan Heo)、[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) (code-yeongyu)、[everything-claude-code](https://github.com/affaan-m/everything-claude-code) (affaan-m)、[gstack](https://github.com/garrytan/gstack) (garrytan)、[superpowers](https://github.com/obra/superpowers) (Jesse Vincent)、[agency-agents](https://github.com/msitarzewski/agency-agents) (msitarzewski — vendored エージェント 3 個)、[anthropic/skills](https://github.com/anthropics/skills) (Anthropic)、[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) (forrestchang)。
+[使用しているオープンソースツール](#open-source-tools-used) に挙げたプロジェクトの上に構築されています。すべての作者に感謝します。
 
 ## ライセンス
 
-MIT ライセンス。詳細は [LICENSE](./LICENSE) ファイルをご参照ください。
+MIT ライセンス。詳細は [LICENSE](../../LICENSE) ファイルをご参照ください。

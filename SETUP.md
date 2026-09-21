@@ -165,7 +165,7 @@ This installs skills to `~/.agents/skills/` and auto-symlinks them to `~/.claude
 | Category | Count | Details |
 |----------|------:|---------|
 | **Agents** (always loaded) | 32 | Boss (1) + OMO sub-orchestrators (9) + OMC specialists (19) + vendored engineering agents (3) |
-| **Skills** | 105 | ECC (61) + gstack (27) + Superpowers (13) + Core (4). ECC's `web` lane (18) is opt-in; OMC's 16 come from the OMC plugin and are not copied |
+| **Skills** | 106 | ECC (61) + gstack (27) + Superpowers (14) + Core (4). ECC's `web` lane (18) is opt-in; OMC's 16 come from the OMC plugin and are not copied |
 | **Rules** | 48 files / 9 sets | ECC (46) + Core (2) |
 | **Hooks** | 10 files / 6 events | SessionStart, PreToolUse, PostToolUse, SubagentStop, Stop, UserPromptSubmit |
 | **MCP Servers** | 3 | Context7, Exa, grep.app (registered globally) |
@@ -186,9 +186,9 @@ Every rule file under `rules/common` is injected into every session, so that dir
 ```
 ~/.claude/
 ├── agents/          ← 32 agents (always loaded by Claude Code)
-├── skills/          ← 105 skill directories
+├── skills/          ← 106 skill directories
 ├── rules/           ← 48 rule files in 9 rule sets
-├── hooks/           ← hooks.json + 7 hook scripts
+├── hooks/           ← hooks.json + 10 hook scripts
 ├── workflows/       ← 2 named workflows (code-review-fanout.js, upstream-audit.js)
 ├── docs/nexus/      ← Agent Teams reference (not parsed as an agent)
 ├── .my-claude-manifest   ← Tracks installed files for safe upgrades
@@ -312,9 +312,9 @@ echo "Version:          $(cat ~/.claude/.my-claude-version 2>/dev/null || echo '
 
 ```
 Agents:           32
-Skills (total):   105 or more (Anthropic document skills add to this)
-Skills (my-claude): 105
-Rules:            54
+Skills (total):   106 or more (Anthropic document skills add to this)
+Skills (my-claude): 106
+Rules:            48
 Anthropic skills: 2 key skills (pdf, docx)
 Manifest:         315 entries
 Duplicates:       0 (should be 0)
