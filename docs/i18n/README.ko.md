@@ -335,13 +335,13 @@ BriefingVault v2는 세 가지 지식 관리 방법론을 통합합니다:
 
 설치된 도구들이 만들어 내는 결과를 어디에서 볼 수 있는지 정리했습니다. 각 도구가 무엇인지는 [사용하는 오픈소스 도구](#open-source-tools-used)에 있습니다.
 
-| 도구 | 실행 방법 | 확인 위치 |
-|------|-----------|---------------|
-| **codeburn** | `install.sh`가 `codeburn web --provider all --port 4747 --no-open`을 시작하거나 재사용 · `codeburn`은 TUI 실행 · `codeburn report --format json --period week`은 비대화형 출력 | 공유 대시보드는 <http://127.0.0.1:4747/>, 시작 로그는 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`. 세션 파일은 읽기 전용이며 달러 금액은 API 정가 기준 추정치입니다. |
-| **Serena** | MCP 서버로 자동 시작됩니다. 어느 세션에서든 `get_symbols_overview` / `find_symbol`을 호출하세요 | 서버가 실행 중일 때 대시보드는 <http://localhost:24282/dashboard/index.html> (로그 + 도구별 호출 횟수). 프로젝트별 메모리는 작업 중인 저장소 안의 `.serena/`에 쌓이고, 전역 설정은 `~/.serena/serena_config.yml`입니다. |
-| **Headroom** | MCP 도구 `headroom_compress` / `headroom_retrieve` / `headroom_stats`; `install.sh`가 공유 프록시 프로필 `agent-harness-shared`를 시작하거나 재사용 | 통계는 <http://127.0.0.1:8787/stats>(프록시로 라우팅되기 전에는 비어 있을 수 있음), 시작 로그는 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`. |
-| **Archify** | 다이어그램을 요청하면 Boss가 `archify` 스킬로 라우팅합니다. 수동으로 하려면 `~/.claude/skills/archify`에서: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 생성된 `out.html` — 아무 브라우저에서나 열면 됩니다. `node bin/archify.mjs check out.html`로 검증할 수 있습니다. |
-| **OMC HUD** | `install.sh`가 스테이터스라인으로 설치합니다. `/oh-my-claudecode:hud`로 재설정할 수 있습니다 | 세션 하단의 Claude Code 스테이터스라인에 컨텍스트·할당량·모드가 실시간으로 표시됩니다. codeburn을 보완합니다 — HUD는 현재 세션, codeburn은 모든 세션. |
+| 도구 | 열기 | 실행 방법 | 확인 위치 |
+|------|------|-----------|-----------|
+| **codeburn** | <http://127.0.0.1:4747/> | `install.sh`가 `codeburn web --provider all --port 4747 --no-open`을 시작하거나 재사용 · `codeburn`은 TUI 실행 · `codeburn report --format json --period week`은 비대화형 출력 | 공유 대시보드. 시작 로그는 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`. 세션 파일은 읽기 전용이며 달러 금액은 API 정가 기준 추정치입니다. |
+| **Serena** | <http://localhost:24282/dashboard/index.html> | MCP 서버로 자동 시작됩니다. 어느 세션에서든 `get_symbols_overview` / `find_symbol`을 호출하세요 | 서버가 실행 중일 때 쓸 수 있는 대시보드 (로그 + 도구별 호출 횟수). 프로젝트별 메모리는 작업 중인 저장소 안의 `.serena/`에 쌓이고, 전역 설정은 `~/.serena/serena_config.yml`입니다. |
+| **Headroom** | <http://127.0.0.1:8787/stats> | MCP 도구 `headroom_compress` / `headroom_retrieve` / `headroom_stats`; `install.sh`가 공유 프록시 프로필 `agent-harness-shared`를 시작하거나 재사용 | 압축 통계. 프록시로 라우팅되기 전에는 비어 있을 수 있습니다. 시작 로그는 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`. |
+| **Archify** | `out.html` | 다이어그램을 요청하면 Boss가 `archify` 스킬로 라우팅합니다. 수동으로 하려면 `~/.claude/skills/archify`에서: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 생성된 파일 — 아무 브라우저에서나 열면 됩니다. `node bin/archify.mjs check out.html`로 검증할 수 있습니다. |
+| **OMC HUD** | Claude Code 스테이터스라인 | `install.sh`가 스테이터스라인으로 설치합니다. `/oh-my-claudecode:hud`로 재설정할 수 있습니다 | 세션 하단에 컨텍스트·할당량·모드가 실시간으로 표시됩니다. codeburn을 보완합니다 — HUD는 현재 세션, codeburn은 모든 세션. |
 
 ---
 

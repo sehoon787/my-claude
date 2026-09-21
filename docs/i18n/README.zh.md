@@ -336,13 +336,13 @@ BriefingVault v2 融合了三种知识管理方法论：
 
 my-claude 捆绑的工具会把结果写到不同位置 —— 下表列出各自的查看方式。每个工具是什么，见 [使用的开源工具](#open-source-tools-used)。
 
-| 工具 | 运行方式 | 查看位置 |
-|------|-----------|---------------|
-| **codeburn** | `install.sh` 启动或复用 `codeburn web --provider all --port 4747 --no-open` · `codeburn` 打开 TUI · `codeburn report --format json --period week` 生成非交互式输出 | 共享仪表盘 <http://127.0.0.1:4747/>，启动日志 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`。会话文件只读，美元金额是按 API 标价计算的估算值。 |
-| **Serena** | 作为 MCP 服务器自动启动；在任意会话中调用 `get_symbols_overview` / `find_symbol` | 服务器运行期间，仪表盘位于 <http://localhost:24282/dashboard/index.html>（日志 + 各工具调用计数）。按项目的记忆写入你正在工作的仓库内的 `.serena/`；全局配置为 `~/.serena/serena_config.yml`。 |
-| **Headroom** | MCP 工具 `headroom_compress` / `headroom_retrieve` / `headroom_stats`；`install.sh` 启动或复用共享代理配置 `agent-harness-shared` | 统计页面 <http://127.0.0.1:8787/stats>（客户端显式通过代理路由前可能为空），启动日志 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`。 |
-| **Archify** | 请求绘图时 Boss 会路由到 `archify` skill。手动方式，从 `~/.claude/skills/archify` 运行：`node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 生成的 `out.html` —— 用任意浏览器打开。可用 `node bin/archify.mjs check out.html` 校验。 |
-| **OMC HUD** | 由 `install.sh` 安装为状态栏；`/oh-my-claudecode:hud` 可重新配置 | 会话底部的 Claude Code 状态栏，实时显示上下文、配额与模式。与 codeburn 互补：HUD 看当前会话，codeburn 看所有会话。 |
+| 工具 | 打开 | 运行方式 | 查看位置 |
+|------|------|----------|----------|
+| **codeburn** | <http://127.0.0.1:4747/> | `install.sh` 启动或复用 `codeburn web --provider all --port 4747 --no-open` · `codeburn` 打开 TUI · `codeburn report --format json --period week` 生成非交互式输出 | 共享仪表盘。启动日志 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`。会话文件只读，美元金额是按 API 标价计算的估算值。 |
+| **Serena** | <http://localhost:24282/dashboard/index.html> | 作为 MCP 服务器自动启动；在任意会话中调用 `get_symbols_overview` / `find_symbol` | 服务器运行期间可用的仪表盘（日志 + 各工具调用计数）。按项目的记忆写入你正在工作的仓库内的 `.serena/`；全局配置为 `~/.serena/serena_config.yml`。 |
+| **Headroom** | <http://127.0.0.1:8787/stats> | MCP 工具 `headroom_compress` / `headroom_retrieve` / `headroom_stats`；`install.sh` 启动或复用共享代理配置 `agent-harness-shared` | 压缩统计页面，客户端显式通过代理路由前可能为空。启动日志 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`。 |
+| **Archify** | `out.html` | 请求绘图时 Boss 会路由到 `archify` skill。手动方式，从 `~/.claude/skills/archify` 运行：`node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 生成的文件 —— 用任意浏览器打开。可用 `node bin/archify.mjs check out.html` 校验。 |
+| **OMC HUD** | Claude Code 状态栏 | 由 `install.sh` 安装为状态栏；`/oh-my-claudecode:hud` 可重新配置 | 会话底部，实时显示上下文、配额与模式。与 codeburn 互补：HUD 看当前会话，codeburn 看所有会话。 |
 
 ---
 

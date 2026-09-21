@@ -359,13 +359,13 @@ The Stop hook checks whether `/boss-briefing` has run today. If not, it blocks s
 Every tool in this stack writes its output somewhere. This is where. What each
 tool is, is in [Open-Source Tools Used](#open-source-tools-used).
 
-| Tool | How to Run | Where to Look |
-|------|-----------|---------------|
-| **codeburn** | `install.sh` starts or reuses `codeburn web --provider all --port 4747 --no-open` · `codeburn` opens the TUI · `codeburn report --format json --period week` emits a non-interactive dump (also `--day`, `--from`/`--to`, `--provider claude`) | Shared dashboard at <http://127.0.0.1:4747/>; startup log `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`. Session files are read-only and dollar figures are **estimates** at API list rates — on a subscription plan a usage proxy, not a bill. |
-| **Serena** | Starts automatically as an MCP server; call `get_symbols_overview` / `find_symbol` from any session | Dashboard at <http://localhost:24282/dashboard/index.html> while a server is running (logs + per-tool call counts). Per-project memories land in `.serena/` inside the repository you are working on; the global config is `~/.serena/serena_config.yml`. |
-| **Headroom** | MCP tools `headroom_compress` / `headroom_retrieve` / `headroom_stats`; `install.sh` starts or reuses the shared `agent-harness-shared` proxy profile | Stats at <http://127.0.0.1:8787/stats> (empty until a client explicitly routes through the proxy); startup log `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`. |
-| **Archify** | Ask for a diagram and Boss routes to the `archify` skill. Manually, from `~/.claude/skills/archify`: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | The generated `out.html` — open it in any browser. Validate one with `node bin/archify.mjs check out.html`. |
-| **OMC HUD** | Installed as the statusline by `install.sh`; `/oh-my-claudecode:hud` reconfigures it | The Claude Code statusline at the bottom of the session, with a live context, quota, and mode readout. Complements codeburn: the HUD is this session, codeburn is every session. |
+| Tool | Open | How to Run | Where to Look |
+|------|------|-----------|---------------|
+| **codeburn** | <http://127.0.0.1:4747/> | `install.sh` starts or reuses `codeburn web --provider all --port 4747 --no-open` · `codeburn` opens the TUI · `codeburn report --format json --period week` emits a non-interactive dump (also `--day`, `--from`/`--to`, `--provider claude`) | The shared dashboard; startup log `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`. Session files are read-only and dollar figures are **estimates** at API list rates — on a subscription plan a usage proxy, not a bill. |
+| **Serena** | <http://localhost:24282/dashboard/index.html> | Starts automatically as an MCP server; call `get_symbols_overview` / `find_symbol` from any session | The dashboard, while a server is running (logs + per-tool call counts). Per-project memories land in `.serena/` inside the repository you are working on; the global config is `~/.serena/serena_config.yml`. |
+| **Headroom** | <http://127.0.0.1:8787/stats> | MCP tools `headroom_compress` / `headroom_retrieve` / `headroom_stats`; `install.sh` starts or reuses the shared `agent-harness-shared` proxy profile | Compression stats, empty until a client explicitly routes through the proxy; startup log `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`. |
+| **Archify** | `out.html` | Ask for a diagram and Boss routes to the `archify` skill. Manually, from `~/.claude/skills/archify`: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | The generated file — open it in any browser. Validate one with `node bin/archify.mjs check out.html`. |
+| **OMC HUD** | Claude Code statusline | Installed as the statusline by `install.sh`; `/oh-my-claudecode:hud` reconfigures it | At the bottom of the session, with a live context, quota, and mode readout. Complements codeburn: the HUD is this session, codeburn is every session. |
 
 ---
 

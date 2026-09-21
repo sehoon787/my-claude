@@ -335,13 +335,13 @@ BriefingVault v2 は 3 つの知識管理手法を統合しています：
 
 スタックが生成した出力を実際に確認できる場所です。各ツールが何であるかは [使用しているオープンソースツール](#open-source-tools-used) にあります:
 
-| ツール | 実行方法 | 確認場所 |
-|------|-----------|---------------|
-| **codeburn** | `install.sh` が `codeburn web --provider all --port 4747 --no-open` を起動または再利用 · `codeburn` は TUI を表示 · `codeburn report --format json --period week` は非対話形式で出力 | 共有ダッシュボードは <http://127.0.0.1:4747/>、起動ログは `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`。セッションファイルは読み取り専用で、ドル金額は API 定価に基づく推定値です。 |
-| **Serena** | MCP サーバーとして自動的に起動します。任意のセッションから `get_symbols_overview` / `find_symbol` を呼び出せます | サーバー稼働中はダッシュボードが <http://localhost:24282/dashboard/index.html> で利用できます（ログ + ツールごとの呼び出し回数）。プロジェクトごとのメモリは作業中のリポジトリ内の `.serena/` に保存され、グローバル設定は `~/.serena/serena_config.yml` です。 |
-| **Headroom** | MCP ツール `headroom_compress` / `headroom_retrieve` / `headroom_stats`。`install.sh` が共有プロキシプロファイル `agent-harness-shared` を起動または再利用 | 統計は <http://127.0.0.1:8787/stats>（プロキシ経由になるまで空の場合あり）、起動ログは `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`。 |
-| **Archify** | 図を依頼すると Boss が `archify` スキルにルーティングします。手動で実行する場合は `~/.claude/skills/archify` から: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 生成された `out.html` — 任意のブラウザで開けます。`node bin/archify.mjs check out.html` で検証できます。 |
-| **OMC HUD** | `install.sh` がステータスラインとしてインストールします。`/oh-my-claudecode:hud` で再設定できます | セッション下部の Claude Code ステータスラインに、コンテキスト・クォータ・モードがライブ表示されます。codeburn を補完します: HUD は現在のセッション、codeburn は全セッションを対象とします。 |
+| ツール | 開く | 実行方法 | 確認場所 |
+|--------|------|----------|----------|
+| **codeburn** | <http://127.0.0.1:4747/> | `install.sh` が `codeburn web --provider all --port 4747 --no-open` を起動または再利用 · `codeburn` は TUI を表示 · `codeburn report --format json --period week` は非対話形式で出力 | 共有ダッシュボード。起動ログは `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`。セッションファイルは読み取り専用で、ドル金額は API 定価に基づく推定値です。 |
+| **Serena** | <http://localhost:24282/dashboard/index.html> | MCP サーバーとして自動的に起動します。任意のセッションから `get_symbols_overview` / `find_symbol` を呼び出せます | サーバー稼働中に使えるダッシュボード（ログ + ツールごとの呼び出し回数）。プロジェクトごとのメモリは作業中のリポジトリ内の `.serena/` に保存され、グローバル設定は `~/.serena/serena_config.yml` です。 |
+| **Headroom** | <http://127.0.0.1:8787/stats> | MCP ツール `headroom_compress` / `headroom_retrieve` / `headroom_stats`。`install.sh` が共有プロキシプロファイル `agent-harness-shared` を起動または再利用 | 圧縮統計。プロキシ経由になるまで空の場合があります。起動ログは `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`。 |
+| **Archify** | `out.html` | 図を依頼すると Boss が `archify` スキルにルーティングします。手動で実行する場合は `~/.claude/skills/archify` から: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 生成されたファイル — 任意のブラウザで開けます。`node bin/archify.mjs check out.html` で検証できます。 |
+| **OMC HUD** | Claude Code ステータスライン | `install.sh` がステータスラインとしてインストールします。`/oh-my-claudecode:hud` で再設定できます | セッション下部に、コンテキスト・クォータ・モードがライブ表示されます。codeburn を補完します: HUD は現在のセッション、codeburn は全セッションを対象とします。 |
 
 ---
 
