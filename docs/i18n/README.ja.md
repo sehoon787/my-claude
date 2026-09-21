@@ -23,7 +23,7 @@
 Boss はランタイムですべてのエージェント、スキル、MCP ツールを自動検出し、<br>
 適切なスペシャリストにタスクをルーティングします。設定ファイルも、ボイラープレートも不要です。
 
-<img src="./assets/owl-claude-social.svg" alt="The Maestro Owl — my-claude" width="700">
+<img src="../../assets/owl-claude-social.svg" alt="The Maestro Owl — my-claude" width="700">
 
 </div>
 
@@ -384,10 +384,10 @@ git サブモジュール経由でリンク。ピン留めされたコミット�
 
 | ソース | SHA | 日付 | 差分 |
 |--------|-----|------|------|
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `4092795` | 2026-07-27 | [compare](https://github.com/affaan-m/everything-claude-code/compare/4092795...HEAD) |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `590fb98` | 2026-07-27 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/590fb98...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | `7c9df1c` | 2026-07-27 | [compare](https://github.com/garrytan/gstack/compare/7c9df1c...HEAD) |
-| [superpowers](https://github.com/obra/superpowers) | `3dcbd5c` | 2026-07-27 | [compare](https://github.com/obra/superpowers/compare/3dcbd5c...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `07756ce` | 2026-09-19 | [compare](https://github.com/affaan-m/everything-claude-code/compare/07756ce...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `5281b19` | 2026-09-13 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/5281b19...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `a6b3a57` | 2026-09-16 | [compare](https://github.com/garrytan/gstack/compare/a6b3a57...HEAD) |
+| [superpowers](https://github.com/obra/superpowers) | `5bf4e78` | 2026-09-19 | [compare](https://github.com/obra/superpowers/compare/5bf4e78...HEAD) |
 | [archify](https://github.com/tt-a1i/archify) | `62904f3` (`v2.9.0`) | 2026-09-19 | [compare](https://github.com/tt-a1i/archify/compare/62904f3...HEAD) |
 
 ---
@@ -402,4 +402,4 @@ Issues と PR を歓迎します。新しいエージェントを追加する際
 
 ## ライセンス
 
-MIT ライセンス。詳細は [LICENSE](./LICENSE) ファイルをご参照ください。
+MIT ライセンス。詳細は [LICENSE](../../LICENSE) ファイルをご参照ください。

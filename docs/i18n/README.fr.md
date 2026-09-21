@@ -23,7 +23,7 @@
 Boss détecte automatiquement chaque agent, skill et outil MCP au démarrage,<br>
 puis route votre tâche vers le bon spécialiste. Aucun fichier de configuration. Aucun code superflu.
 
-<img src="./assets/owl-claude-social.svg" alt="The Maestro Owl — my-claude" width="700">
+<img src="../../assets/owl-claude-social.svg" alt="The Maestro Owl — my-claude" width="700">
 
 </div>
 
@@ -384,10 +384,10 @@ Liées via des sous-modules git. Les commits épinglés sont suivis nativement p
 
 | Source | SHA | Date | Diff |
 |--------|-----|------|------|
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `4092795` | 2026-07-27 | [comparer](https://github.com/affaan-m/everything-claude-code/compare/4092795...HEAD) |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `590fb98` | 2026-07-27 | [comparer](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/590fb98...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | `7c9df1c` | 2026-07-27 | [comparer](https://github.com/garrytan/gstack/compare/7c9df1c...HEAD) |
-| [superpowers](https://github.com/obra/superpowers) | `3dcbd5c` | 2026-07-27 | [comparer](https://github.com/obra/superpowers/compare/3dcbd5c...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `07756ce` | 2026-09-19 | [comparer](https://github.com/affaan-m/everything-claude-code/compare/07756ce...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `5281b19` | 2026-09-13 | [comparer](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/5281b19...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `a6b3a57` | 2026-09-16 | [comparer](https://github.com/garrytan/gstack/compare/a6b3a57...HEAD) |
+| [superpowers](https://github.com/obra/superpowers) | `5bf4e78` | 2026-09-19 | [comparer](https://github.com/obra/superpowers/compare/5bf4e78...HEAD) |
 | [archify](https://github.com/tt-a1i/archify) | `62904f3` (`v2.9.0`) | 2026-09-19 | [comparer](https://github.com/tt-a1i/archify/compare/62904f3...HEAD) |
 
 ---
@@ -402,4 +402,4 @@ Construit sur les projets listés dans [Outils open source utilisés](#open-sour
 
 ## Licence
 
-Licence MIT. Voir le fichier [LICENSE](./LICENSE) pour plus de détails.
+Licence MIT. Voir le fichier [LICENSE](../../LICENSE) pour plus de détails.
