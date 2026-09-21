@@ -36,10 +36,15 @@ SKIP_OMC=0
 SKIP_GSTACK=0
 SKIP_SUPERPOWERS=0
 SKIP_ARCHIFY=0
-# Companion CLI tools (serena, headroom, codeburn). Asked for interactively
-# below; these two flags answer the question up front.
+# Companion CLI tools. Each is selected on its own; the prompt below asks which
+# ones, and --skip-tools / --yes / --tools= answer that question up front.
+# Default (including every unattended run) stays what it has always been: all.
+INSTALL_SERENA=1
+INSTALL_HEADROOM=1
+INSTALL_CODEBURN=1
 SKIP_TOOLS=0
-ASSUME_YES=0
+TOOLS_SELECTION=""
+TOOLS_ANSWERED=0
 # Optional skill lanes (see scripts/skill-allowlists.sh). Empty = default install.
 # Precedence: CLI flag > MY_CLAUDE_SKILLS env > ~/.claude/.my-claude-skills.
 SKILL_LANES=""
@@ -51,8 +56,9 @@ for arg in "$@"; do
     --skip-gstack)     SKIP_GSTACK=1 ;;
     --skip-superpowers) SKIP_SUPERPOWERS=1 ;;
     --skip-archify)    SKIP_ARCHIFY=1 ;;
-    --skip-tools)      SKIP_TOOLS=1 ;;
-    --yes)             ASSUME_YES=1 ;;
+    --skip-tools)      SKIP_TOOLS=1; TOOLS_ANSWERED=1 ;;
+    --yes)             TOOLS_ANSWERED=1 ;;
+    --tools=*)         TOOLS_SELECTION="${arg#--tools=}"; TOOLS_ANSWERED=1 ;;
     --self-only)       SKIP_ECC=1; SKIP_OMC=1; SKIP_GSTACK=1; SKIP_SUPERPOWERS=1; SKIP_ARCHIFY=1 ;;
     --skills=*)        SKILL_LANES="${arg#--skills=}"; SKILL_LANES_SET=1 ;;
     --full-skills)     SKILL_LANES="$ECC_SKILL_OPTIONAL_LANES"; SKILL_LANES_SET=1 ;;
@@ -68,8 +74,11 @@ Options:
   --skip-gstack           Skip gstack upstream install
   --skip-superpowers      Skip superpowers upstream install
   --skip-archify          Skip the archify diagram skill install
-  --skip-tools            Skip the companion tools (serena, headroom, codeburn)
-  --yes                   Install the companion tools without asking
+  --skip-tools            Skip every companion tool (same as --tools=none)
+  --yes                   Install every companion tool without asking (same as --tools=all)
+  --tools=<list>          Choose companion tools without asking: all | none |
+                          any mix of serena, headroom, codeburn (e.g.
+                          --tools=serena,codeburn)
   --self-only             Install only self-owned files (implies all upstream --skip-* flags)
   --skills=<lane[,lane]>  Also install optional skill lanes (available: web)
   --full-skills           Install every optional skill lane
@@ -128,28 +137,94 @@ else
 fi
 
 # ── Companion tools ──
-# Asked once, before any installation work, so that "no" costs nothing. The
-# prompt is skipped whenever an answer cannot be read back (no TTY, CI) or has
-# already been given (--yes / --skip-tools); the unattended default stays what
-# it has always been: install.
-if [ "$SKIP_TOOLS" = "0" ] && [ "$ASSUME_YES" = "0" ] && [ -t 0 ] && [ -z "${CI:-}" ]; then
-  echo ""
-  echo "Companion tools — optional; the harness works without them:"
-  echo "  serena    — symbol-level code navigation over MCP (uv tool, ~1 min)"
-  echo "  headroom  — tool-output compression over MCP (uv tool, ~1 min)"
-  echo "  codeburn  — token/cost tracking with a local dashboard on 4747 (npm)"
-  echo "Installing them also registers the serena and headroom MCP servers and"
-  echo "starts the shared local dashboards. Everything else installs either way."
-  printf "Install them? [Y/n] "
-  read -r _tools_answer || _tools_answer=""
-  case "$_tools_answer" in
-    [nN]|[nN][oO]) SKIP_TOOLS=1 ;;
-    *)             SKIP_TOOLS=0 ;;
+# Asked once, before any installation work, so that a "no" costs nothing.
+
+# Read one selection — "all", "none", or any comma/space separated mix of the
+# numbers 1/2/3 and the names serena/headroom/codeburn — into the three
+# INSTALL_* variables. Returns 1 on an unrecognised token, leaving them as they
+# were, so a bad answer can simply be asked again.
+parse_tool_selection() {
+  local _raw _token _serena=0 _headroom=0 _codeburn=0
+  _raw=$(printf '%s' "$1" | tr 'A-Z' 'a-z' | tr ',' ' ')
+  case "$(printf '%s' "$_raw" | tr -d '[:space:]')" in
+    ""|all|a)  INSTALL_SERENA=1; INSTALL_HEADROOM=1; INSTALL_CODEBURN=1; return 0 ;;
+    none|n|0)  INSTALL_SERENA=0; INSTALL_HEADROOM=0; INSTALL_CODEBURN=0; return 0 ;;
   esac
-  echo ""
+  for _token in $_raw; do
+    case "$_token" in
+      1|serena)   _serena=1 ;;
+      2|headroom) _headroom=1 ;;
+      3|codeburn) _codeburn=1 ;;
+      *)          return 1 ;;
+    esac
+  done
+  INSTALL_SERENA=$_serena
+  INSTALL_HEADROOM=$_headroom
+  INSTALL_CODEBURN=$_codeburn
+}
+
+# Names of the tools whose INSTALL_* flag equals $1 (1 = selected, 0 = skipped),
+# as a comma-separated list. Empty when none match.
+tool_names_with() {
+  _want="$1"; _names=""
+  if [ "$INSTALL_SERENA"   = "$_want" ]; then _names="$_names, serena"; fi
+  if [ "$INSTALL_HEADROOM" = "$_want" ]; then _names="$_names, headroom"; fi
+  if [ "$INSTALL_CODEBURN" = "$_want" ]; then _names="$_names, codeburn"; fi
+  printf '%s' "${_names#, }"
+}
+
+# --tools= is the explicit answer; --skip-tools still means "none" and wins over
+# it, and --yes leaves the install-everything default alone.
+if [ -n "$TOOLS_SELECTION" ]; then
+  parse_tool_selection "$TOOLS_SELECTION" || {
+    echo "ERROR: unrecognised --tools=$TOOLS_SELECTION" >&2
+    echo "       expected: all | none | any mix of serena, headroom, codeburn" >&2
+    exit 1
+  }
 fi
 if [ "$SKIP_TOOLS" = "1" ]; then
-  echo "  Companion tools: skipped (serena, headroom, codeburn)"
+  INSTALL_SERENA=0; INSTALL_HEADROOM=0; INSTALL_CODEBURN=0
+fi
+
+# The prompt is skipped whenever an answer cannot be read back (no TTY, CI) or
+# has already been given (--skip-tools / --yes / --tools=); the unattended
+# default stays what it has always been: install everything.
+if [ "$TOOLS_ANSWERED" = "0" ] && [ -t 0 ] && [ -z "${CI:-}" ]; then
+  echo ""
+  echo "Optional companion tools — the harness works without them:"
+  echo "  1) serena    — symbol-level code navigation over MCP (uv tool)"
+  echo "  2) headroom  — tool-output compression over MCP (uv tool)"
+  echo "  3) codeburn  — token/cost tracking with a local dashboard (npm)"
+  _tools_tries=0
+  while :; do
+    printf 'Select: all / none / numbers like "1,3"  [all]: '
+    # EOF (closed stdin mid-run) is not an answer: take the unattended default
+    # rather than re-asking a question nobody can answer.
+    if ! read -r _tools_answer; then
+      echo ""
+      INSTALL_SERENA=1; INSTALL_HEADROOM=1; INSTALL_CODEBURN=1
+      break
+    fi
+    if parse_tool_selection "$_tools_answer"; then
+      break
+    fi
+    _tools_tries=$((_tools_tries + 1))
+    if [ "$_tools_tries" -ge 3 ]; then
+      echo "  Still unrecognised after 3 tries — installing all three."
+      INSTALL_SERENA=1; INSTALL_HEADROOM=1; INSTALL_CODEBURN=1
+      break
+    fi
+    echo "  Unrecognised: '$_tools_answer'. Enter all, none, or numbers/names like 1,3."
+  done
+  echo ""
+fi
+
+TOOLS_SELECTED="$(tool_names_with 1)"
+TOOLS_SKIPPED="$(tool_names_with 0)"
+if [ -z "$TOOLS_SELECTED" ]; then
+  echo "  Companion tools: skipped ($TOOLS_SKIPPED)"
+elif [ -n "$TOOLS_SKIPPED" ]; then
+  echo "  Companion tools: installing $TOOLS_SELECTED; skipping $TOOLS_SKIPPED"
 fi
 
 # ── 0b. tmux (optional — used by omc qa-tester; Agent Teams run in-process) ──
@@ -629,9 +704,11 @@ claude mcp add grep_app  --transport http --scope user "https://mcp.grep.app" 2>
 # the 2>/dev/null||true below swallows that, so a changed argument list never
 # reaches an already-installed machine. This harness owns these two
 # registrations, so remove any existing one first and re-add with current args.
-if [ "$SKIP_TOOLS" = "0" ]; then
+if [ "$INSTALL_SERENA" = "1" ]; then
   claude mcp remove serena -s user 2>/dev/null || true
   claude mcp add --scope user serena   -- serena start-mcp-server --context claude-code --project-from-cwd --open-web-dashboard False 2>/dev/null || true
+fi
+if [ "$INSTALL_HEADROOM" = "1" ]; then
   claude mcp remove headroom -s user 2>/dev/null || true
   claude mcp add --scope user headroom -- headroom mcp serve 2>/dev/null || true
 fi
@@ -727,7 +804,7 @@ else
   echo "    omo installed"
 fi
 # codeburn is a companion tool; the other two are always installed.
-if [ "$SKIP_TOOLS" = "0" ]; then
+if [ "$INSTALL_CODEBURN" = "1" ]; then
   npm i -g @ast-grep/cli@0.42.0 @code-yeongyu/comment-checker@0.7.0 codeburn@0.9.23 2>/dev/null || true
 else
   npm i -g @ast-grep/cli@0.42.0 @code-yeongyu/comment-checker@0.7.0 2>/dev/null || true
@@ -786,10 +863,16 @@ fi
 # a clone of this repo plus `bash install.sh` is the whole prerequisite list.
 # Every command here is non-fatal: a missing CLI disables one MCP server, it
 # does not break the install.
-if [ "$SKIP_TOOLS" = "1" ]; then
-  echo "  [5e] uv + MCP tool CLIs: SKIPPED (--skip-tools)"
+# uv itself is only worth installing when at least one of the two tools it
+# carries was selected.
+_UV_TOOL_NAMES=""
+if [ "$INSTALL_SERENA"   = "1" ]; then _UV_TOOL_NAMES="$_UV_TOOL_NAMES, serena"; fi
+if [ "$INSTALL_HEADROOM" = "1" ]; then _UV_TOOL_NAMES="$_UV_TOOL_NAMES, headroom"; fi
+_UV_TOOL_NAMES="${_UV_TOOL_NAMES#, }"
+if [ -z "$_UV_TOOL_NAMES" ]; then
+  echo "  [5e] uv + MCP tool CLIs: SKIPPED (not selected)"
 else
-  echo "  [5e] uv + MCP tool CLIs (serena, headroom)..."
+  echo "  [5e] uv + MCP tool CLIs ($_UV_TOOL_NAMES)..."
   if ! command -v uv >/dev/null 2>&1; then
     echo "    uv not found, installing via the official installer..."
     curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1 || echo "    WARNING: uv install failed"
@@ -804,23 +887,27 @@ else
   if command -v uv >/dev/null 2>&1; then
     _UV_TOOLS="$(uv tool list 2>/dev/null || echo "")"
     # serena-agent — symbol-level code navigation and editing (LSP-backed).
-    case "$_UV_TOOLS" in
-      *"serena-agent v1.7.0"*) echo "    serena-agent 1.7.0 already installed" ;;
-      *) uv tool install -p 3.13 serena-agent==1.7.0 >/dev/null 2>&1 \
-           && echo "    serena-agent 1.7.0 installed" \
-           || echo "    WARNING: serena-agent install failed" ;;
-    esac
+    if [ "$INSTALL_SERENA" = "1" ]; then
+      case "$_UV_TOOLS" in
+        *"serena-agent v1.7.0"*) echo "    serena-agent 1.7.0 already installed" ;;
+        *) uv tool install -p 3.13 serena-agent==1.7.0 >/dev/null 2>&1 \
+             && echo "    serena-agent 1.7.0 installed" \
+             || echo "    WARNING: serena-agent install failed" ;;
+      esac
+    fi
     # headroom-ai — tool-output compression exposed over MCP. The proxy mode
     # (`headroom proxy` + ANTHROPIC_BASE_URL) works on a subscription login too,
     # but it is left to the user: Claude Code cannot connect while the proxy is
     # down, so starting one automatically would be a new way to break a session.
     # MCP mode has no such failure mode and is what this installer wires up.
-    case "$_UV_TOOLS" in
-      *"headroom-ai v0.37.0"*) echo "    headroom-ai 0.37.0 already installed" ;;
-      *) uv tool install --python 3.13 "headroom-ai[all]==0.37.0" >/dev/null 2>&1 \
-           && echo "    headroom-ai 0.37.0 installed" \
-           || echo "    WARNING: headroom-ai install failed" ;;
-    esac
+    if [ "$INSTALL_HEADROOM" = "1" ]; then
+      case "$_UV_TOOLS" in
+        *"headroom-ai v0.37.0"*) echo "    headroom-ai 0.37.0 already installed" ;;
+        *) uv tool install --python 3.13 "headroom-ai[all]==0.37.0" >/dev/null 2>&1 \
+             && echo "    headroom-ai 0.37.0 installed" \
+             || echo "    WARNING: headroom-ai install failed" ;;
+      esac
+    fi
 
     # Serena keeps a global config; create it once and turn off the launch-time
     # browser pop-up there too. The registered server passes
@@ -829,7 +916,7 @@ else
     # this run creates the file, so a config the user has tuned is never
     # rewritten.
     SERENA_CONFIG="$HOME/.serena/serena_config.yml"
-    if command -v serena >/dev/null 2>&1 && [ ! -f "$SERENA_CONFIG" ]; then
+    if [ "$INSTALL_SERENA" = "1" ] && command -v serena >/dev/null 2>&1 && [ ! -f "$SERENA_CONFIG" ]; then
       serena init >/dev/null 2>&1 || true
       if [ -f "$SERENA_CONFIG" ]; then
         # `serena config` only offers an interactive `edit`, so patch the key.
@@ -850,12 +937,12 @@ else
     # servers by bare command name, so that directory has to be on the PATH the
     # editor inherits. This script prepended it for itself above; tell the user
     # how to make it permanent rather than editing their shell profile for them.
-    for _cli in serena headroom; do
+    for _cli in $(printf '%s' "$_UV_TOOL_NAMES" | tr -d ','); do
       command -v "$_cli" >/dev/null 2>&1 \
         || echo "    WARNING: $_cli not on PATH — run 'uv tool update-shell' so its MCP server can start"
     done
   else
-    echo "    WARNING: uv unavailable — serena and headroom MCP servers will not start"
+    echo "    WARNING: uv unavailable — the $_UV_TOOL_NAMES MCP server(s) will not start"
   fi
 fi
 
@@ -863,11 +950,17 @@ fi
 # The helper locks a cross-harness state directory, identifies an existing
 # service before reusing it, and never kills an unknown port owner. Failures are
 # diagnostic only: the CLI/MCP installation remains usable without dashboards.
-if [ "$SKIP_TOOLS" = "1" ]; then
-  echo "  [5f] shared local dashboards: SKIPPED (--skip-tools)"
+# The helper takes the services to ensure as positional arguments; with none it
+# still ensures both, which is what the my-codex copy relies on.
+_SHARED_SERVICES=""
+if [ "$INSTALL_CODEBURN" = "1" ]; then _SHARED_SERVICES="$_SHARED_SERVICES codeburn"; fi
+if [ "$INSTALL_HEADROOM" = "1" ]; then _SHARED_SERVICES="$_SHARED_SERVICES headroom"; fi
+if [ -z "$_SHARED_SERVICES" ]; then
+  echo "  [5f] shared local dashboards: SKIPPED (not selected)"
 else
-  echo "  [5f] shared local dashboards (codeburn, Headroom)..."
-  bash "$SCRIPT_DIR/scripts/ensure-shared-local-services.sh" || \
+  echo "  [5f] shared local dashboards ($(printf '%s' "${_SHARED_SERVICES# }" | tr ' ' ','))..."
+  # shellcheck disable=SC2086 # deliberate word splitting: one argument per service
+  bash "$SCRIPT_DIR/scripts/ensure-shared-local-services.sh" $_SHARED_SERVICES || \
     echo "    WARNING: shared local dashboard setup failed"
 fi
 
@@ -964,16 +1057,25 @@ echo "  hooks:            $(find "$HOME/.claude/hooks"  -type f      2>/dev/null
 echo "  omc:              $(command -v omc            >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  omo:              $(command -v oh-my-opencode >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
 echo "  ast-grep:         $(command -v ast-grep       >/dev/null 2>&1 && echo 'OK' || echo 'MISSING')"
-if [ "$SKIP_TOOLS" = "1" ]; then
-  echo "  codeburn:         SKIPPED (--skip-tools)"
-  echo "  uv:               SKIPPED (--skip-tools)"
-  echo "  serena (MCP):     SKIPPED (--skip-tools)"
-  echo "  headroom (MCP):   SKIPPED (--skip-tools)"
-else
+if [ "$INSTALL_CODEBURN" = "1" ]; then
   echo "  codeburn:         $(probe codeburn codeburn report --format json --period today)"
+else
+  echo "  codeburn:         SKIPPED (not selected)"
+fi
+if [ -n "$_UV_TOOL_NAMES" ]; then
   echo "  uv:               $(command -v uv >/dev/null 2>&1 && echo "OK ($(uv --version 2>/dev/null))" || echo 'MISSING')"
+else
+  echo "  uv:               SKIPPED (not selected)"
+fi
+if [ "$INSTALL_SERENA" = "1" ]; then
   echo "  serena (MCP):     $(probe serena serena --version)"
+else
+  echo "  serena (MCP):     SKIPPED (not selected)"
+fi
+if [ "$INSTALL_HEADROOM" = "1" ]; then
   echo "  headroom (MCP):   $(probe headroom headroom --version)"
+else
+  echo "  headroom (MCP):   SKIPPED (not selected)"
 fi
 echo "  archify (skill):  $(probe_archify)"
 echo "  tmux:             $(command -v tmux >/dev/null 2>&1 && echo "OK ($(tmux -V))" || echo 'NOT INSTALLED (optional)')"
@@ -983,18 +1085,26 @@ TEAMMATE_MODE=$(node -e "try{const h=process.env.HOME||process.env.USERPROFILE;c
 echo "  version:          v${INSTALLING_VERSION}"
 echo "  teammateMode:     $TEAMMATE_MODE"
 echo ""
-if [ "$SKIP_TOOLS" = "1" ]; then
+if [ -z "$TOOLS_SELECTED" ]; then
   echo "  Companion tools were skipped; re-run with --yes to install them."
   echo ""
 else
   echo "Open these"
-  echo "  Serena dashboard:   http://localhost:24282/dashboard/index.html"
-  echo "                      (live whenever a Claude session has the serena MCP server up)"
-  echo "  codeburn dashboard: http://127.0.0.1:4747 (shared service started or reused above)"
-  echo "  Headroom stats:      http://127.0.0.1:8787/stats"
-  echo "                       (may be empty until a client explicitly routes through the proxy)"
+  if [ "$INSTALL_SERENA" = "1" ]; then
+    echo "  Serena dashboard:   http://localhost:24282/dashboard/index.html"
+    echo "                      (live whenever a Claude session has the serena MCP server up)"
+  fi
+  if [ "$INSTALL_CODEBURN" = "1" ]; then
+    echo "  codeburn dashboard: http://127.0.0.1:4747 (shared service started or reused above)"
+  fi
+  if [ "$INSTALL_HEADROOM" = "1" ]; then
+    echo "  Headroom stats:      http://127.0.0.1:8787/stats"
+    echo "                       (may be empty until a client explicitly routes through the proxy)"
+  fi
   echo ""
-  echo "  The serena and headroom MCP servers start automatically with each Claude Code session."
+  if [ -n "$_UV_TOOL_NAMES" ]; then
+    echo "  The $_UV_TOOL_NAMES MCP server(s) start automatically with each Claude Code session."
+  fi
   echo ""
 fi
 # Record installed version
