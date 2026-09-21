@@ -60,8 +60,6 @@ Or install as a Claude Code plugin first, then run the companion installer:
 /plugin install my-claude@my-claude
 ```
 
-Then run the three-line installer above to add the companion tools.
-
 If you use both routes, `install.sh` also refreshes the `my-claude` plugin (marketplace update + plugin update) so its hooks stay in sync with this script's install. The installer also ensures one shared codeburn dashboard and one shared Headroom proxy for both my-claude and my-codex. A later installer reuses healthy services instead of starting duplicates. State and startup logs live under `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services`; neither installer changes `ANTHROPIC_BASE_URL` or `OPENAI_BASE_URL`.
 
 ### For AI Agents
@@ -74,19 +72,28 @@ Read https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md an
 
 ## Open-Source Tools Used
 
-| # | Project | What my-claude takes from it |
-|---|---------|------------------------------|
-| 1 | [Oh My Claude Code (OMC)](https://github.com/Yeachan-Heo/oh-my-claudecode) | 19 specialist agents (architect, debugger, code reviewer, security reviewer, …) that divide work by role, plus magic keywords like `autopilot:` that activate automatic parallel execution. |
-| 2 | [Oh My OpenAgent (omo)](https://github.com/code-yeongyu/oh-my-openagent) | A multi-platform harness that routes across 8 providers (Claude, GPT, Gemini, …) by category and bridges to Claude Code via `claude-code-agent-loader` and `claude-code-plugin-loader`. Its 9 agents are adapted here as standalone `.md` files. |
-| 3 | [Andrej Karpathy Skills](https://github.com/forrestchang/andrej-karpathy-skills) | The 4 AI-coding behavioral guidelines — Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution — included in CLAUDE.md and always active. |
-| 4 | [Everything Claude Code (ECC)](https://github.com/affaan-m/everything-claude-code) | 278 skills + 67 agents + 94 commands + language rules upstream; my-claude installs a curated 79-skill subset (stack patterns, AI/agent engineering, codebase tooling) plus 9 rule sets, with slash commands like `/tdd`, `/plan`, `/code-review`, `/build-fix`. |
-| 5 | [Anthropic Official Skills](https://github.com/anthropics/skills) | Anthropic's own skill repository: PDF parsing, Word/Excel/PowerPoint manipulation, MCP server creation. |
-| 6 | [gstack](https://github.com/garrytan/gstack) | Garry Tan's sprint-process harness: 26 skills plus the `gstack` root router (27 total) — browser QA (`/qa`), scope-drift code review (`/review`), security audit (`/cso`), and the full Plan→Review→QA→Ship workflow. Ships a compiled Playwright browser daemon for real-browser testing. |
-| 7 | [superpowers](https://github.com/obra/superpowers) | Jesse Vincent's dev-process library: 13 of its 14 skills — brainstorming, systematic debugging, TDD, plan writing and execution, code-review etiquette. `dispatching-parallel-agents` is excluded because Boss and Agent Teams already own that path. |
-| 8 | [codeburn](https://github.com/getagentseal/codeburn) | Local-first token and cost tracking over the session files Claude Code and Codex already write — no proxy, no API key, nothing leaves the machine. `install.sh` starts or reuses one cross-harness `codeburn web --provider all --port 4747 --no-open` process, and the budget-guard hooks stay opt-in via `bash install.sh --with-codeburn-guard` because their hard cap ($15/session by default) blocks every tool call in the session, including `codeburn guard allow` (run that from an external terminal). |
-| 9 | [Serena](https://github.com/oraios/serena) | A language server's symbol graph over MCP: `find_symbol`, `get_symbols_overview`, `find_referencing_symbols`, `replace_symbol_body`, `insert_after_symbol` — the tokens spent scale with the symbol, not the file. `install.sh` installs the pinned `serena-agent` CLI with uv and registers it as a user-scope stdio MCP server (`serena start-mcp-server --context claude-code --project-from-cwd`); no Serena code is vendored here. |
-| 10 | [Headroom](https://github.com/headroomlabs-ai/headroom) | `headroom mcp serve` exposes `headroom_compress`, `headroom_retrieve`, and `headroom_stats`, and `install.sh` also starts or reuses the mutation-free persistent profile `agent-harness-shared` on port 8787. The proxy stays dormant until a client explicitly routes through it, and the installer never sets `ANTHROPIC_BASE_URL` or `OPENAI_BASE_URL`. |
-| 11 | [Archify](https://github.com/tt-a1i/archify) | An agent skill that draws architecture, workflow, sequence, data-flow, and lifecycle diagrams as self-contained HTML — inline SVG, a dark/light theme toggle, a PNG/JPEG/WebP/SVG export menu, no runtime dependencies in the generated file. It also accepts pasted Mermaid as an input dialect. Pinned as a submodule at tag `v2.9.0`; `install.sh` copies the upstream `archify/` skill directory to `~/.claude/skills/archify`, so no `npx skills add` runs at install time. |
+Every project this stack builds on is described once, here. Five MIT-licensed
+upstreams are linked as git submodules pinned to an explicit SHA; the rest arrive
+as version-pinned CLIs, hosted MCP servers, or files vendored with attribution.
+
+| # | Project | What my-claude takes from it | How it arrives |
+|---|---------|------------------------------|----------------|
+| 1 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** (OMC) — Yeachan Heo | 19 specialist agents (architect, debugger, code reviewer, security reviewer, …) that divide work by role, plus 16 orchestration skills — autopilot, ralph, team. Magic keywords like `autopilot:` activate automatic parallel execution. | Submodule `upstream/omc`, SHA-pinned (see [Bundled Upstream Versions](#bundled-upstream-versions)); `install.sh` runs `npm i -g oh-my-claude-sisyphus@latest` and enables the `oh-my-claudecode@omc` plugin. |
+| 2 | <img src="https://github.com/code-yeongyu.png?size=32" width="20" height="20" align="center"/> **[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** (omo) — code-yeongyu | A multi-platform harness that routes across 8 providers (Claude, GPT, Gemini, …) by category and bridges to Claude Code via `claude-code-agent-loader` and `claude-code-plugin-loader`. Its 9 agents (Sisyphus, Atlas, Oracle, …) are adapted here as standalone `.md` files. | Not a submodule: the 9 agents live in `agents/omo/`; `install.sh` runs `npm i -g oh-my-opencode@latest` for the `omo` CLI. |
+| 3 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | The 4 AI-coding behavioral guidelines — Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution — always active. | `install.sh` curls `CLAUDE.md` at the pinned SHA `aa4467f`, checksum-verifies it, and appends it to `~/.claude/CLAUDE.md`. No code vendored. |
+| 4 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** (ECC) — affaan-m | 278 skills + 67 agents + 94 commands + language rules upstream. my-claude installs a curated 61-skill subset (79 with the opt-in `web` lane) — stack patterns, AI/agent engineering, codebase tooling — plus 9 rule sets and slash commands like `/tdd`, `/plan`, `/code-review`, `/build-fix`. | Submodule `upstream/ecc`, SHA-pinned; `install.sh` tries `claude plugin add affaan-m/everything-claude-code` first and falls back to the submodule. |
+| 5 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | Anthropic's own skill repository: PDF parsing, Word/Excel/PowerPoint manipulation, MCP server creation. | `claude plugin add anthropics/skills`, run by `install.sh`. Deliberately not manifest-tracked. |
+| 6 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | Garry Tan's sprint-process harness: 26 skills plus the `gstack` root router (27 total) — browser QA (`/qa`), scope-drift code review (`/review`), security audit (`/cso`), and the full Plan→Review→QA→Ship workflow (Boss P0 lane). Ships a compiled Playwright browser daemon for real-browser testing. | Submodule `upstream/gstack`, SHA-pinned. |
+| 7 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | Jesse Vincent's dev-process library: 13 of its 14 skills — brainstorming, systematic debugging, TDD, plan writing and execution, code-review etiquette. `dispatching-parallel-agents` is excluded because Boss and Agent Teams already own that path. | Submodule `upstream/superpowers`, SHA-pinned. |
+| 8 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | Local-first token and cost tracking over the session files Claude Code and Codex already write — no proxy, no API key, nothing leaves the machine. The budget-guard hooks stay opt-in via `bash install.sh --with-codeburn-guard` because their hard cap ($15/session by default) blocks every tool call in the session, including `codeburn guard allow` (run that from an external terminal). | `npm i -g codeburn@0.9.23`; `install.sh` also starts or reuses one shared cross-harness dashboard — see [Where to See Results](#where-to-see-results). MIT. |
+| 9 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | A language server's symbol graph over MCP: `find_symbol`, `get_symbols_overview`, `find_referencing_symbols`, `replace_symbol_body`, `insert_after_symbol` — the tokens spent scale with the symbol, not the file. | `uv tool install -p 3.13 serena-agent==1.7.0`, registered as a user-scope stdio MCP server (`serena start-mcp-server --context claude-code --project-from-cwd`). The distributed package is GPL-3.0-or-later as a whole (PyPI's MIT classifier is inaccurate); used as an external server, never vendored. |
+| 10 | <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | Tool-output compression: `headroom mcp serve` exposes `headroom_compress`, `headroom_retrieve`, and `headroom_stats`, so an oversized tool result never lands in the transcript whole. | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"`, registered as the `headroom` stdio MCP server; `install.sh` also starts or reuses the mutation-free persistent profile `agent-harness-shared`. Apache-2.0. |
+| 11 | <img src="https://github.com/tt-a1i.png?size=32" width="20" height="20" align="center"/> **[archify](https://github.com/tt-a1i/archify)** — tt-a1i | One agent skill that draws architecture, workflow, sequence, data-flow, and lifecycle diagrams as self-contained HTML — inline SVG, a dark/light theme toggle, a PNG/JPEG/WebP/SVG export menu, no runtime dependencies in the generated file. It also accepts pasted Mermaid as an input dialect. | Submodule `upstream/archify`, pinned at tag `v2.9.0`; `install.sh` copies the upstream `archify/` skill directory to `~/.claude/skills/archify`, so no `npx skills add` runs at install time. |
+| 12 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 3 engineering agents with no equivalent elsewhere in the stack: AI Engineer, DevOps Automator, Multi-Agent Systems Architect. | Submodule removed 2026-07-27; the 3 agents were snapshotted into `agents/vendored/` on that date, each file carrying its upstream attribution header. MIT. |
+| 13 | <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | Structural, AST-aware code search and rewrite, so agents match code shapes instead of regex. | `npm i -g @ast-grep/cli@0.42.0`. MIT. |
+| 14 | <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | Up-to-date, version-accurate library documentation, so an agent reads the real API instead of recalling one. | Hosted MCP server at `https://mcp.context7.com/mcp`, registered by `install.sh`. |
+| 15 | <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | Neural (semantic) web search for research that keyword search misses. | Hosted MCP server at `https://mcp.exa.ai/mcp`, registered by `install.sh`. |
+| 16 | <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://github.com/grep-app)** — grep.app | Code search across public GitHub repositories, for finding how a pattern is used in the wild. | Hosted MCP server at `https://mcp.grep.app`, registered by `install.sh`. |
 
 ---
 
@@ -159,7 +166,7 @@ Boss closes every working turn — one that edited files, made commits/PRs, chan
 | Commits/PRs produced | Deliverables | PR / Repo / Content / Status |
 | Anything unresolved | Remaining | Item / Status / Next step |
 
-It fires only at the very end of the request — never on a turn that launches or relays background work, never as a mid-task progress update — and pure Q&A turns end normally without it. The spec lives in `boss.md § FINAL REPORT`; the `stop-final-report.js` Stop hook enforces it, blocking at most once per turn and failing open on any error.
+It fires only at the very end of the request — never on a turn that launches or relays background work, never as a mid-task progress update — and pure Q&A turns end normally without it. The spec lives in `boss.md § FINAL REPORT`; the `stop-final-report.js` Stop hook enforces it, judging from the harness-provided `last_assistant_message` plus the turn's origin in the transcript, blocking at most once per turn and failing open on any error.
 
 ### Named Workflows
 
@@ -183,7 +190,7 @@ Deterministic multi-agent workflows. `install.sh` copies them to `~/.claude/work
 | **Hooks** | 10 files / 6 events | Delegation guard, telemetry, verification, vault, context budget |
 | **LSP Servers** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
 | **Named Workflows** | 2 | code-review-fanout, upstream-audit |
-| **Upstream submodules** | 4 | ecc, omc, gstack, superpowers |
+| **Upstream submodules** | 5 | ecc, omc, gstack, superpowers, archify |
 | **CLI Tools** | 7 | omc, omo, ast-grep, comment-checker, codeburn, serena, headroom |
 
 Every agent, skill, and rule above is allowlisted in [`scripts/skill-allowlists.sh`](./scripts/skill-allowlists.sh) and tracked in the install manifest. Anthropic's official document skills (pdf, docx, …) are added separately via `claude plugin add anthropics/skills` and are deliberately not manifest-tracked.
@@ -191,7 +198,7 @@ Every agent, skill, and rule above is allowlisted in [`scripts/skill-allowlists.
 <details>
 <summary><strong>Specialist Agents — 32 across 4 tiers</strong></summary>
 
-Per-agent models are in [Model Routing](#model-routing). The 3 vendored agents were snapshotted from [agency-agents](https://github.com/msitarzewski/agency-agents) (MIT) on 2026-07-27, when that submodule was removed — only the engineering agents with no equivalent elsewhere in the stack were kept, and each file carries its upstream attribution header.
+Per-agent models are in [Model Routing](#model-routing); where each source comes from is in [Open-Source Tools Used](#open-source-tools-used).
 
 | Agent | Tier | Role | Source |
 |-------|------|------|--------|
@@ -240,7 +247,7 @@ Per-agent models are in [Model Routing](#model-routing). The 3 vendored agents w
 | [superpowers](https://github.com/obra/superpowers) | 13 | brainstorming, systematic-debugging, test-driven-development, writing-plans |
 | [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced, boss-briefing, briefing-vault, gstack-sprint |
 
-**Opt-in `web` lane (+18)** — `accessibility`, `bun-runtime`, `e2e-testing`, `frontend-a11y`, `frontend-patterns`, `motion-*` (3), `nestjs-patterns`, `nextjs-turbopack`, `nuxt4-patterns`, `react-patterns`, `react-performance`, `react-testing`, `ui-to-vue`, `vite-patterns`, `vue-patterns`, `windows-desktop-e2e`. Browser-UI work only, so a backend or infra session would pay for 18 descriptions it never uses. See [Installation](#installation) for the flags.
+**Opt-in `web` lane (+18)** — `accessibility`, `bun-runtime`, `e2e-testing`, `frontend-a11y`, `frontend-patterns`, `motion-*` (3), `nestjs-patterns`, `nextjs-turbopack`, `nuxt4-patterns`, `react-patterns`, `react-performance`, `react-testing`, `ui-to-vue`, `vite-patterns`, `vue-patterns`, `windows-desktop-e2e`. Browser-UI work only; see [Installation](#installation) for the flags.
 
 **OMC skills are not copied.** `install.sh` enables the `oh-my-claudecode@omc` plugin, which already exposes all 16 (`autopilot`, `ralph`, `team`, `ultrawork`, `ralplan`, `omc-reference`, …) as `oh-my-claudecode:<name>`. A local copy would put a second description of the same skill in every session. Routing surfaces use the prefixed name; a bare `ralph` does not resolve.
 
@@ -249,13 +256,13 @@ Per-agent models are in [Model Routing](#model-routing). The 3 vendored agents w
 <details>
 <summary><strong>MCP Servers (3) + Hooks (10)</strong></summary>
 
-**MCP Servers**
+**MCP Servers** — what each one does and how it is registered is in [Open-Source Tools Used](#open-source-tools-used).
 
-| Server | Purpose | Cost |
-|--------|---------|------|
-| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://context7.com) | Real-time library documentation | Free |
-| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://exa.ai) | Semantic web search | Free 1k req/month |
-| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://github.com/grep-app) | GitHub code search | Free |
+| Server | Cost |
+|--------|------|
+| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://context7.com) | Free |
+| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://exa.ai) | Free 1k req/month |
+| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://github.com/grep-app) | Free |
 
 **Behavioral Hooks**
 
@@ -343,51 +350,22 @@ Run `/boss-briefing` during or at the end of a session to:
 - **Propose persona rules**: Suggest workflow-based routing preferences (not just frequency)
 - **Validate session notes**: Check that today's session has a proper summary
 
-The Stop hook checks whether `/boss-briefing` has run today. If not, it blocks session end with a reminder. The existing `stop-profile-update.js` continues to run as a fallback. A second Stop hook, `stop-final-report.js`, enforces the [Structured Final Report](#structured-final-report): it judges from the harness-provided `last_assistant_message` plus the turn's origin in the transcript, and enforces only on human-initiated turns that launched no background agent or workflow.
+The Stop hook checks whether `/boss-briefing` has run today. If not, it blocks session end with a reminder. The existing `stop-profile-update.js` continues to run as a fallback. A second Stop hook, `stop-final-report.js`, enforces the [Structured Final Report](#structured-final-report).
 
 ---
 
 ## Where to See Results
 
-Every tool in this stack writes its output somewhere. This is where.
+Every tool in this stack writes its output somewhere. This is where. What each
+tool is, is in [Open-Source Tools Used](#open-source-tools-used).
 
-| Tool | What It Does | How to Run | Where to Look |
-|------|--------------|-----------|---------------|
-| **codeburn** | Token and cost accounting across every past session | `install.sh` starts or reuses `codeburn web --provider all --port 4747 --no-open` · `codeburn` opens the TUI · `codeburn report --format json --period week` emits a non-interactive dump (also `--day`, `--from`/`--to`, `--provider claude`) | Shared dashboard at <http://127.0.0.1:4747/>; startup log `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`. Session files are read-only and dollar figures are **estimates** at API list rates — on a subscription plan a usage proxy, not a bill. |
-| **Serena** | Symbol-level code navigation and editing | Starts automatically as an MCP server; call `get_symbols_overview` / `find_symbol` from any session | Dashboard at <http://localhost:24282/dashboard/index.html> while a server is running (logs + per-tool call counts). Per-project memories land in `.serena/` inside the repository you are working on; the global config is `~/.serena/serena_config.yml`. |
-| **Headroom** | Compresses oversized tool results before they enter the transcript | MCP tools `headroom_compress` / `headroom_retrieve` / `headroom_stats`; `install.sh` starts or reuses the shared `agent-harness-shared` proxy profile | Stats at <http://127.0.0.1:8787/stats> (empty until a client explicitly routes through the proxy); startup log `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`. The installer never sets `ANTHROPIC_BASE_URL` or `OPENAI_BASE_URL`. |
-| **Archify** | Architecture, workflow, sequence, data-flow, and lifecycle diagrams | Ask for a diagram and Boss routes to the `archify` skill. Manually, from `~/.claude/skills/archify`: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | The generated `out.html` — open it in any browser. It is self-contained (inline SVG, theme toggle, export menu) and has no runtime dependencies. Validate one with `node bin/archify.mjs check out.html`. |
-| **OMC HUD** | Live context, quota, and mode readout | Installed as the statusline by `install.sh`; `/oh-my-claudecode:hud` reconfigures it | The Claude Code statusline at the bottom of the session. Complements codeburn: the HUD is this session, codeburn is every session. |
-
----
-
-## Upstream Open-Source Sources
-
-my-claude links 5 MIT-licensed upstream repositories as git submodules, each pinned to an explicit SHA:
-
-| # | Source | What It Provides |
-|---|--------|-----------------|
-| 1 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** — affaan-m | 79 installed skills + 9 rule sets. Language and stack knowledge: TDD, security, coding standards, framework patterns. |
-| 2 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 19 specialist agents + 16 installed skills. Orchestration lane: autopilot, ralph, team. |
-| 3 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | 27 installed skills for ship, QA, deploy, and security review (Boss P0 lane). Includes Playwright browser daemon. |
-| 4 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 13 installed skills covering the dev-process lane: brainstorming, TDD, systematic debugging, plan writing. |
-| 5 | <img src="https://github.com/tt-a1i.png?size=32" width="20" height="20" align="center"/> **[archify](https://github.com/tt-a1i/archify)** — tt-a1i | 1 installed skill, pinned at tag `v2.9.0`. Architecture, workflow, sequence, data-flow, and lifecycle diagrams as self-contained HTML. |
-
-Not submodules, but part of the stack — the companion CLIs and MCP servers are each pinned to an exact version:
-
-| Source | How It Arrives |
-|--------|----------------|
-| <img src="https://github.com/code-yeongyu.png?size=32" width="20" height="20" align="center"/> **[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — code-yeongyu | 9 OMO agents (Sisyphus, Atlas, Oracle, etc.), adapted into this repo as standalone `.md` agents under `agents/omo/`. |
-| <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | Submodule removed 2026-07-27. 3 engineering agents vendored into `agents/vendored/` with attribution. |
-| <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | Installed by `install.sh` via `claude plugin add anthropics/skills` (pdf, docx, and friends). Not manifest-tracked. |
-| <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 AI coding behavioral guidelines appended to `~/.claude/CLAUDE.md`. |
-| <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0`, registered as the `serena` stdio MCP server for symbol-level code navigation and editing. The distributed package is GPL-3.0-or-later as a whole (PyPI's MIT classifier is inaccurate), and it is used as an external server, never vendored. |
-| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"`, registered as the `headroom` stdio MCP server (`headroom mcp serve`) and started as the mutation-free persistent profile `agent-harness-shared`. Tool-output compression; Apache-2.0. |
-| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | `npm i -g codeburn@0.9.23`. Local-first token and cost tracking over the session files Claude Code already writes. |
-| <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`. Structural (AST-aware) code search and rewrite. |
-| <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | Hosted MCP server at `https://mcp.context7.com/mcp`. Up-to-date library documentation. |
-| <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | Hosted MCP server at `https://mcp.exa.ai/mcp`. Neural web search. |
-| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://github.com/grep-app)** — grep.app | Hosted MCP server at `https://mcp.grep.app`. Code search across public GitHub repositories. |
+| Tool | How to Run | Where to Look |
+|------|-----------|---------------|
+| **codeburn** | `install.sh` starts or reuses `codeburn web --provider all --port 4747 --no-open` · `codeburn` opens the TUI · `codeburn report --format json --period week` emits a non-interactive dump (also `--day`, `--from`/`--to`, `--provider claude`) | Shared dashboard at <http://127.0.0.1:4747/>; startup log `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`. Session files are read-only and dollar figures are **estimates** at API list rates — on a subscription plan a usage proxy, not a bill. |
+| **Serena** | Starts automatically as an MCP server; call `get_symbols_overview` / `find_symbol` from any session | Dashboard at <http://localhost:24282/dashboard/index.html> while a server is running (logs + per-tool call counts). Per-project memories land in `.serena/` inside the repository you are working on; the global config is `~/.serena/serena_config.yml`. |
+| **Headroom** | MCP tools `headroom_compress` / `headroom_retrieve` / `headroom_stats`; `install.sh` starts or reuses the shared `agent-harness-shared` proxy profile | Stats at <http://127.0.0.1:8787/stats> (empty until a client explicitly routes through the proxy); startup log `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`. |
+| **Archify** | Ask for a diagram and Boss routes to the `archify` skill. Manually, from `~/.claude/skills/archify`: `node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | The generated `out.html` — open it in any browser. Validate one with `node bin/archify.mjs check out.html`. |
+| **OMC HUD** | Installed as the statusline by `install.sh`; `/oh-my-claudecode:hud` reconfigures it | The Claude Code statusline at the bottom of the session, with a live context, quota, and mode readout. Complements codeburn: the HUD is this session, codeburn is every session. |
 
 ---
 
@@ -443,7 +421,7 @@ Issues and PRs are welcome. When adding a new agent, add a `.md` file to `agents
 
 ## Credits
 
-Built on the work of: [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) (Yeachan Heo), [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) (code-yeongyu), [everything-claude-code](https://github.com/affaan-m/everything-claude-code) (affaan-m), [gstack](https://github.com/garrytan/gstack) (garrytan), [superpowers](https://github.com/obra/superpowers) (Jesse Vincent), [agency-agents](https://github.com/msitarzewski/agency-agents) (msitarzewski — 3 vendored agents), [anthropic/skills](https://github.com/anthropics/skills) (Anthropic), [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) (forrestchang), [serena](https://github.com/oraios/serena) (oraios), [headroom](https://github.com/headroomlabs-ai/headroom) (Headroom Labs), [archify](https://github.com/tt-a1i/archify) (tt-a1i), [codeburn](https://github.com/getagentseal/codeburn) (getagentseal).
+Built on the projects listed in [Open-Source Tools Used](#open-source-tools-used); thank you to every author.
 
 ## License
 

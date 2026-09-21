@@ -64,6 +64,36 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 ---
 
+<a id="open-source-tools-used"></a>
+
+## 使用的开源工具
+
+这套栈所依赖的每个项目，都只在这里描述一次。
+其中 5 个 MIT 许可的上游以 git 子模块方式链接并固定到明确的 SHA；
+其余则以版本固定的 CLI、托管 MCP 服务器，或带署名收录的文件形式引入。
+
+| # | 项目 | my-claude 从中获得什么 | 引入方式 |
+|---|------|------------------------|----------|
+| 1 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** (OMC) — Yeachan Heo | 19 个按角色分工的专家 Agent（architect、debugger、code reviewer、security reviewer 等），以及 autopilot、ralph、team 等 16 个编排 Skills。`autopilot:` 这类魔法关键词会触发自动并行执行。 | 子模块 `upstream/omc`，固定 SHA（见「捆绑的上游版本」）；`install.sh` 执行 `npm i -g oh-my-claude-sisyphus@latest` 并启用 `oh-my-claudecode@omc` 插件。 |
+| 2 | <img src="https://github.com/code-yeongyu.png?size=32" width="20" height="20" align="center"/> **[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** (omo) — code-yeongyu | 一套多平台 harness，按类别在 8 个提供方（Claude、GPT、Gemini 等）之间路由，并通过 `claude-code-agent-loader` 与 `claude-code-plugin-loader` 桥接到 Claude Code。其 9 个 Agent（Sisyphus、Atlas、Oracle 等）在此改写为独立的 `.md` 文件。 | 不是子模块：9 个 Agent 位于 `agents/omo/`；`install.sh` 执行 `npm i -g oh-my-opencode@latest` 安装 `omo` CLI。 |
+| 3 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 条 AI 编码行为准则 —— Think Before Coding、Simplicity First、Surgical Changes、Goal-Driven Execution —— 始终生效。 | `install.sh` 以 curl 拉取固定 SHA `aa4467f` 的 `CLAUDE.md`，校验其校验和后追加到 `~/.claude/CLAUDE.md`。不收录任何代码。 |
+| 4 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** (ECC) — affaan-m | 上游共 278 个 Skills + 67 个 Agent + 94 条命令 + 语言规则。my-claude 精选安装 61 个 Skills（加上可选的 `web` 通道为 79 个）—— 技术栈模式、AI/Agent 工程、代码库工具 —— 外加 9 个规则集，以及 `/tdd`、`/plan`、`/code-review`、`/build-fix` 等斜杠命令。 | 子模块 `upstream/ecc`，固定 SHA；`install.sh` 先尝试 `claude plugin add affaan-m/everything-claude-code`，失败则回退到子模块。 |
+| 5 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | Anthropic 官方 Skills 仓库：PDF 解析，Word/Excel/PowerPoint 处理，MCP 服务器创建。 | 由 `install.sh` 执行 `claude plugin add anthropics/skills`。有意不纳入清单跟踪。 |
+| 6 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | Garry Tan 的冲刺流程 harness：26 个 Skills 加上 `gstack` 根路由器（共 27 个）—— 浏览器 QA（`/qa`）、范围漂移代码审查（`/review`）、安全审计（`/cso`），以及完整的 Plan→Review→QA→Ship 流程（Boss P0 通道）。随附编译好的 Playwright 浏览器守护进程用于真实浏览器测试。 | 子模块 `upstream/gstack`，固定 SHA。 |
+| 7 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | Jesse Vincent 的开发流程库：14 个 Skills 中的 13 个 —— 头脑风暴、系统化调试、TDD、计划编写与执行、代码审查礼仪。`dispatching-parallel-agents` 被排除，因为 Boss 与 Agent Teams 已覆盖该路径。 | 子模块 `upstream/superpowers`，固定 SHA。 |
+| 8 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | 基于 Claude Code 与 Codex 本就写入的会话文件做本地优先的 token 与成本追踪 —— 无代理、无 API key，数据不离开本机。预算守卫 hooks 保持通过 `bash install.sh --with-codeburn-guard` 选择启用，因为其硬上限（默认每会话 $15）会阻断该会话的所有工具调用，包括解除命令 `codeburn guard allow`（需在外部终端运行）。 | `npm i -g codeburn@0.9.23`；`install.sh` 还会启动或复用一个跨 harness 共享的仪表盘 —— 见「在哪里查看结果」。MIT。 |
+| 9 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | 通过 MCP 使用语言服务器的符号图：`find_symbol`、`get_symbols_overview`、`find_referencing_symbols`、`replace_symbol_body`、`insert_after_symbol` —— 消耗的 token 随符号大小而非文件大小增长。 | `uv tool install -p 3.13 serena-agent==1.7.0`，注册为用户级 stdio MCP 服务器（`serena start-mcp-server --context claude-code --project-from-cwd`）。分发包整体遵循 GPL-3.0-or-later（PyPI 的 MIT classifier 并不准确）；作为外部服务器使用，从不收录进本仓库。 |
+| 10 | <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | 工具输出压缩：`headroom mcp serve` 暴露 `headroom_compress`、`headroom_retrieve`、`headroom_stats`，让超大的工具结果不会整段进入对话记录。 | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"`，注册为 `headroom` stdio MCP 服务器；`install.sh` 还会启动或复用无副作用的持久配置 `agent-harness-shared`。Apache-2.0。 |
+| 11 | <img src="https://github.com/tt-a1i.png?size=32" width="20" height="20" align="center"/> **[archify](https://github.com/tt-a1i/archify)** — tt-a1i | 一个把架构、工作流、时序、数据流与生命周期图绘制为自包含 HTML 的 Agent skill —— 内联 SVG、明暗主题切换、PNG/JPEG/WebP/SVG 导出菜单，生成文件没有运行时依赖。它也接受粘贴的 Mermaid 作为输入方言。 | 子模块 `upstream/archify`，固定在标签 `v2.9.0`；`install.sh` 把上游的 `archify/` skill 目录复制到 `~/.claude/skills/archify`，因此安装时不会运行 `npx skills add`。 |
+| 12 | <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 栈内没有替代者的 3 个工程 Agent：AI Engineer、DevOps Automator、Multi-Agent Systems Architect。 | 子模块已于 2026-07-27 移除；当天把这 3 个 Agent 快照到 `agents/vendored/`，每个文件都保留上游署名。MIT。 |
+| 13 | <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | 理解语法树的结构化代码搜索与改写，让 Agent 匹配代码形状而非正则。 | `npm i -g @ast-grep/cli@0.42.0`。MIT。 |
+| 14 | <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | 与版本对应的最新库文档，让 Agent 读真实 API 而不是凭记忆。 | 托管 MCP 服务器 `https://mcp.context7.com/mcp`，由 `install.sh` 注册。 |
+| 15 | <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | 神经（语义）网页搜索，覆盖关键词检索会遗漏的资料。 | 托管 MCP 服务器 `https://mcp.exa.ai/mcp`，由 `install.sh` 注册。 |
+| 16 | <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://github.com/grep-app)** — grep.app | 跨公开 GitHub 仓库的代码搜索，用于查看某个写法在真实项目中的用法。 | 托管 MCP 服务器 `https://mcp.grep.app`，由 `install.sh` 注册。 |
+
+
+---
+
 ## Boss 的工作原理
 
 Boss 是 my-claude 的核心元编排器。它从不编写代码——它负责发现、分类、匹配、委派和验证。
@@ -159,7 +189,7 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 | **Hooks** | 10 个文件 / 6 个事件 | 委派守卫、遥测、验证、知识库 |
 | **LSP 服务器** | 2 | typescript（`typescript-language-server`）、python（`pyright-langserver`） |
 | **具名工作流** | 2 | code-review-fanout、upstream-audit |
-| **上游子模块** | 4 | ecc、omc、gstack、superpowers |
+| **上游子模块** | 5 | ecc、omc、gstack、superpowers、archify |
 | **CLI 工具** | 7 | omc、omo、ast-grep、comment-checker、codeburn、serena、headroom |
 
 以上 Agent、Skills、规则全部登记在 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) 的白名单中，并由安装清单跟踪。Anthropic 官方文档 Skills（pdf、docx 等）通过 `claude plugin add anthropics/skills` 单独安装，有意不纳入清单跟踪。
@@ -167,9 +197,7 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 <details>
 <summary><strong>专家 Agent — 4 个层级共 32 个</strong></summary>
 
-各 Agent 使用的模型见上方「模型路由」表。
-
-在 2026-07-27 移除 `agency-agents` 子模块时，从 [agency-agents](https://github.com/msitarzewski/agency-agents)（MIT）快照而来。仅保留栈内没有替代者的工程 Agent，每个文件都保留了上游署名。
+各 Agent 使用的模型见上方「模型路由」表；各来源的出处见 [使用的开源工具](#open-source-tools-used)。
 
 | Agent | 层级 | 职责 | 来源 |
 |-------|------|------|--------|
@@ -226,13 +254,13 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 <details>
 <summary><strong>MCP 服务器（3）+ Hooks（8）</strong></summary>
 
-**MCP 服务器**
+**MCP 服务器** —— 各自的作用与注册方式见 [使用的开源工具](#open-source-tools-used)。
 
-| 服务器 | 用途 | 费用 |
-|--------|---------|------|
-| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://context7.com) | 实时库文档 | 免费 |
-| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://exa.ai) | 语义网页搜索 | 每月免费 1k 次请求 |
-| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://github.com/grep-app) | GitHub 代码搜索 | 免费 |
+| 服务器 | 费用 |
+|--------|------|
+| <img src="https://context7.com/favicon.ico" width="16" height="16" align="center"/> [Context7](https://context7.com) | 免费 |
+| <img src="https://exa.ai/images/favicon-32x32.png" width="16" height="16" align="center"/> [Exa](https://exa.ai) | 每月免费 1k 次请求 |
+| <img src="https://www.google.com/s2/favicons?domain=grep.app&sz=32" width="16" height="16" align="center"/> [grep.app](https://github.com/grep-app) | 免费 |
 
 **行为 Hooks**
 
@@ -306,50 +334,15 @@ BriefingVault v2 融合了三种知识管理方法论：
 
 ## 在哪里查看结果
 
-my-claude 捆绑的工具会把结果写到不同位置 —— 下表列出各自的查看方式。
+my-claude 捆绑的工具会把结果写到不同位置 —— 下表列出各自的查看方式。每个工具是什么，见 [使用的开源工具](#open-source-tools-used)。
 
-| 工具 | 作用 | 运行方式 | 查看位置 |
-|------|------|-----------|---------------|
-| **codeburn** | 跨所有历史会话的 token 与成本核算 | `install.sh` 启动或复用 `codeburn web --provider all --port 4747 --no-open` · `codeburn` 打开 TUI · `codeburn report --format json --period week` 生成非交互式输出 | 共享仪表盘 <http://127.0.0.1:4747/>，启动日志 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`。会话文件只读，美元金额是按 API 标价计算的估算值。 |
-| **Serena** | 符号级代码导航与编辑 | 作为 MCP 服务器自动启动；在任意会话中调用 `get_symbols_overview` / `find_symbol` | 服务器运行期间，仪表盘位于 <http://localhost:24282/dashboard/index.html>（日志 + 各工具调用计数）。按项目的记忆写入你正在工作的仓库内的 `.serena/`；全局配置为 `~/.serena/serena_config.yml`。 |
-| **Headroom** | 在超大工具结果进入对话记录之前将其压缩 | MCP 工具 `headroom_compress` / `headroom_retrieve` / `headroom_stats`；`install.sh` 启动或复用共享代理配置 `agent-harness-shared` | 统计页面 <http://127.0.0.1:8787/stats>（客户端显式通过代理路由前可能为空），启动日志 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`。安装程序不会设置 `ANTHROPIC_BASE_URL` 或 `OPENAI_BASE_URL`。 |
-| **Archify** | 架构、工作流、时序、数据流与生命周期图 | 请求绘图时 Boss 会路由到 `archify` skill。手动方式，从 `~/.claude/skills/archify` 运行：`node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 生成的 `out.html` —— 用任意浏览器打开。它是自包含的（内联 SVG、主题切换、导出菜单），没有运行时依赖。可用 `node bin/archify.mjs check out.html` 校验。 |
-| **OMC HUD** | 实时的上下文、配额与模式读数 | 由 `install.sh` 安装为状态栏；`/oh-my-claudecode:hud` 可重新配置 | 会话底部的 Claude Code 状态栏。与 codeburn 互补：HUD 看当前会话，codeburn 看所有会话。 |
-
----
-
-## 上游开源来源
-
-my-claude 以 git 子模块方式关联 5 个 MIT 授权的上游仓库，每个都固定在明确的 SHA 上：
-
-| # | 来源 | 提供的内容 |
-|---|--------|-----------------|
-| 1 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** — affaan-m | 安装 79 个 skills + 9 个规则集。语言与技术栈知识通道：TDD、安全、编码标准、框架模式。 |
-| 2 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** — Yeachan Heo | 19 个专家 Agent + 安装 16 个 skills。编排通道：autopilot、ralph、team。 |
-| 3 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | 安装 27 个 skills，用于发布、QA、部署与安全审查（Boss P0 通道）。含 Playwright 浏览器守护进程。 |
-| 4 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | 安装 13 个 skills，覆盖开发流程通道：头脑风暴、TDD、系统化调试、计划撰写。 |
-| 5 | <img src="https://github.com/tt-a1i.png?size=32" width="20" height="20" align="center"/> **[archify](https://github.com/tt-a1i/archify)** — tt-a1i | 安装 1 个 skill，固定在标签 `v2.9.0` 上。以自包含 HTML 生成架构、工作流、时序、数据流与生命周期图。 |
-
-并非子模块，但同属这套技术栈：
-
-| 来源 | 接入方式 |
-|--------|----------------|
-| <img src="https://github.com/code-yeongyu.png?size=32" width="20" height="20" align="center"/> **[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** — code-yeongyu | 9 个 OMO Agent（Sisyphus、Atlas、Oracle 等），已移植为本仓库 `agents/omo/` 下的独立 `.md` Agent。 |
-| <img src="https://github.com/msitarzewski.png?size=32" width="20" height="20" align="center"/> **[agency-agents](https://github.com/msitarzewski/agency-agents)** — msitarzewski | 2026-07-27 移除子模块。3 个工程 Agent 连同署名一并 vendored 到 `agents/vendored/`。 |
-| <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | 由 `install.sh` 通过 `claude plugin add anthropics/skills` 安装（pdf、docx 等）。不纳入清单跟踪。 |
-| <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 条 AI 编码行为准则，追加到 `~/.claude/CLAUDE.md`。 |
-
-`install.sh` 一并引入的配套 CLI 与 MCP 服务器，每个都固定在确切版本上：
-
-| 来源 | 接入方式 |
-|--------|----------------|
-| <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | `uv tool install -p 3.13 serena-agent==1.7.0` 安装，并注册为提供符号级代码导航与编辑的 `serena` stdio MCP 服务器。分发的包整体适用 GPL-3.0-or-later（PyPI 的 MIT classifier 有误），仅作为外部服务器使用，不 vendored。 |
-| <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"` 安装，并注册为 `headroom` stdio MCP 服务器（`headroom mcp serve`），同时以无配置改动的持久配置 `agent-harness-shared` 启动。工具输出压缩，Apache-2.0。 |
-| <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | `npm i -g codeburn@0.9.23`（npm CLI，MIT，在 `upstream/SOURCES.json` 中登记为 `method: npm-cli`）只读解析 Claude Code 已写出的会话文件，按模型、项目、任务汇总 token 与成本，无代理、无 API 密钥、不上传。预算守卫钩子通过 `--with-codeburn-guard` 选择启用，因为其 hard cap（默认 $15/会话）会阻断该会话的所有工具调用，包括解除命令 `codeburn guard allow`（需在外部终端运行）。 |
-| <img src="https://github.com/ast-grep.png?size=32" width="20" height="20" align="center"/> **[ast-grep](https://github.com/ast-grep/ast-grep)** — ast-grep | `npm i -g @ast-grep/cli@0.42.0`。结构化（AST 感知）代码搜索与重写。 |
-| <img src="https://github.com/upstash.png?size=32" width="20" height="20" align="center"/> **[context7](https://github.com/upstash/context7)** — Upstash | 位于 `https://mcp.context7.com/mcp` 的托管 MCP 服务器。最新的库文档。 |
-| <img src="https://github.com/exa-labs.png?size=32" width="20" height="20" align="center"/> **[exa](https://github.com/exa-labs/exa-mcp-server)** — Exa Labs | 位于 `https://mcp.exa.ai/mcp` 的托管 MCP 服务器。神经网络网页搜索。 |
-| <img src="https://github.com/grep-app.png?size=32" width="20" height="20" align="center"/> **[grep.app](https://github.com/grep-app)** — grep.app | 位于 `https://mcp.grep.app` 的托管 MCP 服务器。跨公开 GitHub 仓库的代码搜索。 |
+| 工具 | 运行方式 | 查看位置 |
+|------|-----------|---------------|
+| **codeburn** | `install.sh` 启动或复用 `codeburn web --provider all --port 4747 --no-open` · `codeburn` 打开 TUI · `codeburn report --format json --period week` 生成非交互式输出 | 共享仪表盘 <http://127.0.0.1:4747/>，启动日志 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`。会话文件只读，美元金额是按 API 标价计算的估算值。 |
+| **Serena** | 作为 MCP 服务器自动启动；在任意会话中调用 `get_symbols_overview` / `find_symbol` | 服务器运行期间，仪表盘位于 <http://localhost:24282/dashboard/index.html>（日志 + 各工具调用计数）。按项目的记忆写入你正在工作的仓库内的 `.serena/`；全局配置为 `~/.serena/serena_config.yml`。 |
+| **Headroom** | MCP 工具 `headroom_compress` / `headroom_retrieve` / `headroom_stats`；`install.sh` 启动或复用共享代理配置 `agent-harness-shared` | 统计页面 <http://127.0.0.1:8787/stats>（客户端显式通过代理路由前可能为空），启动日志 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`。 |
+| **Archify** | 请求绘图时 Boss 会路由到 `archify` skill。手动方式，从 `~/.claude/skills/archify` 运行：`node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 生成的 `out.html` —— 用任意浏览器打开。可用 `node bin/archify.mjs check out.html` 校验。 |
+| **OMC HUD** | 由 `install.sh` 安装为状态栏；`/oh-my-claudecode:hud` 可重新配置 | 会话底部的 Claude Code 状态栏，实时显示上下文、配额与模式。与 codeburn 互补：HUD 看当前会话，codeburn 看所有会话。 |
 
 ---
 
@@ -396,6 +389,7 @@ my-claude 以 git 子模块方式关联 5 个 MIT 授权的上游仓库，每个
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `590fb98` | 2026-07-27 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/590fb98...HEAD) |
 | [gstack](https://github.com/garrytan/gstack) | `7c9df1c` | 2026-07-27 | [compare](https://github.com/garrytan/gstack/compare/7c9df1c...HEAD) |
 | [superpowers](https://github.com/obra/superpowers) | `3dcbd5c` | 2026-07-27 | [compare](https://github.com/obra/superpowers/compare/3dcbd5c...HEAD) |
+| [archify](https://github.com/tt-a1i/archify) | `62904f3` (`v2.9.0`) | 2026-09-19 | [compare](https://github.com/tt-a1i/archify/compare/62904f3...HEAD) |
 
 ---
 
@@ -405,7 +399,7 @@ my-claude 以 git 子模块方式关联 5 个 MIT 授权的上游仓库，每个
 
 ## 致谢
 
-本项目基于以下工作构建：[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)（Yeachan Heo）、[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)（code-yeongyu）、[everything-claude-code](https://github.com/affaan-m/everything-claude-code)（affaan-m）、[gstack](https://github.com/garrytan/gstack)（garrytan）、[superpowers](https://github.com/obra/superpowers)（Jesse Vincent）、[agency-agents](https://github.com/msitarzewski/agency-agents)（msitarzewski — 3 个 vendored Agent）、[anthropic/skills](https://github.com/anthropics/skills)（Anthropic）、[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)（forrestchang）。
+本项目构建在 [使用的开源工具](#open-source-tools-used) 所列的项目之上；感谢每一位作者。
 
 ## 许可证
 
