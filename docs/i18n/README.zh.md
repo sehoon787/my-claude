@@ -62,6 +62,8 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 阅读完整输出，然后按顺序执行每个步骤。请使用 `curl`，而非 `WebFetch`。
 
+在运行安装程序之前，代理会询问要安装哪些配套工具（Serena、Headroom、codeburn），因为交互式复选框菜单仅在交互式终端中出现。
+
 ---
 
 <a id="open-source-tools-used"></a>
