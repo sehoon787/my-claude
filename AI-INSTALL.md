@@ -71,7 +71,7 @@ grep '^model:' ~/.claude/agents/boss.md   # if this shows the OLD model, it is s
 
 # 2a. Repo-based install (Step 1b / you have the repo cloned): re-run install.sh.
 #     It overwrites every user-level agent it owns, including boss.md.
-cd <your my-claude repo> && git pull && bash install.sh
+cd <your my-claude repo> && git pull && bash install.sh --tools=<all|none|names>  # same choice step as Step 1b
 #     (Or just start a new Claude Code session — the SessionStart auto-update now
 #      refreshes core user-level agents from your local repo once per day.)
 
