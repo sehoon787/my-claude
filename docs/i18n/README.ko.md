@@ -62,6 +62,8 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 전체 출력을 읽은 후, 각 단계를 순서대로 실행하세요. `WebFetch`가 아닌 `curl`을 사용하세요.
 
+설치 프로그램을 실행하기 전에, 에이전트는 어떤 동반 도구(Serena, Headroom, codeburn)를 설치할지 사용자에게 묻습니다. 대화형 체크박스 메뉴는 대화형 터미널에서만 표시되기 때문입니다.
+
 ---
 
 <a id="open-source-tools-used"></a>

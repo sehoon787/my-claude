@@ -68,6 +68,8 @@ If you use both routes, `install.sh` also refreshes the `my-claude` plugin (mark
 Read https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md and follow every step.
 ```
 
+Before running the installer, the agent will ask which companion tools (Serena, Headroom, codeburn) to install, because the interactive checkbox menu only appears in an interactive terminal.
+
 ---
 
 ## Open-Source Tools Used

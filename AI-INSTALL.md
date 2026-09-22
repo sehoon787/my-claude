@@ -114,13 +114,38 @@ Prerequisites: `bash` (Git Bash or WSL on Windows — this is a bash script, not
 PowerShell), `node`/`npm` (v22.13+ — required by codeburn), and `git`. `install.sh` checks for these and
 exits with an error naming whichever is missing before doing anything else.
 
+### Before running install.sh: ask which companion tools to install
+
+`install.sh` only shows its interactive companion-tool checkbox menu when it detects a
+TTY; an AI agent runs it from a non-interactive shell, so that menu never appears and
+the script silently defaults to installing all three companion tools — you must ask
+the user first.
+
+| Tool | What it does (1 sentence) | Default |
+|------|----------------------------|---------|
+| Serena | A language server's symbol graph over MCP: `find_symbol`, `get_symbols_overview`, `find_referencing_symbols`, `replace_symbol_body`, `insert_after_symbol` — the tokens spent scale with the symbol, not the file. | Installed |
+| Headroom | Tool-output compression: `headroom mcp serve` exposes `headroom_compress`, `headroom_retrieve`, and `headroom_stats`, so an oversized tool result never lands in the transcript whole. | Installed |
+| codeburn | Local-first token and cost tracking over the session files Claude Code and Codex already write — no proxy, no API key, nothing leaves the machine. | Installed |
+
+Present these three as a multi-select choice to the user before running `install.sh`
+(Claude Code agents: use the `AskUserQuestion` tool with `multiSelect`; other agents:
+ask in chat), then map the answer to a flag: all selected → `--tools=all`, none
+selected → `--tools=none`, a subset → `--tools=` followed by the comma-separated names,
+e.g. `--tools=serena,codeburn`. Never run `install.sh` on this path without one of
+`--tools=…`, `--yes`, or `--skip-tools`. If the user genuinely cannot be asked (a fully
+unattended run), use `--yes` and say so in your report.
+
 ```bash
 # Resolve the latest release tag so manual installs match published releases.
 # Falls back to 'main' when the API is unreachable or rate-limited.
 LATEST=$(curl -s https://api.github.com/repos/sehoon787/my-claude/releases/latest | grep '"tag_name"' | head -1 | cut -d'"' -f4)
 git clone --depth 1 --branch "${LATEST:-main}" https://github.com/sehoon787/my-claude.git /tmp/my-claude
 git -C /tmp/my-claude submodule update --init --depth 1
-bash /tmp/my-claude/install.sh
+# Replace --tools=<all|none|names> with the flag chosen above, e.g.:
+#   bash /tmp/my-claude/install.sh --tools=all
+#   bash /tmp/my-claude/install.sh --tools=none
+#   bash /tmp/my-claude/install.sh --tools=serena,codeburn
+bash /tmp/my-claude/install.sh --tools=<all|none|names>
 rm -rf /tmp/my-claude
 ```
 

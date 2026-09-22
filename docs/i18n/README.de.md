@@ -62,6 +62,8 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 
 Lesen Sie die VOLLSTÄNDIGE Ausgabe, und führen Sie dann jeden Schritt der Reihe nach aus. Verwenden Sie `curl`, NICHT `WebFetch`.
 
+Bevor der Installer ausgeführt wird, fragt der Agent, welche Begleitwerkzeuge (Serena, Headroom, codeburn) installiert werden sollen, da das interaktive Auswahlmenü nur in einem interaktiven Terminal erscheint.
+
 ---
 
 <a id="open-source-tools-used"></a>
