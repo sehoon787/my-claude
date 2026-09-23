@@ -1,7 +1,7 @@
 ---
 name: prometheus
 description: Use when a request needs a plan before any code is written — runs a structured interview and researches the codebase; returns a markdown work plan with phases, ordered steps, and acceptance criteria. (Opus)
-model: claude-opus-5
+model: claude-opus-5-5
 effort: xhigh
 disallowedTools: NotebookEdit
 ---
