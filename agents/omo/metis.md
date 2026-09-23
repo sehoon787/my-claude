@@ -1,7 +1,7 @@
 ---
 name: metis
 description: Use before planning starts when a request may be ambiguous, over-scoped, or misread; returns an intent classification, the ambiguities found, and the clarifying questions to ask first. (Opus)
-model: claude-opus-5
+model: claude-opus-5-5
 effort: high
 disallowedTools: Write, Edit
 ---

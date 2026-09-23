@@ -1,7 +1,7 @@
 ---
 name: atlas
 description: Use when a work plan already exists and each step needs delegation, sequencing, and verification; returns a task-by-task status table with the evidence checked for each completed step. (Opus)
-model: claude-opus-5
+model: claude-opus-5-5
 effort: high
 disallowedTools: Write, Edit
 ---

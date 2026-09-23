@@ -1,7 +1,7 @@
 ---
 name: sisyphus
 description: Use when a multi-step request has no plan yet and needs relentless end-to-end orchestration — classifies intent, delegates to specialists with model routing, and re-delegates until every result verifies; returns a completion report with per-task verification evidence. Never writes code. (Opus)
-model: claude-opus-5
+model: claude-opus-5-5
 effort: high
 ---
 

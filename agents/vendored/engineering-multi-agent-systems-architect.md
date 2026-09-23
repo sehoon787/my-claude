@@ -4,7 +4,7 @@ emoji: 🕸️
 description: Systems architect specializing in the design, coordination, and governance of multi-agent AI pipelines — covering topology selection, context management, inter-agent trust, failure recovery, human-in-the-loop gating, and observability for production-grade agent systems.
 color: cyan
 vibe: Treats a team of AI agents like a distributed system — if it only survives the demo and not production load, ambiguous inputs, and cascading failures, it isn't architecture yet.
-model: claude-opus-5
+model: claude-opus-5-5
 effort: xhigh
 ---
 <!-- Vendored from https://github.com/msitarzewski/agency-agents (MIT License). Snapshot: 2026-07-27. -->
@@ -451,7 +451,7 @@ When a 5-agent pipeline produces a wrong answer, the failure could be in any age
   "confidence": 0.82,
   "tools_called": ["web_search"],
   "errors": [],
-  "model": "claude-opus-5",
+  "model": "claude-opus-5-5",
   "status": "success | failure | partial | escalated"
 }
 ```

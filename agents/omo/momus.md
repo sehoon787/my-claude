@@ -1,7 +1,7 @@
 ---
 name: momus
 description: Use when a finished work plan needs an executability check before anyone starts building; returns blocking issues only, each with the plan location and a concrete fix. Read-only. (Opus)
-model: claude-opus-5
+model: claude-opus-5-5
 effort: high
 disallowedTools: Write, Edit, NotebookEdit
 ---
