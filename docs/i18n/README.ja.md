@@ -387,9 +387,9 @@ git サブモジュール経由でリンク。ピン留めされたコミット�
 
 | ソース | SHA | 日付 | 差分 |
 |--------|-----|------|------|
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `07756ce` | 2026-09-19 | [compare](https://github.com/affaan-m/everything-claude-code/compare/07756ce...HEAD) |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `5281b19` | 2026-09-13 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/5281b19...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | `a6b3a57` | 2026-09-16 | [compare](https://github.com/garrytan/gstack/compare/a6b3a57...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `bf70150` | 2026-09-22 | [compare](https://github.com/affaan-m/everything-claude-code/compare/bf70150...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `9fd35ec` | 2026-09-22 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/9fd35ec...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `35dd014` | 2026-09-22 | [compare](https://github.com/garrytan/gstack/compare/35dd014...HEAD) |
 | [superpowers](https://github.com/obra/superpowers) | `5bf4e78` | 2026-09-19 | [compare](https://github.com/obra/superpowers/compare/5bf4e78...HEAD) |
 | [archify](https://github.com/tt-a1i/archify) | `62904f3` (`v2.9.0`) | 2026-09-19 | [compare](https://github.com/tt-a1i/archify/compare/62904f3...HEAD) |
 

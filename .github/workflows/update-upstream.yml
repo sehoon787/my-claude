@@ -63,6 +63,16 @@ jobs:
             || echo "::warning::SOURCES.json pin refresh skipped; pins may lag the submodule pointers"
           git add upstream/SOURCES.json
 
+      # The README pin table is rendered from those same pins, so it has to be
+      # rewritten in the same PR or it goes stale again on the next sync.
+      - name: Refresh the README pin table
+        run: |
+          # Docs only, and node again, so the same degrade-to-a-warning rule
+          # applies: a stale table must never block a submodule update.
+          node scripts/refresh-pin-table.js \
+            || echo "::warning::README pin table refresh skipped; the bundled-versions table may lag SOURCES.json"
+          git add README.md docs/i18n/README.*.md
+
       - name: Check for changes
         id: check
         run: |
