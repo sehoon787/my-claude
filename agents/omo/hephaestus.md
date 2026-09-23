@@ -1,7 +1,7 @@
 ---
 name: hephaestus
 description: Use when one agent should finish a task end-to-end without check-ins or delegation — explores, plans, implements, and verifies on its own; returns the implemented changes plus test and verification output. (Opus)
-model: claude-opus-5
+model: claude-opus-5-5
 effort: high
 ---
 

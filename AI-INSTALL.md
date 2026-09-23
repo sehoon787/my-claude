@@ -63,7 +63,7 @@ The configure step sets the default agent to the bare name `boss`
 old model no matter how many times you update the marketplace and reinstall the plugin.
 
 **Troubleshooting: "I just reinstalled but Boss still shows an old model"** (e.g.
-`claude-opus-4-6`):
+`claude-opus-5`):
 
 ```bash
 # 1. Diagnose — check which model the user-level file serves
