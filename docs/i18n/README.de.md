@@ -387,9 +387,9 @@ Funktionen, die speziell für dieses Projekt entwickelt wurden und über das hin
 
 | Quelle | SHA | Datum | Diff |
 |--------|-----|-------|------|
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `bf70150` | 2026-09-22 | [compare](https://github.com/affaan-m/everything-claude-code/compare/bf70150...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `e482e57` | 2026-09-25 | [compare](https://github.com/affaan-m/everything-claude-code/compare/e482e57...HEAD) |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `9fd35ec` | 2026-09-22 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/9fd35ec...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | `35dd014` | 2026-09-22 | [compare](https://github.com/garrytan/gstack/compare/35dd014...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `730a101` | 2026-09-25 | [compare](https://github.com/garrytan/gstack/compare/730a101...HEAD) |
 | [superpowers](https://github.com/obra/superpowers) | `5bf4e78` | 2026-09-19 | [compare](https://github.com/obra/superpowers/compare/5bf4e78...HEAD) |
 | [archify](https://github.com/tt-a1i/archify) | `62904f3` (`v2.9.0`) | 2026-09-19 | [compare](https://github.com/tt-a1i/archify/compare/62904f3...HEAD) |
 
