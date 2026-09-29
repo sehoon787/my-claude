@@ -26,7 +26,24 @@ const store = require('./adoption-store.js');
 
 const ADVISOR_FOR_INTENT = { Architecture: 'oracle', Ambiguity: 'metis', PlanReview: 'momus' };
 const ADVISOR_TYPE = /(^|:)(oracle|metis|momus)$/;
-const SKIP_LINE = /^[\s>*_-]*Advisor skipped:/im;
+const SKIP_LINE = /^[\s>*_-]*Advisor skipped:\s*(.*)$/im;
+// An escape line (`Advisor skipped:` / `Blocked on user:`) only counts when
+// its reason text is real: at least MIN_REASON_CHARS non-space characters,
+// and not a placeholder someone typed to satisfy the regex without saying
+// anything. An invalid reason is treated as if the line were absent.
+const MIN_REASON_CHARS = 8;
+const PLACEHOLDER_REASONS = new Set(['<reason>', '<action>', 'n/a', 'na', 'none', 'skip', 'skipped', '-', '...', 'tbd']);
+
+function hasRealReason(text) {
+  const trimmed = String(text || '').trim();
+  if (trimmed.replace(/\s/g, '').length < MIN_REASON_CHARS) return false;
+  return !PLACEHOLDER_REASONS.has(trimmed.toLowerCase());
+}
+
+function hasValidSkipLine(text) {
+  const m = String(text || '').match(SKIP_LINE);
+  return !!(m && hasRealReason(m[1]));
+}
 const MACHINE_MESSAGE = /<task-notification>|\[SYSTEM NOTIFICATION|<cross-session-message|<teammate-message|^Another Claude session sent a message:/;
 // The intent file is written a few hundred ms after the prompt's transcript
 // timestamp; allow for clock rounding without accepting a previous prompt's.
@@ -91,7 +108,7 @@ function blockReason(intent, advisor) {
   return `[AdvisorGate] This prompt's intent is ${intent}, but no advisor was consulted this turn. ` +
     `Per boss.md's Advisor Gate, call \`${advisor}\` now with the Agent tool (subagent_type "${advisor}"), passing it the question plus the files and findings you already have. ` +
     `Then repeat your full final answer with a short "Advisor (${advisor})" section: its view and where you agree or disagree. ` +
-    'If consulting truly does not apply (trivial request, misclassified intent, the user said not to), instead repeat your full final answer ending with one line: `Advisor skipped: <reason>`.';
+    'If consulting truly does not apply (trivial request, misclassified intent, the user said not to), instead repeat your full final answer ending with one line: `Advisor skipped: <reason>` — the reason must be concrete, not a placeholder.';
 }
 
 // -> {decision: 'block', reason} or null. Unchanged from before the Stuck
@@ -105,7 +122,7 @@ function evaluateAdvisorGate(input, home, turn) {
   const advisor = ADVISOR_FOR_INTENT[intent];
   if (!advisor) return null;
   const lam = typeof input.last_assistant_message === 'string' ? input.last_assistant_message : turn.lastText;
-  if (SKIP_LINE.test(lam || '')) return null;
+  if (hasValidSkipLine(lam)) return null;
   const marker = markerPath(home, input.session_id);
   const prior = store.readJson(marker, {});
   if (prior && prior.turn === turn.id) return null;
@@ -365,9 +382,9 @@ function detectImpossibilityClaim(lam) {
 
 function isEscaped(lam) {
   const text = lam || '';
-  if (SKIP_LINE.test(text)) return true;
+  if (hasValidSkipLine(text)) return true;
   const m = text.match(BLOCKED_ON_USER_LINE);
-  return !!(m && USER_ONLY_ACTION_RE.test(m[1]));
+  return !!(m && hasRealReason(m[1]) && USER_ONLY_ACTION_RE.test(m[1]));
 }
 
 const STUCK_SIGNAL_LABEL = {
@@ -394,8 +411,8 @@ function stuckBlockReason(signal, context) {
     '(4) a verdict: truly-blocked (naming the user-only action) or unblocked. ' +
     'Then repeat your full final answer with a short "Advisor (<name>)" section covering its verdict. ' +
     'If the verdict is truly-blocked on a user-only action, end with one line: `Blocked on user: <action>` ' +
-    '(only for login/trust/approve/permission/credential/2FA/권한/승인/로그인/신뢰). ' +
-    'Otherwise, if consulting truly does not apply, end with: `Advisor skipped: <reason>`.';
+    '(only for login/trust/approve/permission/credential/2FA/권한/승인/로그인/신뢰), with a concrete action, not a placeholder. ' +
+    'Otherwise, if consulting truly does not apply, end with: `Advisor skipped: <reason>` — the reason must be concrete, not a placeholder.';
 }
 
 // -> {decision: 'block', reason} or null. See the block comment above.

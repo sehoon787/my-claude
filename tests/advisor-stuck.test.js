@@ -178,6 +178,42 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
 }
 {
   const home = mkHome(), cwd = mkRepo();
+  const lam = 'This is impossible without admin login.\n\nBlocked on user:';
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check('"Blocked on user:" with nothing after it -> block', r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = 'This is impossible without admin login.\n\nBlocked on user: n/a';
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check('"Blocked on user: n/a" -> block', r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = 'This is impossible without admin login.\n\nBlocked on user: <action>';
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check('"Blocked on user: <action>" placeholder -> block', r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = 'This is impossible right now.\n\nAdvisor skipped:';
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check('"Advisor skipped:" with nothing after it -> block', r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = 'This is impossible right now.\n\nAdvisor skipped: n/a';
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check('"Advisor skipped: n/a" -> block', r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = 'This is impossible right now.\n\nAdvisor skipped: <reason>';
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check('"Advisor skipped: <reason>" placeholder -> block', r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
   const lam = 'This is impossible without more info.';
   const entries = [human('q'), agentCall('oracle'), toolResult('x', false), asst(lam)];
   const r = runHook({ home, cwd, entries, lam });
