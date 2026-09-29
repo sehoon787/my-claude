@@ -127,8 +127,9 @@ Boss is the meta-orchestrator at the core of my-claude. It never writes code —
 
 | Complexity | Model | Used For |
 |-----------|-------|----------|
-| Top-level orchestration | `claude-fable-5-1` | Boss |
-| Deep analysis, architecture | `claude-opus-5-5` | Sisyphus, Atlas, Hephaestus, Oracle, Metis, Momus, Prometheus |
+| Top-level orchestration | `claude-opus-5-5` | Boss |
+| Advisor group (read-only second opinions) | `claude-fable-5-1` | Oracle, Metis, Momus |
+| Deep analysis, architecture | `claude-opus-5-5` | Sisyphus, Atlas, Hephaestus, Prometheus |
 | Standard implementation | `claude-sonnet-5` | Librarian, Multimodal-Looker, OMC specialists |
 | Quick lookup, exploration | `claude-haiku-4-5` | Lightweight OMC agents, simple advisory |
 
