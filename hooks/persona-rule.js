@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Persona rule CLI: list/accept/reject suggestions
+// Persona rule CLI: list/accept/reject suggestions, plus
+// `adoption <list|pin|unpin|reset|undo>` (hooks/adoption-cli.js)
 // Runs synchronously — no async/await, ES5-compatible
 
 var fs = require('fs');
@@ -15,6 +16,11 @@ var GLOBAL_RULES_DIR = path.join(HOME_DIR, '.claude', 'rules', 'persona');
 var args = process.argv.slice(2);
 var command = args[0] || '';
 var agentType = args[1] || '';
+
+// The adoption ledger is global (~/.config/agent-harness/), not per vault.
+if (command === 'adoption') {
+  process.exit(require('./adoption-cli.js').main(args.slice(1)));
+}
 
 // Guard: no vault = nothing to do
 if (!fs.existsSync(BRIEFING_DIR)) {
@@ -63,7 +69,12 @@ function writeSuggestions(suggestions) {
 
 // LIST command
 if (command === 'list') {
-  var suggestions = readSuggestions();
+  // Suggestions for agent types that are not installed (one-off Agent display
+  // names from the old log) are dismissed, with the reason on the record.
+  var agentLog = require('./agent-log.js');
+  var dismissed = agentLog.dismissUninstalledSuggestions(readSuggestions(), agentLog.installedAgentTypes(), new Date().toISOString());
+  if (dismissed.changed) writeSuggestions(dismissed.list);
+  var suggestions = dismissed.list;
   var pending = [];
   for (var i = 0; i < suggestions.length; i++) {
     if (suggestions[i].type === 'pending') {
@@ -219,5 +230,6 @@ if (command === 'clean') {
 }
 
 // Unknown command or no command
-process.stdout.write('Usage: persona-rule.js <list|accept|reject|clean> [agent_type]\n');
+process.stdout.write('Usage: persona-rule.js <list|accept|reject|clean> [agent_type]\n' +
+  '       persona-rule.js adoption <list [--intent X] | pin <id> <intent> | unpin <id> <intent> | reset [<id>] | undo <ts> [<id>]>\n');
 process.exit(0);

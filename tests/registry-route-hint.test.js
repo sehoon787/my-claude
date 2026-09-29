@@ -104,7 +104,7 @@ check('uninstalled members are skipped', !archIds.includes('plan-eng-review') &&
 const amb = r.intents.find((i) => i.name === 'Ambiguity');
 check('Ambiguity: metis first, bare member resolves plugin skill',
   amb.candidates[0].id === 'metis' && amb.candidates.some((c) => c.id === 'omcx:deep-interview'), amb.candidates.map((c) => c.id).join(','));
-check('adoptionWeight stub returns 0', reg.adoptionWeight({ id: 'x' }, 'Architecture') === 0);
+check('adoptionWeight is 0 without ledger events', reg.adoptionWeight({ id: 'x' }, 'Architecture', { stats: new Map(), pins: [] }) === 0);
 
 check('second run skips rebuild when fresh', reg.ensureRegistry(opts).status === 'fresh');
 const later = new Date(Date.now() + 5000);

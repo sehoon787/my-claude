@@ -37,6 +37,17 @@
             "timeout": 5000
           }
         ]
+      },
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/agent-log.js\" map",
+            "timeout": 5000,
+            "description": "Persona vault: remember Agent display name -> subagent_type before the agent runs, so SubagentStop logs the agent type, not a one-off name (no output)"
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -47,6 +58,17 @@
             "type": "command",
             "command": "bash -c 'mkdir -p ~/.gstack/analytics && node -e \"const j=JSON.parse(require(\\\"fs\\\").readFileSync(0,\\\"utf8\\\"));const i=j.tool_input||{};process.stdout.write(JSON.stringify({agent:i.name||i.description||\\\"unknown\\\",model:i.model||\\\"unknown\\\",ts:new Date().toISOString(),tool:\\\"Agent\\\"})+\\\"\\\\n\\\")\" >> ~/.gstack/analytics/agent-usage.jsonl 2>/dev/null || true'",
             "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "Agent|Task|Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/adoption-tracker.js\" offer",
+            "timeout": 5000,
+            "description": "Adoption: remember the agents/skills the main session ran this turn (no output)"
           }
         ]
       },
@@ -90,8 +112,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"const fs=require('fs');const d='.briefing/agents';if(fs.existsSync('.briefing/INDEX.md')){fs.mkdirSync(d,{recursive:true});const j=JSON.parse(fs.readFileSync(0,'utf8'));var at=j.agent_type||'unknown';var pm={'explore':1,'Explore':1,'research':1,'deep-research':1,'executor':2,'implementer':2,'general-purpose':2,'Senior Developer':2,'code-reviewer':3,'security-reviewer':3,'tdd-guide':4,'planner':5,'Plan':5,'architect':5,'debugger':6};var ph=['','research','implement','review','test','plan','debug'][pm[at]||0]||'';var sf='.briefing/state.json';var st={};try{st=JSON.parse(fs.readFileSync(sf,'utf8'))}catch(e){}var sq=(parseInt(st.subagentSeq,10)||0)+1;st.subagentSeq=sq;fs.writeFileSync(sf,JSON.stringify(st,null,2));var th=(j.description||j.name||'').slice(0,120);var e={ts:new Date().toISOString(),agent_id:j.agent_id||'unknown',agent_type:at,phase:ph,seq:sq,task_hint:th};fs.appendFileSync(d+'/agent-log.jsonl',JSON.stringify(e)+'\\n')}\"",
-            "timeout": 5000
+            "command": "node \"$HOME/.claude/hooks/agent-log.js\" stop",
+            "timeout": 5000,
+            "description": "Persona vault: append to .briefing/agents/agent-log.jsonl keyed by agent type (display name kept as metadata)"
           },
           {
             "type": "command",
@@ -164,6 +187,12 @@
             "command": "node \"$HOME/.claude/hooks/route-hint.js\"",
             "timeout": 5000,
             "description": "RouteHint: classify the prompt by routing-map.json intent keywords and inject the top 3 registry candidates (silent when no intent matches)"
+          },
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/adoption-tracker.js\" verdict",
+            "timeout": 5000,
+            "description": "Adoption: classify the reply to the last turn as accept/reject/neutral and append ledger events (silent, no context)"
           },
           {
             "type": "command",

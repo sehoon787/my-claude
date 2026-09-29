@@ -834,6 +834,10 @@ echo "  Plugin files installed"
 echo "[2/6] Installing hooks..."
 mkdir -p "$HOME/.claude/hooks"
 cp "$SCRIPT_DIR/hooks/hooks.json"                "$HOME/.claude/hooks/"
+# Dependency-free modules first, so a session that starts mid-copy never
+# loads a hook whose require() target is not there yet.
+cp "$SCRIPT_DIR/hooks/adoption-store.js"           "$HOME/.claude/hooks/"
+cp "$SCRIPT_DIR/hooks/agent-log.js"                "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/session-start.sh"           "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/stop-profile-update.js"     "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/stop-session-enforcement.js" "$HOME/.claude/hooks/"
@@ -847,7 +851,9 @@ cp "$SCRIPT_DIR/hooks/vault-enforcer.js"           "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/build-registry.js"           "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/route-hint.js"               "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/routing-map.json"            "$HOME/.claude/hooks/"
-for f in hooks.json session-start.sh stop-profile-update.js stop-session-enforcement.js stop-final-report.js persona-rule.js briefing-runtime.js session-sync.js session-end.js context-budget.js vault-enforcer.js build-registry.js route-hint.js routing-map.json; do
+cp "$SCRIPT_DIR/hooks/adoption-tracker.js"         "$HOME/.claude/hooks/"
+cp "$SCRIPT_DIR/hooks/adoption-cli.js"             "$HOME/.claude/hooks/"
+for f in hooks.json session-start.sh stop-profile-update.js stop-session-enforcement.js stop-final-report.js persona-rule.js briefing-runtime.js session-sync.js session-end.js context-budget.js vault-enforcer.js build-registry.js route-hint.js routing-map.json adoption-store.js adoption-tracker.js adoption-cli.js agent-log.js; do
   echo "hooks/$f" >> "$MANIFEST_TMP"
 done
 mkdir -p "$HOME/.claude/scripts"

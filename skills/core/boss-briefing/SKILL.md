@@ -43,6 +43,8 @@ If gap is 0 (same day), skip this step.
 
 Read `.briefing/agents/agent-log.jsonl`. Parse all entries from the last 30 days.
 
+Count each `agent_id` once: SubagentStop fires again every time a teammate goes idle. Skip entries whose `agent_type` is not an installed agent type — older lines recorded a named agent's display name there (newer lines keep it in `name`).
+
 Group entries by date. For each day, extract the ordered sequence of `agent_type` values.
 
 **Frequency patterns:** Identify any `agent_type` that appears >= 3 times in the last 7 days.

@@ -7,9 +7,14 @@
 // seconds on the prompt path). Emits nothing when no intent matches, for
 // slash commands, and for task-notification / teammate messages. Any error
 // fails open with no output.
+//
+// Also records the prompt's intent (or "unknown") in
+// ~/.claude/.adoption/intent-<session>.json, so adoption-tracker.js can file
+// the agents/skills run for this prompt under that intent.
 'use strict';
 const fs = require('fs');
 const { countMatches, defaultPaths, formatCandidate, keywordMatcher } = require('./build-registry.js');
+const { recordIntent } = require('./adoption-store.js');
 
 const HINT_TOP_N = 3;
 const MACHINE_MESSAGE = /^\s*<(task-notification|teammate-message)\b/;
@@ -56,7 +61,11 @@ function main() {
   let input = {};
   try { input = JSON.parse(fs.readFileSync(0, 'utf8') || '{}'); } catch { return; }
   let registry = null;
-  try { registry = JSON.parse(fs.readFileSync(defaultPaths().out, 'utf8')); } catch { return; }
+  try { registry = JSON.parse(fs.readFileSync(defaultPaths().out, 'utf8')); } catch { /* no hint; intent unknown */ }
+  if (isRoutable(input.prompt)) {
+    const intent = registry ? classify(input.prompt, registry.intents) : null;
+    try { recordIntent(null, input.session_id, intent ? intent.name : 'unknown'); } catch { /* hint still goes out */ }
+  }
   const out = routeHint(input.prompt, registry, input.cwd || process.cwd());
   if (out) process.stdout.write(JSON.stringify(out) + '\n');
 }

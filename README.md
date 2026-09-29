@@ -194,6 +194,26 @@ Boss does not have to remember to read anything: routing information is pushed i
 
 **Adjusting routing:** edit `hooks/routing-map.json` (installed to `~/.claude/hooks/`). Each intent has `members` (preferred agents/skills in order; a bare name also matches a plugin item of that name, and missing ones are skipped), `advisor: true` on Advisor Group members, `description_keywords` (classify registry items), and `prompt_keywords` (classify prompts; the highest keyword count wins and ties go to the intent listed first). Set `REGISTRY_OUT` to write or read the registry somewhere else, e.g. for a dry run.
 
+### Adoption: routing learns which results you keep
+
+Boss records whether you **adopt** what an agent or skill produced, per intent, and uses it — gated — to reorder routing candidates. Call counts are never used: running an agent often says nothing about whether its output was any good.
+
+| Piece | What it does |
+|-------|--------------|
+| **Offer** (`hooks/adoption-tracker.js offer`, PostToolUse Agent/Task/Skill) | Remembers the agents/skills the main session ran in the latest turn (one per item, 5 max) with the intent `route-hint.js` classified for that prompt. Subagents' own tool calls are ignored. A background agent or teammate is judged only after its notification has arrived |
+| **Verdict** (`hooks/adoption-tracker.js verdict`, UserPromptSubmit) | Classifies your next reply: accept (`진행해`, `반영해`, `좋아`, `그렇게 해`, `승인`, `머지해`, `go ahead`, `yes`, `lgtm`, `apply it`, `ship it`, …) or reject (`아니`, `틀렸`, `다시 해`, `그만`, `하지 마`, `되돌려`, `no,`, `wrong`, `redo`, `revert`, `stop`, …); reject wins when both match, a question (`…?`) is never an accept, and anything else is neutral (no event). Slash commands and task-notification / teammate messages are not replies. Prints nothing |
+| **Ranking** (`adoptionWeight` in `hooks/build-registry.js`) | Events from the last 180 days, each weighted `0.5^(age_days/90)`. A (id, intent) pair counts only once its weighted sample reaches 5; its accept rate then moves it up or down by at most two slots **within its band** — explicit routing-map members always stay ahead of keyword matches. `Security` and `Ship` keep the map order and ignore adoption and pins. The SessionStart summary shows `(adopted 7/9)` once a pair is counted, and `[pinned]` for pins |
+
+The store is shared by harnesses (my-codex can write to the same files) under `~/.config/agent-harness/`:
+
+- `adoption-ledger.jsonl` — append-only, one event per line:
+  `{"ts": ISO-8601, "harness": "claude", "session": id, "kind": "agent"|"skill", "id": exact subagent_type or skill name, "intent": route-hint intent or "unknown", "verdict": "accept"|"reject", "signal": "reply"|"choice"|"revert", "evidence": first 120 chars of your reply}`.
+  `signal` is `revert` when the reply asked for a revert/rollback, `reply` otherwise; `choice` is reserved for answers to an explicit choice prompt.
+- `adoption-pins.json` — `[{"id", "intent", "ts"}]`; a pin forces that item to the top of that intent.
+- `adoption-archive.jsonl` / `adoption-audit.jsonl` — where `reset`/`undo` move events (nothing is hard-deleted), and a log of every CLI mutation.
+
+Inspect or correct it with `node ~/.claude/hooks/persona-rule.js adoption <cmd>`: `list [--intent X]` (id × intent table of weighted accept/reject/n), `list --events` (raw events with their `ts`), `pin <id> <intent>`, `unpin <id> <intent>`, `reset [<id>]`, `undo <ts> [<id>]`. The ledger and pins are registry sources, so the next session's routing summary reflects any change.
+
 ---
 
 ## What's Inside

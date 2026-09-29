@@ -191,6 +191,17 @@ function assertShape(label, event, result) {
 
 {
   const dir = tmpProject();
+  const input = JSON.stringify({ session_id: 'shape', tool_name: 'Agent', tool_use_id: 't1', tool_input: { subagent_type: 'oracle', name: 'n1' } });
+  const map = runResolvedFile(findCommand('PreToolUse', 'agent-log.js" map'), { cwd: dir, input });
+  assertShape('PreToolUse agent-log.js map', 'PreToolUse', map);
+  const offer = runResolvedFile(findCommand('PostToolUse', 'adoption-tracker.js" offer'), { cwd: dir, input });
+  assertShape('PostToolUse adoption-tracker.js offer', 'PostToolUse', offer);
+  results.push(check('PostToolUse adoption hooks -> empty stdout', map.stdout === '' && offer.stdout === ''));
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
+{
+  const dir = tmpProject();
   const cmd = findCommand('PostToolUse', 'auto-links.md');
   const r = runInlineNodeE(cmd, { cwd: dir, input: JSON.stringify({ tool_input: { url: 'https://example.com' } }) });
   assertShape('PostToolUse web auto-link collector', 'PostToolUse', r);
@@ -209,9 +220,11 @@ function assertShape(label, event, result) {
 
 {
   const dir = tmpProject();
-  const cmd = findCommand('SubagentStop', 'agent-log.jsonl');
-  const r = runInlineNodeE(cmd, { cwd: dir, input: JSON.stringify({ agent_id: 'a1', agent_type: 'executor' }) });
+  const cmd = findCommand('SubagentStop', 'agent-log.js" stop');
+  const r = runResolvedFile(cmd, { cwd: dir, input: JSON.stringify({ agent_id: 'a1', agent_type: 'executor' }) });
   assertShape('SubagentStop agent-log writer', 'SubagentStop', r);
+  results.push(check('SubagentStop agent-log writer -> line appended',
+    fs.readFileSync(path.join(dir, '.briefing', 'agents', 'agent-log.jsonl'), 'utf8').includes('"agent_type":"executor"')));
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
@@ -349,6 +362,18 @@ function assertShape(label, event, result) {
   results.push(check('UserPromptSubmit route-hint.js -> hint emitted', (r.stdout || '').includes('[RouteHint] intent=Architecture')));
   const quiet = runResolvedFile(cmd, { cwd: dir, input: JSON.stringify({ prompt: '/help', cwd: dir }) });
   assertShape('UserPromptSubmit route-hint.js (slash command)', 'UserPromptSubmit', quiet);
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
+{
+  // Runs after the PostToolUse offer case above left a pending offer for
+  // session "shape" in FAKE_HOME; the verdict must still print nothing.
+  const dir = tmpProject();
+  const cmd = findCommand('UserPromptSubmit', 'adoption-tracker.js" verdict');
+  const r = runResolvedFile(cmd, { cwd: dir, input: JSON.stringify({ session_id: 'shape', prompt: '좋아 그렇게 진행해' }) });
+  assertShape('UserPromptSubmit adoption-tracker.js verdict', 'UserPromptSubmit', r);
+  results.push(check('UserPromptSubmit adoption-tracker.js verdict -> empty stdout, event written',
+    r.stdout === '' && fs.existsSync(path.join(FAKE_HOME, '.config', 'agent-harness', 'adoption-ledger.jsonl'))));
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
