@@ -44,7 +44,7 @@ Parse each agent's `name`, `description`, `model`, and scope (global/project). P
 
 **Step 4 (Persona):** Read `.briefing/persona/profile.md` if it exists. Extract user philosophy, workflow patterns, and agent affinity scores into working memory. Use these to inform intent classification (Phase 1) and capability matching (Phase 2). If the file is missing, skip silently — the profile is built over time.
 
-**Step 4b (Pending Suggestions):** Read `.briefing/persona/suggestions.jsonl` if it exists. For each entry with `"type":"pending"`, present the suggestion to the user via AskUserQuestion (approve/reject). On approve: create the suggested rule file at `.briefing/persona/rules/auto-{agent_type}.md`. On reject: update the entry to `"type":"rejected"` with `"cooldown_until"` set to 7 days from now. Process at most 2 suggestions per session to avoid fatigue.
+**Step 4b (Learning suggestions):** The SessionStart context may carry up to two `[Learn] <id>: <kind> — <text>` lines: a rule drawn from a correction the user made, or a skill drawn from a workflow they adopted in 3+ sessions. Ask about each (at most 2 per session) with AskUserQuestion in one sentence: approve / dismiss / later. On approve run `node ~/.claude/hooks/persona-rule.js learn approve <id>` (for a rule, add `--as "<the rule as one imperative English sentence>"` when the user's wording is not English); on dismiss run `node ~/.claude/hooks/persona-rule.js learn dismiss <id>`; on later do nothing. Never write rule or skill files yourself — only `learn approve` writes them, into `~/.claude/rules/user/` and `~/.claude/skills/learned-*/`. The old `.briefing/persona/suggestions.jsonl` flow is not used here.
 
 Keep the registry in working memory only — do NOT write files.
 
