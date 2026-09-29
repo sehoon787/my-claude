@@ -1,0 +1,124 @@
+{
+  "_comment": [
+    "Boss routing map. One entry per Phase 1 intent, in tie-break order (an earlier intent wins a tied prompt score).",
+    "members: preferred agents/skills, highest first. A bare name also matches a plugin item of that name (security-reviewer -> oh-my-claudecode:security-reviewer). Members that are not installed are skipped.",
+    "advisor: true marks Advisor Group members; route hints tag them [advisor].",
+    "description_keywords: an installed agent/skill whose name or description contains one of these becomes a candidate after the members.",
+    "prompt_keywords: case-insensitive; a user prompt scores one point per matched keyword and the top-scoring intent (score >= 1) gets a route hint. Latin keywords match at a word start; Korean keywords match anywhere."
+  ],
+  "intents": [
+    {
+      "name": "Trivial",
+      "members": ["executor", "explore"],
+      "description_keywords": [],
+      "prompt_keywords": ["typo", "rename", "one-line", "one line", "quick fix", "bump the version", "오타", "이름 바꿔", "한 줄"]
+    },
+    {
+      "name": "Refactoring",
+      "members": ["code-simplifier", "ai-slop-cleaner", "executor"],
+      "description_keywords": ["refactor", "simplif", "clean up", "cleanup", "restructur"],
+      "prompt_keywords": ["refactor", "clean up", "cleanup", "simplify", "deslop", "restructure", "dead code", "리팩터", "리팩토링", "정리해", "단순화"]
+    },
+    {
+      "name": "Build",
+      "members": ["gstack-sprint", "ralph", "autopilot", "hephaestus", "executor"],
+      "description_keywords": ["end-to-end", "new feature", "greenfield", "scaffold"],
+      "prompt_keywords": ["build a", "build an", "from scratch", "new feature", "greenfield", "scaffold", "end-to-end", "implement a", "implement an", "새로 만들", "처음부터", "신규 기능", "구현해"]
+    },
+    {
+      "name": "Mid-sized",
+      "members": ["writing-plans", "executor", "subagent-driven-development", "atlas"],
+      "description_keywords": ["implementation plan", "work plan"],
+      "prompt_keywords": ["add support for", "extend", "wire up", "integrate", "기능 추가", "연동"]
+    },
+    {
+      "name": "Collaborative",
+      "members": ["brainstorming", "office-hours", "deep-interview"],
+      "description_keywords": ["brainstorm", "office hours"],
+      "prompt_keywords": ["brainstorm", "let's discuss", "think through together", "bounce ideas", "idea", "브레인스토밍", "같이 고민", "아이디어", "논의해"]
+    },
+    {
+      "name": "Architecture",
+      "members": [
+        { "name": "oracle", "advisor": true },
+        "architect",
+        "architecture-decision-records",
+        "plan-eng-review",
+        "ccg"
+      ],
+      "description_keywords": ["architecture", "system design", "design decision", "tradeoff", "trade-off", "hexagonal"],
+      "prompt_keywords": ["architecture", "should we", "move from", "switch from", "switch to", "trade-off", "tradeoff", "monolith", "microservice", "long-term", "which approach", "design decision", "아키텍처", "구조", "게 맞을까", "옮기", "전환", "도입할까", "어떤 방식"]
+    },
+    {
+      "name": "Ambiguity",
+      "members": [
+        { "name": "metis", "advisor": true },
+        "deep-interview",
+        "analyst",
+        "ralplan"
+      ],
+      "description_keywords": ["ambigu", "requirements", "clarif"],
+      "prompt_keywords": ["better", "somehow", "something like", "not sure", "improve it", "nicer", "whatever you think", "좋게", "좀 더", "알아서", "뭔가", "잘 모르겠"]
+    },
+    {
+      "name": "PlanReview",
+      "members": [
+        { "name": "momus", "advisor": true },
+        "critic",
+        "plan-eng-review",
+        "autoplan",
+        "plan-ceo-review"
+      ],
+      "description_keywords": ["plan review", "critique", "executab"],
+      "prompt_keywords": ["plan", "migration plan", "rollout plan", "roadmap", "review the plan", "before we execute", "before we start", "계획", "플랜", "마이그레이션 계획", "로드맵"]
+    },
+    {
+      "name": "Research",
+      "members": ["deep-research", "exa-search", "document-specialist", "librarian", "documentation-lookup"],
+      "description_keywords": ["research", "web search", "documentation lookup"],
+      "prompt_keywords": ["research", "look up", "find out", "compare libraries", "what's the latest", "survey", "investigate options", "리서치", "조사", "찾아봐", "알아봐"]
+    },
+    {
+      "name": "Document",
+      "members": ["archify", "doc-coauthoring", "writer", "docx", "pdf", "pptx", "xlsx", "document-release"],
+      "description_keywords": ["diagram", "docx", "pptx", "xlsx", "pdf", "documentation"],
+      "prompt_keywords": ["diagram", "readme", "document", "docs", "slides", "pdf", "docx", "pptx", "spreadsheet", "다이어그램", "문서", "슬라이드", "보고서"]
+    },
+    {
+      "name": "Design",
+      "members": ["designer", "design-consultation", "design-review", "frontend-design"],
+      "description_keywords": ["ui/ux", "visual", "design system", "brand"],
+      "prompt_keywords": ["ui", "ux", "layout", "styling", "visual", "design system", "brand", "landing page", "디자인", "화면", "레이아웃", "브랜드"]
+    },
+    {
+      "name": "Testing",
+      "members": ["test-driven-development", "test-engineer", "qa", "qa-only", "verification-before-completion"],
+      "description_keywords": ["test", "tdd", "coverage", "qa"],
+      "prompt_keywords": ["test", "tdd", "coverage", "qa", "unit test", "e2e", "테스트", "커버리지"]
+    },
+    {
+      "name": "Debug",
+      "members": ["investigate", "debugger", "systematic-debugging", "tracer"],
+      "description_keywords": ["debug", "root cause", "root-cause"],
+      "prompt_keywords": ["bug", "error", "crash", "fails", "failing", "broken", "exception", "stack trace", "not working", "doesn't work", "regression", "debug", "버그", "에러", "오류", "안 돼", "안돼", "작동하지", "터져", "실패"]
+    },
+    {
+      "name": "Security",
+      "members": ["cso", "security-reviewer", "security-scan", "security-review"],
+      "description_keywords": ["security", "vulnerab", "owasp"],
+      "prompt_keywords": ["security", "vulnerab", "owasp", "secret", "cve", "injection", "xss", "auth bypass", "threat model", "보안", "취약점", "시크릿"]
+    },
+    {
+      "name": "Review",
+      "members": ["review", "code-reviewer", "requesting-code-review"],
+      "description_keywords": ["code review"],
+      "prompt_keywords": ["review", "code review", "look over", "pr review", "리뷰", "검토"]
+    },
+    {
+      "name": "Ship",
+      "members": ["ship", "land-and-deploy", "canary", "finishing-a-development-branch", "git-master"],
+      "description_keywords": ["deploy", "release"],
+      "prompt_keywords": ["ship", "deploy", "release", "open a pr", "create a pr", "merge", "배포", "릴리스", "출시"]
+    }
+  ]
+}
