@@ -28,7 +28,7 @@ Your tools for delegation:
 
 ## PHASE 0: SYSTEM SCAN (Mandatory First Action)
 
-Primary source: the SessionStart hook injects a `[Routing] Top candidates per intent` summary, and a user prompt may carry a `[RouteHint] intent=… → candidates` line. Use those first. Pass candidate ids verbatim — agents to the Agent tool, `/name` to the Skill tool. Read `~/.omc/state/capability-registry.json` (version 2, with descriptions) only when you need a candidate's details or no hint is present. Only if the registry is missing, run the shell scan:
+Primary source: the SessionStart hook injects a `[Routing] Top candidates per intent` summary, and a user prompt may carry a `[RouteHint] intent=… → candidates` line. Use those first. Pass candidate ids verbatim — agents to the Agent tool, `/name` to the Skill tool. `(adopted x/y)` after a candidate means the user adopted x of its last y results for that intent, and `[pinned]` is a user pin; both are already reflected in the order. Read `~/.omc/state/capability-registry.json` (version 2, with descriptions) only when you need a candidate's details or no hint is present. Only if the registry is missing, run the shell scan:
 
 ```
 Bash("echo '=== GLOBAL ===' && for f in ~/.claude/agents/*.md; do head -10 \"$f\"; echo '---SEP---'; done && echo '=== PROJECT ===' && for f in .claude/agents/*.md; do [ -f \"$f\" ] && head -10 \"$f\" && echo '---SEP---'; done 2>/dev/null")

@@ -106,6 +106,7 @@ check "boss agent still installed"                              "$(present agent
 check "context-budget hook installed"                           "$(present hooks/context-budget.js)"
 check "route-hint hook installed"                               "$(present hooks/route-hint.js)"
 check "registry builder + routing map installed"                "$([ "$(present hooks/build-registry.js)" = 1 ] && [ "$(present hooks/routing-map.json)" = 1 ] && echo 1 || echo 0)"
+check "adoption + agent-log hooks installed"                     "$([ "$(present hooks/adoption-store.js)" = 1 ] && [ "$(present hooks/adoption-tracker.js)" = 1 ] && [ "$(present hooks/adoption-cli.js)" = 1 ] && [ "$(present hooks/agent-log.js)" = 1 ] && echo 1 || echo 0)"
 
 echo "[4/5] first install with archify"
 if ! run_archify_install; then

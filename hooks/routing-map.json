@@ -47,7 +47,7 @@
         "ccg"
       ],
       "description_keywords": ["architecture", "system design", "design decision", "tradeoff", "trade-off", "hexagonal"],
-      "prompt_keywords": ["architecture", "should we", "move from", "switch from", "switch to", "trade-off", "tradeoff", "monolith", "microservice", "long-term", "which approach", "design decision", "아키텍처", "구조", "게 맞을까", "옮기", "전환", "도입할까", "어떤 방식"]
+      "prompt_keywords": ["architecture", "should we", "move from", "switch from", "switch to", "trade-off", "tradeoff", "monolith", "microservice", "long-term", "which approach", "design decision", "아키텍처", "구조", "게 맞을까", "옮기", "옮길", "전환", "도입할까", "어떤 방식"]
     },
     {
       "name": "Ambiguity",
