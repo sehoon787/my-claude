@@ -4,8 +4,10 @@
     "members: preferred agents/skills, highest first. A bare name also matches a plugin item of that name (security-reviewer -> oh-my-claudecode:security-reviewer). Members that are not installed are skipped.",
     "advisor: true marks Advisor Group members; route hints tag them [advisor].",
     "description_keywords: an installed agent/skill whose name or description contains one of these becomes a candidate after the members.",
-    "prompt_keywords: case-insensitive; a user prompt scores one point per matched keyword and the top-scoring intent (score >= 1) gets a route hint. Latin keywords match at a word start; Korean keywords match anywhere."
+    "prompt_keywords: case-insensitive; a user prompt scores one point per matched keyword and the top-scoring intent (score >= 1) gets a route hint. Latin keywords match at a word start; Korean keywords match anywhere.",
+    "adoption_ignore: process skills whose use says nothing about advice quality; the adoption tracker never records them as offers. An entry also matches a plugin-qualified id with that short name (cancel -> oh-my-claudecode:cancel)."
   ],
+  "adoption_ignore": ["using-superpowers", "boss-briefing", "briefing-vault", "cancel", "oh-my-claudecode:cancel", "artifact-design", "artifact-capabilities", "artifact-diagramming", "workflow-authoring"],
   "intents": [
     {
       "name": "Trivial",
