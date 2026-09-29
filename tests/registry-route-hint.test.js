@@ -10,7 +10,7 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 const BUILD = path.join(REPO_ROOT, 'hooks', 'build-registry.js');
 const ROUTE_HINT = path.join(REPO_ROOT, 'hooks', 'route-hint.js');
 const reg = require(BUILD);
-const { routeHint } = require(ROUTE_HINT);
+const { classify, routeHint } = require(ROUTE_HINT);
 
 const results = [];
 function check(name, ok, detail) {
@@ -161,6 +161,28 @@ for (const [prompt, intent, first] of cases) {
   checkDoc(JSON.stringify(prompt), h);
   check(`${JSON.stringify(prompt)} -> ${intent}, ${first} first`, h.text.startsWith(`[RouteHint] intent=${intent} → ${first}`), h.text);
   check(`${JSON.stringify(prompt)} -> advisor sentence present`, h.text.includes('Advisor Gate: call the [advisor] candidate'));
+}
+
+// Classification against the shipped routing map: words that only look like
+// another intent ("merge", "ship", "옮기기") must not steal the prompt.
+const MAP_INTENTS = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'hooks', 'routing-map.json'), 'utf8')).intents;
+for (const [prompt, intent] of [
+  ["Should my-claude merge its hooks into settings.json or ship them only via the plugin hooks.json? Judge from this repo's code; do not edit files.", 'Architecture'],
+  ['my-claude의 훅들을 settings.json에 병합하는 지금 방식 대신 플러그인 hooks.json 방식 하나로 통일하는 게 맞을까? 이 레포 코드를 근거로 트레이드오프를 판단해줘. 파일은 수정하지 마.', 'Architecture'],
+  ['Which is better for us, SQS or Kafka?', 'Architecture'],
+  ['이 계획 이대로 실행해도 돼? 1) hooks/hooks.json 삭제 2) 모든 훅을 install.sh 안에 인라인으로 옮기기 3) 재설치. 파일은 수정하지 마.', 'PlanReview'],
+  ['이대로 실행해도 돼? 1) DB를 새 호스트로 옮기기 2) 옛 DB 삭제', 'PlanReview'],
+  ['Plan: 1) delete hooks/hooks.json 2) move all hooks into install.sh inline 3) reinstall. Is it safe to execute? Do not edit files.', 'PlanReview'],
+  ['1) dump DB 2) drop tables 3) restore on new host. Is it executable?', 'PlanReview'],
+  ['내부 서비스를 gRPC로 옮기는 게 맞을까?', 'Architecture'],
+  ['Ship it', 'Ship'],
+  ['Merge the PR and cut a release', 'Ship'],
+  ['merge this branch into main', 'Ship'],
+  ['deploy to production', 'Ship'],
+  ['프로덕션에 배포해줘', 'Ship'],
+]) {
+  const got = (classify(prompt, MAP_INTENTS) || {}).name;
+  check(`routing-map: ${JSON.stringify(prompt.slice(0, 60))} -> ${intent}`, got === intent, got);
 }
 
 {

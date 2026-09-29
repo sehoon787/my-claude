@@ -49,7 +49,7 @@
         "ccg"
       ],
       "description_keywords": ["architecture", "system design", "design decision", "tradeoff", "trade-off", "hexagonal"],
-      "prompt_keywords": ["architecture", "should we", "move from", "switch from", "switch to", "trade-off", "tradeoff", "monolith", "microservice", "long-term", "which approach", "design decision", "아키텍처", "구조", "게 맞을까", "옮기", "옮길", "전환", "도입할까", "어떤 방식"]
+      "prompt_keywords": ["architecture", "should we", "move from", "switch from", "switch to", "trade-off", "tradeoff", "monolith", "microservice", "long-term", "which approach", "which is better", "should my", "should i", "design decision", "아키텍처", "구조", "게 맞을까", "트레이드오프", "옮기", "옮길", "전환", "도입할까", "어떤 방식"]
     },
     {
       "name": "Ambiguity",
@@ -72,7 +72,7 @@
         "plan-ceo-review"
       ],
       "description_keywords": ["plan review", "critique", "executab"],
-      "prompt_keywords": ["plan", "migration plan", "rollout plan", "roadmap", "review the plan", "before we execute", "before we start", "계획", "플랜", "마이그레이션 계획", "로드맵"]
+      "prompt_keywords": ["plan", "migration plan", "rollout plan", "roadmap", "review the plan", "before we execute", "before we start", "safe to execute", "safe to run", "is it executable", "계획", "플랜", "마이그레이션 계획", "로드맵", "이대로 실행", "실행해도 돼"]
     },
     {
       "name": "Research",
@@ -120,7 +120,7 @@
       "name": "Ship",
       "members": ["ship", "land-and-deploy", "canary", "finishing-a-development-branch", "git-master"],
       "description_keywords": ["deploy", "release"],
-      "prompt_keywords": ["ship", "deploy", "release", "open a pr", "create a pr", "merge", "배포", "릴리스", "출시"]
+      "prompt_keywords": ["ship it", "ship this", "deploy", "release", "open a pr", "create a pr", "merge it", "merge this", "merge the pr", "merge the branch", "배포", "릴리스", "출시"]
     }
   ]
 }
