@@ -67,8 +67,8 @@ model: claude-sonnet-5
 
 | Model | Use For |
 |-------|---------|
-| `claude-fable-5-1` | Top-level orchestration (Boss) — highest-capability meta-routing |
-| `claude-opus-5-5` | Deep reasoning, architecture, complex analysis |
+| `claude-fable-5-1` | Read-only advisor group (Oracle, Metis, Momus) — highest-capability second opinions |
+| `claude-opus-5-5` | Top-level orchestration (Boss), deep reasoning, architecture, complex analysis |
 | `claude-sonnet-5` | Standard development work, orchestration |
 | `claude-haiku-4-5` | Fast lookups, lightweight agents, frequent invocation |
 

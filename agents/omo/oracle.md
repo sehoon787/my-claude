@@ -1,7 +1,7 @@
 ---
 name: oracle
-description: Use when an architecture decision or a stuck bug needs a deep read-only second opinion; returns a reasoned recommendation with tradeoffs, risks, and the next concrete step. Changes nothing. (Opus)
-model: claude-opus-5-5
+description: Use when an architecture decision or a stuck bug needs a deep read-only second opinion; returns a reasoned recommendation with tradeoffs, risks, and the next concrete step. Changes nothing. (Fable)
+model: claude-fable-5-1
 effort: xhigh
 disallowedTools: Write, Edit, NotebookEdit
 ---
