@@ -104,6 +104,8 @@ check "self-owned skill still installed (boss-advanced)"        "$(present skill
 check "self-owned rule still installed (calibrated-response)"   "$(present rules/common/calibrated-response.md)"
 check "boss agent still installed"                              "$(present agents/boss.md)"
 check "context-budget hook installed"                           "$(present hooks/context-budget.js)"
+check "route-hint hook installed"                               "$(present hooks/route-hint.js)"
+check "registry builder + routing map installed"                "$([ "$(present hooks/build-registry.js)" = 1 ] && [ "$(present hooks/routing-map.json)" = 1 ] && echo 1 || echo 0)"
 
 echo "[4/5] first install with archify"
 if ! run_archify_install; then

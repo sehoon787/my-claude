@@ -179,6 +179,20 @@ Deterministic multi-agent workflows. `install.sh` copies them to `~/.claude/work
 | **code-review-fanout** | Four dimension reviewers (correctness, security, performance, tests) fan out in parallel, then every finding is adversarially verified before it is reported | `Workflow({name: "code-review-fanout"})` — args: the review target (branch, commit range, paths). Defaults to the working-tree diff |
 | **upstream-audit** | One analyst per upstream — pin delta vs origin, allowlist fit, new overlaps, security signals, health — followed by a synthesized action list | `Workflow({name: "upstream-audit"})` — for quarterly or pre-sync audits |
 
+### How Boss discovers agents and skills
+
+Boss does not have to remember to read anything: routing information is pushed into its context by two hooks.
+
+| Piece | What it does |
+|-------|--------------|
+| **Registry v2** (`hooks/build-registry.js`) | At session start, scans every agent and skill Claude Code can load — `~/.claude/agents/**`, `~/.claude/skills/*`, the project's `.claude/agents/**` and `.claude/skills/*`, and the agents/skills of every **enabled** plugin (addressed as `<plugin>:<name>`, e.g. `oh-my-claudecode:architect`). Writes names, descriptions, models, and scopes (`project` / `global` / `plugin:<name>`) to `~/.omc/state/capability-registry.json`. It rebuilds only when a source file or directory changed, the project changed, or the file predates version 2 |
+| **Routing summary** (SessionStart) | Injects one line per intent with the top 3 candidates, e.g. `Architecture → oracle[advisor], oh-my-claudecode:architect, /architecture-decision-records`. Bare names are agents (Agent tool `subagent_type`), `/name` is a skill, `[advisor]` marks the Advisor Group. Capped at ~1,500 tokens |
+| **Route hint** (`hooks/route-hint.js`, UserPromptSubmit) | Classifies each prompt by keyword (English and Korean) and adds `[RouteHint] intent=<X> → <top 3>`. Silent when nothing matches, for slash commands, and for teammate / task-notification messages. It only reads the cached registry, so it adds no scan time to a prompt |
+
+**Adding your own agents or skills:** drop them in `~/.claude/agents/`, `~/.claude/skills/<name>/SKILL.md`, or the project's `.claude/` equivalents, or enable a plugin that ships them. The next session picks them up automatically. Items not named in the routing map still become candidates when their `name` or `description` contains one of an intent's `description_keywords`, so a clear description is what gets them routed.
+
+**Adjusting routing:** edit `hooks/routing-map.json` (installed to `~/.claude/hooks/`). Each intent has `members` (preferred agents/skills in order; a bare name also matches a plugin item of that name, and missing ones are skipped), `advisor: true` on Advisor Group members, `description_keywords` (classify registry items), and `prompt_keywords` (classify prompts; the highest keyword count wins and ties go to the intent listed first). Set `REGISTRY_OUT` to write or read the registry somewhere else, e.g. for a dry run.
+
 ---
 
 ## What's Inside
