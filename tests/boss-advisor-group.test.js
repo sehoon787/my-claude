@@ -28,5 +28,8 @@ for (const advisor of ['oracle', 'metis', 'momus']) {
 }
 check('Advisor Group states the 429 fallback', /429/.test(section) && /retry that same advisor ONCE with `model: "opus"`/.test(section));
 
+const phase0 = (boss.split(/^## PHASE 0:.*$/m)[1] || '').split(/^## /m)[0];
+check('Phase 0 uses [Routing] and [RouteHint] as the primary source', phase0.includes('[Routing]') && phase0.includes('[RouteHint]'));
+
 console.log(failed ? `${failed} FAILED` : 'ALL PASSED');
 process.exit(failed ? 1 : 0);

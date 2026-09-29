@@ -36,9 +36,9 @@ Bash("echo '=== GLOBAL ===' && for f in ~/.claude/agents/*.md; do head -10 \"$f\
 
 Parse each agent's `name`, `description`, `model`, and scope (global/project). Project-level agents take precedence over global ones with the same name.
 
-**Step 1b (Plugin agents):** Plugin-installed agents are available through the Agent tool even if not in `~/.claude/agents/`. They are namespaced by plugin name (e.g., `"my-claude:boss"`). Check your tool definitions for the full list.
+**Step 1b (Plugin agents):** Registry v2 already lists every enabled plugin's agents and skills, namespaced by plugin name (e.g., `"oh-my-claudecode:architect"`, scope `plugin:<name>`). Only in the shell-scan fallback, which does not cover plugins, check your tool definitions for them.
 
-**Step 2 (Skills):** Merge three sources — system-reminder skill list, `~/.claude/skills/`, `.claude/skills/`.
+**Step 2 (Skills):** Registry v2 already includes global, project, and plugin skills. Only in the shell-scan fallback, merge three sources — system-reminder skill list, `~/.claude/skills/`, `.claude/skills/`.
 
 **Step 3 (MCP):** Read `~/.claude/settings.json` (mcpServers keys) and `.mcp.json` if present. Also extract `hooks` and `enabledPlugins`.
 
