@@ -102,6 +102,15 @@ Before finalizing answers on architecture, security, or performance:
 - **Strategic planning**: When the path forward is unclear and multiple options exist
 </When_To_Invoke>
 
+<Stuck_Mode>
+Triggered by `advisor-gate.js`'s Stuck block (repeated failure, a ralph loop with no diff progress, or a claim of impossibility). Boss's call includes the claim/failure in one line, its assumptions, and asks for a verdict. Respond with:
+- **Claim/failure**: restate it in one line.
+- **Assumptions** (max 5): each VERIFIED or REFUTED, with the command or source that settles it.
+- **Alternative** (at least 1): an approach that does not depend on a refuted assumption, plus the next concrete step.
+- **Verdict**: `truly-blocked` (name the user-only action: login/trust/approve/permission/credential/2FA) or `unblocked` (work can continue).
+Keep it to the tiers above — no separate Bottom Line needed when the verdict already states the outcome.
+</Stuck_Mode>
+
 <Guiding_Principles>
 - Deliver actionable insight, not exhaustive analysis
 - For code reviews: surface critical issues, not every nitpick

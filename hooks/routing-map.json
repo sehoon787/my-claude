@@ -75,6 +75,18 @@
       "prompt_keywords": ["plan", "migration plan", "rollout plan", "roadmap", "review the plan", "before we execute", "before we start", "safe to execute", "safe to run", "is it executable", "계획", "플랜", "마이그레이션 계획", "로드맵", "이대로 실행", "실행해도 돼"]
     },
     {
+      "name": "Stuck",
+      "_comment": "Not prompt-classified (no keywords): advisor-gate.js's Stuck trigger reads this intent's members directly to decide which Agent subagent_type calls satisfy the gate. Any one member call satisfies it.",
+      "members": [
+        { "name": "tracer", "advisor": true },
+        { "name": "oracle", "advisor": true },
+        { "name": "metis", "advisor": true },
+        { "name": "architect", "advisor": true }
+      ],
+      "description_keywords": [],
+      "prompt_keywords": []
+    },
+    {
       "name": "Research",
       "members": ["deep-research", "exa-search", "document-specialist", "librarian", "documentation-lookup"],
       "description_keywords": ["research", "web search", "documentation lookup"],
