@@ -11,9 +11,9 @@
 // document, and that any hookSpecificOutput carries a hookEventName matching
 // the firing event. `node tests/hook-output-shape.test.js`
 //
-// hooks/session-start.sh is intentionally NOT executed here: it does network
-// installs (git clone, npm i -g) that are unsafe and irrelevant to hook JSON
-// shape. It never writes hookSpecificOutput.
+// hooks/session-start.sh does network installs (git clone, npm i -g) when a
+// companion tool is missing, so it runs here only with every such tool
+// stubbed on PATH and the anthropic-skills marker present in the fake $HOME.
 'use strict';
 const fs = require('fs'), os = require('os'), path = require('path'), cp = require('child_process');
 
@@ -132,6 +132,31 @@ function assertShape(label, event, result) {
   const cmd = findCommand('SessionStart', 'context-budget.js" reset');
   const r = runResolvedFile(cmd, { cwd: dir });
   assertShape('SessionStart context-budget.js reset', 'SessionStart', r);
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
+{
+  // Stub every companion tool session-start.sh would otherwise install, and
+  // make npm/git fail loudly instead of reaching the network.
+  const dir = tmpProject();
+  const stubBin = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-shape-bin-'));
+  for (const tool of ['omc', 'oh-my-opencode', 'ast-grep']) {
+    fs.writeFileSync(path.join(stubBin, tool), '#!/bin/sh\nexit 0\n', { mode: 0o755 });
+  }
+  fs.writeFileSync(path.join(stubBin, 'npm'), '#!/bin/sh\nexit 1\n', { mode: 0o755 });
+  fs.mkdirSync(path.join(FAKE_HOME, '.claude', 'skills', 'pdf'), { recursive: true });
+  fs.mkdirSync(path.join(FAKE_HOME, '.claude', 'agents'), { recursive: true });
+  fs.writeFileSync(path.join(FAKE_HOME, '.claude', 'agents', 'oracle.md'), '---\nname: oracle\ndescription: advisor\n---\n');
+  const cmd = findCommand('SessionStart', 'session-start.sh');
+  const r = runResolvedFile(cmd, { cwd: dir, env: { PATH: `${stubBin}${path.delimiter}${process.env.PATH}` } });
+  assertShape('SessionStart session-start.sh (tools stubbed)', 'SessionStart', r);
+  let ctx = '';
+  try { ctx = JSON.parse(r.stdout).hookSpecificOutput.additionalContext; } catch { /* shape check reports it */ }
+  results.push(check('SessionStart session-start.sh -> routing summary injected',
+    ctx.includes('Architecture → oracle[advisor]') && ctx.includes('capability-registry.json'), ctx.slice(0, 200)));
+  results.push(check('SessionStart session-start.sh -> registry written under fake HOME only',
+    fs.existsSync(path.join(FAKE_HOME, '.omc', 'state', 'capability-registry.json'))));
+  fs.rmSync(stubBin, { recursive: true, force: true });
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
@@ -312,6 +337,18 @@ function assertShape(label, event, result) {
   const cmd = findCommand('UserPromptSubmit', 'context-budget.js');
   const r = runResolvedFile(cmd, { cwd: dir, input: '{}', env: { MY_CLAUDE_COMPACT_EVERY: '1' } });
   assertShape('UserPromptSubmit context-budget.js (threshold)', 'UserPromptSubmit', r);
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
+{
+  // Uses the registry the session-start.sh case above wrote into FAKE_HOME.
+  const dir = tmpProject();
+  const cmd = findCommand('UserPromptSubmit', 'route-hint.js');
+  const r = runResolvedFile(cmd, { cwd: dir, input: JSON.stringify({ prompt: 'Should we move from REST to gRPC?', cwd: dir }) });
+  assertShape('UserPromptSubmit route-hint.js (intent match)', 'UserPromptSubmit', r);
+  results.push(check('UserPromptSubmit route-hint.js -> hint emitted', (r.stdout || '').includes('[RouteHint] intent=Architecture')));
+  const quiet = runResolvedFile(cmd, { cwd: dir, input: JSON.stringify({ prompt: '/help', cwd: dir }) });
+  assertShape('UserPromptSubmit route-hint.js (slash command)', 'UserPromptSubmit', quiet);
   fs.rmSync(dir, { recursive: true, force: true });
 }
 

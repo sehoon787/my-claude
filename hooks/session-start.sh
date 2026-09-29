@@ -36,86 +36,10 @@ if ! command -v ast-grep >/dev/null 2>&1; then
   npm i -g @ast-grep/cli 2>/dev/null && INSTALLED+=("ast-grep") || MISSING+=("ast-grep")
 fi
 
-# 5. Capability Registry Cache
-REGISTRY_DIR="$HOME/.omc/state"
-REGISTRY_FILE="$REGISTRY_DIR/capability-registry.json"
-REGISTRY_STATUS="up-to-date"
-mkdir -p "$REGISTRY_DIR"
-_needs_regen=0
-if [ ! -f "$REGISTRY_FILE" ]; then
-  _needs_regen=1
-else
-  if find "$HOME/.claude/agents" "$HOME/.claude/skills" -name "*.md" -newer "$REGISTRY_FILE" 2>/dev/null | grep -q .; then
-    _needs_regen=1
-  elif [ -d ".claude/agents" ] && find ".claude/agents" ".claude/skills" -name "*.md" -newer "$REGISTRY_FILE" 2>/dev/null | grep -q .; then
-    _needs_regen=1
-  elif grep -q '"agents":\[\]' "$REGISTRY_FILE" 2>/dev/null \
-    && find "$HOME/.claude/agents" -name "*.md" 2>/dev/null | grep -q .; then
-    # Cached "no agents at all" while agent files exist on disk. That pairing is
-    # never true in a settled install — it is left behind by a scan that ran
-    # while ~/.claude/agents was momentarily empty (install.sh deletes every
-    # manifest-owned agent at the start of step 1 and re-copies it seconds
-    # later). Boss PHASE 0 trusts a present registry and skips its own scan, so
-    # a poisoned cache costs it every agent until some agent file is touched
-    # again. Rescan instead of trusting it.
-    _needs_regen=1
-  fi
-fi
-if [ "$_needs_regen" -eq 1 ]; then
-  _ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-  # Agent packs were removed with the agency-agents submodule (2026-07-27);
-  # keep the registry field for schema compatibility, always empty.
-  _recommended_packs="[]"
-
-  _agents_json="["
-  _first_agent=1
-  for _f in "$HOME/.claude/agents/"*.md .claude/agents/*.md; do
-    [ -f "$_f" ] || continue
-    case "$_f" in "$HOME/.claude/agents/"*) _scope="global" ;; *) _scope="project" ;; esac
-    _name=$(sed -n '/^---/,/^---/p' "$_f" 2>/dev/null | grep '^name:' | head -1 | sed 's/^name:[[:space:]]*//' | tr -d '"'"'"'')
-    _desc=$(sed -n '/^---/,/^---/p' "$_f" 2>/dev/null | grep '^description:' | head -1 | sed 's/^description:[[:space:]]*//' | tr -d '"'"'"'')
-    _model=$(sed -n '/^---/,/^---/p' "$_f" 2>/dev/null | grep '^model:' | head -1 | sed 's/^model:[[:space:]]*//' | tr -d '"'"'"'')
-    [ -z "$_name" ] && _name=$(basename "$_f" .md)
-    [ -z "$_model" ] && _model=""
-    if [ "$_first_agent" -eq 1 ]; then _first_agent=0; else _agents_json="${_agents_json},"; fi
-    _agents_json="${_agents_json}{\"name\":\"${_name}\",\"description\":\"${_desc}\",\"model\":\"${_model}\",\"scope\":\"${_scope}\"}"
-  done
-  _agents_json="${_agents_json}]"
-  _skills_json="["
-  _first_skill=1
-  for _f in "$HOME/.claude/skills/"*/SKILL.md .claude/skills/*/SKILL.md; do
-    [ -f "$_f" ] || continue
-    _sname=$(basename "$(dirname "$_f")")
-    if [ "$_first_skill" -eq 1 ]; then _first_skill=0; else _skills_json="${_skills_json},"; fi
-    _skills_json="${_skills_json}\"${_sname}\""
-  done
-  _skills_json="${_skills_json}]"
-  _mcp_json="["
-  _first_mcp=1
-  for _sf in "$HOME/.claude/settings.json" ".mcp.json"; do
-    [ -f "$_sf" ] || continue
-    while IFS= read -r _key; do
-      [ -z "$_key" ] && continue
-      if [ "$_first_mcp" -eq 1 ]; then _first_mcp=0; else _mcp_json="${_mcp_json},"; fi
-      _mcp_json="${_mcp_json}\"${_key}\""
-    done <<EOF
-$(grep -o '"[^"]*"[[:space:]]*:' "$_sf" 2>/dev/null | sed -n '/mcpServers/,/}/p' | grep -v 'mcpServers' | sed 's/[[:space:]]*"//;s/"[[:space:]]*://' | grep -v '^$' | grep -v '^{' | grep -v '^}' | head -50)
-EOF
-  done
-  _mcp_json="${_mcp_json}]"
-  # Never persist an empty agent list on top of an existing cache: a scan that
-  # lands inside install.sh's delete-then-copy window sees zero agents, and the
-  # result would be trusted by Boss until an agent file changed again. Keeping
-  # the previous registry is always the better of the two wrong answers.
-  if [ "$_first_agent" -eq 1 ] && [ -f "$REGISTRY_FILE" ]; then
-    REGISTRY_STATUS="kept (no agents visible during scan)"
-  else
-    printf '{"generated_at":"%s","agents":%s,"skills":%s,"mcp_servers":%s,"recommended_packs":%s}\n' \
-      "$_ts" "$_agents_json" "$_skills_json" "$_mcp_json" "$_recommended_packs" > "$REGISTRY_FILE" 2>/dev/null \
-      && REGISTRY_STATUS="regenerated" || REGISTRY_STATUS="failed"
-  fi
-fi
+# 5. Capability Registry (v2) + routing summary
+# build-registry.js rebuilds ~/.omc/state/capability-registry.json only when a
+# source changed, and prints the top candidates per intent for Boss.
+_routing_summary=$(node "$(dirname "$0")/build-registry.js" --summary 2>/dev/null)
 
 # 5b. .knowledge → .briefing migration (one-time, backward compat)
 if [ -d ".knowledge" ]; then
@@ -316,6 +240,7 @@ if [ "$_vc_today" != "$_vc_last" ]; then
           for _hf in "$_repo_dir/hooks/"*.sh; do
             [ -f "$_hf" ] && cp "$_hf" "$HOME/.claude/hooks/" 2>/dev/null || true
           done
+          cp "$_repo_dir/hooks/routing-map.json" "$HOME/.claude/hooks/" 2>/dev/null || true
         fi
 
         # Refresh user-level core agents (mirrors install.sh) so model/prompt
@@ -384,9 +309,11 @@ if [ ${#MISSING[@]} -gt 0 ]; then
   MSG="${MSG}[SessionStart] Missing (run install.sh): ${MISSING[*]}."
 fi
 
-MSG="${MSG}[SessionStart] Registry cache: ${REGISTRY_STATUS}."
 [ -n "$_kv_msg" ] && MSG="${MSG} ${_kv_msg}"
 [ -n "$_update_msg" ] && MSG="${MSG} ${_update_msg}"
+[ -n "$_routing_summary" ] && MSG="${MSG}
+${_routing_summary}"
 if [ -n "$MSG" ]; then
-  echo "{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"$MSG\"}}"
+  # The routing summary is multi-line, so let node do the JSON escaping.
+  SESSION_START_MSG="$MSG" node -e 'process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:"SessionStart",additionalContext:process.env.SESSION_START_MSG.trim()}})+"\n")'
 fi

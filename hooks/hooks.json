@@ -161,6 +161,12 @@
           },
           {
             "type": "command",
+            "command": "node \"$HOME/.claude/hooks/route-hint.js\"",
+            "timeout": 5000,
+            "description": "RouteHint: classify the prompt by routing-map.json intent keywords and inject the top 3 registry candidates (silent when no intent matches)"
+          },
+          {
+            "type": "command",
             "command": "node \"$HOME/.claude/hooks/context-budget.js\"",
             "timeout": 5000,
             "description": "ContextBudget: every MY_CLAUDE_COMPACT_EVERY prompts (default 40) since the last compaction, suggest /compact with a focus phrase at the next task boundary"
