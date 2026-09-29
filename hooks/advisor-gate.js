@@ -116,33 +116,40 @@ function evaluateAdvisorGate(input, home, turn) {
 // ---------------------------------------------------------------- Stuck trigger
 //
 // A second, independent reason to block: the turn looks stuck, and Boss
-// should get oracle to reframe it and fact-check its assumptions rather than
-// keep pushing the same approach. Three signals, any one of which fires:
-//   (a) repeated failure   — last-tool-error-state.json retry_count >= 3
-//                             inside this turn, or >=5 failed tool_results
-//                             in the transcript when that file is absent.
-//   (b) loop without progress (ralph only) — ralph-state.json iteration >= 5
-//                             AND the working-tree diff hash is unchanged
-//                             across the last 3 Stops.
+// should get a second opinion (per routing-map.json's "Stuck" intent —
+// tracer, oracle, metis, architect) rather than keep pushing the same
+// approach. Three signals, any one of which fires:
+//   (a) repeated failure    — last-tool-error-state.json retry_count >= 3
+//                              inside this turn, or >=5 failed tool_results
+//                              in the transcript when that file is absent.
+//   (b) no-progress loop    — a per-session rolling window (last 5 Stops,
+//                              human or machine, ralph or not) where the
+//                              last 3 all did tool work, share the same
+//                              working-tree diff hash, and either repeat the
+//                              same failing tool+input signature or produce
+//                              near-identical final messages. Never fires on
+//                              a ralph iteration count alone — ralph's own
+//                              iteration is optional extra context only.
 //   (c) impossibility claim — the final assistant message matches an
-//                             EN/KO "this can't be done" pattern, outside
-//                             code fences and not a question to the user.
+//                              EN/KO "this can't be done" pattern, outside
+//                              code fences and not a question to the user.
 //
 // Unlike the Architecture/Ambiguity/PlanReview gate above, this branch does
-// NOT return early on stop_hook_active (ralph's loop depends on exactly
-// that flag being set) and does not require a human-started turn (ralph
-// continuations count). It still never fires for a subagent or when an
-// advisor was already called this turn, and it fails open on any error.
+// NOT return early on stop_hook_active (a Stop-forced loop, ralph or not,
+// depends on exactly that flag being set) and does not require a
+// human-started turn (machine-started continuations count). It still never
+// fires when a Stuck Group member was already called this turn, and it
+// fails open on any error.
 const IMPOSSIBLE_CLAIM_RE = /(impossible|not possible|cannot be done|can't be done|blocked by|no way to|불가능|할 수 없|막혔|방법이 없)/i;
 const QUESTION_TO_USER_RE = /\byou\b|사용자|직접/i;
 const BLOCKED_ON_USER_LINE = /^[\s>*_-]*Blocked on user:\s*(.+)$/im;
 const USER_ONLY_ACTION_RE = /login|trust|approve|permission|credential|2FA|권한|승인|로그인|신뢰/i;
 const FAILURE_TS_SKEW_MS = 2000;
-const RALPH_LOOP_MIN_ITERATION = 5;
-const RALPH_LOOP_WINDOW = 3;
-const RALPH_BLOCK_COOLDOWN_ITERATIONS = 10;
 const STUCK_SESSION_CAP = 2;
 const TRANSCRIPT_ERROR_THRESHOLD = 5;
+const NO_PROGRESS_WINDOW = 3; // consecutive Stops that must agree to fire
+const NO_PROGRESS_HISTORY = 5; // Stops kept in the rolling window
+const ROUTING_MAP_PATH = process.env.ROUTING_MAP || path.join(__dirname, 'routing-map.json');
 
 function sha1(text) {
   return crypto.createHash('sha1').update(String(text)).digest('hex');
@@ -154,6 +161,80 @@ function stuckMarkerPath(home, session) {
 
 function omcSessionStatePath(cwd, session, filename) {
   return path.join(cwd, '.omc', 'state', 'sessions', String(session || ''), filename);
+}
+
+// The routing-map's "Stuck" intent is the single source of truth for which
+// agents satisfy this gate (data, not code — ROUTING_MAP env var overrides
+// the path, same convention build-registry.js uses).
+function stuckAdvisorNames() {
+  const map = store.readJson(ROUTING_MAP_PATH, null);
+  const intent = map && Array.isArray(map.intents) && map.intents.find((i) => i && i.name === 'Stuck');
+  const members = (intent && intent.members) || [];
+  return members.map((m) => (typeof m === 'string' ? m : m && m.name)).filter(Boolean);
+}
+
+// A bare or plugin-qualified subagent_type matches by its short (last ':')
+// segment, same convention as ADVISOR_TYPE above.
+function stuckAdvisorRegex(names) {
+  if (!names.length) return null;
+  const shorts = names.map((n) => String(n).split(':').pop().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  return new RegExp(`(^|:)(${shorts.join('|')})$`);
+}
+
+function turnHasStuckAdvisorCall(lines, fromIndex, re) {
+  if (!re) return false;
+  for (let i = fromIndex; i < lines.length; i++) {
+    if (!lines[i]) continue;
+    let r;
+    try { r = JSON.parse(lines[i]); } catch { continue; }
+    if (r.isSidechain || r.type !== 'assistant') continue;
+    const content = r.message && r.message.content;
+    if (!Array.isArray(content)) continue;
+    for (const x of content) {
+      const sub = x && x.type === 'tool_use' && (x.name === 'Agent' || x.name === 'Task') && x.input && x.input.subagent_type;
+      if (sub && re.test(String(sub))) return true;
+    }
+  }
+  return false;
+}
+
+function toolSignature(name, toolInput) {
+  return `${name}:${JSON.stringify(toolInput || {}).slice(0, 80)}`;
+}
+
+// {toolCalls, errorSig} for the current turn: how many tools ran, and the
+// most-frequent failing tool+input signature (via tool_use_id pairing), or
+// null when nothing failed / nothing paired.
+function computeTurnToolStats(lines, fromIndex) {
+  const sigById = new Map();
+  const failCounts = new Map();
+  let toolCalls = 0;
+  for (let i = fromIndex; i < lines.length; i++) {
+    if (!lines[i]) continue;
+    let r;
+    try { r = JSON.parse(lines[i]); } catch { continue; }
+    if (r.isSidechain) continue;
+    const content = r.message && r.message.content;
+    if (!Array.isArray(content)) continue;
+    if (r.type === 'assistant') {
+      for (const x of content) {
+        if (x && x.type === 'tool_use') {
+          toolCalls++;
+          if (x.id) sigById.set(x.id, toolSignature(x.name, x.input));
+        }
+      }
+    } else if (r.type === 'user') {
+      for (const item of content) {
+        if (item && item.type === 'tool_result' && item.is_error === true) {
+          const sig = item.tool_use_id && sigById.get(item.tool_use_id);
+          if (sig) failCounts.set(sig, (failCounts.get(sig) || 0) + 1);
+        }
+      }
+    }
+  }
+  let errorSig = null, best = 0;
+  for (const [sig, count] of failCounts) if (count > best) { best = count; errorSig = sig; }
+  return { toolCalls, errorSig };
 }
 
 function countTranscriptToolErrors(lines, fromIndex) {
@@ -186,43 +267,61 @@ function detectRepeatedFailure(cwd, session, turn, lines) {
   return null;
 }
 
-// {iteration} when ralph is active for this session, else null.
-function readRalphState(cwd, session) {
+// Ralph's iteration count, when available — optional extra context for the
+// block reason only; no signal requires it.
+function readRalphIteration(cwd, session) {
   const j = store.readJson(omcSessionStatePath(cwd, session, 'ralph-state.json'), null);
-  if (!j || j.active !== true || typeof j.iteration !== 'number') return null;
-  return { iteration: j.iteration };
+  return (j && j.active === true && typeof j.iteration === 'number') ? j.iteration : null;
 }
 
-// Working-tree diff hash: `git diff HEAD`, falling back to `git status
-// --porcelain` + `git diff` (e.g. no commit yet). Null when git is
-// unavailable — the caller must not treat that as "no change".
+// Working-tree diff hash: `git diff HEAD` plus the untracked-file list,
+// falling back to `git status --porcelain` + `git diff` when there is no
+// commit yet. Null when git is unavailable — never treated as "no change".
 function computeDiffHash(cwd) {
   const opts = { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] };
+  let diff;
   try {
-    return sha1(cp.execSync('git diff HEAD', opts));
+    diff = cp.execSync('git diff HEAD', opts);
   } catch {
-    try {
-      const status = cp.execSync('git status --porcelain', opts);
-      let diff = '';
-      try { diff = cp.execSync('git diff', opts); } catch { /* no diff to show */ }
-      return sha1(status + diff);
-    } catch {
-      return null;
-    }
+    try { diff = cp.execSync('git diff', opts); } catch { return null; }
   }
+  let untracked = '';
+  try {
+    untracked = cp.execSync('git status --porcelain', opts).split('\n').filter((l) => l.startsWith('??')).join('\n');
+  } catch { /* best effort */ }
+  return sha1(diff + '\n' + untracked);
 }
 
-// Rolls the diff hash into the marker's rolling history and reports whether
-// the loop-without-progress condition fires. `priorHistory` and the
-// returned `history` are the last RALPH_LOOP_WINDOW hashes seen.
-function updateLoopState(cwd, ralph, priorHistory) {
-  const history = Array.isArray(priorHistory) ? priorHistory.slice() : [];
-  if (!ralph) return { history, fires: false, hash: null };
-  const hash = computeDiffHash(cwd);
-  const nextHistory = hash ? history.concat([hash]).slice(-RALPH_LOOP_WINDOW) : history;
-  const unchanged = nextHistory.length >= RALPH_LOOP_WINDOW && nextHistory.every((h) => h === nextHistory[0]);
-  const fires = hash !== null && ralph.iteration >= RALPH_LOOP_MIN_ITERATION && unchanged;
-  return { history: nextHistory, fires, hash };
+function normalizeSnippet(text) {
+  return String(text || '').trim().replace(/\s+/g, ' ').slice(0, 200);
+}
+
+// Appends this Stop's {diffHash, errorSig, toolCalls, textSig} to the
+// rolling window (capped at NO_PROGRESS_HISTORY) and reports whether the
+// last NO_PROGRESS_WINDOW entries show no progress: all did tool work,
+// share one diff hash, and either repeat one failing signature or produce
+// near-identical final messages.
+function updateNoProgressWindow(cwd, lines, turn, lam, priorWindow) {
+  const stats = computeTurnToolStats(lines, turn.startIndex >= 0 ? turn.startIndex : 0);
+  const entry = {
+    diffHash: computeDiffHash(cwd),
+    errorSig: stats.errorSig,
+    toolCalls: stats.toolCalls,
+    textSig: normalizeSnippet(lam),
+  };
+  const window = (Array.isArray(priorWindow) ? priorWindow.slice() : []).concat([entry]).slice(-NO_PROGRESS_HISTORY);
+  if (window.length < NO_PROGRESS_WINDOW) return { window, fires: false };
+  const last3 = window.slice(-NO_PROGRESS_WINDOW);
+  const busy = last3.every((e) => e.toolCalls > 0);
+  const sameDiff = busy && last3.every((e) => e.diffHash && e.diffHash === last3[0].diffHash);
+  if (!sameDiff) return { window, fires: false };
+  const errCounts = new Map();
+  for (const e of last3) if (e.errorSig) errCounts.set(e.errorSig, (errCounts.get(e.errorSig) || 0) + 1);
+  let repeatedErrorSig = null;
+  for (const [sig, c] of errCounts) if (c >= 2) { repeatedErrorSig = sig; break; }
+  const sameText = last3.every((e) => e.textSig && e.textSig === last3[0].textSig);
+  if (!repeatedErrorSig && !sameText) return { window, fires: false };
+  return { window, fires: true, diffHash: last3[0].diffHash, errorSig: repeatedErrorSig };
 }
 
 function stripCodeFences(text) {
@@ -247,36 +346,46 @@ function isEscaped(lam) {
 
 const STUCK_SIGNAL_LABEL = {
   'repeated-failure': 'repeated tool failures',
-  'loop-without-progress': 'a ralph loop making no progress across several Stops',
+  'no-progress-loop': 'a loop making no progress across several Stops',
   'impossibility-claim': 'a claim that this cannot be done',
 };
 
-function stuckBlockReason(signal) {
-  return `[AdvisorGate:Stuck] This turn looks stuck (${STUCK_SIGNAL_LABEL[signal]}). ` +
-    'Call `oracle` now with the Agent tool (subagent_type "oracle") in Stuck mode, giving it: ' +
+// Names the member best suited to this signal; any Stuck Group member
+// (tracer, oracle, metis, architect) still satisfies the gate.
+const STUCK_RECOMMENDATION = {
+  'repeated-failure': 'Call `tracer` now with the Agent tool (subagent_type "tracer", model "opus") for a competing-hypotheses trace of why this keeps failing — evidence for and against each hypothesis, and the next probe.',
+  'no-progress-loop': 'Call `oracle` now with the Agent tool (subagent_type "oracle") to reframe the approach — or `metis` (subagent_type "metis") if the goal itself looks misread.',
+  'impossibility-claim': 'Call `oracle` now with the Agent tool (subagent_type "oracle") for an assumption audit.',
+};
+
+function stuckBlockReason(signal, context) {
+  return `[AdvisorGate:Stuck] This turn looks stuck (${STUCK_SIGNAL_LABEL[signal]}${context ? `; ${context}` : ''}). ` +
+    `${STUCK_RECOMMENDATION[signal]} ` +
+    'Any Stuck Group member (tracer, oracle, metis, architect — see routing-map.json\'s "Stuck" intent) satisfies this gate. Whichever you call, give it: ' +
     '(1) the claim or failure in one line; ' +
     '(2) at most 5 assumptions behind it, each marked VERIFIED or REFUTED with the command or source that settles it; ' +
     '(3) at least 1 alternative approach that does not rely on a refuted assumption, plus the next concrete step; ' +
     '(4) a verdict: truly-blocked (naming the user-only action) or unblocked. ' +
-    'Then repeat your full final answer with a short "Advisor (oracle)" section covering its verdict. ' +
-    'If oracle verdict is truly-blocked on a user-only action, end with one line: `Blocked on user: <action>` ' +
+    'Then repeat your full final answer with a short "Advisor (<name>)" section covering its verdict. ' +
+    'If the verdict is truly-blocked on a user-only action, end with one line: `Blocked on user: <action>` ' +
     '(only for login/trust/approve/permission/credential/2FA/권한/승인/로그인/신뢰). ' +
     'Otherwise, if consulting truly does not apply, end with: `Advisor skipped: <reason>`.';
 }
 
 // -> {decision: 'block', reason} or null. See the block comment above.
 function evaluateStuckInner(input, home, turn, lines) {
-  if (!turn.found || turn.advisorCalled) return null;
+  if (!turn.found) return null;
   const cwd = input.cwd || process.cwd();
   const session = input.session_id;
-  const markerFile = stuckMarkerPath(home, session);
-  const state = store.readJson(markerFile, { sessionBlocks: 0, episodes: {}, loopHistory: [], lastRalphBlockIteration: null });
+  if (turnHasStuckAdvisorCall(lines, turn.startIndex >= 0 ? turn.startIndex : 0, stuckAdvisorRegex(stuckAdvisorNames()))) return null;
 
-  const ralph = readRalphState(cwd, session);
-  const loop = updateLoopState(cwd, ralph, state.loopHistory);
-  const persisted = Object.assign({}, state, { loopHistory: loop.history });
+  const markerFile = stuckMarkerPath(home, session);
+  const state = store.readJson(markerFile, { sessionBlocks: 0, episodes: {}, window: [] });
 
   const lam = typeof input.last_assistant_message === 'string' ? input.last_assistant_message : turn.lastText;
+  const noProgress = updateNoProgressWindow(cwd, lines, turn, lam, state.window);
+  const persisted = Object.assign({}, state, { window: noProgress.window });
+
   const failure = detectRepeatedFailure(cwd, session, turn, lines);
   const claimText = failure ? null : detectImpossibilityClaim(lam);
 
@@ -285,9 +394,9 @@ function evaluateStuckInner(input, home, turn, lines) {
   if (failure) {
     signal = 'repeated-failure';
     episodeKey = failure.key;
-  } else if (loop.fires) {
-    signal = 'loop-without-progress';
-    episodeKey = 'loop:' + loop.hash;
+  } else if (noProgress.fires) {
+    signal = 'no-progress-loop';
+    episodeKey = `loop:${noProgress.diffHash}|${noProgress.errorSig || ''}`;
   } else if (claimText) {
     signal = 'impossibility-claim';
     episodeKey = 'claim:' + sha1(claimText);
@@ -305,19 +414,15 @@ function evaluateStuckInner(input, home, turn, lines) {
     store.writeJson(markerFile, persisted);
     return null;
   }
-  if (ralph && persisted.lastRalphBlockIteration != null &&
-      (ralph.iteration - persisted.lastRalphBlockIteration) < RALPH_BLOCK_COOLDOWN_ITERATIONS) {
-    store.writeJson(markerFile, persisted);
-    return null;
-  }
 
   const final = Object.assign({}, persisted, {
     sessionBlocks: (persisted.sessionBlocks || 0) + 1,
     episodes: Object.assign({}, persisted.episodes, { [episodeKey]: true }),
   });
-  if (ralph) final.lastRalphBlockIteration = ralph.iteration;
   store.writeJson(markerFile, final);
-  return { decision: 'block', reason: stuckBlockReason(signal) };
+  const ralphIteration = readRalphIteration(cwd, session);
+  const context = ralphIteration !== null ? `ralph iteration ${ralphIteration}` : '';
+  return { decision: 'block', reason: stuckBlockReason(signal, context) };
 }
 
 function evaluateStuck(input, home, turn, lines) {

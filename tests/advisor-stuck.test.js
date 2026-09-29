@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Unit tests for the Stuck trigger in hooks/advisor-gate.js — repeated
-// failure, ralph loop-without-progress, and impossibility claims.
-// `node tests/advisor-stuck.test.js`
+// failure, a generic no-progress loop (ralph or a plain human loop), and
+// impossibility claims. `node tests/advisor-stuck.test.js`
 'use strict';
 const fs = require('fs'), os = require('os'), path = require('path'), cp = require('child_process');
 const HOOK = path.resolve(__dirname, '..', 'hooks', 'advisor-gate.js');
@@ -11,7 +11,8 @@ const T1 = '2026-09-29T12:00:01.000Z'; // inside the same turn as T0
 
 const human = (t, extra) => Object.assign({ type: 'user', promptId: 'p1', timestamp: T0, message: { role: 'user', content: t } }, extra);
 const agentCall = (sub) => ({ type: 'assistant', message: { role: 'assistant', content: [{ type: 'tool_use', name: 'Agent', input: { subagent_type: sub, prompt: 'q' } }] } });
-const tool = (t) => ({ type: 'user', promptId: 'p1', message: { role: 'user', content: [{ type: 'tool_result', content: t }] } });
+const toolUse = (id, name, input) => ({ type: 'assistant', message: { role: 'assistant', content: [{ type: 'tool_use', id, name, input: input || {} }] } });
+const toolResult = (id, isError) => ({ type: 'user', promptId: 'p1', message: { role: 'user', content: [{ type: 'tool_result', tool_use_id: id, is_error: !!isError, content: 'r' }] } });
 const asst = (t) => ({ type: 'assistant', message: { role: 'assistant', content: [{ type: 'text', text: t }] } });
 
 function mkHome() {
@@ -36,7 +37,7 @@ function writeOmcState(cwd, session, filename, data) {
   fs.writeFileSync(path.join(dir, filename), JSON.stringify(data));
 }
 
-function runHook({ home, cwd, entries, lam, extra }) {
+function runHook({ home, cwd, entries, lam, extra, env }) {
   const tp = path.join(home, `t-${Math.random().toString(36).slice(2)}.jsonl`);
   fs.writeFileSync(tp, entries.map((e) => JSON.stringify(e)).join('\n') + '\n');
   const payload = Object.assign(
@@ -45,7 +46,7 @@ function runHook({ home, cwd, entries, lam, extra }) {
   );
   const out = cp.spawnSync('node', [HOOK], {
     cwd,
-    env: Object.assign({}, process.env, { HOME: home }),
+    env: Object.assign({}, process.env, { HOME: home }, env),
     input: JSON.stringify(payload),
     encoding: 'utf8',
   });
@@ -65,18 +66,18 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
     tool_name: 'Bash', tool_input_preview: '...', error: 'boom', timestamp: T1, retry_count: 3,
   });
   const r1 = runHook({ home, cwd, entries, lam: 'Still working on it.' });
-  check('3 repeated failures in a turn -> 1 block', r1.blocked && r1.status === 0 && /oracle/.test(r1.doc.reason));
+  check('3 repeated failures in a turn -> 1 block', r1.blocked && r1.status === 0 && /tracer/.test(r1.doc.reason));
   const r2 = runHook({ home, cwd, entries, lam: 'Still working on it.' });
   check('same failure episode again -> suppressed (1 block per episode)', !r2.blocked);
 }
 
-// --- (b) ralph loop without progress -------------------------------------
+// --- (b) no-progress loop, generic (ralph-style: same turn, repeated Stops)
 {
   const home = mkHome(), cwd = mkRepo();
-  const entries = [human('keep going'), asst('Continuing.')];
+  const entries = [human('keep going'), toolUse('t1', 'Bash', { command: 'run x' }), toolResult('t1', true), asst('Continuing.')];
   let blocks = 0;
   for (let i = 1; i <= 20; i++) {
-    writeOmcState(cwd, SESSION, 'ralph-state.json', { active: true, iteration: i });
+    writeOmcState(cwd, SESSION, 'ralph-state.json', { active: true, iteration: i }); // optional context only
     const r = runHook({ home, cwd, entries, lam: 'Continuing.', extra: { stop_hook_active: true } });
     if (r.blocked) blocks++;
   }
@@ -84,7 +85,7 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
 }
 {
   const home = mkHome(), cwd = mkRepo();
-  const entries = [human('keep going'), asst('Continuing.')];
+  const entries = [human('keep going'), toolUse('t1', 'Bash', { command: 'run x' }), toolResult('t1', true), asst('Continuing.')];
   let blocks = 0;
   for (let i = 1; i <= 20; i++) {
     writeOmcState(cwd, SESSION, 'ralph-state.json', { active: true, iteration: i });
@@ -93,6 +94,28 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
     if (r.blocked) blocks++;
   }
   check('20 simulated ralph Stops, diff changes every Stop -> 0 blocks', blocks === 0);
+}
+
+// --- (b) no-progress loop, generic: plain human loop, no ralph at all ----
+{
+  const home = mkHome(), cwd = mkRepo();
+  const texts = ['Trying again.', 'Still trying.', 'One more attempt.'];
+  const outcomes = [1, 2, 3].map((n) => {
+    const entries = [human(`retry ${n}`, { promptId: `p${n}` }), toolUse(`t${n}`, 'Bash', { command: 'run x' }), toolResult(`t${n}`, true), asst(texts[n - 1])];
+    return runHook({ home, cwd, entries, lam: texts[n - 1] }).blocked;
+  });
+  check('3-turn human loop, no ralph, same diff + same errorSig -> 1 block (3rd Stop)',
+    outcomes[0] === false && outcomes[1] === false && outcomes[2] === true);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const texts = ['Trying again.', 'Still trying.', 'One more attempt.'];
+  const outcomes = [1, 2, 3].map((n) => {
+    fs.appendFileSync(path.join(cwd, 'f.txt'), `change-${n}\n`);
+    const entries = [human(`retry ${n}`, { promptId: `p${n}` }), toolUse(`t${n}`, 'Bash', { command: 'run x' }), toolResult(`t${n}`, true), asst(texts[n - 1])];
+    return runHook({ home, cwd, entries, lam: texts[n - 1] }).blocked;
+  });
+  check('3-turn human loop, no ralph, changing diff -> 0 blocks', outcomes.every((b) => b === false));
 }
 
 // --- (c) impossibility claim ----------------------------------------------
@@ -129,9 +152,27 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
 {
   const home = mkHome(), cwd = mkRepo();
   const lam = 'This is impossible without more info.';
-  const entries = [human('q'), agentCall('oracle'), tool('advice'), asst(lam)];
+  const entries = [human('q'), agentCall('oracle'), toolResult('x', false), asst(lam)];
   const r = runHook({ home, cwd, entries, lam });
   check('oracle call made this turn -> no block', !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = 'There is no way to do this with the current permissions.';
+  const entries = [human('q'), agentCall('tracer'), toolResult('x', false), asst(lam)];
+  const r = runHook({ home, cwd, entries, lam });
+  check('calling tracer satisfies the gate -> no block', !r.blocked);
+}
+
+// --- routing-map is read as data, not hardcoded ---------------------------
+{
+  const home = mkHome(), cwd = mkRepo();
+  const fixtureMap = path.join(home, 'routing-map.fixture.json');
+  fs.writeFileSync(fixtureMap, JSON.stringify({ intents: [{ name: 'Stuck', members: ['custom-advisor'] }] }));
+  const lam = 'This cannot be done as specified.';
+  const entries = [human('q'), agentCall('custom-advisor'), toolResult('x', false), asst(lam)];
+  const r = runHook({ home, cwd, entries, lam, env: { ROUTING_MAP: fixtureMap } });
+  check('routing-map Stuck entry is read: a fixture member satisfies the gate', !r.blocked);
 }
 
 // --- session cap: at most 2 Stuck blocks per session ----------------------
