@@ -127,9 +127,15 @@ function evaluateAdvisorGate(input, home, turn) {
 //                              last 3 all did tool work, share the same
 //                              working-tree diff hash, and either repeat the
 //                              same failing tool+input signature or produce
-//                              near-identical final messages. Never fires on
-//                              a ralph iteration count alone — ralph's own
-//                              iteration is optional extra context only.
+//                              near-identical final messages. This part
+//                              never fires on a ralph iteration count alone.
+//                              Separately, with ralph active (iteration >=
+//                              5) it also fires on a frozen diff hash alone
+//                              across the last 3 Stops, no tool-work/error/
+//                              text agreement required (ralph's own loop
+//                              already guarantees tool activity); that path
+//                              carries its own 10-iteration cooldown on top
+//                              of the shared per-episode/per-session caps.
 //   (c) impossibility claim — the final assistant message matches an
 //                              EN/KO "this can't be done" pattern, outside
 //                              code fences and not a question to the user.
@@ -149,6 +155,8 @@ const STUCK_SESSION_CAP = 2;
 const TRANSCRIPT_ERROR_THRESHOLD = 5;
 const NO_PROGRESS_WINDOW = 3; // consecutive Stops that must agree to fire
 const NO_PROGRESS_HISTORY = 5; // Stops kept in the rolling window
+const RALPH_LOOP_MIN_ITERATION = 5;
+const RALPH_BLOCK_COOLDOWN_ITERATIONS = 10;
 const ROUTING_MAP_PATH = process.env.ROUTING_MAP || path.join(__dirname, 'routing-map.json');
 
 function sha1(text) {
@@ -324,6 +332,18 @@ function updateNoProgressWindow(cwd, lines, turn, lam, priorWindow) {
   return { window, fires: true, diffHash: last3[0].diffHash, errorSig: repeatedErrorSig };
 }
 
+// Ralph-specific addition to the no-progress check: with ralph active and
+// iteration >= 5, also fire purely off a frozen diff across the last 3
+// Stops (no toolCalls/errorSig/textSig requirement — ralph's own loop
+// already guarantees tool activity). Reuses the same rolling window.
+function detectRalphFrozenDiff(window, ralphIteration) {
+  if (ralphIteration === null || ralphIteration < RALPH_LOOP_MIN_ITERATION) return null;
+  if (!Array.isArray(window) || window.length < NO_PROGRESS_WINDOW) return null;
+  const last3 = window.slice(-NO_PROGRESS_WINDOW);
+  const sameDiff = last3.every((e) => e.diffHash && e.diffHash === last3[0].diffHash);
+  return sameDiff ? { diffHash: last3[0].diffHash } : null;
+}
+
 function stripCodeFences(text) {
   return text.replace(/```[\s\S]*?```/g, '');
 }
@@ -380,10 +400,12 @@ function evaluateStuckInner(input, home, turn, lines) {
   if (turnHasStuckAdvisorCall(lines, turn.startIndex >= 0 ? turn.startIndex : 0, stuckAdvisorRegex(stuckAdvisorNames()))) return null;
 
   const markerFile = stuckMarkerPath(home, session);
-  const state = store.readJson(markerFile, { sessionBlocks: 0, episodes: {}, window: [] });
+  const state = store.readJson(markerFile, { sessionBlocks: 0, episodes: {}, window: [], lastRalphBlockIteration: null });
 
   const lam = typeof input.last_assistant_message === 'string' ? input.last_assistant_message : turn.lastText;
+  const ralphIteration = readRalphIteration(cwd, session);
   const noProgress = updateNoProgressWindow(cwd, lines, turn, lam, state.window);
+  const ralphFrozen = noProgress.fires ? null : detectRalphFrozenDiff(noProgress.window, ralphIteration);
   const persisted = Object.assign({}, state, { window: noProgress.window });
 
   const failure = detectRepeatedFailure(cwd, session, turn, lines);
@@ -391,12 +413,17 @@ function evaluateStuckInner(input, home, turn, lines) {
 
   let signal = null;
   let episodeKey = null;
+  let viaRalphCooldown = false;
   if (failure) {
     signal = 'repeated-failure';
     episodeKey = failure.key;
   } else if (noProgress.fires) {
     signal = 'no-progress-loop';
     episodeKey = `loop:${noProgress.diffHash}|${noProgress.errorSig || ''}`;
+  } else if (ralphFrozen) {
+    signal = 'no-progress-loop';
+    episodeKey = `loop:${ralphFrozen.diffHash}`;
+    viaRalphCooldown = true;
   } else if (claimText) {
     signal = 'impossibility-claim';
     episodeKey = 'claim:' + sha1(claimText);
@@ -414,13 +441,18 @@ function evaluateStuckInner(input, home, turn, lines) {
     store.writeJson(markerFile, persisted);
     return null;
   }
+  if (viaRalphCooldown && persisted.lastRalphBlockIteration != null &&
+      (ralphIteration - persisted.lastRalphBlockIteration) < RALPH_BLOCK_COOLDOWN_ITERATIONS) {
+    store.writeJson(markerFile, persisted);
+    return null;
+  }
 
   const final = Object.assign({}, persisted, {
     sessionBlocks: (persisted.sessionBlocks || 0) + 1,
     episodes: Object.assign({}, persisted.episodes, { [episodeKey]: true }),
   });
+  if (viaRalphCooldown) final.lastRalphBlockIteration = ralphIteration;
   store.writeJson(markerFile, final);
-  const ralphIteration = readRalphIteration(cwd, session);
   const context = ralphIteration !== null ? `ralph iteration ${ralphIteration}` : '';
   return { decision: 'block', reason: stuckBlockReason(signal, context) };
 }

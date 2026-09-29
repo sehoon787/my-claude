@@ -117,6 +117,33 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
   });
   check('3-turn human loop, no ralph, changing diff -> 0 blocks', outcomes.every((b) => b === false));
 }
+{
+  // Same diff, identical final text each turn, but no repeated errorSig
+  // (tool_result succeeds) -- isolates the textSig-only firing path.
+  const home = mkHome(), cwd = mkRepo();
+  const lam = 'Still stuck on the same step.';
+  const outcomes = [1, 2, 3].map((n) => {
+    const entries = [human(`retry ${n}`, { promptId: `p${n}` }), toolUse(`t${n}`, 'Bash', { command: 'run x' }), toolResult(`t${n}`, false), asst(lam)];
+    return runHook({ home, cwd, entries, lam }).blocked;
+  });
+  check('3-turn human loop, no ralph, identical text + same diff (no repeated error) -> 1 block (3rd Stop)',
+    outcomes[0] === false && outcomes[1] === false && outcomes[2] === true);
+}
+
+// --- (b) no-progress loop, ralph-specific addition: frozen diff alone ----
+{
+  // No tool calls at all, so the generic toolCalls>0 rule never fires; the
+  // ralph-only "iteration >= 5 + frozen diff" addition must fire instead.
+  const home = mkHome(), cwd = mkRepo();
+  const entries = [human('keep going'), asst('Continuing.')];
+  let blocks = 0;
+  for (let i = 1; i <= 20; i++) {
+    writeOmcState(cwd, SESSION, 'ralph-state.json', { active: true, iteration: i });
+    const r = runHook({ home, cwd, entries, lam: 'Continuing.', extra: { stop_hook_active: true } });
+    if (r.blocked) blocks++;
+  }
+  check('ralph active, frozen diff, zero tool calls -> exactly 1 block (ralph-only rule)', blocks === 1);
+}
 
 // --- (c) impossibility claim ----------------------------------------------
 {
