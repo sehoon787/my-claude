@@ -846,6 +846,7 @@ cp "$SCRIPT_DIR/hooks/session-start.sh"           "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/stop-profile-update.js"     "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/stop-session-enforcement.js" "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/stop-final-report.js"        "$HOME/.claude/hooks/"
+cp "$SCRIPT_DIR/hooks/advisor-gate.js"             "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/persona-rule.js"             "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/briefing-runtime.js"         "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/session-sync.js"             "$HOME/.claude/hooks/"
@@ -859,7 +860,7 @@ cp "$SCRIPT_DIR/hooks/adoption-tracker.js"         "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/adoption-cli.js"             "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/learning-cli.js"             "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/learning-review.js"          "$HOME/.claude/hooks/"
-for f in hooks.json session-start.sh stop-profile-update.js stop-session-enforcement.js stop-final-report.js persona-rule.js briefing-runtime.js session-sync.js session-end.js context-budget.js vault-enforcer.js build-registry.js route-hint.js routing-map.json adoption-store.js adoption-tracker.js adoption-cli.js agent-log.js learning-store.js learning-cli.js learning-review.js; do
+for f in hooks.json session-start.sh stop-profile-update.js stop-session-enforcement.js stop-final-report.js advisor-gate.js persona-rule.js briefing-runtime.js session-sync.js session-end.js context-budget.js vault-enforcer.js build-registry.js route-hint.js routing-map.json adoption-store.js adoption-tracker.js adoption-cli.js agent-log.js learning-store.js learning-cli.js learning-review.js; do
   echo "hooks/$f" >> "$MANIFEST_TMP"
 done
 mkdir -p "$HOME/.claude/scripts"

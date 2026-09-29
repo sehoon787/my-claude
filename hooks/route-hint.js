@@ -53,7 +53,7 @@ function routeHint(prompt, registry, cwd) {
   const top = candidatesFor(intent, registry, cwd);
   if (!top.length) return null;
   let text = `[RouteHint] intent=${intent.name} → ${top.map(formatCandidate).join(', ')}.`;
-  if (top.some((c) => c.advisor)) text += ' Consult the Advisor Group when the intent calls for it.';
+  if (top.some((c) => c.advisor)) text += ' Advisor Gate: call the [advisor] candidate before answering, or write one line "Advisor skipped: <reason>".';
   return { hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: text } };
 }
 

@@ -160,7 +160,7 @@ for (const [prompt, intent, first] of cases) {
   const h = hint(prompt);
   checkDoc(JSON.stringify(prompt), h);
   check(`${JSON.stringify(prompt)} -> ${intent}, ${first} first`, h.text.startsWith(`[RouteHint] intent=${intent} → ${first}`), h.text);
-  check(`${JSON.stringify(prompt)} -> advisor sentence present`, h.text.includes('Consult the Advisor Group'));
+  check(`${JSON.stringify(prompt)} -> advisor sentence present`, h.text.includes('Advisor Gate: call the [advisor] candidate'));
 }
 
 {
