@@ -286,12 +286,18 @@ function readRalphIteration(cwd, session) {
 // falling back to `git status --porcelain` + `git diff` when there is no
 // commit yet. Null when git is unavailable — never treated as "no change".
 function computeDiffHash(cwd) {
-  const opts = { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] };
+  // Bounded: the Stop hook's total budget is 5000ms, and a big repo's diff
+  // can be slow or exceed the default 1 MB maxBuffer. --no-ext-diff avoids
+  // shelling out to a configured external diff tool.
+  const opts = {
+    cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
+    timeout: 2000, maxBuffer: 64 * 1024 * 1024,
+  };
   let diff;
   try {
-    diff = cp.execSync('git diff HEAD', opts);
+    diff = cp.execSync('git diff --no-ext-diff HEAD', opts);
   } catch {
-    try { diff = cp.execSync('git diff', opts); } catch { return null; }
+    try { diff = cp.execSync('git diff --no-ext-diff', opts); } catch { return null; }
   }
   let untracked = '';
   try {

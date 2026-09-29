@@ -202,6 +202,26 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
   check('routing-map Stuck entry is read: a fixture member satisfies the gate', !r.blocked);
 }
 
+// --- git unavailable: computeDiffHash must fail open, never block --------
+{
+  // cwd is not a git repo: every execSync attempt in computeDiffHash throws
+  // ("not a git repository"), it returns null, and the no-progress window
+  // must never treat that as "diff unchanged". Reuses the ralph scenario
+  // that would otherwise fire the ralph-only frozen-diff rule.
+  const home = mkHome();
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'astuck-nogit-'));
+  const entries = [human('keep going'), asst('Continuing.')];
+  let blocks = 0;
+  let allExitZero = true;
+  for (let i = 1; i <= 20; i++) {
+    writeOmcState(cwd, SESSION, 'ralph-state.json', { active: true, iteration: i });
+    const r = runHook({ home, cwd, entries, lam: 'Continuing.', extra: { stop_hook_active: true } });
+    if (r.blocked) blocks++;
+    if (r.status !== 0) allExitZero = false;
+  }
+  check('git unavailable (cwd not a repo) -> computeDiffHash fails open, never blocks', blocks === 0 && allExitZero);
+}
+
 // --- session cap: at most 2 Stuck blocks per session ----------------------
 {
   const home = mkHome(), cwd = mkRepo();
