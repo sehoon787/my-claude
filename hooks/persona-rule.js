@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Persona rule CLI: list/accept/reject suggestions, plus
-// `adoption <list|pin|unpin|reset|undo>` (hooks/adoption-cli.js)
+// `adoption <list|pin|unpin|reset|undo>` (hooks/adoption-cli.js) and
+// `learn <list|show|approve|dismiss|pin|unpin|curate|rollback>` (hooks/learning-cli.js)
 // Runs synchronously — no async/await, ES5-compatible
 
 var fs = require('fs');
@@ -20,6 +21,10 @@ var agentType = args[1] || '';
 // The adoption ledger is global (~/.config/agent-harness/), not per vault.
 if (command === 'adoption') {
   process.exit(require('./adoption-cli.js').main(args.slice(1)));
+}
+// So is the learning loop (~/.config/agent-harness/learning-*).
+if (command === 'learn') {
+  process.exit(require('./learning-cli.js').main(args.slice(1)));
 }
 
 // Guard: no vault = nothing to do
@@ -231,5 +236,6 @@ if (command === 'clean') {
 
 // Unknown command or no command
 process.stdout.write('Usage: persona-rule.js <list|accept|reject|clean> [agent_type]\n' +
-  '       persona-rule.js adoption <list [--intent X] | pin <id> <intent> | unpin <id> <intent> | reset [<id>] | undo <ts> [<id>]>\n');
+  '       persona-rule.js adoption <list [--intent X] | pin <id> <intent> | unpin <id> <intent> | reset [<id>] | undo <ts> [<id>]>\n' +
+  '       persona-rule.js learn <list | show <id> | approve <id> [--as "<rule>"] | dismiss <id> | pin <slug> | unpin <slug> | curate [--dry-run] | rollback <audit-id>>\n');
 process.exit(0);

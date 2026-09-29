@@ -199,6 +199,9 @@ if [ -d "$_rules_dir" ]; then
   fi
 fi
 
+# 9. Learning loop: weekly silent curate of learned rules/skills, and at most
+# two pending suggestions (learning-review.js queues them at SessionEnd).
+_learn_msg=$(node "$(dirname "$0")/persona-rule.js" learn session-start 2>/dev/null)
 
 # 10. Version Freshness Check (once per day, non-blocking)
 _update_msg=""
@@ -311,6 +314,8 @@ fi
 
 [ -n "$_kv_msg" ] && MSG="${MSG} ${_kv_msg}"
 [ -n "$_update_msg" ] && MSG="${MSG} ${_update_msg}"
+[ -n "$_learn_msg" ] && MSG="${MSG}
+${_learn_msg}"
 [ -n "$_routing_summary" ] && MSG="${MSG}
 ${_routing_summary}"
 if [ -n "$MSG" ]; then

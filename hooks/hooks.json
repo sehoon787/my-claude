@@ -155,6 +155,18 @@
         ]
       }
     ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/learning-review.js\"",
+            "timeout": 5000,
+            "description": "Learning loop: queue rule suggestions from user corrections and skill suggestions from workflows adopted in 3+ sessions (writes suggestions only; nothing is applied until `persona-rule.js learn approve`; no output)"
+          }
+        ]
+      }
+    ],
     "UserPromptSubmit": [
       {
         "hooks": [

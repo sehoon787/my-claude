@@ -214,6 +214,24 @@ The store is shared by harnesses (my-codex can write to the same files) under `~
 
 Inspect or correct it with `node ~/.claude/hooks/persona-rule.js adoption <cmd>`: `list [--intent X]` (id × intent table of weighted accept/reject/n), `list --events` (raw events with their `ts`), `pin <id> <intent>`, `unpin <id> <intent>`, `reset [<id>]`, `undo <ts> [<id>]`. The ledger and pins are registry sources, so the next session's routing summary reflects any change.
 
+### Learning loop (approved by you)
+
+Over time, Boss turns what you correct and what you keep adopting into rules and skills, but only the ones you approve. Detection runs without an LLM call; nothing is written to your rules or skills until you run `learn approve`.
+
+| Piece | What it does |
+|-------|--------------|
+| **Review** (`hooks/learning-review.js`, SessionEnd) | Reads the session transcript and the adoption ledger, prints nothing, and queues suggestions. **Rule:** a message of yours, after Boss has replied at least once, that states a preference or correction: English `don't …`, `never …`, `always …` at the start of a sentence, or `stop doing`, `from now on`, `instead of` anywhere; Korean `~지 마`, `~지 말고`, `다음부터` anywhere, or `항상` / `앞으로` / `대신` / `말고` with an imperative ending (`…해줘`, `…써`). It skips questions, code blocks, inline code, quoted lines, slash commands, notifications, and messages over 1,500 characters. It queues at most 2 per session, `always`/`앞으로`-style phrasing first, and records the agent or skill that ran just before. **Skill:** an ordered chain of 2–4 agents/skills you accepted back to back in 3 or more sessions within 30 days (a reject in between breaks the chain) |
+| **Queue** | Suggestions are deduped by kind plus normalized text or steps. A key you approved or dismissed is never suggested again. At most 5 are pending: new ones beyond that are refused, and each refusal is audited as `cap_refused` |
+| **Surfacing** (`hooks/session-start.sh`) | Adds at most two `[Learn] <id>: <kind> — <text>. Approve: … learn approve <id> / dismiss: … learn dismiss <id>` lines. Boss asks you about them, at most 2 per session (boss.md Phase 0 Step 4b) |
+| **Approval** | A rule goes to `~/.claude/rules/user/learned-<slug>.md`, which has no `paths` frontmatter, so it loads in every session, with your original sentence quoted (`--as "<English rule>"` adds an imperative English line). A skill goes to `~/.claude/skills/learned-<slug>/SKILL.md`: an ordered procedure whose description names its intent, so the registry routes it. Both paths are user-owned: `install.sh` never lists them in its manifest and never deletes them. At most 20 learned items can be live; approving beyond that is refused until you curate or roll back |
+| **Curator** (`learn curate`, also silently once every 7 days at SessionStart) | Ages items by **last use** only (a `Skill` call of the learned skill, the same correction repeated, a ledger event, or an edit to the file) and never by how often they are used: 30 days unused → `stale`, 90 days → `archived` (moved to `~/.config/agent-harness/learned-archive/`, never deleted). Pinned items are exempt |
+
+State lives next to the adoption store in `~/.config/agent-harness/`: `learning-suggestions.jsonl` (id, kind, status `pending|approved|dismissed`, key, created_at, and the text or steps), `learning-items.json` (approved items, their status, pin, and last use), `learning-audit.jsonl` (one row per mutation, ids `A1`, `A2`, …, with before/after state and paths), and `learned-archive/`.
+
+Commands: `node ~/.claude/hooks/persona-rule.js learn <cmd>`: `list`, `show <id|slug>`, `approve <id> [--as "<rule>"]`, `dismiss <id>`, `pin <slug>`, `unpin <slug>`, `curate [--dry-run]`, `rollback <audit-id>`. Rollback undoes one mutation: an approval moves the file to the archive and puts the suggestion back to pending; an archive moves the file back; a dismiss, pin, or status change is reversed. It refuses when a later mutation changed the same item.
+
+**How this differs from Hermes Agent:** the design follows NousResearch/hermes-agent. A background review looks for your corrections, a curator ages agent-created skills by last use and not by popularity, suggestions go pending → accepted/dismissed with at most 5 pending, every mutation is ledgered and can be rolled back, and size caps refuse writes instead of evicting. The difference is that Hermes rewrites its skills and memory on its own, while here nothing reaches your rules or skills without your explicit `learn approve`.
+
 ---
 
 ## What's Inside
