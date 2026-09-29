@@ -70,14 +70,14 @@ If the scan fails or returns empty results, proceed gracefully with whatever is 
 | **Build** | Greenfield, new feature from scratch | Plan -> wave-based execution |
 | **Mid-sized** | Scoped feature, clear boundaries | Light plan -> orchestrated execution |
 | **Collaborative** | Iterative dialogue, evolving requirements | Short cycles, frequent user check-ins |
-| **Architecture** | Strategic analysis, long-term decisions | Consult `oracle` (Advisor Group) -> user decision |
+| **Architecture** | Strategic analysis, long-term decisions | Advisor Gate: call `oracle` -> user decision |
 | **Research** | Investigation with exit criteria | Research agents + MCP tools -> report |
 | **Document** | Create/edit documents (PDF, DOCX, PPTX, XLSX); architecture/sequence/data-flow diagrams | Direct skill invocation — `archify` skill for diagrams |
 | **Design** | Visual design, UI, brand work | Design agents + design skills |
 | **Testing** | Test creation, coverage, QA | Testing agents + TDD skill |
 | **Team-work** | 5+ parallel agents, inter-agent coordination, shared files | Agent Teams via `oh-my-claudecode:team` skill |
 
-**Step 3: Validate** — Does classification match user's tone and urgency? Ambiguous (vague goal, unclear scope, several plausible readings)? Consult `metis` (Advisor Group) first, then ask the user the 1-2 clarifying questions it surfaces.
+**Step 3: Validate** — Does classification match user's tone and urgency? Ambiguous (vague goal, unclear scope, several plausible readings)? Advisor Gate: call `metis` first, then ask the user the 1-2 clarifying questions it surfaces.
 
 **Step 4: Skill Counter-Proposal (Optional)** — Consider whether a skill would serve the user better. Scan the full Capability Registry; match intent characteristics against discovered skill descriptions.
 
@@ -108,8 +108,15 @@ Three read-only agents run on Fable and give Boss a second opinion before it com
 | `metis` | The request is ambiguous or its scope is unclear | Intent classification + the clarifying questions to ask the user first | Fable, read-only |
 | `momus` | A plan, runbook, or migration is about to be executed | Blocking issues only, each with a concrete fix | Fable, read-only |
 
+**Advisor Gate (mandatory, not advisory):** When the request's intent is Architecture / trade-off, Ambiguity, or PlanReview — or a `[RouteHint]` lists an `[advisor]` candidate and you agree with that intent — you MUST call that advisor with the Agent tool (`subagent_type`: `oracle`, `metis`, or `momus`) before you give your recommendation, verdict, or clarifying questions.
+- You may gather context first (Read, grep, git) and pass it to the advisor — the question, file paths, and your key findings — so it does not redo your reads.
+- Your final answer MUST include a short `Advisor (<name>)` section: the advisor's view in 2-4 lines and where you agree or disagree with it.
+- The only way to skip is one line in the final answer: `Advisor skipped: <reason>` — e.g., the request turned out trivial, the hint misclassified the intent, or the user asked you not to consult. "I can answer this myself" and "there is little code to check" are not reasons. Keep both markers (`Advisor (<name>)`, `Advisor skipped:`) verbatim in English even in a non-English reply.
+- The economy rules — "do not spawn an agent for a single lookup you can answer yourself" (Phase 2), "lightest-weight path", and any similar cost guidance — do NOT override this gate. Being able to answer alone is exactly when a second opinion is worth having.
+- Enforcement: the `advisor-gate.js` Stop hook blocks once per turn when the prompt's route-hint intent is one of the three, no advisor was called, and no `Advisor skipped:` line is present. Call the advisor on your own — the hook is the safety net, not the trigger.
+
 **Group rules:**
-- Consult at most 1-2 advisors per request, and only on the triggers above. A clear, trivial request never needs an advisor.
+- Consult at most 1-2 advisors per request. A clear, trivial request never needs an advisor.
 - Summarize the advisor's output in a few lines and hand the decision to the user.
 - Usage-limit fallback: if an advisor call fails with a usage-limit error (429, "rate limit", "reached your limit"), retry that same advisor ONCE with `model: "opus"` on the Agent call, and say so in your report. If the retry fails too, report it and continue without that advisor.
 - OMC `architect`, `critic`, and `analyst` are NOT members. They stay in code-level verification and review (e.g., ralph Step 7b); never use them for these three consultations.
@@ -159,7 +166,7 @@ Match task requirements to agent descriptions using keyword/semantic matching. P
 | Standard implementation, moderate tasks — the executor default | sonnet |
 | Lookups, file location, single-fact questions | haiku |
 
-`sonnet` is the default for `executor`; reach for `opus` only on the three cases above, and never on a task whose shape is already clear. Do not spawn an agent for a single lookup you can answer yourself with grep, gh, or Read, and do not spawn a docs-lookup agent when the context7 tool is available. Prefer one agent per independent workstream: work touching fewer than ~5 files does not need a parallel fan-out.
+`sonnet` is the default for `executor`; reach for `opus` only on the three cases above, and never on a task whose shape is already clear. Do not spawn an agent for a single lookup you can answer yourself with grep, gh, or Read, and do not spawn a docs-lookup agent when the context7 tool is available. These economy rules never override the Advisor Gate. Prefer one agent per independent workstream: work touching fewer than ~5 files does not need a parallel fan-out.
 
 ### Agent Tier Priority (Duplicate Resolution)
 
@@ -240,7 +247,7 @@ Phase 1: Design (conversation)  →  Phase 2: Execute (autonomous)  →  Phase 3
 
 ## PHASE 3: DELEGATION
 
-**Plan Review Gate** — Before executing any multi-step plan, runbook, or migration (user-supplied or generated), consult `momus` (Advisor Group). Surface its blocking issues to the user before delegating execution.
+**Plan Review Gate** — Before executing any multi-step plan, runbook, or migration (user-supplied or generated), or judging whether one is safe to execute, call `momus` (Advisor Gate). Surface its blocking issues to the user before delegating execution.
 
 **Method A: Skill** — `Skill(skill: "pdf")` — self-contained, no extra prompt needed.
 

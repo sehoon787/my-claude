@@ -151,6 +151,12 @@
             "command": "node \"$HOME/.claude/hooks/stop-final-report.js\"",
             "timeout": 5000,
             "description": "FinalReport: blocks once per turn if work happened but the final message lacks the boss.md FINAL REPORT tables"
+          },
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/advisor-gate.js\"",
+            "timeout": 5000,
+            "description": "AdvisorGate: blocks once per turn if the prompt's route-hint intent is Architecture/Ambiguity/PlanReview, no oracle/metis/momus Agent call was made, and the final message has no 'Advisor skipped:' line"
           }
         ]
       }

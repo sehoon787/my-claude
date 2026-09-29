@@ -28,6 +28,15 @@ for (const advisor of ['oracle', 'metis', 'momus']) {
 }
 check('Advisor Group states the 429 fallback', /429/.test(section) && /retry that same advisor ONCE with `model: "opus"`/.test(section));
 
+const gate = (section.split('**Advisor Gate')[1] || '').split('**Group rules:**')[0];
+check('Advisor Gate is mandatory (MUST call via the Agent tool)', /MUST call that advisor with the Agent tool/.test(gate));
+check('Advisor Gate names all three intents', ['Architecture', 'Ambiguity', 'PlanReview'].every((i) => gate.includes(i)));
+check('Advisor Gate requires an "Advisor (<name>)" section', gate.includes('`Advisor (<name>)`'));
+check('Advisor Gate allows skipping only via "Advisor skipped: <reason>"', gate.includes('`Advisor skipped: <reason>`'));
+check('Advisor Gate says economy rules do NOT override it', /economy rules[\s\S]*do NOT override this gate/.test(gate));
+check('Advisor Gate names its Stop-hook backstop', gate.includes('advisor-gate.js'));
+check('Phase 2 economy rule defers to the Advisor Gate', /single lookup you can answer yourself[^\n]*These economy rules never override the Advisor Gate\./.test(boss));
+
 const phase0 = (boss.split(/^## PHASE 0:.*$/m)[1] || '').split(/^## /m)[0];
 check('Phase 0 uses [Routing] and [RouteHint] as the primary source', phase0.includes('[Routing]') && phase0.includes('[RouteHint]'));
 

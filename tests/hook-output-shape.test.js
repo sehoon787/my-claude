@@ -283,6 +283,28 @@ function assertShape(label, event, result) {
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
+{
+  // Architecture prompt, no advisor call, no skip line -> block.
+  const dir = tmpProject();
+  const scratch = path.join(FAKE_HOME, '.claude', '.adoption');
+  fs.mkdirSync(scratch, { recursive: true });
+  fs.writeFileSync(path.join(scratch, 'intent-shape.json'), JSON.stringify({ intent: 'Architecture', ts: new Date().toISOString() }));
+  fs.writeFileSync(path.join(dir, 't.jsonl'), JSON.stringify({ type: 'user', promptId: 'p1', message: { role: 'user', content: 'should we?' } }) + '\n');
+  const cmd = findCommand('Stop', 'advisor-gate.js');
+  const r = runResolvedFile(cmd, {
+    cwd: dir,
+    input: JSON.stringify({
+      hook_event_name: 'Stop',
+      session_id: 'shape',
+      transcript_path: path.join(dir, 't.jsonl'),
+      last_assistant_message: 'My answer, no advisor.'
+    })
+  });
+  assertShape('Stop advisor-gate.js (blocks)', 'Stop', r);
+  results.push(check('Stop advisor-gate.js -> decision block', /"decision":"block"/.test(r.stdout || '')));
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
 // ---------------------------------------------------------------- UserPromptSubmit
 
 {
