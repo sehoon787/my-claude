@@ -233,6 +233,38 @@ function pendingOffers() {
   })());
 }
 
+// ---------------------------------------------------------------- adoption_ignore (process skills)
+
+{
+  const map = JSON.parse(fs.readFileSync(path.join(HOOKS, 'routing-map.json'), 'utf8'));
+  const want = ['using-superpowers', 'boss-briefing', 'briefing-vault', 'cancel', 'oh-my-claudecode:cancel', 'artifact-design', 'artifact-capabilities', 'artifact-diagramming', 'workflow-authoring'];
+  check('routing map lists the process skills to ignore', want.every((id) => map.adoption_ignore.includes(id)), map.adoption_ignore.join(','));
+  check('registry carries adoption_ignore from the map', JSON.stringify(reg.buildRegistry(opts).adoption_ignore) === JSON.stringify(map.adoption_ignore));
+  check('tracker falls back to the routing map without a registry', tracker.adoptionIgnore(path.join(ROOT, 'no-home')).has('boss-briefing'));
+  const own = path.join(ROOT, 'ignore-home');
+  write(path.join(own, '.omc', 'state', 'capability-registry.json'), JSON.stringify({ adoption_ignore: ['only-this'] }));
+  const fromRegistry = tracker.adoptionIgnore(own);
+  check('tracker reads adoption_ignore from the registry', fromRegistry.has('only-this') && !fromRegistry.has('cancel'));
+  const ignore = tracker.adoptionIgnore(null);
+  check('plugin-qualified ids match by short name', tracker.isIgnored('superpowers:using-superpowers', ignore) && tracker.isIgnored('oh-my-claudecode:cancel', ignore)
+    && !tracker.isIgnored('oh-my-claudecode:ralph', ignore));
+
+  // Through the hooks as Claude Code runs them (registry at REGISTRY_OUT).
+  reg.ensureRegistry(opts, true);
+  const S = 'sess-ignore';
+  const skill = (name) => run(TRACKER, ['offer'], { session_id: S, hook_event_name: 'PostToolUse', tool_name: 'Skill', tool_input: { skill: name }, tool_use_id: `tu-${name}` });
+  const before = store.readLedger(HOME).length;
+  ['boss-briefing', 'oh-my-claudecode:cancel', 'superpowers:using-superpowers', 'artifact-design'].forEach(skill);
+  check('ignored skills are not offers', !fs.existsSync(store.pendingPath(HOME, S)));
+  run(TRACKER, ['verdict'], { session_id: S, hook_event_name: 'UserPromptSubmit', prompt: '좋아 진행해' });
+  check('ignored ids never produce ledger events', store.readLedger(HOME).length === before);
+  skill('boss-briefing');
+  skill('architecture-decision-records');
+  run(TRACKER, ['verdict'], { session_id: S, hook_event_name: 'UserPromptSubmit', prompt: '좋아 진행해' });
+  const added = store.readLedger(HOME).slice(before);
+  check('a non-ignored skill in the same turn still produces its event', added.length === 1 && added[0].id === 'architecture-decision-records', added.map((e) => e.id).join(','));
+}
+
 // ---------------------------------------------------------------- adoptionWeight + ranking
 
 {

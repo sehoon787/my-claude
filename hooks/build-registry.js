@@ -370,6 +370,8 @@ function buildRegistry(overrides) {
     agents: agents.map(strip),
     skills: skills.map(strip),
     intents,
+    // Copied from the map so the adoption tracker reads one file.
+    adoption_ignore: Array.isArray(map.adoption_ignore) ? map.adoption_ignore : [],
     mcp_servers: collectMcpServers(p.home, p.cwd),
     recommended_packs: [],
   };

@@ -16,12 +16,18 @@
 // has passed (before that the user has not seen its result); until then it
 // is carried over.
 //
+// Skills in the registry's adoption_ignore (from routing-map.json: process
+// skills such as boss-briefing or cancel that run regardless of advice
+// quality) are never offers; an entry also matches a plugin-qualified id
+// with that short name.
+//
 // Both modes print nothing (no context is added) and never throw.
 //   node adoption-tracker.js <offer|verdict>
 'use strict';
 const fs = require('fs');
 const store = require('./adoption-store.js');
 const { isRoutable } = require('./route-hint.js');
+const { defaultPaths } = require('./build-registry.js');
 
 const MAX_OFFERS = 5;
 const EVIDENCE_MAX = 120;
@@ -73,9 +79,21 @@ function offerFrom(input) {
   return null;
 }
 
+// adoption_ignore as copied into the registry at build time; the routing
+// map itself until the registry has been rebuilt with it.
+function adoptionIgnore(home) {
+  const p = defaultPaths(home ? { home } : undefined);
+  const list = [p.out, p.mapPath].map((file) => store.readJson(file, {}).adoption_ignore).find(Array.isArray);
+  return new Set(list || []);
+}
+
+function isIgnored(id, ignore) {
+  return ignore.has(id) || ignore.has(id.split(':').pop());
+}
+
 function recordOffer(input, home, now) {
   const offer = offerFrom(input);
-  if (!offer) return;
+  if (!offer || isIgnored(offer.id, adoptionIgnore(home))) return;
   store.appendJsonl(store.pendingPath(home, input.session_id), [Object.assign({ type: 'offer' }, offer, {
     tool_use_id: input.tool_use_id || '',
     ts: new Date(now).toISOString(),
@@ -150,7 +168,7 @@ function main(mode) {
   else if (mode === 'verdict') recordVerdict(input, null, Date.now());
 }
 
-module.exports = { classifyVerdict, offerFrom, readPending, recordOffer, recordVerdict, resolvePending };
+module.exports = { adoptionIgnore, classifyVerdict, isIgnored, offerFrom, readPending, recordOffer, recordVerdict, resolvePending };
 
 if (require.main === module) {
   try { main(process.argv[2]); } catch { /* fail open: never block a prompt or a tool */ }
