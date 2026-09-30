@@ -58,6 +58,8 @@ const OLD_SETTINGS = {
     UserPromptSubmit: [
       {
         hooks: [
+          { type: 'command', command: '"$HOME/.orca/hooks/claude-hook.sh" UserPromptSubmit', timeout: 5000 },
+          { type: 'command', command: 'node "$HOME/.claude/plugins/oh-my-claudecode/scripts/keyword-detector.mjs"', timeout: 5000 },
           { type: 'command', command: "node -e \"const fs=require('fs');const cp=require('child_process');try{if(!fs.existsSync('.briefing/INDEX.md')){process.exit(0)}const sf='.briefing/state.json';function rs(){try{return JSON.parse(fs.readFileSync(sf,'utf8'))}catch(e){return{}}}function ws(u){var s=rs();Object.assign(s,u);fs.writeFileSync(sf,JSON.stringify(s,null,2))}var st=rs();var counter=(parseInt(st.profileUpdateCounter,10)||0)+1;var smc=parseInt(st.sessionMessageCount,10)||1;if(smc===0||counter>=5){ws({profileUpdateCounter:counter>=5?0:counter});const stub=JSON.stringify({agent_id:'user-prompt-submit',agent_type:'throttled-update'});cp.spawnSync(process.execPath,[(process.env.HOME||process.env.USERPROFILE)+'/.claude/hooks/stop-profile-update.js'],{input:stub,stdio:['pipe','ignore','ignore'],timeout:9000})}else{ws({profileUpdateCounter:counter})}}catch(e){process.exit(0)}\"", timeout: 10000 },
           { type: 'command', command: 'some-unrelated-prompt-hook --do-thing', timeout: 5000 },
         ],
@@ -113,7 +115,31 @@ function run(name, fn) {
   return ok;
 }
 
+function readMerged(home) {
+  return fs.readFileSync(path.join(home, '.claude', 'settings.json'), 'utf8');
+}
+
+function runTwice(name, fn) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mhr-'));
+  const home = path.join(dir, 'home');
+  fs.mkdirSync(path.join(home, '.claude'), { recursive: true });
+  fs.writeFileSync(path.join(home, '.claude', 'settings.json'), JSON.stringify(OLD_SETTINGS, null, 2));
+  const env = { ...process.env, HOME: home };
+  cp.spawnSync('node', [SCRIPT, HOOKS_JSON], { env, encoding: 'utf8' });
+  const first = readMerged(home);
+  cp.spawnSync('node', [SCRIPT, HOOKS_JSON], { env, encoding: 'utf8' });
+  const second = readMerged(home);
+  const ok = fn(JSON.parse(first), first === second);
+  console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`);
+  fs.rmSync(dir, { recursive: true, force: true });
+  return ok;
+}
+
 const results = [
+  runTwice('Orca and OMC foreign UserPromptSubmit hooks are untouched; a second merge changes nothing', (s, same) =>
+    same &&
+    (s.hooks.UserPromptSubmit || []).some((g) => (g.hooks || []).some((h) => h.command.includes('.orca/hooks/claude-hook.sh'))) &&
+    (s.hooks.UserPromptSubmit || []).some((g) => (g.hooks || []).some((h) => h.command.includes('oh-my-claudecode')))),
   run('removed hook events are dropped', (s) => !s.hooks.TeammateIdle && !s.hooks.TaskCompleted),
   run('stale SubagentStop additionalContext hook is dropped', (s) =>
     (s.hooks.SubagentStop || []).every((g) => (g.hooks || []).every((h) => !h.command.includes('additionalContext')))),
