@@ -4,6 +4,7 @@
 
 'use strict';
 
+const fs = require('fs');
 const cp = require('child_process');
 const path = require('path');
 const runtime = require('./briefing-runtime');
@@ -138,6 +139,34 @@ function promptEntryFromPayload(payload, count) {
   };
 }
 
+function countTodayVaultEntries() {
+  const today = runtime.currentDate();
+  let count = 0;
+  for (const sub of ['decisions', 'learnings']) {
+    const dir = path.join(runtime.BRIEFING_DIR, sub);
+    if (!runtime.exists(dir)) continue;
+    count += fs.readdirSync(dir).filter((f) => {
+      try {
+        return fs.statSync(path.join(dir, f)).mtime.toISOString().slice(0, 10) === today;
+      } catch {
+        return false;
+      }
+    }).length;
+  }
+  return count;
+}
+
+function editNudgeText(counter, todayCount) {
+  if (todayCount !== 0) return '';
+  if (counter >= 10) {
+    return `[BriefingVault] WARNING: ${counter} file edits this session, 0 decisions/learnings written to .briefing/. Write at least one entry to .briefing/decisions/ or .briefing/learnings/ to document your work.`;
+  }
+  if (counter >= 3) {
+    return `[BriefingVault] REQUIRED: You have made ${counter} file edits this session and written no decisions/learnings to .briefing/. Write at least one decision or learning NOW before continuing. See rules/common/knowledge-vault.md.`;
+  }
+  return '';
+}
+
 function gatherGitChanges(noisePaths) {
   const status = runtime.parseStatusOutput(
     run('git', ['status', '--short', '--untracked-files=all'])
@@ -218,8 +247,11 @@ function main() {
     state.editCount = (state.editCount || 0) + 1;
     state.workCounter = (state.workCounter || 0) + 1;
     state.lastUpdatedBy = 'edit';
+    const todayVaultCount = countTodayVaultEntries();
+    state.prevEntryCount = todayVaultCount;
     runtime.writeState(state);
     updateScaffolds({ agent_id: 'post-tool-edit', agent_type: 'mid-session-sync' });
+    emitAdditionalContext(editNudgeText(state.workCounter, todayVaultCount), 'PostToolUse');
     return;
   }
 
