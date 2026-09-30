@@ -163,7 +163,9 @@ function evaluateAdvisorGate(input, home, turn) {
 // human-started turn (machine-started continuations count). It still never
 // fires when a Stuck Group member was already called this turn, and it
 // fails open on any error.
-const IMPOSSIBLE_CLAIM_RE = /(impossible|not possible|cannot be done|can't be done|blocked by|no way to|불가능|할 수 없|막혔|방법이 없)/i;
+// Assertive predicate forms only: a bare noun ("불가능 주장", "the impossible
+// case") merely names a topic and must not count as a claim.
+const IMPOSSIBLE_CLAIM_RE = /(\b(is|it's|it is|this is|that's) (impossible|not possible)\b|cannot be done|can't be done|there is no way to|불가능(합니다|해요|해|하다|하네요|함)|할 수 없(습니다|어요|어|다|음)|막혔(습니다|어요|어|다)|방법이 없(습니다|어요|어|다|음))/i;
 const QUESTION_TO_USER_RE = /\byou\b|사용자|직접/i;
 const BLOCKED_ON_USER_LINE = /^[\s>*_-]*Blocked on user:\s*(.+)$/im;
 const USER_ONLY_ACTION_RE = /login|trust|approve|permission|credential|2FA|권한|승인|로그인|신뢰/i;
@@ -367,8 +369,14 @@ function detectRalphFrozenDiff(window, ralphIteration) {
   return sameDiff ? { diffHash: last3[0].diffHash } : null;
 }
 
+// Drops fenced blocks, inline code and quoted spans: text that is quoted or
+// named rather than asserted.
 function stripCodeFences(text) {
-  return text.replace(/```[\s\S]*?```/g, '');
+  return text
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/`[^`\n]*`/g, '')
+    .replace(/"[^"\n]*"/g, '')
+    .replace(/\u201c[^\u201d\n]*\u201d/g, '');
 }
 
 // The claim text (fences stripped) when the final message asserts
