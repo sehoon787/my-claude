@@ -160,6 +160,48 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
 }
 {
   const home = mkHome(), cwd = mkRepo();
+  const lam = "- Claude S1~S5: 반복 실패 → tracer, 불가능 주장 → oracle, `Blocked on user` 통과, 루프, …";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("observed bullet naming a test scenario -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "불가능 주장 → oracle";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("bare noun '불가능 주장 → oracle' -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "이 작업은 불가능합니다.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("KO predicate '이 작업은 불가능합니다.' -> block", r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "권한이 없어 할 수 없습니다.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("KO predicate '할 수 없습니다' -> block", r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "This is impossible without admin rights.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("EN 'This is impossible without admin rights.' -> block", r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "`불가능합니다`";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("claim inside inline code -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "The detector matches \"This is impossible\" phrasing.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("claim inside double quotes -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
   const lam = '```\nThis is impossible.\n```\nHere is plan B instead.';
   const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
   check('claim inside a code fence -> no block', !r.blocked);
