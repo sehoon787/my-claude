@@ -216,7 +216,7 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
   const home = mkHome(), cwd = mkRepo();
   const lam = 'This is impossible right now.\n\nAdvisor skipped: known limitation, no advisor needed';
   const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
-  check('"Advisor skipped: x" -> no block', !r.blocked);
+  check('"Advisor skipped: x" on an impossibility claim -> still block', r.blocked);
 }
 {
   const home = mkHome(), cwd = mkRepo();
