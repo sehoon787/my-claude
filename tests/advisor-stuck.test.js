@@ -313,6 +313,34 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
     outcomes[0] === true && outcomes[1] === true && outcomes[2] === false);
 }
 
+// --- impossibility claim: `Advisor skipped:` is not an escape ------------
+{
+  const CLAIM = 'It is impossible to find the port; config/app.settings.json, which I did not open.';
+  const SKIP = 'Advisor skipped: "impossible" here is the answer you asked for.';
+  const run = (lam, entries) => runHook({ home: mkHome(), cwd: mkRepo(), entries: entries || [human('q'), asst(lam)], lam });
+  const a = run(`${CLAIM}\n${SKIP}`);
+  check('claim + valid "Advisor skipped:" -> block, reason says skip not accepted',
+    a.blocked && /not accepted for impossibility claims/.test(a.doc.reason));
+  check('claim + oracle call -> pass', !run(CLAIM, [human('q'), agentCall('oracle'), asst(CLAIM)]).blocked);
+  check('claim + "Blocked on user: complete the acme login" -> pass',
+    !run(`${CLAIM}\nBlocked on user: complete the acme login`).blocked);
+  const home = mkHome(), cwd = mkRepo();
+  writeOmcState(cwd, SESSION, 'last-tool-error-state.json', {
+    tool_name: 'Bash', tool_input_preview: '...', error: 'boom', timestamp: T1, retry_count: 3,
+  });
+  const lam = 'Still stuck.\nAdvisor skipped: the user asked me not to consult anyone.';
+  check('repeated failure + valid "Advisor skipped:" -> pass',
+    !runHook({ home, cwd, entries: [human('q'), asst(lam)], lam }).blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const skipped = (c) => `${c}\nAdvisor skipped: the user asked me not to consult anyone.`;
+  const claims = ['This is impossible with the current API.', 'There is no way to fix this without X.', 'This cannot be done without Y.'];
+  const outcomes = claims.map((c) => { const lam = skipped(c); return runHook({ home, cwd, entries: [human('q'), asst(lam)], lam }).blocked; });
+  check('cap holds for skipped claims: blocked, blocked, NOT blocked',
+    outcomes[0] === true && outcomes[1] === true && outcomes[2] === false);
+}
+
 const failed = results.filter((r) => !r).length;
 console.log(failed ? `${failed} FAILED` : 'ALL PASSED');
 process.exit(failed ? 1 : 0);
