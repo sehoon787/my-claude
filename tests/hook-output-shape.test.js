@@ -171,21 +171,24 @@ function assertShape(label, event, result) {
 }
 
 {
-  // Edit|Write BriefingVault edit-counter enforcer, tuned to trip the
-  // counter>=3 && todayCount===0 REQUIRED branch.
-  const dir = tmpProject();
-  writeState(dir, { workCounter: 2, prevEntryCount: 0 });
-  const cmd = findCommand('PostToolUse', 'BriefingVault enforcer: warns at 3 edits');
-  const r = runInlineNodeE(cmd, { cwd: dir });
-  assertShape('PostToolUse edit-counter enforcer (>=3 edits, 0 entries)', 'PostToolUse', r);
-  fs.rmSync(dir, { recursive: true, force: true });
-}
-
-{
   const dir = tmpProject();
   const cmd = findCommand('PostToolUse', 'session-sync.js" edit');
   const r = runResolvedFile(cmd, { cwd: dir, input: '{}' });
   assertShape('PostToolUse session-sync.js edit', 'PostToolUse', r);
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
+{
+  // Edit|Write edit-counter nudge (formerly a separate inline `node -e`
+  // hook in hooks.json, now ported into session-sync.js's `edit` mode),
+  // tuned to trip the counter>=3 && todayCount===0 REQUIRED branch.
+  const dir = tmpProject();
+  writeState(dir, { workCounter: 2, prevEntryCount: 0 });
+  const cmd = findCommand('PostToolUse', 'session-sync.js" edit');
+  const r = runResolvedFile(cmd, { cwd: dir, input: '{}' });
+  assertShape('PostToolUse session-sync.js edit (>=3 edits, 0 entries)', 'PostToolUse', r);
+  results.push(check('PostToolUse session-sync.js edit -> REQUIRED nudge emitted',
+    (r.stdout || '').includes('[BriefingVault] REQUIRED:') && (r.stdout || '').includes('3 file edits')));
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
@@ -201,14 +204,11 @@ function assertShape(label, event, result) {
 }
 
 {
-  const dir = tmpProject();
-  const cmd = findCommand('PostToolUse', 'auto-links.md');
-  const r = runInlineNodeE(cmd, { cwd: dir, input: JSON.stringify({ tool_input: { url: 'https://example.com' } }) });
-  assertShape('PostToolUse web auto-link collector', 'PostToolUse', r);
-  fs.rmSync(dir, { recursive: true, force: true });
-}
-
-{
+  // Formerly also covered by a separate inline `node -e` auto-link
+  // collector hook in hooks.json; session-sync.js's `search` mode (via
+  // appendAutoLink + session-end.js's writeAutoLinks, exercised in
+  // isolation elsewhere) now owns writing .briefing/references/auto-links.md
+  // on its own.
   const dir = tmpProject();
   const cmd = findCommand('PostToolUse', 'session-sync.js" search');
   const r = runResolvedFile(cmd, { cwd: dir, input: JSON.stringify({ tool_input: { url: 'https://example.com' } }) });
@@ -307,14 +307,11 @@ function assertShape(label, event, result) {
 
 // ---------------------------------------------------------------- UserPromptSubmit
 
-{
-  const dir = tmpProject();
-  writeState(dir, { profileUpdateCounter: 4, sessionMessageCount: 5 });
-  const cmd = findCommand('UserPromptSubmit', 'throttled mid-session update');
-  const r = runInlineNodeE(cmd, { cwd: dir });
-  assertShape('UserPromptSubmit throttled profile-update', 'UserPromptSubmit', r);
-  fs.rmSync(dir, { recursive: true, force: true });
-}
+// The former standalone inline `node -e` throttled profile-update hook was
+// removed: session-sync.js's `prompt` mode already calls
+// updateProfileIfNeeded() on every UserPromptSubmit, so it was a plain
+// duplicate. That mode's shape is covered by the
+// "UserPromptSubmit session-sync.js prompt (reminder)" case below.
 
 {
   // The exact historical repro state: this used to write two JSON documents.
