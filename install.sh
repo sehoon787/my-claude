@@ -42,6 +42,9 @@ SKIP_ARCHIFY=0
 INSTALL_SERENA=1
 INSTALL_HEADROOM=1
 INSTALL_CODEBURN=1
+# codeburn's usage guard (budget-cap hooks) installs by default whenever
+# codeburn itself is selected. --no-codeburn-guard opts out.
+INSTALL_CODEBURN_GUARD=1
 SKIP_TOOLS=0
 TOOLS_SELECTION=""
 TOOLS_ANSWERED=0
@@ -62,7 +65,8 @@ for arg in "$@"; do
     --self-only)       SKIP_ECC=1; SKIP_OMC=1; SKIP_GSTACK=1; SKIP_SUPERPOWERS=1; SKIP_ARCHIFY=1 ;;
     --skills=*)        SKILL_LANES="${arg#--skills=}"; SKILL_LANES_SET=1 ;;
     --full-skills)     SKILL_LANES="$ECC_SKILL_OPTIONAL_LANES"; SKILL_LANES_SET=1 ;;
-    --with-codeburn-guard) WITH_CODEBURN_GUARD=1 ;;
+    --with-codeburn-guard) ;; # no-op: the guard is on by default now
+    --no-codeburn-guard) INSTALL_CODEBURN_GUARD=0 ;;
     -h|--help)
       cat <<'EOF'
 Usage:
@@ -82,7 +86,10 @@ Options:
   --self-only             Install only self-owned files (implies all upstream --skip-* flags)
   --skills=<lane[,lane]>  Also install optional skill lanes (available: web)
   --full-skills           Install every optional skill lane
-  --with-codeburn-guard   Install the opt-in codeburn budget-guard hooks
+  --no-codeburn-guard     Skip the codeburn budget-guard hooks (installed by
+                          default alongside codeburn, with the hard cost cap
+                          disabled — see the codeburn row in README.md)
+  --with-codeburn-guard   Deprecated no-op; the guard is on by default now
 
 Environment:
   MY_CLAUDE_SKILLS=web    Same as --skills=web
@@ -483,6 +490,9 @@ mkdir -p "$HOME/.claude/agents" "$HOME/.claude/skills" "$HOME/.claude/rules"
 # user-owned) are never touched, because we never delete-by-directory-scan.
 if [ -f "$HOME/.claude/.my-claude-manifest" ]; then
   while IFS= read -r rel_path; do
+    # The learning loop's user-approved layer is never install-owned, even if
+    # a manifest somehow listed it.
+    case "$rel_path" in rules/user/*|skills/learned-*) continue ;; esac
     target="$HOME/.claude/$rel_path"
     [ -f "$target" ] && rm -f "$target"
   done < "$HOME/.claude/.my-claude-manifest"
@@ -827,17 +837,30 @@ echo "  Plugin files installed"
 echo "[2/6] Installing hooks..."
 mkdir -p "$HOME/.claude/hooks"
 cp "$SCRIPT_DIR/hooks/hooks.json"                "$HOME/.claude/hooks/"
+# Dependency-free modules first, so a session that starts mid-copy never
+# loads a hook whose require() target is not there yet.
+cp "$SCRIPT_DIR/hooks/adoption-store.js"           "$HOME/.claude/hooks/"
+cp "$SCRIPT_DIR/hooks/learning-store.js"           "$HOME/.claude/hooks/"
+cp "$SCRIPT_DIR/hooks/agent-log.js"                "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/session-start.sh"           "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/stop-profile-update.js"     "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/stop-session-enforcement.js" "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/stop-final-report.js"        "$HOME/.claude/hooks/"
+cp "$SCRIPT_DIR/hooks/advisor-gate.js"             "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/persona-rule.js"             "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/briefing-runtime.js"         "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/session-sync.js"             "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/session-end.js"              "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/context-budget.js"           "$HOME/.claude/hooks/"
 cp "$SCRIPT_DIR/hooks/vault-enforcer.js"           "$HOME/.claude/hooks/"
-for f in hooks.json session-start.sh stop-profile-update.js stop-session-enforcement.js stop-final-report.js persona-rule.js briefing-runtime.js session-sync.js session-end.js context-budget.js vault-enforcer.js; do
+cp "$SCRIPT_DIR/hooks/build-registry.js"           "$HOME/.claude/hooks/"
+cp "$SCRIPT_DIR/hooks/route-hint.js"               "$HOME/.claude/hooks/"
+cp "$SCRIPT_DIR/hooks/routing-map.json"            "$HOME/.claude/hooks/"
+cp "$SCRIPT_DIR/hooks/adoption-tracker.js"         "$HOME/.claude/hooks/"
+cp "$SCRIPT_DIR/hooks/adoption-cli.js"             "$HOME/.claude/hooks/"
+cp "$SCRIPT_DIR/hooks/learning-cli.js"             "$HOME/.claude/hooks/"
+cp "$SCRIPT_DIR/hooks/learning-review.js"          "$HOME/.claude/hooks/"
+for f in hooks.json session-start.sh stop-profile-update.js stop-session-enforcement.js stop-final-report.js advisor-gate.js persona-rule.js briefing-runtime.js session-sync.js session-end.js context-budget.js vault-enforcer.js build-registry.js route-hint.js routing-map.json adoption-store.js adoption-tracker.js adoption-cli.js agent-log.js learning-store.js learning-cli.js learning-review.js; do
   echo "hooks/$f" >> "$MANIFEST_TMP"
 done
 mkdir -p "$HOME/.claude/scripts"
@@ -965,9 +988,46 @@ if [ "$INSTALL_CODEBURN" = "1" ]; then
 else
   npm i -g @ast-grep/cli@0.42.0 @code-yeongyu/comment-checker@0.7.0 2>/dev/null || true
 fi
-# codeburn budget guard is opt-in: it adds a PreToolUse hook on every tool call.
-if [ "${WITH_CODEBURN_GUARD:-0}" = "1" ] && command -v codeburn >/dev/null 2>&1; then
-  codeburn guard install 2>/dev/null && echo "  codeburn guard hooks installed" || echo "  WARNING: codeburn guard install failed"
+# codeburn's usage guard installs by default (no --statusline: OMC HUD owns
+# the statusline). Its hard cap is estimated from the transcript at API
+# list-price rates, so on a subscription plan a normal session reaches the
+# $15 default in minutes and the guard starts denying every tool call — the
+# session "works then stops". codeburn-guard-policy.js disables that default
+# cap right after install; --no-codeburn-guard skips the guard entirely.
+CODEBURN_GUARD_STATUS="skipped (not selected)"
+if [ "$INSTALL_CODEBURN" = "1" ] && [ "$INSTALL_CODEBURN_GUARD" = "1" ]; then
+  if command -v codeburn >/dev/null 2>&1; then
+    _CB_GUARD_INSTALLED_LINE="$(codeburn guard status 2>/dev/null | grep 'installed:' || true)"
+    case "$_CB_GUARD_INSTALLED_LINE" in
+      *global*)
+        echo "  codeburn guard hooks already installed"
+        _CB_GUARD_INSTALL_OK=1
+        ;;
+      *)
+        if codeburn guard install --global 2>/dev/null; then
+          echo "  codeburn guard hooks installed"
+          _CB_GUARD_INSTALL_OK=1
+        else
+          echo "  WARNING: codeburn guard install failed"
+          _CB_GUARD_INSTALL_OK=0
+        fi
+        ;;
+    esac
+    if [ "$_CB_GUARD_INSTALL_OK" = "1" ]; then
+      if _CB_CAP_LABEL="$(node "$SCRIPT_DIR/scripts/codeburn-guard-policy.js")"; then
+        CODEBURN_GUARD_STATUS="installed (${_CB_CAP_LABEL})"
+      else
+        CODEBURN_GUARD_STATUS="installed (cap policy skipped — see warning above)"
+      fi
+    else
+      CODEBURN_GUARD_STATUS="skipped (guard install failed)"
+    fi
+  else
+    echo "  WARNING: codeburn not on PATH, skipping codeburn guard install"
+    CODEBURN_GUARD_STATUS="skipped (codeburn not on PATH)"
+  fi
+elif [ "$INSTALL_CODEBURN" = "1" ]; then
+  CODEBURN_GUARD_STATUS="skipped (--no-codeburn-guard)"
 fi
 
 # 5c-lsp. Language servers for the plugin's .lsp.json declaration (typescript + python).
@@ -1218,6 +1278,7 @@ if [ "$INSTALL_CODEBURN" = "1" ]; then
 else
   echo "  codeburn:         SKIPPED (not selected)"
 fi
+echo "  codeburn guard:   $CODEBURN_GUARD_STATUS"
 if [ -n "$_UV_TOOL_NAMES" ]; then
   echo "  uv:               $(command -v uv >/dev/null 2>&1 && echo "OK ($(uv --version 2>/dev/null))" || echo 'MISSING')"
 else

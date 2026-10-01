@@ -4,6 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const agentLog = require('./agent-log.js');
 
 const BRIEFING_DIR = '.briefing';
 const INDEX_FILE = path.join(BRIEFING_DIR, 'INDEX.md');
@@ -58,6 +59,21 @@ try {
   process.stderr.write('stop-profile-update: failed to read agent-log: ' + e.message + '\n');
 }
 
+// SubagentStop fires again every time a teammate goes idle: count each
+// agent_id once.
+logEntries = agentLog.dedupeByAgentId(logEntries);
+
+// Affinity keys on agent types Boss can route to. Older log lines carry a
+// named agent's display name in agent_type; those are not installed types
+// and are skipped. null (no registry) = do not filter.
+var installedTypes = agentLog.installedAgentTypes();
+function affinityKey(e) {
+  var t = e.agent_type || e.agent || 'unknown';
+  if (t === 'unknown') return '';
+  if (installedTypes && !installedTypes.has(t)) return '';
+  return t;
+}
+
 var now = new Date();
 var ms30d = 30 * 24 * 60 * 60 * 1000;
 var ms7d = 7 * 24 * 60 * 60 * 1000;
@@ -81,11 +97,8 @@ var entries7d = logEntries.filter(function(e) {
 // Compute Agent Affinity (30-day rolling)
 var affinityCounts = {};
 for (var i = 0; i < entries30d.length; i++) {
-  var agentType = entries30d[i].agent_type || entries30d[i].agent || 'unknown';
-  if (agentType === 'unknown') {
-    agentType = entries30d[i].name || entries30d[i].description || 'unknown';
-  }
-  if (!agentType || agentType === 'unknown') continue;
+  var agentType = affinityKey(entries30d[i]);
+  if (!agentType) continue;
   affinityCounts[agentType] = (affinityCounts[agentType] || 0) + 1;
 }
 var total30d = Object.keys(affinityCounts).reduce(function(sum, k) { return sum + affinityCounts[k]; }, 0);
@@ -99,11 +112,8 @@ affinityList = affinityList.slice(0, 10);
 // Detect Patterns (7-day rolling)
 var pattern7d = {};
 for (var i = 0; i < entries7d.length; i++) {
-  var agentType = entries7d[i].agent_type || entries7d[i].agent || 'unknown';
-  if (agentType === 'unknown') {
-    agentType = entries7d[i].name || entries7d[i].description || 'unknown';
-  }
-  if (!agentType || agentType === 'unknown') continue;
+  var agentType = affinityKey(entries7d[i]);
+  if (!agentType) continue;
   pattern7d[agentType] = (pattern7d[agentType] || 0) + 1;
 }
 
@@ -125,6 +135,17 @@ try {
   }
 } catch (e) {
   process.stderr.write('stop-profile-update: failed to read suggestions: ' + e.message + '\n');
+}
+
+// Dismiss pending suggestions for types that are not installed agent types.
+var dismissed = agentLog.dismissUninstalledSuggestions(existingSuggestions, installedTypes, now.toISOString());
+if (dismissed.changed) {
+  existingSuggestions = dismissed.list;
+  try {
+    fs.writeFileSync(SUGGESTIONS_FILE, existingSuggestions.map(function(s) { return JSON.stringify(s); }).join('\n') + '\n');
+  } catch (e) {
+    process.stderr.write('stop-profile-update: failed to rewrite suggestions: ' + e.message + '\n');
+  }
 }
 
 // Write new pending suggestions for patterns >= 3 in 7 days

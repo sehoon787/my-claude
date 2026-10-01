@@ -16,9 +16,9 @@ teammate communication patterns, and Known Limitations & Workarounds referenced 
 | hephaestus | Opus | ✅ | ⚠️ | Autonomous execution | Low cost-efficiency as teammate |
 | prometheus | Opus | MD only | ⚠️ | Planning | NotebookEdit blocked only |
 | atlas | Opus | ❌ | ❌ | Sub-agent delegation only | Write/Edit blocked + cannot spawn |
-| metis | Opus | ❌ | ⚠️ | Analysis only | Read-only |
-| momus | Opus | ❌ | ⚠️ | Review only | Read-only |
-| oracle | Opus | ❌ | ⚠️ | Advisory only | Read-only |
+| metis | Fable | ❌ | ⚠️ | Analysis only | Read-only |
+| momus | Fable | ❌ | ⚠️ | Review only | Read-only |
+| oracle | Fable | ❌ | ⚠️ | Advisory only | Read-only |
 | librarian | Sonnet | ❌ | ⚠️ | Doc search only | Read-only |
 | multimodal-looker | Sonnet | ❌ | ❌ | — | Bash also blocked, unsuitable as teammate |
 

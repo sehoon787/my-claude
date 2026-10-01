@@ -10,6 +10,8 @@
 #      owned them.
 #   2. A skill directory the manifest never listed — anything the user dropped
 #      into ~/.claude/skills/ by hand — survives every install untouched.
+#   2b. The learning loop's user-approved layer (rules/user/learned-*,
+#      skills/learned-*) survives even when an old manifest lists it.
 #   3. Runtime files the agent creates inside the installed archify skill
 #      (node_modules/ from the `npm install` its SKILL.md asks for, rendered
 #      diagrams) are user-owned: the archify manifest entries come from the
@@ -91,6 +93,13 @@ echo "rules/common/testing.md" >> "$MANIFEST"
 mkdir -p "$FAKE_HOME/.claude/skills/user-custom/references"
 echo "# mine" > "$FAKE_HOME/.claude/skills/user-custom/SKILL.md"
 echo "# mine" > "$FAKE_HOME/.claude/skills/user-custom/references/notes.md"
+# Learning-loop output (user-approved rules and skills): user-owned even if a
+# manifest listed it, so neither the cleanup nor the copy steps touch it.
+mkdir -p "$FAKE_HOME/.claude/rules/user" "$FAKE_HOME/.claude/skills/learned-investigate-then-debugger"
+echo "# learned" > "$FAKE_HOME/.claude/rules/user/learned-korean-tables.md"
+echo "# learned" > "$FAKE_HOME/.claude/skills/learned-investigate-then-debugger/SKILL.md"
+echo "rules/user/learned-korean-tables.md" >> "$MANIFEST"
+echo "skills/learned-investigate-then-debugger/SKILL.md" >> "$MANIFEST"
 
 echo "[3/5] second install"
 run_install || { echo "FAIL  second install exited non-zero"; tail -20 "$TMP/install.log"; exit 1; }
@@ -100,10 +109,17 @@ check "manifest-owned web-lane skill removed (react-patterns)"  "$([ "$(present 
 check "manifest-owned rules/common/testing.md removed"          "$([ "$(present rules/common/testing.md)" = 0 ] && echo 1 || echo 0)"
 check "user-owned skill dir survives"                           "$(present skills/user-custom/SKILL.md)"
 check "user-owned nested file survives"                         "$(present skills/user-custom/references/notes.md)"
+check "learned rule survives install (rules/user/learned-*)"     "$(present rules/user/learned-korean-tables.md)"
+check "learned skill survives install (skills/learned-*)"       "$(present skills/learned-investigate-then-debugger/SKILL.md)"
+check "new manifest never lists the learned layer"              "$(grep -Eq '^(rules/user/|skills/learned-)' "$MANIFEST" && echo 0 || echo 1)"
 check "self-owned skill still installed (boss-advanced)"        "$(present skills/boss-advanced/SKILL.md)"
 check "self-owned rule still installed (calibrated-response)"   "$(present rules/common/calibrated-response.md)"
 check "boss agent still installed"                              "$(present agents/boss.md)"
 check "context-budget hook installed"                           "$(present hooks/context-budget.js)"
+check "route-hint hook installed"                               "$(present hooks/route-hint.js)"
+check "registry builder + routing map installed"                "$([ "$(present hooks/build-registry.js)" = 1 ] && [ "$(present hooks/routing-map.json)" = 1 ] && echo 1 || echo 0)"
+check "learning-loop hooks installed"                           "$([ "$(present hooks/learning-store.js)" = 1 ] && [ "$(present hooks/learning-cli.js)" = 1 ] && [ "$(present hooks/learning-review.js)" = 1 ] && echo 1 || echo 0)"
+check "adoption + agent-log hooks installed"                     "$([ "$(present hooks/adoption-store.js)" = 1 ] && [ "$(present hooks/adoption-tracker.js)" = 1 ] && [ "$(present hooks/adoption-cli.js)" = 1 ] && [ "$(present hooks/agent-log.js)" = 1 ] && echo 1 || echo 0)"
 
 echo "[4/5] first install with archify"
 if ! run_archify_install; then

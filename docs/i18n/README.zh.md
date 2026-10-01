@@ -83,7 +83,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 | 5 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | Anthropic 官方 Skills 仓库：PDF 解析，Word/Excel/PowerPoint 处理，MCP 服务器创建。 | 由 `install.sh` 执行 `claude plugin add anthropics/skills`。有意不纳入清单跟踪。 |
 | 6 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | Garry Tan 的冲刺流程 harness：26 个 Skills 加上 `gstack` 根路由器（共 27 个）—— 浏览器 QA（`/qa`）、范围漂移代码审查（`/review`）、安全审计（`/cso`），以及完整的 Plan→Review→QA→Ship 流程（Boss P0 通道）。随附编译好的 Playwright 浏览器守护进程用于真实浏览器测试。 | 子模块 `upstream/gstack`，固定 SHA。 |
 | 7 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | Jesse Vincent 的开发流程库：15 个 Skills 中的 14 个 —— 头脑风暴、系统化调试、TDD、计划编写与执行、代码审查礼仪。`dispatching-parallel-agents` 被排除，因为 Boss 与 Agent Teams 已覆盖该路径。 | 子模块 `upstream/superpowers`，固定 SHA。 |
-| 8 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | 基于 Claude Code 与 Codex 本就写入的会话文件做本地优先的 token 与成本追踪 —— 无代理、无 API key，数据不离开本机。预算守卫 hooks 保持通过 `bash install.sh --with-codeburn-guard` 选择启用，因为其硬上限（默认每会话 $15）会阻断该会话的所有工具调用，包括解除命令 `codeburn guard allow`（需在外部终端运行）。 | `npm i -g codeburn@0.9.23`；`install.sh` 还会启动或复用一个跨 harness 共享的仪表盘 —— 见「在哪里查看结果」。MIT。 |
+| 8 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | 基于 Claude Code 与 Codex 本就写入的会话文件做本地优先的 token 与成本追踪 —— 无代理、无 API key，数据不离开本机。用量守卫 hooks 默认安装（`--no-codeburn-guard` 可跳过），且硬上限默认禁用：该值是根据会话记录按 API 标价估算的，在订阅制套餐下正常会话几分钟内就会达到默认的 $15，之后每次工具调用都会被拒绝。要设置自己的上限，请编辑 `~/.config/codeburn/guard.json` 中的 `hardUSD`。 | `npm i -g codeburn@0.9.23`；`install.sh` 还会启动或复用一个跨 harness 共享的仪表盘 —— 见「在哪里查看结果」。MIT。 |
 | 9 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | 通过 MCP 使用语言服务器的符号图：`find_symbol`、`get_symbols_overview`、`find_referencing_symbols`、`replace_symbol_body`、`insert_after_symbol` —— 消耗的 token 随符号大小而非文件大小增长。 | `uv tool install -p 3.13 serena-agent==1.7.0`，注册为用户级 stdio MCP 服务器（`serena start-mcp-server --context claude-code --project-from-cwd`）。分发包整体遵循 GPL-3.0-or-later（PyPI 的 MIT classifier 并不准确）；作为外部服务器使用，从不收录进本仓库。 |
 | 10 | <img src="https://github.com/headroomlabs-ai.png?size=32" width="20" height="20" align="center"/> **[headroom](https://github.com/headroomlabs-ai/headroom)** — Headroom Labs | 工具输出压缩：`headroom mcp serve` 暴露 `headroom_compress`、`headroom_retrieve`、`headroom_stats`，让超大的工具结果不会整段进入对话记录。 | `uv tool install --python 3.13 "headroom-ai[all]==0.37.0"`，注册为 `headroom` stdio MCP 服务器；`install.sh` 还会启动或复用无副作用的持久配置 `agent-harness-shared`。Apache-2.0。 |
 | 11 | <img src="https://github.com/tt-a1i.png?size=32" width="20" height="20" align="center"/> **[archify](https://github.com/tt-a1i/archify)** — tt-a1i | 一个把架构、工作流、时序、数据流与生命周期图绘制为自包含 HTML 的 Agent skill —— 内联 SVG、明暗主题切换、PNG/JPEG/WebP/SVG 导出菜单，生成文件没有运行时依赖。它也接受粘贴的 Mermaid 作为输入方言。 | 子模块 `upstream/archify`，固定在标签 `v2.9.0`；`install.sh` 把上游的 `archify/` skill 目录复制到 `~/.claude/skills/archify`，因此安装时不会运行 `npx skills add`。 |
@@ -126,8 +126,9 @@ Boss 对每个请求按优先级链逐级匹配，直到找到最佳方案：
 
 | 复杂度 | 模型 | 用途 |
 |-----------|-------|----------|
-| 顶层编排 | `claude-fable-5-1` | Boss |
-| 深度分析、架构 | `claude-opus-5-5` | Sisyphus、Atlas、Hephaestus、Oracle、Metis、Momus、Prometheus |
+| 顶层编排 | `claude-opus-5-5` | Boss |
+| 顾问组（只读的第二意见） | `claude-fable-5-1` | Oracle、Metis、Momus |
+| 深度分析、架构 | `claude-opus-5-5` | Sisyphus、Atlas、Hephaestus、Prometheus |
 | 标准实现 | `claude-sonnet-5` | Librarian、Multimodal-Looker、OMC 专家 Agent |
 | 快速查询、探索 | `claude-haiku-4-5` | 轻量 OMC Agent、简单咨询 |
 
@@ -342,6 +343,7 @@ my-claude 捆绑的工具会把结果写到不同位置 —— 下表列出各�
 | 工具 | 打开 | 运行方式 | 查看位置 |
 |------|------|----------|----------|
 | **codeburn** | <http://127.0.0.1:4747/> | `install.sh` 启动或复用 `codeburn web --provider all --port 4747 --no-open` · `codeburn` 打开 TUI · `codeburn report --format json --period week` 生成非交互式输出 | 共享仪表盘。启动日志 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/codeburn.log`。会话文件只读，美元金额是按 API 标价计算的估算值。 |
+| **codeburn guard** | `codeburn guard status` | `install.sh` 默认安装（`--no-codeburn-guard` 可跳过） —— `codeburn guard install --global` | 软上限（$5）与检查点提示（$3）保持不变；硬上限在安装后立即写为 null，因为它是按 API 标价估算的，在订阅制套餐下否则会在几分钟内让正常会话停止。要设置自己的上限，请编辑 `~/.config/codeburn/guard.json` 中的 `hardUSD`。 |
 | **Serena** | <http://localhost:24282/dashboard/index.html> | 作为 MCP 服务器自动启动；在任意会话中调用 `get_symbols_overview` / `find_symbol` | 服务器运行期间可用的仪表盘（日志 + 各工具调用计数）。按项目的记忆写入你正在工作的仓库内的 `.serena/`；全局配置为 `~/.serena/serena_config.yml`。 |
 | **Headroom** | <http://127.0.0.1:8787/stats> | MCP 工具 `headroom_compress` / `headroom_retrieve` / `headroom_stats`；`install.sh` 启动或复用共享代理配置 `agent-harness-shared` | 压缩统计页面，客户端显式通过代理路由前可能为空。启动日志 `${XDG_STATE_HOME:-$HOME/.local/state}/agent-harness-services/logs/headroom.log`。 |
 | **Archify** | `out.html` | 请求绘图时 Boss 会路由到 `archify` skill。手动方式，从 `~/.claude/skills/archify` 运行：`node bin/archify.mjs render workflow examples/agent-tool-call.workflow.json out.html` | 生成的文件 —— 用任意浏览器打开。可用 `node bin/archify.mjs check out.html` 校验。 |
