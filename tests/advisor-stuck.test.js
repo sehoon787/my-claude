@@ -71,6 +71,25 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
   check('same failure episode again -> suppressed (1 block per episode)', !r2.blocked);
 }
 
+// --- (a2) masked failures: Bash output reports a nonzero exit, is_error=false
+{
+  const maskedRun = (text, n) => {
+    const home = mkHome(), cwd = mkRepo();
+    const entries = [human('build it')];
+    for (let i = 0; i < n; i++) {
+      const cmd = `./build.sh; echo "EXIT=$?"`;
+      entries.push(toolUse(`m${i}`, 'Bash', { command: cmd }));
+      entries.push({ type: 'user', promptId: 'p1', message: { role: 'user', content: [{ type: 'tool_result', tool_use_id: `m${i}`, is_error: false, content: text }] } });
+    }
+    entries.push(asst('Still working on it.'));
+    return runHook({ home, cwd, entries, lam: 'Still working on it.' });
+  };
+  check('3 masked failures "EXIT=1" (is_error=false) -> block', maskedRun('error: x EXIT=1', 3).blocked);
+  check('3 results "EXIT=0" -> no block', !maskedRun('ok EXIT=0', 3).blocked);
+  check('3 masked failures "exit code: 2" -> block', maskedRun('failed\nexit code: 2', 3).blocked);
+  check('2 masked failures -> no block', !maskedRun('error: x EXIT=1', 2).blocked);
+}
+
 // --- (b) no-progress loop, generic (ralph-style: same turn, repeated Stops)
 {
   const home = mkHome(), cwd = mkRepo();
