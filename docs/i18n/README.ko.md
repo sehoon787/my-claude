@@ -388,9 +388,9 @@ git 서브모듈을 통해 연결됩니다. 고정된 커밋은 `.gitmodules`가
 
 | 출처 | SHA | 날짜 | 비교 |
 |--------|-----|------|------|
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `d3b8a3e` | 2026-09-28 | [compare](https://github.com/affaan-m/everything-claude-code/compare/d3b8a3e...HEAD) |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `9fd35ec` | 2026-09-22 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/9fd35ec...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | `01593aa` | 2026-09-28 | [compare](https://github.com/garrytan/gstack/compare/01593aa...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `c70874f` | 2026-10-01 | [compare](https://github.com/affaan-m/everything-claude-code/compare/c70874f...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `dc7ba1d` | 2026-10-01 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/dc7ba1d...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `96764e8` | 2026-10-01 | [compare](https://github.com/garrytan/gstack/compare/96764e8...HEAD) |
 | [superpowers](https://github.com/obra/superpowers) | `8ca22db` | 2026-09-28 | [compare](https://github.com/obra/superpowers/compare/8ca22db...HEAD) |
 | [archify](https://github.com/tt-a1i/archify) | `62904f3` (`v2.9.0`) | 2026-09-19 | [compare](https://github.com/tt-a1i/archify/compare/62904f3...HEAD) |
 
