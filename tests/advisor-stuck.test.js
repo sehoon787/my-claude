@@ -329,8 +329,22 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
     tool_name: 'Bash', tool_input_preview: '...', error: 'boom', timestamp: T1, retry_count: 3,
   });
   const lam = 'Still stuck.\nAdvisor skipped: the user asked me not to consult anyone.';
-  check('repeated failure + valid "Advisor skipped:" -> pass',
-    !runHook({ home, cwd, entries: [human('q'), asst(lam)], lam }).blocked);
+  const r = runHook({ home, cwd, entries: [human('q'), asst(lam)], lam });
+  check('repeated failure + valid "Advisor skipped:" -> block, says skip not accepted',
+    r.blocked && /not accepted for repeated failure/.test(r.doc.reason));
+  const run2 = (l, entries) => runHook({ home: mkHome(), cwd, entries, lam: l });
+  check('repeated failure + tracer call -> pass', !run2('Still stuck.', [human('q'), agentCall('tracer'), asst('Still stuck.')]).blocked);
+  const bl = 'Still stuck.\nBlocked on user: complete the acme login';
+  check('repeated failure + valid "Blocked on user:" -> pass', !run2(bl, [human('q'), asst(bl)]).blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = 'Still stuck on the same step.\nAdvisor skipped: the user asked me not to consult anyone.';
+  const outcomes = [1, 2, 3].map((n) => {
+    const entries = [human(`retry ${n}`, { promptId: `p${n}` }), toolUse(`t${n}`, 'Bash', { command: 'run x' }), toolResult(`t${n}`, false), asst(lam)];
+    return runHook({ home, cwd, entries, lam }).blocked;
+  });
+  check('no-progress + valid "Advisor skipped:" -> pass (unchanged)', outcomes.every((b) => b === false));
 }
 {
   const home = mkHome(), cwd = mkRepo();
@@ -339,6 +353,18 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
   const outcomes = claims.map((c) => { const lam = skipped(c); return runHook({ home, cwd, entries: [human('q'), asst(lam)], lam }).blocked; });
   check('cap holds for skipped claims: blocked, blocked, NOT blocked',
     outcomes[0] === true && outcomes[1] === true && outcomes[2] === false);
+}
+
+{
+  const home = mkHome(), cwd = mkRepo();
+  const outcomes = [1, 2, 3].map((n) => {
+    writeOmcState(cwd, SESSION, 'last-tool-error-state.json', {
+      tool_name: 'Bash', tool_input_preview: `cmd ${n}`, error: 'boom', timestamp: T1, retry_count: 3,
+    });
+    const lam = `Still stuck ${n}.\nAdvisor skipped: the user asked me not to consult anyone.`;
+    return runHook({ home, cwd, entries: [human('q'), asst(lam)], lam }).blocked;
+  });
+  check('cap holds for skipped repeated failures: at most 2 blocks', outcomes.filter(Boolean).length <= 2);
 }
 
 const failed = results.filter((r) => !r).length;
