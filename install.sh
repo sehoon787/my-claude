@@ -984,9 +984,9 @@ else
 fi
 # codeburn is a companion tool; the other two are always installed.
 if [ "$INSTALL_CODEBURN" = "1" ]; then
-  npm i -g @ast-grep/cli@0.42.0 @code-yeongyu/comment-checker@0.7.0 codeburn@0.9.23 2>/dev/null || true
+  npm i -g @ast-grep/cli@0.45.3 @code-yeongyu/comment-checker@0.8.2 codeburn@0.9.25 2>/dev/null || true
 else
-  npm i -g @ast-grep/cli@0.42.0 @code-yeongyu/comment-checker@0.7.0 2>/dev/null || true
+  npm i -g @ast-grep/cli@0.45.3 @code-yeongyu/comment-checker@0.8.2 2>/dev/null || true
 fi
 # codeburn's usage guard installs by default (no --statusline: OMC HUD owns
 # the statusline). Its hard cap is estimated from the transcript at API
@@ -1118,9 +1118,9 @@ else
     # MCP mode has no such failure mode and is what this installer wires up.
     if [ "$INSTALL_HEADROOM" = "1" ]; then
       case "$_UV_TOOLS" in
-        *"headroom-ai v0.37.0"*) echo "    headroom-ai 0.37.0 already installed" ;;
-        *) uv tool install --python 3.13 "headroom-ai[all]==0.37.0" >/dev/null 2>&1 \
-             && echo "    headroom-ai 0.37.0 installed" \
+        *"headroom-ai v0.39.1"*) echo "    headroom-ai 0.39.1 already installed" ;;
+        *) uv tool install --python 3.13 "headroom-ai[all]==0.39.1" >/dev/null 2>&1 \
+             && echo "    headroom-ai 0.39.1 installed" \
              || echo "    WARNING: headroom-ai install failed" ;;
       esac
     fi

@@ -7,7 +7,7 @@
 // Root cause: the guard estimates session cost from the transcript at API
 // list-price rates ("Plan: none, API-pricing view"), so a subscription
 // session reaches the $15 default in minutes — then every further tool call
-// is denied (codeburn 0.9.23, dist/main.js: the hardUSD check in
+// is denied (codeburn 0.9.23–0.9.25, dist/main.js: the hardUSD check in
 // handlePreToolUse). Only the *default* cap is touched here: a value the
 // user set themselves (anything other than the default 15) is left exactly
 // as it is. Non-fatal: any failure here must not fail install.sh.
