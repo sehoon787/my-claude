@@ -172,6 +172,7 @@ const USER_ONLY_ACTION_RE = /login|trust|approve|permission|credential|2FA|권�
 const FAILURE_TS_SKEW_MS = 2000;
 const STUCK_SESSION_CAP = 2;
 const TRANSCRIPT_ERROR_THRESHOLD = 5;
+const MASKED_REPEAT_THRESHOLD = 3; // same masked-failure command, mirrors retry_count >= 3
 const NO_PROGRESS_WINDOW = 3; // consecutive Stops that must agree to fire
 const NO_PROGRESS_HISTORY = 5; // Stops kept in the rolling window
 const RALPH_LOOP_MIN_ITERATION = 5;
@@ -225,6 +226,22 @@ function turnHasStuckAdvisorCall(lines, fromIndex, re) {
   return false;
 }
 
+// A Bash result whose text reports a nonzero exit status counts as a failure
+// even when is_error is false (e.g. `cmd; echo "EXIT=$?"` always exits 0).
+const MASKED_EXIT_RE = /\bexit(?:[ _-]?(?:code|status))?\s*[=:]?\s*([1-9]\d{0,2})\b/i;
+
+function toolResultText(item) {
+  const c = item.content;
+  if (typeof c === 'string') return c;
+  if (Array.isArray(c)) return c.map((o) => (o && typeof o.text === 'string' ? o.text : '')).join('\n');
+  return '';
+}
+
+function isFailedToolResult(item, isBash) {
+  if (item.is_error === true) return true;
+  return isBash && MASKED_EXIT_RE.test(toolResultText(item));
+}
+
 function toolSignature(name, toolInput) {
   return `${name}:${JSON.stringify(toolInput || {}).slice(0, 80)}`;
 }
@@ -234,6 +251,7 @@ function toolSignature(name, toolInput) {
 // null when nothing failed / nothing paired.
 function computeTurnToolStats(lines, fromIndex) {
   const sigById = new Map();
+  const bashIds = new Set();
   const failCounts = new Map();
   let toolCalls = 0;
   for (let i = fromIndex; i < lines.length; i++) {
@@ -248,11 +266,12 @@ function computeTurnToolStats(lines, fromIndex) {
         if (x && x.type === 'tool_use') {
           toolCalls++;
           if (x.id) sigById.set(x.id, toolSignature(x.name, x.input));
+          if (x.id && x.name === 'Bash') bashIds.add(x.id);
         }
       }
     } else if (r.type === 'user') {
       for (const item of content) {
-        if (item && item.type === 'tool_result' && item.is_error === true) {
+        if (item && item.type === 'tool_result' && isFailedToolResult(item, bashIds.has(item.tool_use_id))) {
           const sig = item.tool_use_id && sigById.get(item.tool_use_id);
           if (sig) failCounts.set(sig, (failCounts.get(sig) || 0) + 1);
         }
@@ -266,18 +285,29 @@ function computeTurnToolStats(lines, fromIndex) {
 
 function countTranscriptToolErrors(lines, fromIndex) {
   let count = 0;
+  const bashSigById = new Map();
+  const maskedCounts = new Map();
   for (let i = fromIndex; i < lines.length; i++) {
     if (!lines[i]) continue;
     let r;
     try { r = JSON.parse(lines[i]); } catch { continue; }
-    if (r.isSidechain || r.type !== 'user') continue;
+    if (r.isSidechain) continue;
     const content = r.message && r.message.content;
     if (!Array.isArray(content)) continue;
+    if (r.type === 'assistant') {
+      for (const x of content) if (x && x.type === 'tool_use' && x.id && x.name === 'Bash') bashSigById.set(x.id, toolSignature(x.name, x.input));
+      continue;
+    }
+    if (r.type !== 'user') continue;
     for (const item of content) {
-      if (item && item.type === 'tool_result' && item.is_error === true) count++;
+      if (!item || item.type !== 'tool_result') continue;
+      const sig = bashSigById.get(item.tool_use_id);
+      if (!isFailedToolResult(item, !!sig)) continue;
+      count++;
+      if (item.is_error !== true) maskedCounts.set(sig, (maskedCounts.get(sig) || 0) + 1);
     }
   }
-  return count;
+  return { count, maxMasked: Math.max(0, ...maskedCounts.values()) };
 }
 
 // {key} when the turn shows repeated tool failure, else null.
@@ -289,8 +319,8 @@ function detectRepeatedFailure(cwd, session, turn, lines) {
       return { key: 'err:' + sha1(`${errState.tool_name}|${errState.error}|${errState.timestamp}`) };
     }
   }
-  const count = countTranscriptToolErrors(lines, turn.startIndex >= 0 ? turn.startIndex : 0);
-  if (count >= TRANSCRIPT_ERROR_THRESHOLD) return { key: 'err:transcript:' + turn.id };
+  const { count, maxMasked } = countTranscriptToolErrors(lines, turn.startIndex >= 0 ? turn.startIndex : 0);
+  if (count >= TRANSCRIPT_ERROR_THRESHOLD || maxMasked >= MASKED_REPEAT_THRESHOLD) return { key: 'err:transcript:' + turn.id };
   return null;
 }
 
@@ -388,10 +418,12 @@ function detectImpossibilityClaim(lam) {
   return stripped;
 }
 
-// Repeated failure and impossibility claims must be audited, so `Advisor
-// skipped:` does not escape them — only a valid `Blocked on user:` line does.
+// Repeated failure is escaped only by a Stuck advisor call (checked by the
+// caller), never by a line. Impossibility claims must be audited too, so
+// `Advisor skipped:` does not escape them — only a valid `Blocked on user:`.
 function isEscaped(lam, signal) {
   const text = lam || '';
+  if (signal === 'repeated-failure') return false;
   if (signal === 'no-progress-loop' && hasValidSkipLine(text)) return true;
   const m = text.match(BLOCKED_ON_USER_LINE);
   return !!(m && hasRealReason(m[1]) && USER_ONLY_ACTION_RE.test(m[1]));
@@ -414,9 +446,9 @@ const STUCK_RECOMMENDATION = {
 function stuckEscapeLine(signal) {
   if (signal === 'repeated-failure') {
     return 'Retrying the same command is not progress: call the recommended advisor to get competing hypotheses, a reframe and at least one different approach, then try that approach. ' +
-      'If it truly needs a user-only action, end with one line: `Blocked on user: <action>` ' +
-      '(only for login/trust/approve/permission/credential/2FA/권한/승인/로그인/신뢰), with a concrete action, not a placeholder. ' +
-      '`Advisor skipped` is not accepted for repeated failure.';
+      'The advisor call must come first: `Advisor skipped` and `Blocked on user` are not accepted for repeated failure without it. ' +
+      'After the advisor returns, if its verdict is truly-blocked on a user-only action, your final answer may then end with one line: `Blocked on user: <action>` ' +
+      '(only for login/trust/approve/permission/credential/2FA/권한/승인/로그인/신뢰), with a concrete action, not a placeholder.';
   }
   if (signal === 'impossibility-claim') {
     return 'An impossibility claim must be audited by an advisor. If it truly needs a user-only action, end with one line: `Blocked on user: <action>` ' +
