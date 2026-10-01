@@ -388,9 +388,11 @@ function detectImpossibilityClaim(lam) {
   return stripped;
 }
 
-function isEscaped(lam) {
+// An impossibility claim must be audited, so `Advisor skipped:` does not
+// escape it — only a valid `Blocked on user:` line does.
+function isEscaped(lam, signal) {
   const text = lam || '';
-  if (hasValidSkipLine(text)) return true;
+  if (signal !== 'impossibility-claim' && hasValidSkipLine(text)) return true;
   const m = text.match(BLOCKED_ON_USER_LINE);
   return !!(m && hasRealReason(m[1]) && USER_ONLY_ACTION_RE.test(m[1]));
 }
@@ -409,6 +411,17 @@ const STUCK_RECOMMENDATION = {
   'impossibility-claim': 'Call `oracle` now with the Agent tool (subagent_type "oracle") for an assumption audit.',
 };
 
+function stuckEscapeLine(signal) {
+  if (signal === 'impossibility-claim') {
+    return 'An impossibility claim must be audited by an advisor. If it truly needs a user-only action, end with one line: `Blocked on user: <action>` ' +
+      '(only for login/trust/approve/permission/credential/2FA/권한/승인/로그인/신뢰), with a concrete action, not a placeholder. ' +
+      '`Advisor skipped` is not accepted for impossibility claims.';
+  }
+  return 'If the verdict is truly-blocked on a user-only action, end with one line: `Blocked on user: <action>` ' +
+    '(only for login/trust/approve/permission/credential/2FA/권한/승인/로그인/신뢰), with a concrete action, not a placeholder. ' +
+    'Otherwise, if consulting truly does not apply, end with: `Advisor skipped: <reason>` — the reason must be concrete, not a placeholder.';
+}
+
 function stuckBlockReason(signal, context) {
   return `[AdvisorGate:Stuck] This turn looks stuck (${STUCK_SIGNAL_LABEL[signal]}${context ? `; ${context}` : ''}). ` +
     `${STUCK_RECOMMENDATION[signal]} ` +
@@ -418,9 +431,7 @@ function stuckBlockReason(signal, context) {
     '(3) at least 1 alternative approach that does not rely on a refuted assumption, plus the next concrete step; ' +
     '(4) a verdict: truly-blocked (naming the user-only action) or unblocked. ' +
     'Then repeat your full final answer with a short "Advisor (<name>)" section covering its verdict. ' +
-    'If the verdict is truly-blocked on a user-only action, end with one line: `Blocked on user: <action>` ' +
-    '(only for login/trust/approve/permission/credential/2FA/권한/승인/로그인/신뢰), with a concrete action, not a placeholder. ' +
-    'Otherwise, if consulting truly does not apply, end with: `Advisor skipped: <reason>` — the reason must be concrete, not a placeholder.';
+    stuckEscapeLine(signal);
 }
 
 // -> {decision: 'block', reason} or null. See the block comment above.
@@ -460,7 +471,7 @@ function evaluateStuckInner(input, home, turn, lines) {
     episodeKey = 'claim:' + sha1(claimText);
   }
 
-  if (!signal || isEscaped(lam)) {
+  if (!signal || isEscaped(lam, signal)) {
     store.writeJson(markerFile, persisted);
     return null;
   }
