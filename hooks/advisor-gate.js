@@ -418,10 +418,12 @@ function detectImpossibilityClaim(lam) {
   return stripped;
 }
 
-// Repeated failure and impossibility claims must be audited, so `Advisor
-// skipped:` does not escape them — only a valid `Blocked on user:` line does.
+// Repeated failure is escaped only by a Stuck advisor call (checked by the
+// caller), never by a line. Impossibility claims must be audited too, so
+// `Advisor skipped:` does not escape them — only a valid `Blocked on user:`.
 function isEscaped(lam, signal) {
   const text = lam || '';
+  if (signal === 'repeated-failure') return false;
   if (signal === 'no-progress-loop' && hasValidSkipLine(text)) return true;
   const m = text.match(BLOCKED_ON_USER_LINE);
   return !!(m && hasRealReason(m[1]) && USER_ONLY_ACTION_RE.test(m[1]));
@@ -444,9 +446,9 @@ const STUCK_RECOMMENDATION = {
 function stuckEscapeLine(signal) {
   if (signal === 'repeated-failure') {
     return 'Retrying the same command is not progress: call the recommended advisor to get competing hypotheses, a reframe and at least one different approach, then try that approach. ' +
-      'If it truly needs a user-only action, end with one line: `Blocked on user: <action>` ' +
-      '(only for login/trust/approve/permission/credential/2FA/권한/승인/로그인/신뢰), with a concrete action, not a placeholder. ' +
-      '`Advisor skipped` is not accepted for repeated failure.';
+      'The advisor call must come first: `Advisor skipped` and `Blocked on user` are not accepted for repeated failure without it. ' +
+      'After the advisor returns, if its verdict is truly-blocked on a user-only action, your final answer may then end with one line: `Blocked on user: <action>` ' +
+      '(only for login/trust/approve/permission/credential/2FA/권한/승인/로그인/신뢰), with a concrete action, not a placeholder.';
   }
   if (signal === 'impossibility-claim') {
     return 'An impossibility claim must be audited by an advisor. If it truly needs a user-only action, end with one line: `Blocked on user: <action>` ' +

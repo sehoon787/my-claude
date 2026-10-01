@@ -354,7 +354,8 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
   const run2 = (l, entries) => runHook({ home: mkHome(), cwd, entries, lam: l });
   check('repeated failure + tracer call -> pass', !run2('Still stuck.', [human('q'), agentCall('tracer'), asst('Still stuck.')]).blocked);
   const bl = 'Still stuck.\nBlocked on user: complete the acme login';
-  check('repeated failure + valid "Blocked on user:" -> pass', !run2(bl, [human('q'), asst(bl)]).blocked);
+  check('repeated failure + valid "Blocked on user:", no advisor -> block', run2(bl, [human('q'), asst(bl)]).blocked);
+  check('repeated failure + tracer call + "Blocked on user:" -> pass', !run2(bl, [human('q'), agentCall('tracer'), asst(bl)]).blocked);
 }
 {
   const home = mkHome(), cwd = mkRepo();
