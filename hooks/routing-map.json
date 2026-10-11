@@ -46,7 +46,7 @@
         "architect",
         "architecture-decision-records",
         "plan-eng-review",
-        "ccg"
+        "ask"
       ],
       "description_keywords": ["architecture", "system design", "design decision", "tradeoff", "trade-off", "hexagonal"],
       "prompt_keywords": ["architecture", "should we", "move from", "switch from", "switch to", "trade-off", "tradeoff", "monolith", "microservice", "long-term", "which approach", "which is better", "should my", "should i", "design decision", "아키텍처", "구조", "게 맞을까", "트레이드오프", "옮기", "옮길", "전환", "도입할까", "어떤 방식"]

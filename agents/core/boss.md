@@ -83,13 +83,13 @@ If the scan fails or returns empty results, proceed gracefully with whatever is 
 
 | Signal | Skill Direction |
 |--------|----------------|
-| High completion risk — large scope, many moving parts | `oh-my-claudecode:ralph`, `oh-my-claudecode:autopilot`, `oh-my-claudecode:ultrawork` |
+| High completion risk — large scope, many moving parts | `oh-my-claudecode:ralph`, `oh-my-claudecode:autopilot`, `oh-my-claudecode:execute` |
 | Ambiguity — vague requirements | `oh-my-claudecode:deep-interview`, `oh-my-claudecode:ralplan` |
 | Safety-sensitive — auth, secrets, deployment | gstack `/cso`, `verification-before-completion` |
 | Unknown root cause | gstack `/investigate` |
 | Quality concern — AI-generated code, no tests | `test-driven-development`, `oh-my-claudecode:ai-slop-cleaner` |
 | Knowledge gap — new codebase, unfamiliar library | `codebase-onboarding`, `documentation-lookup` |
-| Strategic decision — architecture tradeoffs | `oracle` (Advisor Group), `oh-my-claudecode:ccg`, `architecture-decision-records` |
+| Strategic decision — architecture tradeoffs | `oracle` (Advisor Group), `oh-my-claudecode:ask` + `oh-my-claudecode:team`, `architecture-decision-records` |
 | Content creation — docs, specs, RFCs | `doc-coauthoring` |
 | end-to-end feature implementation — Build/Mid-sized intent | `gstack-sprint` |
 | Project kickoff/initial planning — idea needs fleshing out | `/office-hours`, `oh-my-claudecode:deep-interview` |
@@ -155,7 +155,7 @@ Scan all discovered skill `description` fields from Phase 0. If a skill's descri
 
 OMC skills are provided by the OMC plugin, so they are routed by their plugin-qualified name (`oh-my-claudecode:<name>`); a bare `ralph` or `team` will not resolve.
 
-**Common keyword → skill mappings**: "tdd"/"TDD" → `test-driven-development`, "autopilot" → `oh-my-claudecode:autopilot`, "ralph" → `oh-my-claudecode:ralph`, "ulw"/"ultrawork" → `oh-my-claudecode:ultrawork`, "deslop" → `oh-my-claudecode:ai-slop-cleaner`, "review"/"code review" → gstack `/review`, "QA"/"qa" → gstack `/qa` or `/qa-only` (`oh-my-claudecode:ultraqa` is omc-mode-only — route there only inside an active ultrawork/autopilot mode session, not as a standalone default), "deploy"/"ship" → gstack `/ship`, "security audit"/"정기 감사" → gstack `/cso`, "pre-commit security"/"커밋 전 점검" → `security-scan`, "debug"/"investigate" → gstack `/investigate`, "sprint"/"end-to-end"/"e2e implementation" → `gstack-sprint`, "research"/"리서치" → `deep-research` (multi-source, cited report) or `exa-search` (targeted neural web/code search), "plan"/"기획" → `autoplan` (gstack plan-review automation) or `oh-my-claudecode:ralplan` (omc interview-driven planning), "deep interview" → `oh-my-claudecode:deep-interview`, "omc plan" → `oh-my-claudecode:plan`
+**Common keyword → skill mappings**: "tdd"/"TDD" → `test-driven-development`, "autopilot" → `oh-my-claudecode:autopilot`, "ralph" → `oh-my-claudecode:ralph`, "ulw"/"ultrawork" (retired in OMC 5.0) → `oh-my-claudecode:execute` (or `oh-my-claudecode:team` for coordinated parallel workers), "deslop" → `oh-my-claudecode:ai-slop-cleaner`, "review"/"code review" → gstack `/review`, "QA"/"qa" → gstack `/qa` or `/qa-only` (`oh-my-claudecode:verify` is omc-mode-only — route there only inside an active execute/autopilot mode session, not as a standalone default), "deploy"/"ship" → gstack `/ship`, "security audit"/"정기 감사" → gstack `/cso`, "pre-commit security"/"커밋 전 점검" → `security-scan`, "debug"/"investigate" → gstack `/investigate`, "sprint"/"end-to-end"/"e2e implementation" → `gstack-sprint`, "research"/"리서치" → `deep-research` (multi-source, cited report) or `exa-search` (targeted neural web/code search), "plan"/"기획" → `autoplan` (gstack plan-review automation) or `oh-my-claudecode:ralplan` (omc interview-driven planning), "deep interview" → `oh-my-claudecode:deep-interview`, "omc plan" → `oh-my-claudecode:plan`
 
 ### Priority 2: Specialist Agent Match
 

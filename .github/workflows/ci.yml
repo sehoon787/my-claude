@@ -27,6 +27,8 @@ jobs:
           python3 -c "import json; json.load(open('settings.json'))"
       - name: Test shared local service startup
         run: bash tests/shared-local-services.test.sh
+      - name: Test version comparison
+        run: bash tests/version-compare.test.sh
       - name: Check agent files exist
         run: |
           test -f "agents/core/boss.md" || (echo "Missing agent: boss" && exit 1)

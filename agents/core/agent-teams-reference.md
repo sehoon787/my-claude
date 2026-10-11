@@ -65,9 +65,9 @@ teammate communication patterns, and Known Limitations & Workarounds referenced 
 | `oh-my-claudecode:team` skill | Pipeline orchestration | Yes | High | Structured plan→exec→verify (Priority 3c) |
 | `oh-my-claudecode:ralph` | Completion-guarantee loop | No | Medium | Iterative tasks requiring verification |
 | `oh-my-claudecode:autopilot` | Full automation | Internal use | High | Idea→code fully automated |
-| `oh-my-claudecode:ultrawork` | Parallel execution engine | No | Medium | Large-scale parallel execution of independent tasks |
+| `oh-my-claudecode:execute` | Direct execution engine | No | Medium | Plan-driven implementation; use `team` for coordinated parallel workers |
 
-**Containment**: `autopilot ⊃ ralph ⊃ ultrawork` — each wraps the one below. The team skill is a separate path (native team infrastructure). All four are OMC plugin skills, routed as `oh-my-claudecode:<name>`.
+**Containment**: `autopilot ⊃ ralph ⊃ execute` — each wraps the one below. The team skill is a separate path (native team infrastructure). All four are OMC plugin skills, routed as `oh-my-claudecode:<name>`.
 
 ---
 

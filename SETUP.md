@@ -165,7 +165,7 @@ This installs skills to `~/.agents/skills/` and auto-symlinks them to `~/.claude
 | Category | Count | Details |
 |----------|------:|---------|
 | **Agents** (always loaded) | 32 | Boss (1) + OMO sub-orchestrators (9) + OMC specialists (19) + vendored engineering agents (3) |
-| **Skills** | 107 | ECC (61) + gstack (27) + Superpowers (14) + Core (4) + Archify (1). ECC's `web` lane (18) is opt-in; OMC's 16 come from the OMC plugin and are not copied |
+| **Skills** | 107 | ECC (61) + gstack (27) + Superpowers (14) + Core (4) + Archify (1). ECC's `web` lane (18) is opt-in; OMC's 13 come from the OMC plugin and are not copied |
 | **Rules** | 48 files / 9 sets | ECC (46) + Core (2) |
 | **Hooks** | 10 files / 6 events | SessionStart, PreToolUse, PostToolUse, SubagentStop, Stop, UserPromptSubmit |
 | **MCP Servers** | 3 | Context7, Exa, grep.app (registered globally) |
@@ -177,7 +177,7 @@ Skills and rules are installed from an explicit allowlist (`scripts/skill-allowl
 Two lanes are deliberately not in the default install:
 
 - **ECC `web` (18 skills)** — React/Vue/Nuxt/Nest, motion, a11y and browser e2e. Add them with `bash install.sh --skills=web` (or `--full-skills`, or `MY_CLAUDE_SKILLS=web`). The choice is saved to `~/.claude/.my-claude-skills`, so later plain installs keep it; `--skills=` clears it.
-- **OMC (16 skills)** — the OMC plugin already exposes all of them as `oh-my-claudecode:<name>`, so copying them would put a second description of the same skill in every session. Routing surfaces use the prefixed name.
+- **OMC (13 skills)** — the OMC plugin already exposes all of them as `oh-my-claudecode:<name>`, so copying them would put a second description of the same skill in every session. Routing surfaces use the prefixed name.
 
 Every rule file under `rules/common` is injected into every session, so that directory is allowlisted per file (`coding-style.md`, `git-workflow.md`, `security.md` plus this repo's own two). The language rule dirs are `paths:`-scoped and cost nothing until a matching file is opened, so they stay whole.
 

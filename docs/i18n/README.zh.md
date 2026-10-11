@@ -248,7 +248,7 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 |--------|------:|------------|
 | [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 61 | coding-standards、fastapi-patterns、agent-architecture-audit、springboot-patterns、kubernetes-patterns |
 | [gstack](https://github.com/garrytan/gstack) | 27 | /qa、/review、/ship、/cso、/investigate、/office-hours |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 16（插件） | autopilot、ralph、team、ultrawork、ralplan、omc-reference |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 13（插件） | autopilot、ralph、team、execute、ralplan、verify |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming、systematic-debugging、test-driven-development、writing-plans |
 | [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced、boss-briefing、briefing-vault、gstack-sprint |
 | [archify](https://github.com/tt-a1i/archify) | 1 | archify |

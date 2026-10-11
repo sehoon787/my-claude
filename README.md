@@ -80,7 +80,7 @@ as version-pinned CLIs, hosted MCP servers, or files vendored with attribution.
 
 | # | Project | What my-claude takes from it | How it arrives |
 |---|---------|------------------------------|----------------|
-| 1 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** (OMC) — Yeachan Heo | 19 specialist agents (architect, debugger, code reviewer, security reviewer, …) that divide work by role, plus 16 orchestration skills — autopilot, ralph, team. Magic keywords like `autopilot:` activate automatic parallel execution. | Submodule `upstream/omc`, SHA-pinned (see [Bundled Upstream Versions](#bundled-upstream-versions)); `install.sh` runs `npm i -g oh-my-claude-sisyphus@latest` and enables the `oh-my-claudecode@omc` plugin. |
+| 1 | <img src="https://github.com/Yeachan-Heo.png?size=32" width="20" height="20" align="center"/> **[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)** (OMC) — Yeachan Heo | 19 specialist agents (architect, debugger, code reviewer, security reviewer, …) that divide work by role, plus 13 orchestration skills — autopilot, ralph, team. Magic keywords like `autopilot:` activate automatic parallel execution. | Submodule `upstream/omc`, SHA-pinned (see [Bundled Upstream Versions](#bundled-upstream-versions)); `install.sh` runs `npm i -g oh-my-claude-sisyphus@latest` and enables the `oh-my-claudecode@omc` plugin. |
 | 2 | <img src="https://github.com/code-yeongyu.png?size=32" width="20" height="20" align="center"/> **[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)** (omo) — code-yeongyu | A multi-platform harness that routes across 8 providers (Claude, GPT, Gemini, …) by category and bridges to Claude Code via `claude-code-agent-loader` and `claude-code-plugin-loader`. Its 9 agents (Sisyphus, Atlas, Oracle, …) are adapted here as standalone `.md` files. | Not a submodule: the 9 agents live in `agents/omo/`; `install.sh` runs `npm i -g oh-my-opencode@latest` for the `omo` CLI. |
 | 3 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | The 4 AI-coding behavioral guidelines — Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution — always active. | `install.sh` curls `CLAUDE.md` at the pinned SHA `aa4467f`, checksum-verifies it, and appends it to `~/.claude/CLAUDE.md`. No code vendored. |
 | 4 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** (ECC) — affaan-m | 278 skills + 67 agents + 94 commands + language rules upstream. my-claude installs a curated 61-skill subset (79 with the opt-in `web` lane) — stack patterns, AI/agent engineering, codebase tooling — plus 9 rule sets and slash commands like `/tdd`, `/plan`, `/code-review`, `/build-fix`. | Submodule `upstream/ecc`, SHA-pinned; `install.sh` tries `claude plugin add affaan-m/everything-claude-code` first and falls back to the submodule. |
@@ -240,7 +240,7 @@ Commands: `node ~/.claude/hooks/persona-rule.js learn <cmd>`: `list`, `show <id|
 | Category | Count | Source |
 |----------|------:|--------|
 | **Agents** (always loaded) | 32 | Boss 1 + OMO 9 + OMC 19 + Vendored 3 |
-| **Skills** | 107 | ECC 61 · gstack 27 · Superpowers 14 · Core 4 · Archify 1. ECC's 18-skill `web` lane is opt-in (`--skills=web`); OMC's 16 come from the OMC plugin and are never copied |
+| **Skills** | 107 | ECC 61 · gstack 27 · Superpowers 14 · Core 4 · Archify 1. ECC's 18-skill `web` lane is opt-in (`--skills=web`); OMC's 13 come from the OMC plugin and are never copied |
 | **Rules** | 48 files / 9 sets | ECC 46 (3 common files + 8 language dirs) + Core 2 |
 | **MCP Servers** | 3 | Context7, Exa, grep.app |
 | **Hooks** | 10 files / 6 events | Delegation guard, telemetry, verification, vault, context budget |
@@ -306,7 +306,7 @@ Per-agent models are in [Model Routing](#model-routing); where each source comes
 
 **Opt-in `web` lane (+18)** — `accessibility`, `bun-runtime`, `e2e-testing`, `frontend-a11y`, `frontend-patterns`, `motion-*` (3), `nestjs-patterns`, `nextjs-turbopack`, `nuxt4-patterns`, `react-patterns`, `react-performance`, `react-testing`, `ui-to-vue`, `vite-patterns`, `vue-patterns`, `windows-desktop-e2e`. Browser-UI work only; see [Installation](#installation) for the flags.
 
-**OMC skills are not copied.** `install.sh` enables the `oh-my-claudecode@omc` plugin, which already exposes all 16 (`autopilot`, `ralph`, `team`, `ultrawork`, `ralplan`, `omc-reference`, …) as `oh-my-claudecode:<name>`. A local copy would put a second description of the same skill in every session. Routing surfaces use the prefixed name; a bare `ralph` does not resolve.
+**OMC skills are not copied.** `install.sh` enables the `oh-my-claudecode@omc` plugin, which already exposes all 13 (`autopilot`, `ralph`, `team`, `execute`, `ralplan`, `verify`, …) as `oh-my-claudecode:<name>`. A local copy would put a second description of the same skill in every session. Routing surfaces use the prefixed name; a bare `ralph` does not resolve.
 
 </details>
 
