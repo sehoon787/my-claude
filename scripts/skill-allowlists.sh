@@ -198,18 +198,15 @@ ai-slop-cleaner
 ask
 autopilot
 cancel
-ccg
 deep-interview
+execute
 hud
 omc-doctor
-omc-reference
 omc-setup
 ralph
 ralplan
-setup
 team
-ultraqa
-ultrawork
+verify
 "
 
 # ── superpowers skills ──

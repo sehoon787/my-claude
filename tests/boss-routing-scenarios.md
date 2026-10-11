@@ -25,9 +25,8 @@ postgres-patterns, slack-gif-creator, strategic-compact, theme-factory, verifica
 web-artifacts-builder, webapp-testing
 
 ### OMC skill names
-OMC execution-mode skills (ralph, autopilot, ultrawork, ultraqa, team, ralplan, ccg,
-deep-interview, ai-slop-cleaner, cancel, ask, hud, setup, omc-setup, omc-doctor,
-omc-reference) come from the OMC plugin and are routed as `oh-my-claudecode:<name>`.
+OMC execution-mode skills (ralph, autopilot, execute, verify, team, ralplan,
+deep-interview, ai-slop-cleaner, cancel, ask, hud, omc-setup, omc-doctor) come from the OMC plugin and are routed as `oh-my-claudecode:<name>`.
 A bare name does not resolve. Where the scenarios below name one in prose, the
 routing target is the prefixed form.
 
@@ -340,7 +339,7 @@ engineering-multi-agent-systems-architect (vendored, model inherited)
 
 1. **3-Phase trigger** — Only end-to-end requests ("만들어줘", "구현해줘", "배포해줘") trigger the full Sprint. Standalone requests ("리뷰해줘", "QA해줘") go directly to P0.
 2. **Phase 1 is always interactive** — AskUserQuestion must be used for design decisions. No silent assumptions.
-3. **Phase 2 always uses ralph** — Boss never calls ultrawork directly in Sprint mode. ralph handles internal routing.
+3. **Phase 2 always uses ralph** — Boss never calls execute directly in Sprint mode. ralph handles internal routing.
 4. **Step 7a is non-blocking** — gstack /review failure must not prevent Step 7b from running.
 5. **Phase 3 re-reads design doc** — Context recovery from `~/.gstack/projects/` path, not from memory.
 

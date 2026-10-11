@@ -19,6 +19,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # Which upstream skills/rules this installer copies — see scripts/skill-allowlists.sh
 # shellcheck source=scripts/skill-allowlists.sh
 . "$SCRIPT_DIR/scripts/skill-allowlists.sh"
+# shellcheck source=scripts/version-compare.sh
+. "$SCRIPT_DIR/scripts/version-compare.sh"
 
 echo "=== my-claude installer ==="
 echo ""
@@ -821,7 +823,7 @@ if [ -d "$HOME/.claude/plugins/cache/omc/oh-my-claudecode" ]; then
         _omc_dedup_count=$((_omc_dedup_count + 1))
       fi
     done
-    for _skill in ai-slop-cleaner ask autopilot cancel ccg configure-notifications deep-interview deepinit external-context hud learner mcp-setup omc-doctor omc-setup omc-teams plan project-session-manager ralph ralplan release sciomc setup skill team ultraqa ultrawork visual-verdict writer-memory; do
+    for _skill in ai-slop-cleaner ask autopilot cancel configure-notifications deep-interview deepinit execute external-context hud omc-doctor omc-setup plan project-session-manager ralph ralplan release skill team verify visual-verdict; do
       if [ -d "$HOME/.claude/skills/$_skill" ]; then
         rm -rf "$HOME/.claude/skills/$_skill"
         _omc_dedup_count=$((_omc_dedup_count + 1))
@@ -951,7 +953,19 @@ _OMC_HUD_OK=false
 _OMC_PKG_HUD="$(npm root -g 2>/dev/null)/oh-my-claude-sisyphus/dist/hud/index.js"
 [ -f "$_OMC_PKG_HUD" ] && _OMC_HUD_OK=true
 if command -v omc >/dev/null 2>&1 && [ "$_OMC_HUD_OK" = "true" ]; then
-  echo "    OMC already installed ($(omc --version 2>/dev/null || echo 'unknown'))"
+  _OMC_INSTALLED_VER="$(omc --version 2>/dev/null | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)"
+  echo "    OMC already installed (${_OMC_INSTALLED_VER:-unknown})"
+  # Present is not current: upgrade when npm has a newer release. Network or
+  # npm failures never fail the install.
+  _OMC_LATEST_VER="$(npm view oh-my-claude-sisyphus version 2>/dev/null | grep -Eo '^[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)"
+  if [ -n "$_OMC_INSTALLED_VER" ] && [ -n "$_OMC_LATEST_VER" ] && version_lt "$_OMC_INSTALLED_VER" "$_OMC_LATEST_VER"; then
+    echo "    OMC $_OMC_INSTALLED_VER is older than $_OMC_LATEST_VER, upgrading..."
+    if npm i -g oh-my-claude-sisyphus@latest; then
+      echo "    OMC upgraded to $_OMC_LATEST_VER"
+    else
+      echo "    OMC upgrade failed (continuing with $_OMC_INSTALLED_VER)"
+    fi
+  fi
 else
   if command -v omc >/dev/null 2>&1 && [ "$_OMC_HUD_OK" = "false" ]; then
     echo "    OMC found but HUD missing (broken install), reinstalling..."
@@ -1206,6 +1220,28 @@ if command -v claude >/dev/null 2>&1; then
   esac
 fi
 echo "  my-claude plugin: $PLUGIN_REFRESH_STATUS"
+
+# The OMC Claude plugin is refreshed the same way: the npm package above does
+# not update the plugin clone Claude Code actually loads skills and hooks from.
+echo "  [5h] OMC plugin (marketplace route, if installed)..."
+OMC_PLUGIN_REFRESH_STATUS="not installed (skipped)"
+if command -v claude >/dev/null 2>&1; then
+  _PLUGIN_LIST="$(claude plugin list 2>/dev/null || true)"
+  case "$_PLUGIN_LIST" in
+    *oh-my-claudecode@omc*)
+      claude plugin marketplace update omc 2>/dev/null || true
+      claude plugin update oh-my-claudecode@omc 2>/dev/null || true
+      _PLUGIN_LIST_AFTER="$(claude plugin list 2>/dev/null || true)"
+      _PLUGIN_VERSION="$(printf '%s\n' "$_PLUGIN_LIST_AFTER" | awk '/oh-my-claudecode@omc/{found=1; next} found && /Version:/{print $2; exit}')"
+      if [ -n "$_PLUGIN_VERSION" ]; then
+        OMC_PLUGIN_REFRESH_STATUS="refreshed to $_PLUGIN_VERSION"
+      else
+        OMC_PLUGIN_REFRESH_STATUS="refreshed"
+      fi
+      ;;
+  esac
+fi
+echo "  OMC plugin: $OMC_PLUGIN_REFRESH_STATUS"
 
 # Write the manifest from provenance-tracked entries (MANIFEST_TMP), not from
 # scanning $HOME/.claude directories. A directory scan would also pick up

@@ -93,7 +93,7 @@ A stale marketplace cache (path 1) is only the cause when you have **no** user-l
 
 This installs:
 - 32 agents in ~/.claude/agents/ (always loaded): Boss 1 + OMO 9 + OMC 19 + vendored 3
-- 107 skills (61 ECC + 27 gstack + 14 Superpowers + 4 Core + 1 Archify). ECC's 18-skill `web` lane is opt-in via `--skills=web`; OMC's 16 skills come from the OMC plugin and are not copied
+- 107 skills (61 ECC + 27 gstack + 14 Superpowers + 4 Core + 1 Archify). ECC's 18-skill `web` lane is opt-in via `--skills=web`; OMC's 13 skills come from the OMC plugin and are not copied
   Note: gstack skills are installed separately — run Step 1b (`install.sh`) for those.
 - 48 rule files across 9 rule sets
 - 10 behavioral hooks across 6 events (SessionStart, PreToolUse, PostToolUse, SubagentStop, Stop, UserPromptSubmit)
