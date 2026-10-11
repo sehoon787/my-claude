@@ -227,4 +227,4 @@ dispatching-parallel-agents
 # and the clone fallback in install.sh checks out the same tag.
 ARCHIFY_SKILL_NAME="archify"
 ARCHIFY_SKILL_SRC_DIR="archify"
-ARCHIFY_PINNED_TAG="v2.9.0"
+ARCHIFY_PINNED_TAG="v3.0.1"

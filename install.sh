@@ -1132,9 +1132,9 @@ else
     # MCP mode has no such failure mode and is what this installer wires up.
     if [ "$INSTALL_HEADROOM" = "1" ]; then
       case "$_UV_TOOLS" in
-        *"headroom-ai v0.39.1"*) echo "    headroom-ai 0.39.1 already installed" ;;
-        *) uv tool install --python 3.13 "headroom-ai[all]==0.39.1" >/dev/null 2>&1 \
-             && echo "    headroom-ai 0.39.1 installed" \
+        *"headroom-ai v0.40.0"*) echo "    headroom-ai 0.40.0 already installed" ;;
+        *) uv tool install --python 3.13 "headroom-ai[all]==0.40.0" >/dev/null 2>&1 \
+             && echo "    headroom-ai 0.40.0 installed" \
              || echo "    WARNING: headroom-ai install failed" ;;
       esac
     fi
