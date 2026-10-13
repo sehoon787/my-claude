@@ -390,9 +390,9 @@ my-claude 捆绑的工具会把结果写到不同位置 —— 下表列出各�
 
 | 来源 | SHA | 日期 | 差异 |
 |--------|-----|------|------|
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `4eb71d9` | 2026-10-10 | [compare](https://github.com/affaan-m/everything-claude-code/compare/4eb71d9...HEAD) |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `454bae0` | 2026-10-10 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/454bae0...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | `20eb620` | 2026-10-10 | [compare](https://github.com/garrytan/gstack/compare/20eb620...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `b92f181` | 2026-10-13 | [compare](https://github.com/affaan-m/everything-claude-code/compare/b92f181...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `7eb8f08` | 2026-10-13 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/7eb8f08...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `953a62a` | 2026-10-13 | [compare](https://github.com/garrytan/gstack/compare/953a62a...HEAD) |
 | [superpowers](https://github.com/obra/superpowers) | `bb92a77` | 2026-10-10 | [compare](https://github.com/obra/superpowers/compare/bb92a77...HEAD) |
 | [archify](https://github.com/tt-a1i/archify) | `2ab3cae` (`v3.0.1`) | 2026-09-28 | [compare](https://github.com/tt-a1i/archify/compare/2ab3cae...HEAD) |
 
