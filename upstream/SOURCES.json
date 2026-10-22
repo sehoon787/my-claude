@@ -9,8 +9,8 @@
     "path": "upstream/ecc",
     "method": "submodule + plugin-add",
     "note": "ECC plugin install attempted first, submodule as fallback",
-    "pinned_sha": "4eb71d92a39cab44ad40ac9d8a6a5ccb4029d6c2",
-    "pinned_date": "2026-10-10",
+    "pinned_sha": "90606c8315ee09cafc303515c5f33024db6b9882",
+    "pinned_date": "2026-10-22",
     "license": "MIT"
   },
   "oh-my-claudecode": {
@@ -18,8 +18,8 @@
     "path": "upstream/omc",
     "method": "submodule + npm-cli",
     "package": "oh-my-claude-sisyphus",
-    "pinned_sha": "454bae017356ed1d056182cd929b6eb6cf6143ad",
-    "pinned_date": "2026-10-10",
+    "pinned_sha": "1d56846d62024325a0677e83c6fa76003982192f",
+    "pinned_date": "2026-10-22",
     "license": "MIT"
   },
   "gstack": {
@@ -47,16 +47,16 @@
     "installCommand": "git clone --depth 1",
     "updateCommand": "git pull --ff-only",
     "syncFrequency": "on-install",
-    "pinned_sha": "20eb6202fa8ea83a882e7c0463b722cd8a31af1e",
-    "pinned_date": "2026-10-10",
+    "pinned_sha": "514fbfdc9799376edfd2536f60659501a48ead64",
+    "pinned_date": "2026-10-22",
     "license": "MIT"
   },
   "superpowers": {
     "repo": "https://github.com/obra/superpowers",
     "path": "upstream/superpowers",
     "method": "submodule",
-    "pinned_sha": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-    "pinned_date": "2026-10-10",
+    "pinned_sha": "2ce8aa15d05bd57213e6f746f953aafb7ded7a8b",
+    "pinned_date": "2026-10-22",
     "license": "MIT"
   },
   "archify": {
