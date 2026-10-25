@@ -389,10 +389,10 @@ git サブモジュール経由でリンク。ピン留めされたコミット�
 
 | ソース | SHA | 日付 | 差分 |
 |--------|-----|------|------|
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `4eb71d9` | 2026-10-10 | [compare](https://github.com/affaan-m/everything-claude-code/compare/4eb71d9...HEAD) |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `454bae0` | 2026-10-10 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/454bae0...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | `20eb620` | 2026-10-10 | [compare](https://github.com/garrytan/gstack/compare/20eb620...HEAD) |
-| [superpowers](https://github.com/obra/superpowers) | `bb92a77` | 2026-10-10 | [compare](https://github.com/obra/superpowers/compare/bb92a77...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `90606c8` | 2026-10-25 | [compare](https://github.com/affaan-m/everything-claude-code/compare/90606c8...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `5632614` | 2026-10-25 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/5632614...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `cb99df4` | 2026-10-25 | [compare](https://github.com/garrytan/gstack/compare/cb99df4...HEAD) |
+| [superpowers](https://github.com/obra/superpowers) | `2ce8aa1` | 2026-10-25 | [compare](https://github.com/obra/superpowers/compare/2ce8aa1...HEAD) |
 | [archify](https://github.com/tt-a1i/archify) | `2ab3cae` (`v3.0.1`) | 2026-09-28 | [compare](https://github.com/tt-a1i/archify/compare/2ab3cae...HEAD) |
 
 ---
