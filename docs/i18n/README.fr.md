@@ -389,10 +389,10 @@ Liées via des sous-modules git. Les commits épinglés sont suivis nativement p
 
 | Source | SHA | Date | Diff |
 |--------|-----|------|------|
-| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `4eb71d9` | 2026-10-10 | [comparer](https://github.com/affaan-m/everything-claude-code/compare/4eb71d9...HEAD) |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `454bae0` | 2026-10-10 | [comparer](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/454bae0...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | `20eb620` | 2026-10-10 | [comparer](https://github.com/garrytan/gstack/compare/20eb620...HEAD) |
-| [superpowers](https://github.com/obra/superpowers) | `bb92a77` | 2026-10-10 | [comparer](https://github.com/obra/superpowers/compare/bb92a77...HEAD) |
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `25278e7` | 2026-10-28 | [comparer](https://github.com/affaan-m/everything-claude-code/compare/25278e7...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `e10206d` | 2026-10-28 | [comparer](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/e10206d...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `61e201e` | 2026-10-28 | [comparer](https://github.com/garrytan/gstack/compare/61e201e...HEAD) |
+| [superpowers](https://github.com/obra/superpowers) | `2ce8aa1` | 2026-10-28 | [comparer](https://github.com/obra/superpowers/compare/2ce8aa1...HEAD) |
 | [archify](https://github.com/tt-a1i/archify) | `2ab3cae` (`v3.0.1`) | 2026-09-28 | [comparer](https://github.com/tt-a1i/archify/compare/2ab3cae...HEAD) |
 
 ---
