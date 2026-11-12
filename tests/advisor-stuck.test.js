@@ -197,6 +197,42 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
 }
 {
   const home = mkHome(), cwd = mkRepo();
+  const lam = "이 hook은 불가능하다고 단정한 경우에만 막습니다.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("KO connective '불가능하다고' -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "불가능하다는 주장이 없습니다.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("KO connective '불가능하다는' -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "할 수 없다고 판단되면 oracle을 부릅니다.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("KO connective '할 수 없다고' -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "이 작업은 불가능하다.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("KO predicate '불가능하다.' -> block", r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "지금은 할 수 없다.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("KO predicate '할 수 없다.' -> block", r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "이 작업은 불가능해요.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("KO predicate '불가능해요.' -> block", r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
   const lam = "권한이 없어 할 수 없습니다.";
   const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
   check("KO predicate '할 수 없습니다' -> block", r.blocked);

@@ -165,7 +165,8 @@ function evaluateAdvisorGate(input, home, turn) {
 // fails open on any error.
 // Assertive predicate forms only: a bare noun ("불가능 주장", "the impossible
 // case") merely names a topic and must not count as a claim.
-const IMPOSSIBLE_CLAIM_RE = /(\b(is|it's|it is|this is|that's) (impossible|not possible)\b|cannot be done|can't be done|there is no way to|불가능(합니다|해요|해|하다|하네요|함)|할 수 없(습니다|어요|어|다|음)|막혔(습니다|어요|어|다)|방법이 없(습니다|어요|어|다|음))/i;
+// Connective forms (…다고/…다는/…다면) are descriptive, not claims.
+const IMPOSSIBLE_CLAIM_RE = /(\b(is|it's|it is|this is|that's) (impossible|not possible)\b|cannot be done|can't be done|there is no way to|불가능(합니다|해요|해|하다|하네요|함)(?![고는면])|할 수 없(습니다|어요|어|다|음)(?![고는면])|막혔(습니다|어요|어|다)(?![고는면])|방법이 없(습니다|어요|어|다|음)(?![고는면]))/i;
 const QUESTION_TO_USER_RE = /\byou\b|사용자|직접/i;
 const BLOCKED_ON_USER_LINE = /^[\s>*_-]*Blocked on user:\s*(.+)$/im;
 const USER_ONLY_ACTION_RE = /login|trust|approve|permission|credential|2FA|권한|승인|로그인|신뢰/i;
