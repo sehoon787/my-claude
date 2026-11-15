@@ -42,6 +42,25 @@ PY
     fi
     ;;
   http://127.0.0.1:8787/livez)
+    if [ -f "$state/headroom-slow-response" ]; then
+      max_time=1
+      previous=""
+      for argument in "$@"; do
+        [ "$previous" = "--max-time" ] && max_time="$argument"
+        previous="$argument"
+      done
+      if python3 - "$max_time" <<'PY'
+import sys
+raise SystemExit(0 if float(sys.argv[1]) < 1.2 else 1)
+PY
+      then
+        python3 -c 'import sys,time; time.sleep(float(sys.argv[1]))' "$max_time"
+        exit 28
+      fi
+      sleep 1.2
+      printf '{"service":"headroom-proxy","status":"healthy","alive":true}'
+      exit 0
+    fi
     if [ -f "$state/headroom-healthy" ]; then
       printf '{"service":"headroom-proxy","status":"healthy","alive":true}'
       exit 0
@@ -218,6 +237,25 @@ touch "$TMP/foreign-retry/state/codeburn-foreign" "$TMP/foreign-retry/state/code
 run_helper foreign-retry env CODEBURN_SHIM_MODE=success HEADROOM_SHIM_MODE=native
 assert_contains "$TMP/foreign-retry/output" "codeburn web: FAIL (port 4747 belongs to another service; left untouched"
 [ ! -e "$TMP/foreign-retry/state/codeburn-calls" ] || fail "foreign port owner triggered codeburn during identity retry"
+
+# A genuinely running Headroom listener whose health endpoint answers slower
+# than the 1-second identity probe must be reused, not misreported as a
+# foreign owner.
+mkdir -p "$TMP/slow-response-headroom/state"
+touch "$TMP/slow-response-headroom/state/headroom-slow-response" \
+  "$TMP/slow-response-headroom/state/headroom-listener"
+run_helper_with_timeout slow-response-headroom 3 env CODEBURN_SHIM_MODE=success HEADROOM_SHIM_MODE=native
+assert_contains "$TMP/slow-response-headroom/output" "Headroom proxy: REUSED"
+[ ! -e "$TMP/slow-response-headroom/state/headroom-calls" ] \
+  || fail "slow healthy listener started duplicate Headroom"
+
+# A genuinely foreign listener on 8787 must still end in the existing FAIL
+# line and be left untouched once the identity retry reaches a foreign verdict.
+mkdir -p "$TMP/foreign-retry-headroom/state"
+touch "$TMP/foreign-retry-headroom/state/headroom-foreign" "$TMP/foreign-retry-headroom/state/headroom-listener"
+run_helper foreign-retry-headroom env CODEBURN_SHIM_MODE=success HEADROOM_SHIM_MODE=native
+assert_contains "$TMP/foreign-retry-headroom/output" "Headroom proxy: FAIL (port 8787 belongs to another service; left untouched"
+[ ! -e "$TMP/foreign-retry-headroom/state/headroom-calls" ] || fail "foreign port owner triggered Headroom during identity retry"
 
 # Non-HTTP listeners are also detected and never touched.
 mkdir -p "$TMP/non-http/state"
