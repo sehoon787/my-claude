@@ -10,10 +10,10 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-107-purple)
+![Skills](https://img.shields.io/badge/skills-106-purple)
 ![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
-![Hooks](https://img.shields.io/badge/hooks-10-red)
+![Hooks](https://img.shields.io/badge/hooks-13-red)
 ![LSP Servers](https://img.shields.io/badge/LSP-2-008b8b)
 ![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
@@ -81,7 +81,7 @@ MIT 라이선스 업스트림 5개는 명시적인 SHA에 고정한 git 서브�
 | 3 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | AI 코딩 행동 가이드라인 4가지 — Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution — 가 항상 활성화됩니다. | `install.sh`가 고정 SHA `aa4467f`의 `CLAUDE.md`를 curl로 받아 체크섬을 검증한 뒤 `~/.claude/CLAUDE.md`에 덧붙입니다. 코드는 가져오지 않습니다. |
 | 4 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** (ECC) — affaan-m | 업스트림에는 스킬 278개 + 에이전트 67개 + 커맨드 94개 + 언어 룰이 있습니다. my-claude는 엄선한 스킬 61개(옵트인 `web` 레인을 더하면 79개) — 스택 패턴, AI·에이전트 엔지니어링, 코드베이스 도구 — 와 룰셋 9개, `/tdd`, `/plan`, `/code-review`, `/build-fix` 같은 슬래시 커맨드를 설치합니다. | 서브모듈 `upstream/ecc`, SHA 고정. `install.sh`는 `claude plugin add affaan-m/everything-claude-code`를 먼저 시도하고 실패하면 서브모듈로 폴백합니다. |
 | 5 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | Anthropic 공식 스킬 저장소: PDF 파싱, Word/Excel/PowerPoint 조작, MCP 서버 생성. | `install.sh`가 `claude plugin add anthropics/skills`로 설치합니다. 의도적으로 매니페스트 추적 대상이 아닙니다. |
-| 6 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | Garry Tan의 스프린트 프로세스 하네스: 스킬 26개와 `gstack` 루트 라우터(총 27개) — 브라우저 QA(`/qa`), 스코프 드리프트 코드 리뷰(`/review`), 보안 감사(`/cso`), 그리고 Plan→Review→QA→Ship 전체 워크플로(Boss P0 레인). 실제 브라우저 테스트용으로 컴파일된 Playwright 브라우저 데몬을 함께 제공합니다. | 서브모듈 `upstream/gstack`, SHA 고정. |
+| 6 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | Garry Tan의 스프린트 프로세스 하네스: 스킬 25개와 `gstack` 루트 라우터(총 26개) — 브라우저 QA(`/qa`), 스코프 드리프트 코드 리뷰(`/review`), 보안 감사(`/cso`), 그리고 Plan→Review→QA→Ship 전체 워크플로(Boss P0 레인). 실제 브라우저 테스트용으로 컴파일된 Playwright 브라우저 데몬을 함께 제공합니다. | 서브모듈 `upstream/gstack`, SHA 고정. |
 | 7 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | Jesse Vincent의 개발 프로세스 라이브러리: 15개 스킬 중 14개 — 브레인스토밍, 체계적 디버깅, TDD, 계획 작성과 실행, 코드 리뷰 에티켓. `dispatching-parallel-agents`는 Boss와 Agent Teams가 이미 그 경로를 담당하므로 제외했습니다. | 서브모듈 `upstream/superpowers`, SHA 고정. |
 | 8 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | Claude Code와 Codex가 이미 기록하는 세션 파일을 읽는 로컬 우선 토큰·비용 추적 — 프록시도 API 키도 없고 머신 밖으로 나가는 것이 없습니다. 사용량 가드 훅은 기본으로 설치되며(`--no-codeburn-guard`로 건너뛰기 가능) 하드 비용 캡은 비활성화된 채로 설치됩니다: 이 캡은 세션 기록에서 API 정가 기준으로 추정한 값이라, 구독 요금제에서는 정상 세션이 몇 분 만에 기본값 $15에 도달해 이후 모든 툴 호출이 거부될 수 있기 때문입니다. 직접 캡을 설정하려면 `~/.config/codeburn/guard.json`의 `hardUSD`를 수정하세요. | `npm i -g codeburn@0.9.25`. `install.sh`는 두 하네스가 공유하는 대시보드도 시작하거나 재사용합니다 — 「결과를 확인하는 곳」 참조. MIT. |
 | 9 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | MCP로 쓰는 언어 서버의 심볼 그래프: `find_symbol`, `get_symbols_overview`, `find_referencing_symbols`, `replace_symbol_body`, `insert_after_symbol` — 소비 토큰이 파일이 아니라 심볼 크기에 비례합니다. | `uv tool install -p 3.13 serena-agent==1.7.0`으로 설치해 사용자 스코프 stdio MCP 서버(`serena start-mcp-server --context claude-code --project-from-cwd`)로 등록합니다. 배포 패키지는 전체가 GPL-3.0-or-later이며(PyPI의 MIT classifier는 부정확) 외부 서버로만 사용하고 벤더링하지 않습니다. |
@@ -186,10 +186,10 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 | 카테고리 | 수량 | 출처 |
 |----------|------:|--------|
 | **에이전트** (항상 로드됨) | 32 | Boss 1 + OMO 9 + OMC 19 + 벤더링 3 |
-| **스킬** | 107 | ECC 61 · gstack 27 · Superpowers 14 · Core 4 · Archify 1 |
+| **스킬** | 106 | ECC 61 · gstack 26 · Superpowers 14 · Core 4 · Archify 1 |
 | **규칙** | 48개 파일 / 9개 룰셋 | ECC 46 (common + 8개 언어 디렉터리) + Core 2 |
 | **MCP 서버** | 3 | Context7, Exa, grep.app |
-| **훅** | 10개 파일 / 6개 이벤트 | 위임 가드, 텔레메트리, 검증, 지식 금고 |
+| **훅** | 13개 파일 / 7개 이벤트 | 위임 가드, 텔레메트리, 검증, 지식 금고 |
 | **LSP 서버** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
 | **네임드 워크플로** | 2 | code-review-fanout, upstream-audit |
 | **업스트림 서브모듈** | 5 | ecc, omc, gstack, superpowers, archify |
@@ -240,7 +240,7 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 </details>
 
 <details>
-<summary><strong>스킬 — 5개 출처에서 107개</strong></summary>
+<summary><strong>스킬 — 5개 출처에서 106개</strong></summary>
 
 각 출처는 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh)의 허용목록으로 관리되며, 목록에 없는 스킬은 설치되지 않습니다.
 
@@ -256,7 +256,7 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 </details>
 
 <details>
-<summary><strong>MCP 서버 (3) + 훅 (8)</strong></summary>
+<summary><strong>MCP 서버 (3) + 훅 (13)</strong></summary>
 
 **MCP 서버** — 각 서버가 무엇을 하고 어떻게 등록되는지는 [사용하는 오픈소스 도구](#open-source-tools-used)에 있습니다.
 
@@ -374,7 +374,7 @@ BriefingVault v2는 세 가지 지식 관리 방법론을 통합합니다:
 | **3단계 스프린트** | 설계 (대화형) → 실행 (ralph를 통한 자율) → 리뷰 (설계 문서와 대화형 비교) |
 | **에이전트 티어 우선순위** | core > omo > omc > vendored 중복 제거. 가장 특화된 에이전트가 선택됩니다. |
 | **레인 소유권** | 오케스트레이션 → OMC, 개발 프로세스 → superpowers, 배포·QA·보안 → gstack (Boss P0), 언어·스택 지식 → ECC, AI·도메인 → 벤더링 에이전트 |
-| **큐레이션 허용목록** | `scripts/skill-allowlists.sh`가 단일 진실 공급원 — 업스트림 수천 개 중 스킬 107개와 룰셋 9개만 살아남아, 목록에 없는 것은 세션 컨텍스트에 절대 올라오지 않습니다 |
+| **큐레이션 허용목록** | `scripts/skill-allowlists.sh`가 단일 진실 공급원 — 업스트림 수천 개 중 스킬 106개와 룰셋 9개만 살아남아, 목록에 없는 것은 세션 컨텍스트에 절대 올라오지 않습니다 |
 | **Briefing Vault** | 세션, 의사결정, 학습, 참조를 포함하는 Obsidian 호환 `.briefing/` 디렉터리 |
 | **에이전트 텔레메트리** | PostToolUse 훅이 에이전트 사용량을 `agent-usage.jsonl`에 기록 |
 | **무변경 동기화 스킵** | 업스트림 동기화는 서브모듈 범프와 `SOURCES.json` 핀을 스테이징한 뒤, 그 diff가 비어 있지 않을 때만 PR을 생성 |
