@@ -9,8 +9,10 @@
 # or runs it writes a markdown report and signals "flagged" so the caller can
 # skip auto-merge and request human review. Hits in files that are never
 # installed (upstream tests, CI config, docker/, ...) are listed under
-# "Informational (not installed)" and never set the flag. The one exception is
-# a new or changed symlink, which gates wherever it sits.
+# "Informational (not installed)" and never set the flag. Symlinks widen what
+# counts as installed, because install.sh copies through links: a new or changed
+# link gates wherever it sits, and a file that a link in the new tree exposes at
+# an installed path is judged there (see is_installed).
 #
 # Outputs:
 #   - Markdown report to $SCAN_REPORT (default: scan-report.md)
@@ -139,6 +141,48 @@ is_installed_path() {
 }
 # ── end per-repo ────────────────────────────────────────────────────────────
 
+# resolve_link <link path> <link target>: where the link points, as a path from
+# the repository root with "." and ".." folded away. Prints nothing for an
+# absolute target or one that climbs out of the repository.
+resolve_link() {
+  local combined="$2" seg
+  local -a parts out=()
+  case "$2" in /*|'') return 0 ;; esac
+  case "$1" in */*) combined="${1%/*}/$2" ;; esac
+  IFS=/ read -ra parts <<< "$combined"
+  for seg in "${parts[@]}"; do
+    case "$seg" in
+      ''|.) ;;
+      ..) [ "${#out[@]}" -gt 0 ] || return 0; unset "out[${#out[@]}-1]" ;;
+      *) out+=("$seg") ;;
+    esac
+  done
+  (IFS=/; printf '%s\n' "${out[*]:-.}")
+}
+
+# is_installed <upstream dir> <path> [depth]: is_installed_path, or the same
+# question asked at the place a symlink in the new tree exposes the path. With
+# `skills/foo -> ../docker/foo`, install.sh copies docker/foo/SKILL.md as
+# skills/foo/SKILL.md, so that is the path to judge. A link approved once would
+# otherwise let every later sync edit its target unseen: the link itself no
+# longer changes. link_paths/link_dests are filled per submodule below.
+is_installed() {
+  local i dest rel depth="${3:-0}"
+  is_installed_path "$1" "$2" && return 0
+  [ "$depth" -lt 8 ] || return 1 # links that point at each other
+  for i in ${link_paths[@]+"${!link_paths[@]}"}; do
+    dest="${link_dests[$i]}"
+    [ -n "$dest" ] || continue
+    case "$2" in
+      "$dest") rel="" ;;
+      "$dest"/*) rel="/${2#"$dest"/}" ;;
+      *) [ "$dest" = . ] || continue; rel="/$2" ;;
+    esac
+    is_installed "$1" "${link_paths[$i]}$rel" $((depth + 1)) && return 0
+  done
+  return 1
+}
+
 emit "## Upstream sync security scan"
 emit ""
 if [ "$ALLOWLISTS_OK" -ne 1 ]; then
@@ -216,6 +260,15 @@ for sub in "${subs[@]}"; do
   sub_flag=0
   installed_count=0
 
+  # Every symlink in the new tree and where it points, read by is_installed.
+  link_paths=(); link_dests=()
+  while IFS= read -r -d '' entry; do
+    [ "${entry%% *}" = 120000 ] || continue
+    blob="${entry%%$'\t'*}"; blob="${blob##* }"
+    link_paths+=("${entry#*$'\t'}")
+    link_dests+=("$(resolve_link "${entry#*$'\t'}" "$(git -C "$sub" cat-file blob "$blob" 2>/dev/null)")")
+  done < <(git -C "$sub" ls-tree -r -z "$new" 2>/dev/null || true)
+
   # Newly added executable or binary files. Docs are not exempt here: a
   # payload cannot hide behind a .md extension. --no-renames makes a moved file
   # a delete plus an add, so moving a binary into an installed path is seen.
@@ -230,7 +283,7 @@ for sub in "${subs[@]}"; do
     else
       continue
     fi
-    if is_installed_path "$sub" "$path"; then
+    if is_installed "$sub" "$path"; then
       emit "- FLAG **$what**: \`$path\`$detail"
       sub_flag=1
     else
@@ -241,9 +294,11 @@ for sub in "${subs[@]}"; do
   # New or changed symlinks gate wherever they sit. A link's own diff is just
   # its target string, and install.sh copies through links, so a link at a path
   # that looks uninstalled (`review -> test/fixtures/review`) can put content
-  # the scan only lists as informational onto the machine.
+  # the scan only lists as informational onto the machine. The target is shown
+  # as one line without backticks: a link target may hold newlines, and an
+  # unfiltered one could write extra lines into this report.
   while IFS= read -r path; do
-    target=$(git -C "$sub" cat-file -p "$new:$path" 2>/dev/null | cut -c1-120)
+    target=$(git -C "$sub" cat-file -p "$new:$path" 2>/dev/null | head -n 1 | cut -c1-120 | tr -d '\r\140')
     emit "- FLAG **new or changed symlink**: \`$path\` (to \`$target\`)"
     sub_flag=1
   done < <(git -C "$sub" diff --raw --no-renames "$old" "$new" 2>/dev/null \
@@ -252,7 +307,7 @@ for sub in "${subs[@]}"; do
   # Pattern scan over ADDED lines only.
   for f in "${files[@]}"; do
     installed=0
-    if is_installed_path "$sub" "$f"; then
+    if is_installed "$sub" "$f"; then
       installed=1
       installed_count=$((installed_count + 1))
     elif is_doc_path "$f"; then

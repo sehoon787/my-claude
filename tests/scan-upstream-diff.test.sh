@@ -83,6 +83,7 @@ case_new() {
 case_add() {
   local up="$CASE_DIR/upstream/$CASE_UP" f="$CASE_DIR/upstream/$CASE_UP/$1"
   mkdir -p "$(dirname "$f")"
+  rm -f "$f" # a symlink here would otherwise be written through
   printf '%s\n' "$2" > "$f"
   git -C "$up" add -- "$1"
   if [ "${3:-}" = x ]; then git -C "$up" update-index --chmod=+x -- "$1"; fi
@@ -93,14 +94,18 @@ case_add_bin() {
   printf '\000\001\002\003\000' > "$f"
   git -C "$up" add -- "$1"
 }
-# case_link <path> <target>: a symlink, replacing a file already at <path>.
+# case_link <path> <target>: a symlink, replacing whatever is at <path> (a file,
+# another link, or a whole directory).
 case_link() {
   local up="$CASE_DIR/upstream/$CASE_UP" f="$CASE_DIR/upstream/$CASE_UP/$1"
+  git -C "$up" rm -rqf --ignore-unmatch -- "$1"
+  rm -rf "$f"
   mkdir -p "$(dirname "$f")"
-  rm -f "$f"
   ln -s "$2" "$f"
   git -C "$up" add -- "$1"
 }
+# case_rm <path>: delete a tracked file or link in the NEW commit.
+case_rm() { git -C "$CASE_DIR/upstream/$CASE_UP" rm -qf -- "$1"; }
 # case_old: commit what was added so far as the OLD side of the bump, for tests
 # that need a file to exist before the sync moves or changes it.
 case_old() {
@@ -226,6 +231,9 @@ expect "moved executable: flagged=true" flagged_is true
 expect "moved executable: FLAG line" \
   gating_has "- FLAG **new executable file**: \`skills/$ECC_SKILL/run.sh\` (mode 100755)"
 
+# The pattern scan diffs one destination path at a time, so a moved file reads as
+# all-added lines even with rename detection on; this one holds with or without
+# --no-renames, which only the two cases above depend on.
 case_new ecc; case_add docker/evil.sh "$PAYLOAD"; case_old
 case_move docker/evil.sh "skills/$ECC_SKILL/evil.sh"; case_scan
 expect "moved payload: flagged=true" flagged_is true
@@ -248,6 +256,86 @@ case_new ecc; case_link base.txt elsewhere.txt; case_scan
 expect "file replaced by a symlink: flagged=true" flagged_is true
 expect "file replaced by a symlink: FLAG line" \
   gating_has "- FLAG **new or changed symlink**: \`base.txt\` (to \`elsewhere.txt\`)"
+
+# The directory itself becomes the link: its files vanish from the diff and the
+# link's own diff is a target string. This is the shape the link check exists for.
+case_new ecc; case_add "skills/$ECC_SKILL/SKILL.md" 'clean'; case_add docker/evil-skill/SKILL.md "$PAYLOAD"; case_old
+case_link "skills/$ECC_SKILL" ../docker/evil-skill; case_scan
+expect "skill dir replaced by a symlink: flagged=true" flagged_is true
+expect "skill dir replaced by a symlink: FLAG line" \
+  gating_has "- FLAG **new or changed symlink**: \`skills/$ECC_SKILL\` (to \`../docker/evil-skill\`)"
+
+case_new ecc; case_link "skills/$ECC_SKILL" ../docker/a; case_old
+case_link "skills/$ECC_SKILL" ../docker/b; case_scan
+expect "retargeted symlink: flagged=true" flagged_is true
+expect "retargeted symlink: FLAG line shows the new target" \
+  gating_has "- FLAG **new or changed symlink**: \`skills/$ECC_SKILL\` (to \`../docker/b\`)"
+
+# A link that goes away, or turns into a plain file, is no new way in.
+case_new ecc; case_link docker/link ../README.md; case_old
+case_rm docker/link; case_scan
+expect "deleted symlink: flagged=false" flagged_is false
+expect "deleted symlink: nothing about links in the report" report_lacks symlink
+
+case_new ecc; case_link docker/link ../README.md; case_old
+case_add docker/link 'plain'; case_scan
+expect "symlink replaced by a plain file: flagged=false" flagged_is false
+expect "symlink replaced by a plain file: nothing about links in the report" report_lacks symlink
+
+# A link target can hold a backtick and a newline. The report line must stay one
+# line, or upstream could write its own verdict into the comment.
+case_new ecc; case_link docker/inject $'x`\n:white_check_mark: injected verdict'; case_scan
+expect "symlink target with a newline: one FLAG line, target cut at the newline" \
+  gating_has "- FLAG **new or changed symlink**: \`docker/inject\` (to \`x\`)"
+expect "symlink target with a newline: nothing injected into the report" report_lacks ':white_check_mark: injected'
+
+# A link the maintainers approved once is still a way in: a later sync that only
+# edits the file behind it leaves the link alone. The file is judged at the path
+# the link exposes it at (docker/skill-src/run.sh is skills/<name>/run.sh).
+case_new ecc; case_add docker/skill-src/run.sh 'echo ok'; case_link "skills/$ECC_SKILL" ../docker/skill-src; case_old
+case_add docker/skill-src/run.sh "$PAYLOAD"; case_scan
+expect "edit behind an existing symlink: flagged=true" flagged_is true
+expect "edit behind an existing symlink: FLAG line" gating_has "$(flag_line "$PAYLOAD_LABEL" docker/skill-src/run.sh)"
+expect "edit behind an existing symlink: not informational" report_lacks "upstream/ecc/docker/skill-src/run.sh"
+expect "edit behind an existing symlink: the unchanged link is not flagged again" report_lacks symlink
+
+case_new ecc; case_add docker/real.sh 'echo ok'; case_link "skills/$ECC_SKILL/run.sh" ../../docker/real.sh; case_old
+case_add docker/real.sh "$PAYLOAD"; case_scan
+expect "edit behind a symlink to a file: flagged=true" flagged_is true
+expect "edit behind a symlink to a file: FLAG line" gating_has "$(flag_line "$PAYLOAD_LABEL" docker/real.sh)"
+
+# Judged where the link sits: a link at a path nothing installs exposes nothing,
+# however busy its target is (gstack's connect-chrome -> open-gstack-browser).
+case_new ecc; case_add docker/target/run.sh 'echo ok'; case_link docker/alias ./target; case_old
+case_add docker/target/run.sh "$PAYLOAD"; case_scan
+expect "edit behind a symlink nobody installs: flagged=false" flagged_is false
+expect "edit behind a symlink nobody installs: informational" info_has "$(info_line "$PAYLOAD_LABEL" docker/target/run.sh)"
+
+# Links that leave the repository or point at an absolute path expose nothing.
+case_new ecc; case_add docker/run.sh 'echo ok'; case_link "skills/$ECC_SKILL" ../../outside; case_link docker/abs /etc; case_old
+case_add docker/run.sh "$PAYLOAD"; case_scan
+expect "symlinks out of the repository expose nothing: flagged=false" flagged_is false
+expect "symlinks out of the repository expose nothing: informational" info_has "$(info_line "$PAYLOAD_LABEL" docker/run.sh)"
+
+# A link to the repository root exposes every path beneath the link's own.
+case_new ecc; case_add docker/run.sh 'echo ok'; case_link "skills/$ECC_SKILL" ..; case_old
+case_add docker/run.sh "$PAYLOAD"; case_scan
+expect "symlink to the repository root: flagged=true" flagged_is true
+expect "symlink to the repository root: FLAG line" gating_has "$(flag_line "$PAYLOAD_LABEL" docker/run.sh)"
+
+# A link that points at another link: the chain is followed.
+case_new ecc; case_add docker/payload/run.sh 'echo ok'; case_link docker/hop ./payload; case_link "skills/$ECC_SKILL" ../docker/hop; case_old
+case_add docker/payload/run.sh "$PAYLOAD"; case_scan
+expect "chain of symlinks: flagged=true" flagged_is true
+expect "chain of symlinks: FLAG line" gating_has "$(flag_line "$PAYLOAD_LABEL" docker/payload/run.sh)"
+
+# Links that point at each other must not loop: docker/b/x.sh, deleted in this
+# sync, is looked up through both of them.
+case_new ecc; case_add docker/b/x.sh 'echo ok'; case_old
+case_link docker/b ./a; case_link docker/a ./b; case_scan
+expect "symlinks pointing at each other: the scan finishes with flagged=true" flagged_is true
+expect "symlinks pointing at each other: both links flagged" \
+  gating_has "- FLAG **new or changed symlink**: \`docker/a\` (to \`./b\`)"
 
 # ── 3. Unknown upstream fails closed ─────────────────────────────────────────
 should_flag "unknown upstream, script" mystery tests/helper.sh
