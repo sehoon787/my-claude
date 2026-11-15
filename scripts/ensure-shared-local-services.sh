@@ -139,6 +139,54 @@ headroom_healthy() {
   printf '%s' "$_body" | grep -Eq '"alive"[[:space:]]*:[[:space:]]*true'
 }
 
+# Retries the Headroom identity check until $1 (a time.monotonic() deadline)
+# instead of relying on the single 1-second probe in fetch_url, which can time
+# out against a live but momentarily slow proxy under install load and get that
+# port misreported as belonging to another service. Exits 0 once the same
+# identity headroom_healthy requires is confirmed, 1 once a different service
+# answers with valid JSON (a genuinely foreign listener), or 2 if neither is
+# confirmed before the deadline.
+wait_for_headroom_identity() {
+  python3 - "$1" "$HEADROOM_HEALTH_URL" <<'PY'
+import json
+import subprocess
+import sys
+import time
+
+deadline = float(sys.argv[1])
+url = sys.argv[2]
+
+while True:
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise SystemExit(2)
+    try:
+        result = subprocess.run(
+            ["curl", "--silent", "--show-error", "--fail", "--max-time", f"{remaining:.3f}", url],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            timeout=remaining,
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        raise SystemExit(2)
+    if result.returncode == 0:
+        try:
+            body = json.loads(result.stdout)
+        except ValueError:
+            body = None
+        if isinstance(body, dict):
+            if body.get("service") != "headroom-proxy":
+                raise SystemExit(1)
+            if body.get("status") == "healthy" and body.get("alive") is True:
+                raise SystemExit(0)
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise SystemExit(2)
+    time.sleep(min(0.1, remaining))
+PY
+}
+
 # Return 0 when a listener owns the port, 1 when it is clear, and 2 when this
 # host has neither supported listener probe. Health identity is checked first,
 # so an occupied port here is always left untouched.
@@ -258,6 +306,7 @@ ensure_codeburn() {
 
 ensure_headroom() {
   _log="$LOG_DIR/headroom.log"
+  _identity_deadline=$(python3 -c 'import sys,time; print(time.monotonic() + int(sys.argv[1]))' "$TIMEOUT_SECONDS")
 
   if headroom_healthy; then
     echo "Headroom proxy: REUSED ($HEADROOM_URL)"
@@ -266,6 +315,11 @@ ensure_headroom() {
   port_is_occupied 8787
   _port_status=$?
   if [ "$_port_status" = "0" ]; then
+    wait_for_headroom_identity "$_identity_deadline"
+    if [ "$?" = "0" ]; then
+      echo "Headroom proxy: REUSED ($HEADROOM_URL)"
+      return 0
+    fi
     echo "Headroom proxy: FAIL (port 8787 belongs to another service; left untouched; log: $_log)"
     return 0
   fi
