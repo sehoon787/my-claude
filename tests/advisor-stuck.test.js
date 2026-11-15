@@ -239,6 +239,96 @@ const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); r
 }
 {
   const home = mkHome(), cwd = mkRepo();
+  const lam = "직접 접근이 불가능해서 우회 방법을 썼습니다.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("KO causal '불가능해서' -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "할 수 없어서 다른 경로로 처리했습니다.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("KO causal '할 수 없어서' -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "길이 막혀서 우회했습니다.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("KO causal '막혀서' -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "방법이 없어서 다른 경로를 택했습니다.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("KO causal '방법이 없어서' -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "if it is impossible, we fall back.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("EN conditional 'if it is impossible' -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "if it's not possible, we fall back.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("EN conditional \"if it's not possible\" -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "whether this is impossible depends on the host.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("EN conditional 'whether this is impossible' -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "We stop when it is impossible to continue.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("EN conditional 'when it is impossible' -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "unless it is impossible we proceed.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("EN conditional 'unless it is impossible' -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "불가능합니다만 대안이 있습니다.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("KO predicate '불가능합니다만' -> block", r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "할 수 없지만 대안은 있습니다.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("KO connective '할 수 없지만' (pre-existing) -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "불가능하다면 우회합니다.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("KO connective '불가능하다면' -> no block", !r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "It is impossible.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("EN 'It is impossible.' -> block", r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "This cannot be done.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("EN 'This cannot be done.' -> block", r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
+  const lam = "There is no way to do this.";
+  const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
+  check("EN 'there is no way to do this' -> block", r.blocked);
+}
+{
+  const home = mkHome(), cwd = mkRepo();
   const lam = "This is impossible without admin rights.";
   const r = runHook({ home, cwd, entries: [human('try again'), asst(lam)], lam });
   check("EN 'This is impossible without admin rights.' -> block", r.blocked);
