@@ -81,7 +81,7 @@ INSTALLABLE="$(echo $ECC_SKILL_ALLOWLIST $ECC_SKILL_OPTIONAL_WEB $GSTACK_SKILL_A
 
 # ── known-cut names: skills/agents removed in earlier dependency-graph
 # reconciliation passes. Referencing one of these is always dangling. ──
-DENYLIST="trace deep-dive tdd-workflow blueprint sciomc market-research plan-orchestrate make-pdf skillify plan-canvas git-workflow team-builder autoresearch research-ops dispatching-parallel-agents benchmark-models context-save context-restore devex-review"
+DENYLIST="trace deep-dive tdd-workflow blueprint sciomc market-research plan-orchestrate make-pdf skillify plan-canvas git-workflow team-builder autoresearch research-ops dispatching-parallel-agents benchmark-models context-save context-restore devex-review investigate"
 
 FILES="agents/core/boss.md skills/core/boss-advanced/SKILL.md skills/core/gstack-sprint/SKILL.md"
 

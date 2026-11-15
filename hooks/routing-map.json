@@ -112,7 +112,7 @@
     },
     {
       "name": "Debug",
-      "members": ["investigate", "debugger", "systematic-debugging", "tracer"],
+      "members": ["systematic-debugging", "debugger", "tracer"],
       "description_keywords": ["debug", "root cause", "root-cause"],
       "prompt_keywords": ["bug", "error", "crash", "fails", "failing", "broken", "exception", "stack trace", "not working", "doesn't work", "regression", "debug", "버그", "에러", "오류", "안 돼", "안돼", "작동하지", "터져", "실패"]
     },

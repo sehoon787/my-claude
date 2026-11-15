@@ -237,7 +237,7 @@ The vendored three — ai-engineer, devops-automator, multi-agent-systems-archit
 
 gstack is a sprint-process harness from [garrytan/gstack](https://github.com/garrytan/gstack). my-claude installs 26 of its skills plus the `gstack` root router — 27 in total — for structured engineering workflows.
 
-Key gstack skills: `/review`, `/qa`, `/ship`, `/cso`, `/investigate`, `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`, `/plan-design-review`, `/plan-devex-review`, `/land-and-deploy`, `/canary`, `/benchmark`, `/retro`. gstack supersedes several ECC skills of the same name — `install.sh` removes stale copies automatically.
+Key gstack skills: `/review`, `/qa`, `/ship`, `/cso`, `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`, `/plan-design-review`, `/plan-devex-review`, `/land-and-deploy`, `/canary`, `/benchmark`, `/retro`. gstack supersedes several ECC skills of the same name — `install.sh` removes stale copies automatically.
 
 ### How Boss uses gstack
 
@@ -417,7 +417,7 @@ Or enable Windows Developer Mode (Settings > Update & Security > For Developers)
 curl -fsSL https://bun.sh/install | bash && source ~/.bashrc && bash install.sh
 ```
 
-Text-based gstack skills (`/review`, `/ship`, `/plan-*`, `/investigate`) work without the browser runtime.
+Text-based gstack skills (`/review`, `/ship`, `/plan-*`) work without the browser runtime.
 
 ### Duplicates: N > 0 in verify output
 
