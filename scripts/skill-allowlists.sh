@@ -155,7 +155,7 @@ security.md
 "
 
 # ── gstack skills ──
-# The 26 skills Boss P0 routing depends on. The gstack root SKILL.md
+# The 25 skills Boss P0 routing depends on. The gstack root SKILL.md
 # (meta-router) is installed separately by install.sh and is not listed here.
 GSTACK_SKILL_ALLOWLIST="
 autoplan
@@ -169,7 +169,6 @@ design-review
 document-release
 freeze
 guard
-investigate
 land-and-deploy
 office-hours
 plan-ceo-review

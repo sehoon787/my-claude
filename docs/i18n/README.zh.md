@@ -10,10 +10,10 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-107-purple)
+![Skills](https://img.shields.io/badge/skills-106-purple)
 ![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
-![Hooks](https://img.shields.io/badge/hooks-10-red)
+![Hooks](https://img.shields.io/badge/hooks-13-red)
 ![LSP Servers](https://img.shields.io/badge/LSP-2-008b8b)
 ![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
@@ -81,7 +81,7 @@ curl -s https://raw.githubusercontent.com/sehoon787/my-claude/main/AI-INSTALL.md
 | 3 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | 4 条 AI 编码行为准则 —— Think Before Coding、Simplicity First、Surgical Changes、Goal-Driven Execution —— 始终生效。 | `install.sh` 以 curl 拉取固定 SHA `aa4467f` 的 `CLAUDE.md`，校验其校验和后追加到 `~/.claude/CLAUDE.md`。不收录任何代码。 |
 | 4 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** (ECC) — affaan-m | 上游共 278 个 Skills + 67 个 Agent + 94 条命令 + 语言规则。my-claude 精选安装 61 个 Skills（加上可选的 `web` 通道为 79 个）—— 技术栈模式、AI/Agent 工程、代码库工具 —— 外加 9 个规则集，以及 `/tdd`、`/plan`、`/code-review`、`/build-fix` 等斜杠命令。 | 子模块 `upstream/ecc`，固定 SHA；`install.sh` 先尝试 `claude plugin add affaan-m/everything-claude-code`，失败则回退到子模块。 |
 | 5 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | Anthropic 官方 Skills 仓库：PDF 解析，Word/Excel/PowerPoint 处理，MCP 服务器创建。 | 由 `install.sh` 执行 `claude plugin add anthropics/skills`。有意不纳入清单跟踪。 |
-| 6 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | Garry Tan 的冲刺流程 harness：26 个 Skills 加上 `gstack` 根路由器（共 27 个）—— 浏览器 QA（`/qa`）、范围漂移代码审查（`/review`）、安全审计（`/cso`），以及完整的 Plan→Review→QA→Ship 流程（Boss P0 通道）。随附编译好的 Playwright 浏览器守护进程用于真实浏览器测试。 | 子模块 `upstream/gstack`，固定 SHA。 |
+| 6 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | Garry Tan 的冲刺流程 harness：25 个 Skills 加上 `gstack` 根路由器（共 26 个）—— 浏览器 QA（`/qa`）、范围漂移代码审查（`/review`）、安全审计（`/cso`），以及完整的 Plan→Review→QA→Ship 流程（Boss P0 通道）。随附编译好的 Playwright 浏览器守护进程用于真实浏览器测试。 | 子模块 `upstream/gstack`，固定 SHA。 |
 | 7 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | Jesse Vincent 的开发流程库：15 个 Skills 中的 14 个 —— 头脑风暴、系统化调试、TDD、计划编写与执行、代码审查礼仪。`dispatching-parallel-agents` 被排除，因为 Boss 与 Agent Teams 已覆盖该路径。 | 子模块 `upstream/superpowers`，固定 SHA。 |
 | 8 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | 基于 Claude Code 与 Codex 本就写入的会话文件做本地优先的 token 与成本追踪 —— 无代理、无 API key，数据不离开本机。用量守卫 hooks 默认安装（`--no-codeburn-guard` 可跳过），且硬上限默认禁用：该值是根据会话记录按 API 标价估算的，在订阅制套餐下正常会话几分钟内就会达到默认的 $15，之后每次工具调用都会被拒绝。要设置自己的上限，请编辑 `~/.config/codeburn/guard.json` 中的 `hardUSD`。 | `npm i -g codeburn@0.9.25`；`install.sh` 还会启动或复用一个跨 harness 共享的仪表盘 —— 见「在哪里查看结果」。MIT。 |
 | 9 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | 通过 MCP 使用语言服务器的符号图：`find_symbol`、`get_symbols_overview`、`find_referencing_symbols`、`replace_symbol_body`、`insert_after_symbol` —— 消耗的 token 随符号大小而非文件大小增长。 | `uv tool install -p 3.13 serena-agent==1.7.0`，注册为用户级 stdio MCP 服务器（`serena start-mcp-server --context claude-code --project-from-cwd`）。分发包整体遵循 GPL-3.0-or-later（PyPI 的 MIT classifier 并不准确）；作为外部服务器使用，从不收录进本仓库。 |
@@ -186,10 +186,10 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 | 类别 | 数量 | 来源 |
 |----------|------:|--------|
 | **Agent**（始终加载） | 32 | Boss 1 + OMO 9 + OMC 19 + Vendored 3 |
-| **Skills** | 107 | ECC 61 · gstack 27 · Superpowers 14 · Core 4 · Archify 1 |
+| **Skills** | 106 | ECC 61 · gstack 26 · Superpowers 14 · Core 4 · Archify 1 |
 | **规则** | 48 个文件 / 9 个规则集 | ECC 46（common + 8 个语言目录）+ Core 2 |
 | **MCP 服务器** | 3 | Context7、Exa、grep.app |
-| **Hooks** | 10 个文件 / 6 个事件 | 委派守卫、遥测、验证、知识库 |
+| **Hooks** | 13 个文件 / 7 个事件 | 委派守卫、遥测、验证、知识库 |
 | **LSP 服务器** | 2 | typescript（`typescript-language-server`）、python（`pyright-langserver`） |
 | **具名工作流** | 2 | code-review-fanout、upstream-audit |
 | **上游子模块** | 5 | ecc、omc、gstack、superpowers、archify |
@@ -240,14 +240,14 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 </details>
 
 <details>
-<summary><strong>Skills — 107 个，来自 5 个来源</strong></summary>
+<summary><strong>Skills — 106 个，来自 5 个来源</strong></summary>
 
 每个来源都由 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) 白名单管理，未列入的 Skills 一律不安装。
 
 | 来源 | 数量 | 核心 Skills |
 |--------|------:|------------|
 | [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 61 | coding-standards、fastapi-patterns、agent-architecture-audit、springboot-patterns、kubernetes-patterns |
-| [gstack](https://github.com/garrytan/gstack) | 27 | /qa、/review、/ship、/cso、/investigate、/office-hours |
+| [gstack](https://github.com/garrytan/gstack) | 26 | /qa、/review、/ship、/cso、/office-hours |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 13（插件） | autopilot、ralph、team、execute、ralplan、verify |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming、systematic-debugging、test-driven-development、writing-plans |
 | [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced、boss-briefing、briefing-vault、gstack-sprint |
@@ -256,7 +256,7 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 </details>
 
 <details>
-<summary><strong>MCP 服务器（3）+ Hooks（8）</strong></summary>
+<summary><strong>MCP 服务器（3）+ Hooks（13）</strong></summary>
 
 **MCP 服务器** —— 各自的作用与注册方式见 [使用的开源工具](#open-source-tools-used)。
 
@@ -375,7 +375,7 @@ my-claude 捆绑的工具会把结果写到不同位置 —— 下表列出各�
 | **三阶段冲刺** | 设计（交互式）→ 执行（通过 ralph 自主进行）→ 审查（交互式对比设计文档） |
 | **Agent 层级优先级** | core > omo > omc > vendored 去重。最专业的 Agent 优先。 |
 | **通道归属** | 编排 → OMC，开发流程 → superpowers，发布/QA/部署/安全 → gstack（Boss P0），语言与技术栈知识 → ECC，AI 与领域 → vendored Agent |
-| **精选白名单** | `scripts/skill-allowlists.sh` 是唯一事实来源——上游数千项中只留下 107 个 Skills 和 9 个规则集，未列入的绝不进入会话上下文 |
+| **精选白名单** | `scripts/skill-allowlists.sh` 是唯一事实来源——上游数千项中只留下 106 个 Skills 和 9 个规则集，未列入的绝不进入会话上下文 |
 | **Briefing Vault** | 兼容 Obsidian 的 `.briefing/` 目录，含会话、决策、学习、参考资料 |
 | **Agent 遥测** | PostToolUse hook 将 Agent 使用情况记录到 `agent-usage.jsonl` |
 | **智能包** | 项目类型检测在会话开始时推荐相关 Agent 包 |

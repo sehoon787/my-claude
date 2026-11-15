@@ -34,7 +34,7 @@ Every agent is always loaded — there are no on-demand packs. 32 agents install
 | Upstream | `upstream/omc/agents/` | 19 |
 | Vendored | `agents/vendored/` | 3 |
 
-Skills and rules are not loaded wholesale from upstream: only names listed in `scripts/skill-allowlists.sh` are copied (139 skills, 9 rule sets). Adding a skill to the stack means adding its name there.
+Skills and rules are not loaded wholesale from upstream: only names listed in `scripts/skill-allowlists.sh` are copied (106 skills, 9 rule sets). Adding a skill to the stack means adding its name there.
 
 ---
 

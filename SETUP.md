@@ -165,9 +165,9 @@ This installs skills to `~/.agents/skills/` and auto-symlinks them to `~/.claude
 | Category | Count | Details |
 |----------|------:|---------|
 | **Agents** (always loaded) | 32 | Boss (1) + OMO sub-orchestrators (9) + OMC specialists (19) + vendored engineering agents (3) |
-| **Skills** | 107 | ECC (61) + gstack (27) + Superpowers (14) + Core (4) + Archify (1). ECC's `web` lane (18) is opt-in; OMC's 13 come from the OMC plugin and are not copied |
+| **Skills** | 106 | ECC (61) + gstack (26) + Superpowers (14) + Core (4) + Archify (1). ECC's `web` lane (18) is opt-in; OMC's 13 come from the OMC plugin and are not copied |
 | **Rules** | 48 files / 9 sets | ECC (46) + Core (2) |
-| **Hooks** | 10 files / 6 events | SessionStart, PreToolUse, PostToolUse, SubagentStop, Stop, UserPromptSubmit |
+| **Hooks** | 13 scripts / 7 events | SessionStart, PreToolUse, PostToolUse, SubagentStop, Stop, SessionEnd, UserPromptSubmit |
 | **MCP Servers** | 3 | Context7, Exa, grep.app (registered globally) |
 | **LSP Servers** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) — declared in `.lsp.json`, started on demand for diagnostics and code navigation |
 | **Named Workflows** | 2 | code-review-fanout, upstream-audit — copied to `~/.claude/workflows/`, invocable from any project via the Workflow tool |
@@ -186,9 +186,9 @@ Every rule file under `rules/common` is injected into every session, so that dir
 ```
 ~/.claude/
 ├── agents/          ← 32 agents (always loaded by Claude Code)
-├── skills/          ← 107 skill directories
+├── skills/          ← 106 skill directories
 ├── rules/           ← 48 rule files in 9 rule sets
-├── hooks/           ← hooks.json + 10 hook scripts
+├── hooks/           ← hooks.json + routing-map.json + 13 hook scripts + 7 helper modules
 ├── workflows/       ← 2 named workflows (code-review-fanout.js, upstream-audit.js)
 ├── docs/nexus/      ← Agent Teams reference (not parsed as an agent)
 ├── .my-claude-manifest   ← Tracks installed files for safe upgrades
@@ -235,9 +235,9 @@ The vendored three — ai-engineer, devops-automator, multi-agent-systems-archit
 
 ## 6. gstack Sprint Process
 
-gstack is a sprint-process harness from [garrytan/gstack](https://github.com/garrytan/gstack). my-claude installs 26 of its skills plus the `gstack` root router — 27 in total — for structured engineering workflows.
+gstack is a sprint-process harness from [garrytan/gstack](https://github.com/garrytan/gstack). my-claude installs 25 of its skills plus the `gstack` root router — 26 in total — for structured engineering workflows.
 
-Key gstack skills: `/review`, `/qa`, `/ship`, `/cso`, `/investigate`, `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`, `/plan-design-review`, `/plan-devex-review`, `/land-and-deploy`, `/canary`, `/benchmark`, `/retro`. gstack supersedes several ECC skills of the same name — `install.sh` removes stale copies automatically.
+Key gstack skills: `/review`, `/qa`, `/ship`, `/cso`, `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`, `/plan-design-review`, `/plan-devex-review`, `/land-and-deploy`, `/canary`, `/benchmark`, `/retro`. gstack supersedes several ECC skills of the same name — `install.sh` removes stale copies automatically.
 
 ### How Boss uses gstack
 
@@ -312,11 +312,11 @@ echo "Version:          $(cat ~/.claude/.my-claude-version 2>/dev/null || echo '
 
 ```
 Agents:           32
-Skills (total):   126 (107 + Anthropic's 19 document/design skills)
-Skills (my-claude): 107
+Skills (total):   209 (106 + Anthropic's 19 document/design skills + OMC's 84)
+Skills (my-claude): 106
 Rules:            48
 Anthropic skills: 2 key skills (pdf, docx)
-Manifest:         318 entries
+Manifest:         605 entries
 Duplicates:       0 (should be 0)
 gstack:           OK
 omc:              OK
@@ -327,7 +327,7 @@ LSP (python):     OK
 Version:          <latest release tag>
 ```
 
-Note: if the OMC plugin is already installed, `install.sh` skips copying the 19 OMC agent files ("Plugin detected — skipping agent file copy"), so `Agents` reads 13 and `Manifest` 299; and any personal skills or rules already in `~/.claude` raise the totals above — both are expected.
+Note: the 84 OMC skills in `Skills (total)` are written by `omc setup`, which `install.sh` runs on a clean machine, so they count there but not in `Skills (my-claude)`. If the OMC plugin is already installed, `install.sh` skips copying the 19 OMC agent files ("Plugin detected — skipping agent file copy"), so `Agents` reads 13 and `Manifest` 586 (605 − 19); the plugin serves the OMC skills instead (a machine with the plugin showed only 2 OMC-named directories under `~/.claude/skills`), so `Skills (total)` reads lower. Any personal skills or rules already in `~/.claude` raise the totals above. All of these are expected.
 
 Non-zero duplicates: re-run `install.sh` (deduplicates automatically). gstack MISSING: install `bun` and re-run `install.sh`. LSP MISSING: install the binary yourself (`npm i -g typescript-language-server typescript` or `npm i -g pyright`) — the rest of the stack is unaffected.
 
@@ -417,7 +417,7 @@ Or enable Windows Developer Mode (Settings > Update & Security > For Developers)
 curl -fsSL https://bun.sh/install | bash && source ~/.bashrc && bash install.sh
 ```
 
-Text-based gstack skills (`/review`, `/ship`, `/plan-*`, `/investigate`) work without the browser runtime.
+Text-based gstack skills (`/review`, `/ship`, `/plan-*`) work without the browser runtime.
 
 ### Duplicates: N > 0 in verify output
 

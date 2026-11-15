@@ -1,7 +1,7 @@
 # my-claude AI Installation Guide
 
 You are an AI agent setting up a Claude Code multi-agent orchestration environment.
-The plugin bundles 32 curated agents, 107 curated skills (plus an opt-in 18-skill `web` lane), 48 rule files (9 rule sets), 10 hooks, 3 MCP servers, and 2 LSP servers.
+The plugin bundles 32 curated agents, 106 curated skills (plus an opt-in 18-skill `web` lane), 48 rule files (9 rule sets), 13 hooks, 3 MCP servers, and 2 LSP servers.
 `install.sh` additionally copies 2 named workflows to `~/.claude/workflows/` and installs the LSP binaries.
 Only 2-3 steps are needed.
 
@@ -93,10 +93,10 @@ A stale marketplace cache (path 1) is only the cause when you have **no** user-l
 
 This installs:
 - 32 agents in ~/.claude/agents/ (always loaded): Boss 1 + OMO 9 + OMC 19 + vendored 3
-- 107 skills (61 ECC + 27 gstack + 14 Superpowers + 4 Core + 1 Archify). ECC's 18-skill `web` lane is opt-in via `--skills=web`; OMC's 13 skills come from the OMC plugin and are not copied
+- 106 skills (61 ECC + 26 gstack + 14 Superpowers + 4 Core + 1 Archify). ECC's 18-skill `web` lane is opt-in via `--skills=web`; OMC's 13 skills come from the OMC plugin and are not copied
   Note: gstack skills are installed separately — run Step 1b (`install.sh`) for those.
 - 48 rule files across 9 rule sets
-- 10 behavioral hooks across 6 events (SessionStart, PreToolUse, PostToolUse, SubagentStop, Stop, UserPromptSubmit)
+- 13 behavioral hooks across 7 events (SessionStart, PreToolUse, PostToolUse, SubagentStop, Stop, SessionEnd, UserPromptSubmit)
   - The SessionStart hook auto-creates a `.briefing/` vault per-project (with `INDEX.md`) on first session. This provides persistent project context, decision logs, and session summaries.
 - 3 MCP servers globally (Context7, Exa, grep.app) — available in all projects
 - 2 LSP servers declared in `.lsp.json` (typescript, python) — auto-started diagnostics and code navigation for agents
@@ -151,15 +151,15 @@ rm -rf /tmp/my-claude
 
 This installs everything in one step:
 - 32 agents (Boss + OMO + OMC + vendored)
-- 107 skills (ECC + gstack + Superpowers + Core + Archify)
-- 48 rule files (9 rule sets), 10 hooks
+- 106 skills (ECC + gstack + Superpowers + Core + Archify)
+- 48 rule files (9 rule sets), 13 hooks
 - 3 MCP servers (Context7, Exa, grep.app)
 - 2 named workflows in `~/.claude/workflows/` (code-review-fanout, upstream-audit) — usable from any project via the Workflow tool
 - 2 LSP server binaries (`typescript-language-server`, `pyright-langserver`) — installed non-fatally, a missing binary only disables that one server
 - Companion tools: OMC CLI, omo CLI, ast-grep, comment-checker, codeburn (budget-guard hooks opt-in via `--with-codeburn-guard`)
 - Anthropic Official Skills (pdf, docx)
 - Karpathy coding guidelines
-- gstack sprint-process harness (27 skills)
+- gstack sprint-process harness (26 skills)
 - Boss meta-orchestrator as default agent
 - HUD statusline (context usage, active agents, task progress)
 
@@ -230,11 +230,11 @@ echo "Boss model:       $(grep '^model:' ~/.claude/agents/boss.md 2>/dev/null ||
 
 Expected:
 - Agents: 32
-- Skills (total): 126 (107 + Anthropic's 19 document/design skills)
-- Skills (my-claude): 107
+- Skills (total): 209 (106 + Anthropic's 19 document/design skills + OMC's 84)
+- Skills (my-claude): 106
 - Rules: 48
 - Anthropic skills: 2 key skills (pdf, docx)
-- Manifest: 318 entries
+- Manifest: 605 entries
 - Duplicates: 0 (should be 0)
 - gstack: OK
 - omc: OK
@@ -246,6 +246,6 @@ Expected:
   doesn't match after a reinstall, see "Updating or reinstalling the plugin" above)
 - Boss model: matches the current model in the published `agents/core/boss.md` on GitHub
 
-Note: if the OMC plugin is already installed, `install.sh` skips copying the 19 OMC agent files ("Plugin detected — skipping agent file copy"), so `Agents` reads 13 and `Manifest` 299; and any personal skills or rules already in `~/.claude` raise the totals above — both are expected.
+Note: the 84 OMC skills in `Skills (total)` are written by `omc setup`, which `install.sh` runs on a clean machine, so they count there but not in `Skills (my-claude)`. If the OMC plugin is already installed, `install.sh` skips copying the 19 OMC agent files ("Plugin detected — skipping agent file copy"), so `Agents` reads 13 and `Manifest` 586 (605 − 19); the plugin serves the OMC skills instead (a machine with the plugin showed only 2 OMC-named directories under `~/.claude/skills`), so `Skills (total)` reads lower. Any personal skills or rules already in `~/.claude` raise the totals above. All of these are expected.
 
 Setup complete. Boss orchestrator is ready.

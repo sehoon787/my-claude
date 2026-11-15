@@ -10,10 +10,10 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-107-purple)
+![Skills](https://img.shields.io/badge/skills-106-purple)
 ![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
-![Hooks](https://img.shields.io/badge/hooks-10-red)
+![Hooks](https://img.shields.io/badge/hooks-13-red)
 ![LSP Servers](https://img.shields.io/badge/LSP-2-008b8b)
 ![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
@@ -85,7 +85,7 @@ as version-pinned CLIs, hosted MCP servers, or files vendored with attribution.
 | 3 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | The 4 AI-coding behavioral guidelines — Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution — always active. | `install.sh` curls `CLAUDE.md` at the pinned SHA `aa4467f`, checksum-verifies it, and appends it to `~/.claude/CLAUDE.md`. No code vendored. |
 | 4 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** (ECC) — affaan-m | 278 skills + 67 agents + 94 commands + language rules upstream. my-claude installs a curated 61-skill subset (79 with the opt-in `web` lane) — stack patterns, AI/agent engineering, codebase tooling — plus 9 rule sets and slash commands like `/tdd`, `/plan`, `/code-review`, `/build-fix`. | Submodule `upstream/ecc`, SHA-pinned; `install.sh` tries `claude plugin add affaan-m/everything-claude-code` first and falls back to the submodule. |
 | 5 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | Anthropic's own skill repository: PDF parsing, Word/Excel/PowerPoint manipulation, MCP server creation. | `claude plugin add anthropics/skills`, run by `install.sh`. Deliberately not manifest-tracked. |
-| 6 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | Garry Tan's sprint-process harness: 26 skills plus the `gstack` root router (27 total) — browser QA (`/qa`), scope-drift code review (`/review`), security audit (`/cso`), and the full Plan→Review→QA→Ship workflow (Boss P0 lane). Ships a compiled Playwright browser daemon for real-browser testing. | Submodule `upstream/gstack`, SHA-pinned. |
+| 6 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | Garry Tan's sprint-process harness: 25 skills plus the `gstack` root router (26 total) — browser QA (`/qa`), scope-drift code review (`/review`), security audit (`/cso`), and the full Plan→Review→QA→Ship workflow (Boss P0 lane). Ships a compiled Playwright browser daemon for real-browser testing. | Submodule `upstream/gstack`, SHA-pinned. |
 | 7 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | Jesse Vincent's dev-process library: 14 of its 15 skills — brainstorming, systematic debugging, TDD, plan writing and execution, code-review etiquette. `dispatching-parallel-agents` is excluded because Boss and Agent Teams already own that path. | Submodule `upstream/superpowers`, SHA-pinned. |
 | 8 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | Local-first token and cost tracking over the session files Claude Code and Codex already write — no proxy, no API key, nothing leaves the machine. The usage-guard hooks install by default (`--no-codeburn-guard` opts out) with the hard cost cap disabled: it's estimated from the transcript at API list-price rates, so on a subscription plan a normal session reaches the $15 default in minutes and the guard would deny every further tool call. Edit `hardUSD` in `~/.config/codeburn/guard.json` to set a cap of your own. | `npm i -g codeburn@0.9.25`; `install.sh` also starts or reuses one shared cross-harness dashboard — see [Where to See Results](#where-to-see-results). MIT. |
 | 9 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | A language server's symbol graph over MCP: `find_symbol`, `get_symbols_overview`, `find_referencing_symbols`, `replace_symbol_body`, `insert_after_symbol` — the tokens spent scale with the symbol, not the file. | `uv tool install -p 3.13 serena-agent==1.7.0`, registered as a user-scope stdio MCP server (`serena start-mcp-server --context claude-code --project-from-cwd`). The distributed package is GPL-3.0-or-later as a whole (PyPI's MIT classifier is inaccurate); used as an external server, never vendored. |
@@ -240,10 +240,10 @@ Commands: `node ~/.claude/hooks/persona-rule.js learn <cmd>`: `list`, `show <id|
 | Category | Count | Source |
 |----------|------:|--------|
 | **Agents** (always loaded) | 32 | Boss 1 + OMO 9 + OMC 19 + Vendored 3 |
-| **Skills** | 107 | ECC 61 · gstack 27 · Superpowers 14 · Core 4 · Archify 1. ECC's 18-skill `web` lane is opt-in (`--skills=web`); OMC's 13 come from the OMC plugin and are never copied |
+| **Skills** | 106 | ECC 61 · gstack 26 · Superpowers 14 · Core 4 · Archify 1. ECC's 18-skill `web` lane is opt-in (`--skills=web`); OMC's 13 come from the OMC plugin and are never copied |
 | **Rules** | 48 files / 9 sets | ECC 46 (3 common files + 8 language dirs) + Core 2 |
 | **MCP Servers** | 3 | Context7, Exa, grep.app |
-| **Hooks** | 10 files / 6 events | Delegation guard, telemetry, verification, vault, context budget |
+| **Hooks** | 13 scripts / 7 events | Delegation guard, telemetry, verification, vault, context budget |
 | **LSP Servers** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
 | **Named Workflows** | 2 | code-review-fanout, upstream-audit |
 | **Upstream submodules** | 5 | ecc, omc, gstack, superpowers, archify |
@@ -294,12 +294,12 @@ Per-agent models are in [Model Routing](#model-routing); where each source comes
 </details>
 
 <details>
-<summary><strong>Skills — 107 from 5 sources</strong></summary>
+<summary><strong>Skills — 106 from 5 sources</strong></summary>
 
 | Source | Count | Key Skills |
 |--------|------:|------------|
 | [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 61 | coding-standards, fastapi-patterns, agent-architecture-audit, springboot-patterns, kubernetes-patterns |
-| [gstack](https://github.com/garrytan/gstack) | 27 | /qa, /review, /ship, /cso, /investigate, /office-hours |
+| [gstack](https://github.com/garrytan/gstack) | 26 | /qa, /review, /ship, /cso, /office-hours |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming, systematic-debugging, test-driven-development, writing-plans |
 | [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced, boss-briefing, briefing-vault, gstack-sprint |
 | [archify](https://github.com/tt-a1i/archify) | 1 | archify |
@@ -311,7 +311,7 @@ Per-agent models are in [Model Routing](#model-routing); where each source comes
 </details>
 
 <details>
-<summary><strong>MCP Servers (3) + Hooks (10)</strong></summary>
+<summary><strong>MCP Servers (3) + Hooks (13)</strong></summary>
 
 **MCP Servers** — what each one does and how it is registered is in [Open-Source Tools Used](#open-source-tools-used).
 
@@ -451,7 +451,7 @@ Features built specifically for this project, beyond what upstream sources provi
 | **3-Phase Sprint** | Design (interactive) → Execute (autonomous via ralph) → Review (interactive vs design doc) |
 | **Agent Tier Priority** | core > omo > omc > vendored deduplication. Most specialized agent wins. |
 | **Lane Ownership** | Orchestration → OMC, dev process → superpowers, ship/QA/deploy/security → gstack (Boss P0), language and stack knowledge → ECC, AI and domain work → vendored agents |
-| **Curated Allowlists** | `scripts/skill-allowlists.sh` is the single source of truth — 107 skills, 3 always-on common rules and 8 path-scoped language rule sets survive from thousands upstream, so nothing unlisted ever reaches a session's context |
+| **Curated Allowlists** | `scripts/skill-allowlists.sh` is the single source of truth — 106 skills, 3 always-on common rules and 8 path-scoped language rule sets survive from thousands upstream, so nothing unlisted ever reaches a session's context |
 | **Briefing Vault** | Obsidian-compatible `.briefing/` directory with sessions, decisions, learnings, references |
 | **Agent Telemetry** | PostToolUse hook logs agent usage to `agent-usage.jsonl` |
 | **No-op Sync Skip** | Upstream sync stages the submodule bumps and `SOURCES.json` pins, then opens a PR only when that staged diff is non-empty |

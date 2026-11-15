@@ -10,10 +10,10 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-107-purple)
+![Skills](https://img.shields.io/badge/skills-106-purple)
 ![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
-![Hooks](https://img.shields.io/badge/hooks-10-red)
+![Hooks](https://img.shields.io/badge/hooks-13-red)
 ![LSP Servers](https://img.shields.io/badge/LSP-2-008b8b)
 ![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
@@ -81,7 +81,7 @@ MIT ライセンスのアップストリーム 5 件は明示的な SHA に固�
 | 3 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | AI コーディングの 4 つの行動指針 — Think Before Coding、Simplicity First、Surgical Changes、Goal-Driven Execution — が常時有効になります。 | `install.sh` が固定 SHA `aa4467f` の `CLAUDE.md` を curl で取得し、チェックサムを検証して `~/.claude/CLAUDE.md` に追記します。コードは取り込みません。 |
 | 4 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** (ECC) — affaan-m | アップストリームには 278 スキル + 67 エージェント + 94 コマンド + 言語ルール。my-claude は厳選した 61 スキル（オプトインの `web` レーンを足すと 79）— スタックパターン、AI/エージェントエンジニアリング、コードベースツール — に加えて 9 ルールセットと `/tdd`、`/plan`、`/code-review`、`/build-fix` などのスラッシュコマンドを導入します。 | サブモジュール `upstream/ecc`、SHA 固定。`install.sh` はまず `claude plugin add affaan-m/everything-claude-code` を試し、失敗した場合はサブモジュールにフォールバックします。 |
 | 5 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | Anthropic 公式のスキルリポジトリ: PDF 解析、Word/Excel/PowerPoint 操作、MCP サーバー作成。 | `install.sh` が `claude plugin add anthropics/skills` を実行します。意図的にマニフェスト追跡の対象外です。 |
-| 6 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | Garry Tan のスプリントプロセスハーネス: 26 スキルとルートルーター `gstack`（合計 27）— ブラウザ QA（`/qa`）、スコープドリフトのコードレビュー（`/review`）、セキュリティ監査（`/cso`）、および Plan→Review→QA→Ship の全工程（Boss P0 レーン）。実ブラウザテスト用にコンパイル済みの Playwright ブラウザデーモンを同梱します。 | サブモジュール `upstream/gstack`、SHA 固定。 |
+| 6 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | Garry Tan のスプリントプロセスハーネス: 25 スキルとルートルーター `gstack`（合計 26）— ブラウザ QA（`/qa`）、スコープドリフトのコードレビュー（`/review`）、セキュリティ監査（`/cso`）、および Plan→Review→QA→Ship の全工程（Boss P0 レーン）。実ブラウザテスト用にコンパイル済みの Playwright ブラウザデーモンを同梱します。 | サブモジュール `upstream/gstack`、SHA 固定。 |
 | 7 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | Jesse Vincent の開発プロセスライブラリ: 15 スキル中 14 — ブレインストーミング、体系的デバッグ、TDD、計画の作成と実行、コードレビューの作法。`dispatching-parallel-agents` は Boss と Agent Teams が既にその経路を担うため除外しています。 | サブモジュール `upstream/superpowers`、SHA 固定。 |
 | 8 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | Claude Code と Codex が既に書き出しているセッションファイルを読むローカルファーストのトークン・コスト追跡 — プロキシなし、API キーなし、マシンの外に何も出ません。使用量ガードフックは既定でインストールされます（`--no-codeburn-guard` でスキップ可能）。ハードキャップは無効化された状態でインストールされます: この値はトランスクリプトから API 定価で推定されるため、サブスクリプションプランでは通常のセッションが数分で既定の $15 に達し、以降のすべてのツール呼び出しが拒否されてしまうからです。独自の上限を設定するには `~/.config/codeburn/guard.json` の `hardUSD` を編集してください。 | `npm i -g codeburn@0.9.25`。`install.sh` は両ハーネス共有のダッシュボードも起動または再利用します — 「結果を確認する場所」を参照。MIT。 |
 | 9 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | MCP 経由で使う言語サーバーのシンボルグラフ: `find_symbol`、`get_symbols_overview`、`find_referencing_symbols`、`replace_symbol_body`、`insert_after_symbol` — 消費トークンはファイルではなくシンボルの大きさに比例します。 | `uv tool install -p 3.13 serena-agent==1.7.0` でインストールし、ユーザースコープの stdio MCP サーバー（`serena start-mcp-server --context claude-code --project-from-cwd`）として登録します。配布パッケージは全体として GPL-3.0-or-later です（PyPI の MIT classifier は不正確）。外部サーバーとして利用し、コードは取り込みません。 |
@@ -186,10 +186,10 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 | カテゴリ | 数 | ソース |
 |----------|------:|--------|
 | **エージェント**（常時ロード） | 32 | Boss 1 + OMO 9 + OMC 19 + Vendored 3 |
-| **スキル** | 107 | ECC 61 · gstack 27 · Superpowers 14 · Core 4 · Archify 1 |
+| **スキル** | 106 | ECC 61 · gstack 26 · Superpowers 14 · Core 4 · Archify 1 |
 | **ルール** | 48 ファイル / 9 ルールセット | ECC 46（common + 8 言語ディレクトリ）+ Core 2 |
 | **MCP サーバー** | 3 | Context7、Exa、grep.app |
-| **フック** | 10 ファイル / 6 イベント | 委任ガード、テレメトリー、検証、ナレッジ Vault |
+| **フック** | 13 ファイル / 7 イベント | 委任ガード、テレメトリー、検証、ナレッジ Vault |
 | **LSP サーバー** | 2 | typescript（`typescript-language-server`）、python（`pyright-langserver`） |
 | **名前付きワークフロー** | 2 | code-review-fanout、upstream-audit |
 | **アップストリームサブモジュール** | 5 | ecc、omc、gstack、superpowers、archify |
@@ -240,14 +240,14 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 </details>
 
 <details>
-<summary><strong>スキル — 5 つのソースから 107</strong></summary>
+<summary><strong>スキル — 5 つのソースから 106</strong></summary>
 
 各ソースは [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) の許可リストで管理され、リストにないスキルはインストールされません。
 
 | ソース | 数 | 主要スキル |
 |--------|------:|------------|
 | [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 61 | coding-standards、fastapi-patterns、agent-architecture-audit、springboot-patterns、kubernetes-patterns |
-| [gstack](https://github.com/garrytan/gstack) | 27 | /qa、/review、/ship、/cso、/investigate、/office-hours |
+| [gstack](https://github.com/garrytan/gstack) | 26 | /qa、/review、/ship、/cso、/office-hours |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 13（プラグイン） | autopilot、ralph、team、execute、ralplan、verify |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming、systematic-debugging、test-driven-development、writing-plans |
 | [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced、boss-briefing、briefing-vault、gstack-sprint |
@@ -256,7 +256,7 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 </details>
 
 <details>
-<summary><strong>MCP サーバー (3) + フック (8)</strong></summary>
+<summary><strong>MCP サーバー (3) + フック (13)</strong></summary>
 
 **MCP サーバー** — それぞれの機能と登録方法は [使用しているオープンソースツール](#open-source-tools-used) にあります。
 
@@ -374,7 +374,7 @@ BriefingVault v2 は 3 つの知識管理手法を統合しています：
 | **3 フェーズスプリント** | 設計（インタラクティブ）→ 実行（ralph による自律）→ レビュー（設計書との比較インタラクティブ） |
 | **エージェント層優先度** | core > omo > omc > vendored 重複排除。最も特化したエージェントが優先。 |
 | **レーン所有権** | オーケストレーション → OMC、開発プロセス → superpowers、リリース/QA/デプロイ/セキュリティ → gstack（Boss P0）、言語・スタック知識 → ECC、AI・ドメイン → vendored エージェント |
-| **厳選された許可リスト** | `scripts/skill-allowlists.sh` が唯一の正 — アップストリームの数千から 107 スキルと 9 ルールセットだけが残り、リストにないものはセッションのコンテキストに入りません |
+| **厳選された許可リスト** | `scripts/skill-allowlists.sh` が唯一の正 — アップストリームの数千から 106 スキルと 9 ルールセットだけが残り、リストにないものはセッションのコンテキストに入りません |
 | **Briefing Vault** | セッション、決定、学習、参照を含む Obsidian 互換の `.briefing/` ディレクトリ |
 | **エージェントテレメトリー** | PostToolUse フックがエージェント使用状況を `agent-usage.jsonl` に記録 |
 | **スマートパック** | プロジェクトタイプ検出がセッション開始時に関連エージェントパックを推奨 |

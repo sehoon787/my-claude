@@ -10,10 +10,10 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-107-purple)
+![Skills](https://img.shields.io/badge/skills-106-purple)
 ![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
-![Hooks](https://img.shields.io/badge/hooks-10-red)
+![Hooks](https://img.shields.io/badge/hooks-13-red)
 ![LSP Servers](https://img.shields.io/badge/LSP-2-008b8b)
 ![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
@@ -81,7 +81,7 @@ der Rest kommt als versionsfixierte CLIs, gehostete MCP-Server oder als Dateien 
 | 3 | <img src="https://github.com/forrestchang.png?size=32" width="20" height="20" align="center"/> **[andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)** — forrestchang | Die 4 Verhaltensrichtlinien für KI-Coding — Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution — dauerhaft aktiv. | `install.sh` lädt `CLAUDE.md` beim fixierten SHA `aa4467f` per curl, prüft die Checksumme und hängt es an `~/.claude/CLAUDE.md` an. Kein Code vendored. |
 | 4 | <img src="https://github.com/affaan-m.png?size=32" width="20" height="20" align="center"/> **[everything-claude-code](https://github.com/affaan-m/everything-claude-code)** (ECC) — affaan-m | 278 Skills + 67 Agenten + 94 Commands + Sprachregeln upstream. my-claude installiert eine kuratierte Auswahl von 61 Skills (79 mit der optionalen `web`-Lane) — Stack-Patterns, KI- und Agenten-Engineering, Codebasis-Tooling — plus 9 Regelsätze und Slash-Commands wie `/tdd`, `/plan`, `/code-review`, `/build-fix`. | Submodul `upstream/ecc`, SHA-fixiert; `install.sh` versucht zuerst `claude plugin add affaan-m/everything-claude-code` und fällt auf das Submodul zurück. |
 | 5 | <img src="https://www.anthropic.com/favicon.ico" width="20" height="20" align="center"/> **[anthropic/skills](https://github.com/anthropics/skills)** — Anthropic | Anthropics eigenes Skill-Repository: PDF-Parsing, Word-/Excel-/PowerPoint-Bearbeitung, Erstellung von MCP-Servern. | `claude plugin add anthropics/skills`, ausgeführt von `install.sh`. Bewusst nicht im Manifest verfolgt. |
-| 6 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | Garry Tans Sprint-Prozess-Harness: 26 Skills plus der `gstack`-Root-Router (27 insgesamt) — Browser-QA (`/qa`), Code-Review auf Scope-Drift (`/review`), Sicherheitsaudit (`/cso`) und der vollständige Plan→Review→QA→Ship-Workflow (Boss-P0-Lane). Bringt einen kompilierten Playwright-Browser-Daemon für echte Browsertests mit. | Submodul `upstream/gstack`, SHA-fixiert. |
+| 6 | <img src="https://github.com/garrytan.png?size=32" width="20" height="20" align="center"/> **[gstack](https://github.com/garrytan/gstack)** — garrytan | Garry Tans Sprint-Prozess-Harness: 25 Skills plus der `gstack`-Root-Router (26 insgesamt) — Browser-QA (`/qa`), Code-Review auf Scope-Drift (`/review`), Sicherheitsaudit (`/cso`) und der vollständige Plan→Review→QA→Ship-Workflow (Boss-P0-Lane). Bringt einen kompilierten Playwright-Browser-Daemon für echte Browsertests mit. | Submodul `upstream/gstack`, SHA-fixiert. |
 | 7 | <img src="https://github.com/obra.png?size=32" width="20" height="20" align="center"/> **[superpowers](https://github.com/obra/superpowers)** — Jesse Vincent | Jesse Vincents Bibliothek für den Entwicklungsprozess: 14 seiner 15 Skills — Brainstorming, systematisches Debuggen, TDD, Planerstellung und -ausführung, Code-Review-Etikette. `dispatching-parallel-agents` bleibt ausgeschlossen, weil Boss und Agent Teams diesen Pfad bereits abdecken. | Submodul `upstream/superpowers`, SHA-fixiert. |
 | 8 | <img src="https://github.com/getagentseal.png?size=32" width="20" height="20" align="center"/> **[codeburn](https://github.com/getagentseal/codeburn)** — getagentseal | Local-first Token- und Kosten-Tracking über die Sitzungsdateien, die Claude Code und Codex ohnehin schreiben — kein Proxy, kein API-Key, nichts verlässt den Rechner. Die Nutzungs-Guard-Hooks werden standardmäßig installiert (`--no-codeburn-guard` zum Überspringen), mit deaktiviertem Hard Cap: Dieser wird aus dem Transkript zu API-Listenpreisen geschätzt, sodass eine normale Sitzung in einem Abo-Plan den Standardwert von $15 in wenigen Minuten erreicht und danach jeder weitere Tool-Aufruf abgelehnt würde. Setzen Sie über `hardUSD` in `~/.config/codeburn/guard.json` ein eigenes Limit. | `npm i -g codeburn@0.9.25`; `install.sh` startet oder übernimmt außerdem ein gemeinsames Dashboard für beide Harnesses — siehe **Wo die Ergebnisse landen**. MIT. |
 | 9 | <img src="https://github.com/oraios.png?size=32" width="20" height="20" align="center"/> **[serena](https://github.com/oraios/serena)** — oraios | Der Symbolgraph eines Language Servers über MCP: `find_symbol`, `get_symbols_overview`, `find_referencing_symbols`, `replace_symbol_body`, `insert_after_symbol` — die Token-Kosten skalieren mit dem Symbol, nicht mit der Datei. | `uv tool install -p 3.13 serena-agent==1.7.0`, registriert als stdio-MCP-Server im User-Scope (`serena start-mcp-server --context claude-code --project-from-cwd`). Das ausgelieferte Paket steht als Ganzes unter GPL-3.0-or-later (der MIT-Classifier auf PyPI ist falsch); es wird als externer Server genutzt, nie vendored. |
@@ -186,10 +186,10 @@ Deterministische Multi-Agenten-Workflows. `install.sh` kopiert sie nach `~/.clau
 | Kategorie | Anzahl | Quelle |
 |-----------|-------:|--------|
 | **Agenten** (immer geladen) | 32 | Boss 1 + OMO 9 + OMC 19 + Vendored 3 |
-| **Skills** | 107 | ECC 61 · gstack 27 · Superpowers 14 · Core 4 · Archify 1 |
+| **Skills** | 106 | ECC 61 · gstack 26 · Superpowers 14 · Core 4 · Archify 1 |
 | **Regeln** | 48 Dateien / 9 Regelsätze | ECC 46 (common + 8 Sprachverzeichnisse) + Core 2 |
 | **MCP-Server** | 3 | Context7, Exa, grep.app |
-| **Hooks** | 10 Dateien / 6 Events | Delegationswächter, Telemetrie, Verifikation, Vault |
+| **Hooks** | 13 Dateien / 7 Events | Delegationswächter, Telemetrie, Verifikation, Vault |
 | **LSP-Server** | 2 | typescript (`typescript-language-server`), python (`pyright-langserver`) |
 | **Benannte Workflows** | 2 | code-review-fanout, upstream-audit |
 | **Upstream-Submodule** | 5 | ecc, omc, gstack, superpowers, archify |
@@ -240,14 +240,14 @@ Das Modell je Agent steht in der Tabelle **Modell-Routing** weiter oben; woher d
 </details>
 
 <details>
-<summary><strong>Skills — 107 aus 5 Quellen</strong></summary>
+<summary><strong>Skills — 106 aus 5 Quellen</strong></summary>
 
 Jede Quelle wird über die Allowlist in [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) gesteuert — was dort nicht steht, wird nie installiert.
 
 | Quelle | Anzahl | Wichtige Skills |
 |--------|-------:|-----------------|
 | [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 61 | coding-standards, fastapi-patterns, agent-architecture-audit, springboot-patterns, kubernetes-patterns |
-| [gstack](https://github.com/garrytan/gstack) | 27 | /qa, /review, /ship, /cso, /investigate, /office-hours |
+| [gstack](https://github.com/garrytan/gstack) | 26 | /qa, /review, /ship, /cso, /office-hours |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 13 (Plugin) | autopilot, ralph, team, execute, ralplan, verify |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming, systematic-debugging, test-driven-development, writing-plans |
 | [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced, boss-briefing, briefing-vault, gstack-sprint |
@@ -256,7 +256,7 @@ Jede Quelle wird über die Allowlist in [`scripts/skill-allowlists.sh`](../../sc
 </details>
 
 <details>
-<summary><strong>MCP-Server (3) + Hooks (10)</strong></summary>
+<summary><strong>MCP-Server (3) + Hooks (13)</strong></summary>
 
 **MCP-Server** — was jeder davon tut und wie er registriert wird, steht unter [Verwendete Open-Source-Tools](#open-source-tools-used).
 
@@ -374,7 +374,7 @@ Funktionen, die speziell für dieses Projekt entwickelt wurden und über das hin
 | **3-Phasen-Sprint** | Design (interaktiv) → Ausführung (autonom über ralph) → Review (interaktiv vs. Design-Dokument) |
 | **Agenten-Tier-Priorität** | core > omo > omc > vendored-Deduplizierung. Der speziellste Agent gewinnt. |
 | **Lane-Zuständigkeit** | Orchestrierung → OMC, Entwicklungsprozess → superpowers, Release/QA/Deployment/Sicherheit → gstack (Boss P0), Sprach- und Stack-Wissen → ECC, KI und Domäne → vendored Agenten |
-| **Kuratierte Allowlists** | `scripts/skill-allowlists.sh` ist die einzige Quelle der Wahrheit — von Tausenden Upstream-Einträgen bleiben 107 Skills und 9 Regelsätze übrig; nichts Ungelistetes erreicht je den Sitzungskontext |
+| **Kuratierte Allowlists** | `scripts/skill-allowlists.sh` ist die einzige Quelle der Wahrheit — von Tausenden Upstream-Einträgen bleiben 106 Skills und 9 Regelsätze übrig; nichts Ungelistetes erreicht je den Sitzungskontext |
 | **Briefing Vault** | Obsidian-kompatibles `.briefing/`-Verzeichnis mit Sitzungen, Entscheidungen, Lernnotizen und Referenzen |
 | **Agenten-Telemetrie** | PostToolUse-Hook protokolliert Agentennutzung in `agent-usage.jsonl` |
 | **Smart Packs** | Projekttypenerkennung empfiehlt relevante Agenten-Packs beim Sitzungsstart |
