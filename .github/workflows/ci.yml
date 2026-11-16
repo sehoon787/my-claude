@@ -27,8 +27,8 @@ jobs:
           python3 -c "import json; json.load(open('settings.json'))"
       - name: Test shared local service startup
         run: bash tests/shared-local-services.test.sh
-      - name: Test version comparison
-        run: bash tests/version-compare.test.sh
+      - name: Test gstack and OMC install at the submodule pins
+        run: bash tests/upstream-pins.test.sh
       - name: Test upstream sync scanner
         run: bash tests/scan-upstream-diff.test.sh
       - name: Check agent files exist

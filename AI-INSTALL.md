@@ -198,7 +198,7 @@ npx skills add sehoon787/my-claude -y -g
 
 This installs skills to `~/.agents/skills/` and auto-symlinks to `~/.claude/skills/`. Cross-platform: works with Claude Code, Codex, Cursor, and other tools that support the skills.sh standard. For the full experience (agents, hooks, rules, MCP), complete Step 1 (or 1b) above instead.
 
-Note: `npx skills add` does NOT install gstack. gstack requires Step 1b (`install.sh`) for full installation, including the superseded-skill cleanup and auto-upgrade config.
+Note: `npx skills add` does NOT install gstack. gstack requires Step 1b (`install.sh`) for full installation, including the superseded-skill cleanup and the browser runtime, which is built from the commit the `upstream/gstack` submodule pins.
 
 ## Update behavior
 

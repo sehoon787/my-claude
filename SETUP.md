@@ -156,7 +156,7 @@ npx skills add sehoon787/my-claude -y -g
 
 This installs skills to `~/.agents/skills/` and auto-symlinks them to `~/.claude/skills/`. Works with Claude Code, Codex, Cursor, and other tools that support the skills.sh standard.
 
-**Note:** `npx skills add` does NOT install gstack, agents, rules, or hooks. Use Method A or B for the full experience. gstack in particular requires `install.sh` for the browser runtime and auto-upgrade config.
+**Note:** `npx skills add` does NOT install gstack, agents, rules, or hooks. Use Method A or B for the full experience. gstack in particular requires `install.sh` for the browser runtime.
 
 ---
 
@@ -265,7 +265,7 @@ Phase 3: REVIEW        (interactive)
 curl -fsSL https://bun.sh/install | bash && bash install.sh
 ```
 
-`install.sh` also writes `~/.gstack/config.json` with `auto_upgrade: true` so gstack self-updates on each use.
+`install.sh` checks the runtime in `~/.gstack/runtime` out at the commit of the `upstream/gstack` submodule and never pulls it from upstream, so it only moves when the submodule does. `install.sh` never turns on gstack auto-upgrade, and it turns off the `auto_upgrade: true` that earlier versions wrote to `~/.gstack/config.json`.
 
 ---
 
@@ -349,6 +349,8 @@ cd /path/to/my-claude && git pull && git submodule update --init --depth 1 && ba
 cd /path/to/my-claude && git submodule update --remote && bash install.sh
 ```
 
+This moves every submodule to its upstream HEAD, including the commit gstack's runtime is built from and the OMC version `install.sh` installs. It skips the upstream-diff scan and review that the sync PRs get.
+
 The manifest system removes stale files on upgrade without touching user-added content.
 
 ---
@@ -390,11 +392,14 @@ MCP servers are registered at user scope (`--scope user`) so they are available 
 ### omc / omo not found after install
 
 ```bash
-npm i -g oh-my-claude-sisyphus@4.8.2 && omc setup
+# OMC: the version upstream/omc pins (run from the my-claude checkout)
+v=$(node -p "require('./upstream/omc/package.json').version") && npm i -g "oh-my-claude-sisyphus@$v" && omc setup
 npm i -g oh-my-opencode@3.12.3 && oh-my-opencode install --no-tui --claude=yes --openai=no --gemini=no --copilot=no
 ```
 
 If `npm i -g` fails with a permissions error, set a user-local npm prefix: `npm config set prefix ~/.npm-global` and add `~/.npm-global/bin` to your `PATH`.
+
+If npm reports `No matching version found` for `oh-my-claude-sisyphus`, upstream has not published the pinned version to npm yet. `install.sh` prints a warning and leaves OMC as it is in that case; it installs the pinned version on the first run after npm has it.
 
 ### Agent not recognized by Boss
 

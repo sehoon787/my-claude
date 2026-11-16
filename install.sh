@@ -19,8 +19,6 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # Which upstream skills/rules this installer copies — see scripts/skill-allowlists.sh
 # shellcheck source=scripts/skill-allowlists.sh
 . "$SCRIPT_DIR/scripts/skill-allowlists.sh"
-# shellcheck source=scripts/version-compare.sh
-. "$SCRIPT_DIR/scripts/version-compare.sh"
 
 echo "=== my-claude installer ==="
 echo ""
@@ -702,17 +700,38 @@ if [ "$SKIP_GSTACK" = "0" ]; then
     export PATH="$BUN_INSTALL/bin:$PATH"
   fi
 
-  # Clone gstack for binary build (separate from vendored skills)
-  if [ -d "$GSTACK_RUNTIME/.git" ]; then
-    git -C "$GSTACK_RUNTIME" pull --ff-only 2>/dev/null || true
+  # Check the runtime out at the commit the upstream/gstack submodule pins (the
+  # one the skills above came from), fetched from that local checkout, never
+  # from upstream: upstream changes reach it only through the sync PRs that bump
+  # the pin. A runtime an older install cloned from upstream main is moved to
+  # the pin the same way. The checkout is forced, so local edits to tracked
+  # files in this installer-owned directory are discarded; untracked build
+  # output (node_modules, dist/) stays.
+  GSTACK_PIN_DIR="$SCRIPT_DIR/upstream/gstack"
+  GSTACK_PIN_SHA=""
+  if [ -e "$GSTACK_PIN_DIR/.git" ]; then
+    GSTACK_PIN_SHA="$(git -C "$GSTACK_PIN_DIR" rev-parse --verify -q 'HEAD^{commit}' 2>/dev/null || true)"
+  fi
+  GSTACK_RUNTIME_PINNED=0
+  if [ -z "$GSTACK_PIN_SHA" ]; then
+    echo "  [gstack] WARNING: upstream/gstack is not checked out — runtime not updated, setup skipped"
   else
-    rm -rf "$GSTACK_RUNTIME"
-    git clone --depth 1 https://github.com/garrytan/gstack.git "$GSTACK_RUNTIME" 2>/dev/null || true
+    if [ ! -d "$GSTACK_RUNTIME/.git" ]; then
+      rm -rf "$GSTACK_RUNTIME"
+      mkdir -p "$GSTACK_RUNTIME"
+      git init -q "$GSTACK_RUNTIME" 2>/dev/null || true
+    fi
+    if git -C "$GSTACK_RUNTIME" fetch -q --depth 1 "$GSTACK_PIN_DIR" "$GSTACK_PIN_SHA" 2>/dev/null \
+      && git -C "$GSTACK_RUNTIME" checkout -q -f --detach "$GSTACK_PIN_SHA" 2>/dev/null; then
+      GSTACK_RUNTIME_PINNED=1
+    else
+      echo "  [gstack] WARNING: could not check the runtime out at the pinned ${GSTACK_PIN_SHA:0:12} — setup skipped"
+    fi
   fi
 
-  # Run gstack setup for binary compilation
+  # Run gstack setup for binary compilation — only ever from the pinned commit
   GSTACK_BROWSER_OK=0
-  if [ -d "$GSTACK_RUNTIME" ] && command -v bun >/dev/null 2>&1 && [ -f "$GSTACK_RUNTIME/setup" ]; then
+  if [ "$GSTACK_RUNTIME_PINNED" = "1" ] && command -v bun >/dev/null 2>&1 && [ -f "$GSTACK_RUNTIME/setup" ]; then
     if (cd "$GSTACK_RUNTIME" && ./setup --host claude 2>/dev/null); then
       GSTACK_BROWSER_OK=1
     fi
@@ -722,18 +741,22 @@ if [ "$SKIP_GSTACK" = "0" ]; then
     echo "           Text-based gstack skills (review, ship, plan-*, etc.) are installed and functional."
   fi
 
-  # gstack auto_upgrade config
-  mkdir -p "$HOME/.gstack"
+  # gstack auto-upgrade is never turned on: it would move gstack past the pin.
+  # Older my-claude (and my-codex) installs wrote auto_upgrade=true into this
+  # file; gstack keeps its own setting in config.yaml and never writes this
+  # key, so a true here is theirs and is turned off. Any other value is the
+  # user's and is left as it is.
   GSTACK_CONFIG="$HOME/.gstack/config.json"
   if [ -f "$GSTACK_CONFIG" ]; then
-    node -e "
-      const fs = require('fs');
-      const cfg = JSON.parse(fs.readFileSync('$GSTACK_CONFIG', 'utf8'));
-      cfg.auto_upgrade = true;
-      fs.writeFileSync('$GSTACK_CONFIG', JSON.stringify(cfg, null, 2));
-    " 2>/dev/null || true
-  else
-    echo '{"auto_upgrade":true}' > "$GSTACK_CONFIG"
+    node -e '
+      const fs = require("fs");
+      const file = process.argv[1];
+      const cfg = JSON.parse(fs.readFileSync(file, "utf8"));
+      if (cfg && cfg.auto_upgrade === true) {
+        fs.writeFileSync(file, JSON.stringify({ ...cfg, auto_upgrade: false }, null, 2));
+        console.log("  [gstack] auto_upgrade turned off in " + file + " (an earlier my-claude or my-codex install set it)");
+      }
+    ' "$GSTACK_CONFIG" 2>/dev/null || true
   fi
 fi
 
@@ -949,31 +972,39 @@ else
 fi
 
 # 5b. OMC CLI (npm package)
+# Installed at the version upstream/omc pins (its package.json), the pin the
+# HUD wrapper and agents come from, never npm @latest: a newer release reaches
+# this machine only through the sync PR that bumps the submodule. npm failures
+# (including a pinned version npm does not have yet) never fail the install.
 echo "  [5b] OMC CLI..."
+_OMC_PIN_VER="$(node -e 'console.log(require(process.argv[1]).version || "")' "$SCRIPT_DIR/upstream/omc/package.json" 2>/dev/null || true)"
 _OMC_HUD_OK=false
-_OMC_PKG_HUD="$(npm root -g 2>/dev/null)/oh-my-claude-sisyphus/dist/hud/index.js"
+_OMC_PKG_DIR="$(npm root -g 2>/dev/null)/oh-my-claude-sisyphus"
+_OMC_PKG_HUD="$_OMC_PKG_DIR/dist/hud/index.js"
 [ -f "$_OMC_PKG_HUD" ] && _OMC_HUD_OK=true
-if command -v omc >/dev/null 2>&1 && [ "$_OMC_HUD_OK" = "true" ]; then
-  _OMC_INSTALLED_VER="$(omc --version 2>/dev/null | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)"
-  echo "    OMC already installed (${_OMC_INSTALLED_VER:-unknown})"
-  # Present is not current: upgrade when npm has a newer release. Network or
-  # npm failures never fail the install.
-  _OMC_LATEST_VER="$(npm view oh-my-claude-sisyphus version 2>/dev/null | grep -Eo '^[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)"
-  if [ -n "$_OMC_INSTALLED_VER" ] && [ -n "$_OMC_LATEST_VER" ] && version_lt "$_OMC_INSTALLED_VER" "$_OMC_LATEST_VER"; then
-    echo "    OMC $_OMC_INSTALLED_VER is older than $_OMC_LATEST_VER, upgrading..."
-    if npm i -g oh-my-claude-sisyphus@latest; then
-      echo "    OMC upgraded to $_OMC_LATEST_VER"
+if [ -z "$_OMC_PIN_VER" ]; then
+  echo "    WARNING: upstream/omc is not checked out, so the pinned OMC version is unknown — OMC CLI left as it is"
+elif command -v omc >/dev/null 2>&1 && [ "$_OMC_HUD_OK" = "true" ]; then
+  # The version npm manages, not whichever omc comes first on PATH.
+  _OMC_INSTALLED_VER="$(node -e 'console.log(require(process.argv[1]).version || "")' "$_OMC_PKG_DIR/package.json" 2>/dev/null || true)"
+  echo "    OMC already installed (${_OMC_INSTALLED_VER:-unknown}; pinned $_OMC_PIN_VER)"
+  if [ "$_OMC_INSTALLED_VER" != "$_OMC_PIN_VER" ]; then
+    if npm i -g "oh-my-claude-sisyphus@$_OMC_PIN_VER"; then
+      echo "    OMC set to the pinned $_OMC_PIN_VER"
     else
-      echo "    OMC upgrade failed (continuing with $_OMC_INSTALLED_VER)"
+      echo "    WARNING: npm could not install oh-my-claude-sisyphus@$_OMC_PIN_VER (continuing with ${_OMC_INSTALLED_VER:-unknown})"
     fi
   fi
 else
   if command -v omc >/dev/null 2>&1 && [ "$_OMC_HUD_OK" = "false" ]; then
     echo "    OMC found but HUD missing (broken install), reinstalling..."
   fi
-  npm i -g oh-my-claude-sisyphus@latest
-  omc setup 2>/dev/null || true
-  echo "    OMC installed"
+  if npm i -g "oh-my-claude-sisyphus@$_OMC_PIN_VER"; then
+    omc setup 2>/dev/null || true
+    echo "    OMC $_OMC_PIN_VER installed"
+  else
+    echo "    WARNING: npm could not install oh-my-claude-sisyphus@$_OMC_PIN_VER, the pinned version"
+  fi
 fi
 
 # Sync OMC npm package to plugin cache (HUD reads from cache first)
@@ -1222,27 +1253,24 @@ if command -v claude >/dev/null 2>&1; then
 fi
 echo "  my-claude plugin: $PLUGIN_REFRESH_STATUS"
 
-# The OMC Claude plugin is refreshed the same way: the npm package above does
-# not update the plugin clone Claude Code actually loads skills and hooks from.
+# The OMC Claude plugin is not refreshed: `claude plugin update` moves a plugin
+# to the newest version its marketplace lists, `claude plugin marketplace
+# update` pulls that listing from upstream, and neither takes a version or ref
+# (Claude Code 2.1.325), so a refresh would bypass the upstream/omc pin. Only
+# `marketplace add` takes a ref, and re-adding means `marketplace remove`, which
+# uninstalls the plugin. The installed version is reported against the pin.
 echo "  [5h] OMC plugin (marketplace route, if installed)..."
-OMC_PLUGIN_REFRESH_STATUS="not installed (skipped)"
+OMC_PLUGIN_STATUS="not installed (skipped)"
 if command -v claude >/dev/null 2>&1; then
   _PLUGIN_LIST="$(claude plugin list 2>/dev/null || true)"
   case "$_PLUGIN_LIST" in
     *oh-my-claudecode@omc*)
-      claude plugin marketplace update omc 2>/dev/null || true
-      claude plugin update oh-my-claudecode@omc 2>/dev/null || true
-      _PLUGIN_LIST_AFTER="$(claude plugin list 2>/dev/null || true)"
-      _PLUGIN_VERSION="$(printf '%s\n' "$_PLUGIN_LIST_AFTER" | awk '/oh-my-claudecode@omc/{found=1; next} found && /Version:/{print $2; exit}')"
-      if [ -n "$_PLUGIN_VERSION" ]; then
-        OMC_PLUGIN_REFRESH_STATUS="refreshed to $_PLUGIN_VERSION"
-      else
-        OMC_PLUGIN_REFRESH_STATUS="refreshed"
-      fi
+      _PLUGIN_VERSION="$(printf '%s\n' "$_PLUGIN_LIST" | awk '/oh-my-claudecode@omc/{found=1; next} found && /Version:/{print $2; exit}')"
+      OMC_PLUGIN_STATUS="${_PLUGIN_VERSION:-installed}, left as is (pinned ${_OMC_PIN_VER:-unknown})"
       ;;
   esac
 fi
-echo "  OMC plugin: $OMC_PLUGIN_REFRESH_STATUS"
+echo "  OMC plugin: $OMC_PLUGIN_STATUS"
 
 # Write the manifest from provenance-tracked entries (MANIFEST_TMP), not from
 # scanning $HOME/.claude directories. A directory scan would also pick up
