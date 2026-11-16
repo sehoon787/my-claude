@@ -71,7 +71,7 @@ grep '^model:' ~/.claude/agents/boss.md   # if this shows the OLD model, it is s
 
 # 2a. Repo-based install (Step 1b / you have the repo cloned): re-run install.sh.
 #     It overwrites every user-level agent it owns, including boss.md.
-cd <your my-claude repo> && git pull && bash install.sh --tools=<all|none|names>  # same choice step as Step 1b
+cd <your my-claude repo> && git pull && git submodule update --init --depth 1 && bash install.sh --tools=<all|none|names>  # same choice step as Step 1b
 #     (Or just start a new Claude Code session — the SessionStart auto-update now
 #      refreshes core user-level agents from your local repo once per day.)
 
@@ -198,7 +198,7 @@ npx skills add sehoon787/my-claude -y -g
 
 This installs skills to `~/.agents/skills/` and auto-symlinks to `~/.claude/skills/`. Cross-platform: works with Claude Code, Codex, Cursor, and other tools that support the skills.sh standard. For the full experience (agents, hooks, rules, MCP), complete Step 1 (or 1b) above instead.
 
-Note: `npx skills add` does NOT install gstack. gstack requires Step 1b (`install.sh`) for full installation, including the superseded-skill cleanup and auto-upgrade config.
+Note: `npx skills add` does NOT install gstack. gstack requires Step 1b (`install.sh`) for full installation, including the superseded-skill cleanup and the browser runtime, which is built from the commit the `upstream/gstack` submodule pins.
 
 ## Update behavior
 
