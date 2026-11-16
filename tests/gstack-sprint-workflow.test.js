@@ -82,9 +82,10 @@ const phase2Missing = missing(phase2, ['oh-my-claudecode:ralph', 'absolute path 
 check('C1 Phase 2 names oh-my-claudecode:ralph, the absolute plan path and that the plan header "does not apply"',
   phase2Missing.length === 0, phase2Missing.length ? `missing: ${phase2Missing.join(', ')}` : '');
 
-// Phase 3 runs from its heading to the end of <Steps>.
-const phase3 = section(skill, '## Phase 3:', (line) => line === '</Steps>');
-const order = PHASE3_ORDER.map((term) => phase3.indexOf(term));
+// Phase 3 step 1, the lookup list: from the Phase 3 heading up to step 2, the
+// next top-level line starting with "2. " (the lookup items are indented).
+const phase3Step1 = section(skill, '## Phase 3:', (line) => line.startsWith('2. '));
+const order = PHASE3_ORDER.map((term) => phase3Step1.indexOf(term));
 const inOrder = order.every((at, i) => at >= 0 && (i === 0 || at > order[i - 1]));
 check('C2 Phase 3 lookup order: plan file, then gstack design doc, then the original request', inOrder,
   inOrder ? '' : `first indexes ${order.join(', ')}`);
