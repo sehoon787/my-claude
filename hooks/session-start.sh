@@ -22,9 +22,10 @@ if [ ! -f "$HOME/.claude/skills/pdf/SKILL.md" ] || [ ! -f "$HOME/.claude/skills/
   fi
 fi
 
-# 2. OMC CLI
+# 2. OMC CLI — reported, not installed: install.sh installs the version the
+# upstream/omc submodule pins, and npm @latest here would bypass that pin.
 if ! command -v omc >/dev/null 2>&1; then
-  npm i -g oh-my-claude-sisyphus@latest 2>/dev/null && INSTALLED+=("omc") || MISSING+=("omc")
+  MISSING+=("omc")
 fi
 
 # 3. omo CLI
