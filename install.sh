@@ -924,27 +924,28 @@ fi
 # 5a. Anthropic Official Skills (proprietary — cannot be bundled)
 echo "[5/6] Installing companion tools..."
 echo "  [5a] Anthropic skills..."
-if [ -d "$HOME/.claude/skills/pdf" ] && [ -d "$HOME/.claude/skills/docx" ]; then
+# shellcheck source=scripts/anthropic-skills.sh
+. "$SCRIPT_DIR/scripts/anthropic-skills.sh"
+if anthropic_skills_installed; then
   echo "    Anthropic skills already installed"
 else
-  claude plugin add anthropics/skills 2>/dev/null || {
-    echo "    Plugin install failed, falling back to git clone..."
-    _tmp_skills=$(mktemp -d)
-    trap 'rm -rf "$_tmp_skills"' EXIT
-    git clone --depth 1 https://github.com/anthropics/skills.git "$_tmp_skills/skills" 2>/dev/null || true
-    if [ -d "$_tmp_skills/skills/skills" ]; then
-      mkdir -p "$HOME/.claude/skills"
-      # Deliberately manifest-exempt: this fallback only runs once (the
-      # `[ -d pdf ] && [ -d docx ]` guard above skips it afterwards). Tracking
-      # it would make every update delete these skills at cleanup time and
-      # re-clone the whole anthropics/skills repo. Left fully untracked rather
-      # than half-tracked.
-      cp -r "$_tmp_skills/skills/skills/"* "$HOME/.claude/skills/"
-      echo "    Anthropic skills installed via git clone"
-    else
-      echo "    WARNING: Could not install Anthropic skills"
-    fi
-  }
+  _tmp_skills=$(mktemp -d)
+  trap 'rm -rf "$_tmp_skills"' EXIT
+  git clone --depth 1 https://github.com/anthropics/skills.git "$_tmp_skills/skills" 2>/dev/null || true
+  if [ -d "$_tmp_skills/skills/skills" ]; then
+    mkdir -p "$HOME/.claude/skills"
+    # Deliberately manifest-exempt: this clone only runs once (the
+    # anthropic_skills_installed guard above skips it afterwards). Tracking
+    # it would make every update delete these skills at cleanup time and
+    # re-clone the whole anthropics/skills repo. Left fully untracked rather
+    # than half-tracked. The same copy repairs a husk (a skill directory
+    # whose SKILL.md was deleted): cp -r into the existing directory
+    # restores SKILL.md and keeps the other files.
+    cp -r "$_tmp_skills/skills/skills/"* "$HOME/.claude/skills/"
+    echo "    Anthropic skills installed via git clone"
+  else
+    echo "    WARNING: Could not install Anthropic skills"
+  fi
 fi
 
 # 5b. OMC CLI (npm package)

@@ -203,7 +203,7 @@ Every rule file under `rules/common` is injected into every session, so that dir
 
 | Tool | What It Is | Why |
 |------|-----------|-----|
-| **Anthropic Official Skills** | Official document and design skills (pdf, docx, pptx, xlsx, canvas-design, mcp-builder) | Cannot be bundled in the plugin; installed via `claude plugin add anthropics/skills`. Deliberately not manifest-tracked, so upgrades never delete them |
+| **Anthropic Official Skills** | Official document and design skills (pdf, docx, pptx, xlsx, canvas-design, mcp-builder) | Cannot be bundled in the plugin; `install.sh` clones github.com/anthropics/skills into `~/.claude/skills`. Deliberately not manifest-tracked, so upgrades never delete them |
 | **omc** (`oh-my-claude-sisyphus`) | npm CLI for OMC team orchestration | Enables `omc team` multi-agent split-pane sessions |
 | **omo** (`oh-my-opencode`) | npm CLI bridging Claude Code and OpenCode | Optional — only needed for OpenCode TUI workflows |
 | **ast-grep** | Structural code search and rewrite tool | Used by several skills for code analysis |
@@ -296,7 +296,7 @@ echo "Agents:           $(find ~/.claude/agents -name '*.md' 2>/dev/null | wc -l
 echo "Skills (total):   $(find ~/.claude/skills -maxdepth 2 -name 'SKILL.md' 2>/dev/null | wc -l)"
 echo "Skills (my-claude): $(grep '^skills/' ~/.claude/.my-claude-manifest 2>/dev/null | cut -d/ -f2 | sort -u | wc -l)"
 echo "Rules:            $(find ~/.claude/rules -name '*.md' 2>/dev/null | wc -l)"
-echo "Anthropic skills: $(ls -d ~/.claude/skills/pdf ~/.claude/skills/docx 2>/dev/null | wc -l) key skills"
+echo "Anthropic skills: $(ls ~/.claude/skills/pdf/SKILL.md ~/.claude/skills/docx/SKILL.md 2>/dev/null | wc -l) key skills"
 echo "Manifest:         $(wc -l < ~/.claude/.my-claude-manifest 2>/dev/null || echo 'MISSING') entries"
 echo "Duplicates:       $(find ~/.claude/agents -name '*.md' -exec basename {} \; | sort | uniq -d | wc -l | tr -d ' ') (should be 0)"
 echo "gstack:           $(find ~/.claude/skills -path '*/gstack/SKILL.md' 2>/dev/null | head -1 | grep -q . && echo 'OK' || echo 'MISSING')"

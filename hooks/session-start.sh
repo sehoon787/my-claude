@@ -7,7 +7,8 @@ MISSING=()
 INSTALLED=()
 
 # 1. Anthropic Skills
-if [ ! -d "$HOME/.claude/skills/pdf" ] && [ ! -d "$HOME/.claude/skills/docx" ]; then
+# Test SKILL.md, not the directory: pre-6bc7841 cleanup left husks (see scripts/anthropic-skills.sh).
+if [ ! -f "$HOME/.claude/skills/pdf/SKILL.md" ] || [ ! -f "$HOME/.claude/skills/docx/SKILL.md" ]; then
   _tmp_dir=$(mktemp -d)
   git clone --depth 1 https://github.com/anthropics/skills.git "$_tmp_dir/skills" 2>/dev/null
   if [ -d "$_tmp_dir/skills/skills" ]; then
