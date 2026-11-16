@@ -265,7 +265,7 @@ Phase 3: REVIEW        (interactive)
 curl -fsSL https://bun.sh/install | bash && bash install.sh
 ```
 
-`install.sh` checks the runtime in `~/.gstack/runtime` out at the commit of the `upstream/gstack` submodule and never pulls it from upstream, so it only moves when the submodule does. `install.sh` never turns on gstack auto-upgrade, and it turns off the `auto_upgrade: true` that earlier versions wrote to `~/.gstack/config.json`.
+`install.sh` checks the runtime in `~/.gstack/runtime` out at the commit this checkout records for the `upstream/gstack` submodule, fetched from that local submodule, and never pulls it from upstream, so it only moves when the recorded commit does. If the submodule does not hold that commit, the runtime is left as it is and gstack's `./setup` is skipped. `install.sh` never turns on gstack auto-upgrade, and it turns off the `auto_upgrade: true` that earlier versions wrote to `~/.gstack/config.json`.
 
 ---
 
@@ -349,7 +349,7 @@ cd /path/to/my-claude && git pull && git submodule update --init --depth 1 && ba
 cd /path/to/my-claude && git submodule update --remote && bash install.sh
 ```
 
-This moves every submodule to its upstream HEAD, including the commit gstack's runtime is built from and the OMC version `install.sh` installs. It skips the upstream-diff scan and review that the sync PRs get.
+This moves every submodule to its upstream HEAD, including the gstack skills and the OMC version `install.sh` installs. It skips the upstream-diff scan and review that the sync PRs get. gstack's browser runtime stays at the commit this checkout records, and `install.sh` warns that the submodule checkouts differ from the recorded commits.
 
 The manifest system removes stale files on upgrade without touching user-added content.
 
@@ -371,9 +371,9 @@ rm -rf /tmp/my-claude
 
 ### install.sh fails on submodule init
 
-If submodule init fails for an upstream (slow network, a timeout), `install.sh` prints `WARNING: submodule init failed for <name>, falling back to git clone...`. It then fetches the commit this checkout records for that submodule, the same one the upstream scan covered. archify is cloned at its pinned tag instead. If that fetch fails too, the upstream is skipped with a warning. Re-run `git submodule update --init --depth 1` once the network is back, then run `install.sh` again.
+If submodule init fails for an upstream (slow network, a timeout), `install.sh` prints `WARNING: submodule init failed for <name>, falling back to git clone...`. It then fetches the commit this checkout records for that submodule, the same one the upstream scan covered. archify is cloned at its pinned tag instead. If that fetch fails too, the upstream is skipped with a warning. gstack's browser runtime is built only from the recorded commit inside `upstream/gstack`, so while that submodule does not hold it, the runtime is left as it is and its setup is skipped. Re-run `git submodule update --init --depth 1` once the network is back, then run `install.sh` again.
 
-Only a directory that is not a git checkout, such as an extracted zip download, records no commits. `install.sh` then clones each upstream's default branch and warns that the copy is not pinned and was not covered by the upstream scan. Install from a `git clone` of this repository to avoid that.
+A directory that is not a git checkout, such as an extracted zip download, records no commits. `install.sh` does not fall back to an upstream's default branch there: it skips that upstream with a warning, because the copy would be neither pinned nor covered by the upstream scan (archify still uses its pinned tag). Install from a `git clone` of this repository.
 
 ### MCP servers not showing up
 
@@ -400,6 +400,8 @@ npm i -g oh-my-opencode@3.12.3 && oh-my-opencode install --no-tui --claude=yes -
 If `npm i -g` fails with a permissions error, set a user-local npm prefix: `npm config set prefix ~/.npm-global` and add `~/.npm-global/bin` to your `PATH`.
 
 If npm reports `No matching version found` for `oh-my-claude-sisyphus`, upstream has not published the pinned version to npm yet. `install.sh` handles that case by installing the newest published version below the pin, so re-running it is the simplest fix. It switches to the pinned version on the first run after npm has it.
+
+The pin bounds the OMC version only. The npm package (its compiled `dist/`, its `postinstall` script, and the `omc setup` that `install.sh` runs after a fresh install) is not the git source the upstream scan reviewed: its contents are trusted as the npm registry serves them.
 
 ### Agent not recognized by Boss
 

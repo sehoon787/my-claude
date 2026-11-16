@@ -474,33 +474,36 @@ init_upstream() {
   fi
   # Otherwise fetch exactly the commit this checkout records for the submodule,
   # the one the upstream scan covered; if that fails, the upstream is skipped.
+  # The git calls name this directory's own .git and work tree, so an exported
+  # GIT_DIR or GIT_WORK_TREE cannot send them to another one.
   recorded_sha="$(git -C "$SCRIPT_DIR" rev-parse -q --verify ":upstream/$name" 2>/dev/null || true)"
   if [ -n "$recorded_sha" ]; then
-    if mkdir -p "$UPSTREAM_DIR" && git init -q "$UPSTREAM_DIR" 2>/dev/null \
+    if mkdir -p "$UPSTREAM_DIR" && git -C "$UPSTREAM_DIR" --git-dir=.git --work-tree=. init -q 2>/dev/null \
       && git -C "$UPSTREAM_DIR" --git-dir=.git fetch -q --depth 1 "$url" "$recorded_sha" 2>/dev/null \
-      && git -C "$UPSTREAM_DIR" --git-dir=.git checkout -q --detach FETCH_HEAD 2>/dev/null; then
+      && git -C "$UPSTREAM_DIR" --git-dir=.git --work-tree=. checkout -q --detach FETCH_HEAD 2>/dev/null; then
       return 0
     fi
     echo "  WARNING: could not fetch $name at its recorded commit ${recorded_sha:0:12}"
     return 1
   fi
   # No recorded commit (this directory is not a git checkout): the default
-  # branch is all that is left, and it says so.
-  echo "  WARNING: no commit is recorded for upstream/$name here, so $name is cloned from its default branch: this copy is not pinned and was not covered by the upstream scan"
-  git clone --depth 1 "$url" "$UPSTREAM_DIR" 2>/dev/null || return 1
+  # branch would be neither pinned nor scanned, so the upstream is skipped.
+  echo "  WARNING: no commit is recorded for upstream/$name here, so $name is skipped: a copy of its default branch would not be pinned or covered by the upstream scan"
+  return 1
 }
 
 # Warn when an upstream submodule is checked out at another commit than the one
 # this checkout records for it: `git pull` without a submodule update leaves it
-# behind, `git submodule update --remote` moves it past the scanned commit. The
-# install still uses the checkout.
+# behind, `git submodule update --remote` moves it past the scanned commit.
+# Skills, agents and the OMC version still come from the checkout; the gstack
+# runtime is only ever built from the recorded commit.
 warn_unsynced_submodule() {  # warn_unsynced_submodule <name>
   local recorded checked_out
   [ -e "$SCRIPT_DIR/upstream/$1/.git" ] || return 0
   recorded="$(git -C "$SCRIPT_DIR" rev-parse -q --verify ":upstream/$1" 2>/dev/null || true)"
   checked_out="$(git -C "$SCRIPT_DIR/upstream/$1" rev-parse -q --verify 'HEAD^{commit}' 2>/dev/null || true)"
   if [ -n "$recorded" ] && [ -n "$checked_out" ] && [ "$recorded" != "$checked_out" ]; then
-    echo "  WARNING: upstream/$1 is checked out at ${checked_out:0:12}, not the recorded ${recorded:0:12}; installing from the checkout (to sync: cd \"$SCRIPT_DIR\" && git submodule update --init --depth 1)"
+    echo "  WARNING: upstream/$1 is checked out at ${checked_out:0:12}, not the recorded ${recorded:0:12} (to sync: cd \"$SCRIPT_DIR\" && git submodule update --init --depth 1)"
   fi
 }
 
@@ -729,19 +732,22 @@ if [ "$SKIP_GSTACK" = "0" ]; then
     export PATH="$BUN_INSTALL/bin:$PATH"
   fi
 
-  # Check the runtime out at the commit the upstream/gstack submodule pins (the
-  # one the skills above came from), fetched from that local checkout, never
-  # from upstream: upstream changes reach it only through the sync PRs that bump
-  # the pin. A runtime an older install cloned from upstream main is moved to
-  # the pin the same way. The checkout is forced, so local edits to tracked
-  # files in this installer-owned directory are discarded; untracked build
-  # output (node_modules, dist/) stays. Every git call on the runtime names its
-  # own .git, so a broken one fails here instead of resolving to a repository
-  # further up (a HOME kept under git, for one).
+  # Check the runtime out at the commit this checkout records for upstream/gstack
+  # (the commit the upstream scan covered), fetched from the local submodule,
+  # never from upstream: upstream changes reach it only through the sync PRs
+  # that bump the pin. When the submodule does not hold that commit (a clone
+  # that stopped at upstream's tip, a checkout behind it), the update fails and
+  # setup is skipped. A runtime an older install cloned from upstream main is
+  # moved to the pin the same way. The checkout is forced, so local edits to
+  # tracked files in this installer-owned directory are discarded; untracked
+  # build output (node_modules, dist/) stays. Every git call on the runtime
+  # names its own .git and work tree, so a broken .git fails here instead of
+  # resolving to a repository further up (a HOME kept under git, for one), and
+  # an exported GIT_WORK_TREE or a core.worktree cannot redirect the checkout.
   GSTACK_PIN_DIR="$SCRIPT_DIR/upstream/gstack"
   GSTACK_PIN_SHA=""
   if [ -e "$GSTACK_PIN_DIR/.git" ]; then
-    GSTACK_PIN_SHA="$(git -C "$GSTACK_PIN_DIR" rev-parse --verify -q 'HEAD^{commit}' 2>/dev/null || true)"
+    GSTACK_PIN_SHA="$(git -C "$SCRIPT_DIR" rev-parse -q --verify ':upstream/gstack' 2>/dev/null || true)"
   fi
   # What a failed update leaves in the runtime directory, for the warnings.
   gstack_runtime_state() {
@@ -755,16 +761,16 @@ if [ "$SKIP_GSTACK" = "0" ]; then
   }
   GSTACK_RUNTIME_PINNED=0
   if [ -z "$GSTACK_PIN_SHA" ]; then
-    echo "  [gstack] WARNING: upstream/gstack is not checked out — runtime not updated, setup skipped; $(gstack_runtime_state)"
+    echo "  [gstack] WARNING: upstream/gstack is not checked out, or no commit is recorded for it — runtime not updated, setup skipped; $(gstack_runtime_state)"
   else
     warn_unsynced_submodule gstack
     if [ ! -d "$GSTACK_RUNTIME/.git" ]; then
       rm -rf "$GSTACK_RUNTIME"
       mkdir -p "$GSTACK_RUNTIME"
-      git init -q "$GSTACK_RUNTIME" 2>/dev/null || true
+      git -C "$GSTACK_RUNTIME" --git-dir=.git --work-tree=. init -q 2>/dev/null || true
     fi
     if git -C "$GSTACK_RUNTIME" --git-dir=.git -c protocol.file.allow=always fetch -q --depth 1 "$GSTACK_PIN_DIR" "$GSTACK_PIN_SHA" 2>/dev/null \
-      && git -C "$GSTACK_RUNTIME" --git-dir=.git checkout -q -f --detach "$GSTACK_PIN_SHA" 2>/dev/null; then
+      && git -C "$GSTACK_RUNTIME" --git-dir=.git --work-tree=. checkout -q -f --detach "$GSTACK_PIN_SHA" 2>/dev/null; then
       GSTACK_RUNTIME_PINNED=1
     else
       echo "  [gstack] WARNING: could not check the runtime out at the pinned ${GSTACK_PIN_SHA:0:12} — setup skipped; $(gstack_runtime_state)"
@@ -1016,10 +1022,12 @@ fi
 # 5b. OMC CLI (npm package)
 # The version upstream/omc pins (its package.json) when npm has it, otherwise
 # the newest published version below it: upstream tags a release in git before
-# it publishes it to npm. Never npm @latest and never anything above the pin,
-# so a newer release reaches this machine only through the sync PR that bumps
-# the submodule. One `npm view` per run; when it cannot be read, the CLI is
-# left as it is. npm failures never fail the install.
+# it publishes it to npm. Never npm @latest and never anything above the pin.
+# The pin bounds the version only: the npm tarball (its compiled dist/, its
+# postinstall script, then `omc setup`) is not the git source the upstream scan
+# reviewed, and its contents are trusted as the registry serves them. One
+# `npm view` per run; when it cannot be read, the CLI is left as it is. npm
+# failures never fail the install.
 echo "  [5b] OMC CLI..."
 _OMC_PIN_VER="$(node -e 'console.log(require(process.argv[1]).version || "")' "$SCRIPT_DIR/upstream/omc/package.json" 2>/dev/null || true)"
 _OMC_HUD_OK=false

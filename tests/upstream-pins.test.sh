@@ -20,12 +20,16 @@
 #   4. The OMC plugin is never refreshed: no `claude plugin update`, `install`
 #      or `marketplace update|add|remove`.
 #   5. When submodule init fails, the fallback fetches the commit this checkout
-#      records, not the upstream default branch; without a recorded commit the
-#      default-branch copy is announced as unpinned. gstack's ./setup never runs
-#      from either, and the warnings say what is left in ~/.gstack/runtime.
+#      records, not the upstream default branch; with no recorded commit the
+#      upstream is skipped. The gstack runtime is only ever built from the
+#      recorded commit, taken from the local submodule: a clone that stopped at
+#      upstream's tip, or a checkout behind the recorded commit, never reaches
+#      ./setup. The warnings say what is left in ~/.gstack/runtime.
 #   6. A submodule checkout that differs from the recorded commit is reported.
 #   7. A broken ~/.gstack/runtime/.git never resolves to an enclosing repository
-#      (here a HOME kept under git).
+#      (here a HOME kept under git), and neither an exported GIT_WORK_TREE nor
+#      a core.worktree left in the runtime's .git receives its checkout or a
+#      fallback checkout.
 #   8. hooks/session-start.sh reports a missing omc instead of installing it
 #      from npm @latest.
 #
@@ -132,10 +136,41 @@ NOPIN_REPO="$TMP/repo-nopin"
 make_repo "$NOPIN_REPO"
 mkdir -p "$NOPIN_REPO/upstream/gstack" "$NOPIN_REPO/upstream/omc"
 
+# An upstream whose history no longer holds the recorded commit, only a newer
+# tip (a rewritten branch). This copy keeps the real .gitmodules, and the run
+# points github.com/garrytan/gstack at this repo: `git submodule update` clones
+# the tip, cannot fetch the recorded commit and stops, leaving
+# upstream/gstack/.git at the unscanned tip with no files checked out.
+GSTACK_TIP_ONLY="$TMP/gstack-tip-only"
+mkdir -p "$GSTACK_TIP_ONLY"
+cp "$GSTACK_PIN_REPO/setup" "$GSTACK_TIP_ONLY/setup"
+chmod +x "$GSTACK_TIP_ONLY/setup"
+echo upstream-tip > "$GSTACK_TIP_ONLY/MARKER"
+printf -- '---\nname: gstack\n---\nupstream-tip\n' > "$GSTACK_TIP_ONLY/SKILL.md"
+tgit init -q "$GSTACK_TIP_ONLY"
+tgit -C "$GSTACK_TIP_ONLY" add -A
+tgit -C "$GSTACK_TIP_ONLY" commit -qm "rewritten upstream tip"
+GSTACK_TIP_SHA="$(tgit -C "$GSTACK_TIP_ONLY" rev-parse HEAD)"
+TIPCLONE_REPO="$TMP/repo-tip-clone"
+make_repo "$TIPCLONE_REPO"
+mkdir -p "$TIPCLONE_REPO/upstream/gstack"
+tgit init -q "$TIPCLONE_REPO"
+record "$TIPCLONE_REPO" "$GSTACK_PIN_SHA" upstream/gstack
+
+# upstream/gstack moved past the recorded commit (`git submodule update
+# --remote`): checked out at upstream main, with the recorded commit still in
+# its history.
+AHEAD_REPO="$TMP/repo-ahead"
+make_repo "$AHEAD_REPO"
+tgit clone -q "$GSTACK_UPSTREAM" "$AHEAD_REPO/upstream/gstack"
+tgit init -q "$AHEAD_REPO"
+record "$AHEAD_REPO" "$GSTACK_PIN_SHA" upstream/gstack
+
 # Every check below compares against these, so a broken fixture must stop here
 # rather than let two empty strings compare equal.
 if [ -z "$GSTACK_PIN_SHA" ] || [ -z "$GSTACK_HEAD_SHA" ] || [ "$GSTACK_PIN_SHA" = "$GSTACK_HEAD_SHA" ] \
-   || [ -z "$OMC_PIN_SHA" ] || [ -z "$OMC_HEAD_SHA" ] \
+   || [ -z "$OMC_PIN_SHA" ] || [ -z "$OMC_HEAD_SHA" ] || [ -z "$GSTACK_TIP_SHA" ] \
+   || [ "$(tgit -C "$AHEAD_REPO/upstream/gstack" rev-parse HEAD)" != "$GSTACK_HEAD_SHA" ] \
    || [ ! -f "$GSTACK_PIN_REPO/.git" ] || [ ! -f "$OMC_PIN_REPO/.git" ] \
    || [ "$(tgit -C "$FAKE_REPO" rev-parse -q --verify :upstream/gstack)" != "$GSTACK_PIN_SHA" ]; then
   echo "FAIL  fixture setup (pin '$GSTACK_PIN_SHA', upstream head '$GSTACK_HEAD_SHA')"
@@ -230,8 +265,12 @@ chmod +x "$SHIM"/*
 
 # Environment for a run against throwaway HOME $1, with npm offering the
 # versions in $2 (NPM_DOWN=1 makes the registry unreachable). Both gstack URLs
-# lead to the local "upstream" repo (git uses the longest matching insteadOf).
+# lead to $GSTACK_REMOTE, the local "upstream" repo unless a scenario swaps it
+# (git uses the longest matching insteadOf). GIT_WORK_TREE_EXPORT, when set, is
+# exported to the run as GIT_WORK_TREE.
 NPM_DOWN=""
+GSTACK_REMOTE="$GSTACK_UPSTREAM"
+GIT_WORK_TREE_EXPORT=""
 run_env() {
   local home="$1" published="$2"
   mkdir -p "$home/tmp"
@@ -242,8 +281,9 @@ run_env() {
     AGENT_HARNESS_SERVICES_SKIP=1 \
     GIT_CONFIG_NOSYSTEM=1 GIT_ALLOW_PROTOCOL=file \
     GIT_CONFIG_COUNT=2 \
-    GIT_CONFIG_KEY_0="url.$GSTACK_UPSTREAM.insteadOf" GIT_CONFIG_VALUE_0="$GSTACK_GIT_URL" \
-    GIT_CONFIG_KEY_1="url.$GSTACK_UPSTREAM.insteadOf" GIT_CONFIG_VALUE_1="$GSTACK_URL" \
+    GIT_CONFIG_KEY_0="url.$GSTACK_REMOTE.insteadOf" GIT_CONFIG_VALUE_0="$GSTACK_GIT_URL" \
+    GIT_CONFIG_KEY_1="url.$GSTACK_REMOTE.insteadOf" GIT_CONFIG_VALUE_1="$GSTACK_URL" \
+    ${GIT_WORK_TREE_EXPORT:+"GIT_WORK_TREE=$GIT_WORK_TREE_EXPORT"} \
     "${@:3}"
 }
 INSTALL_RC=0
@@ -303,7 +343,7 @@ omc_warnings() { omc_step "$1" | grep -c 'WARNING'; }
 omc_installs() { { grep -E '^npm (i|install) .*oh-my-claude-sisyphus@' "$1/shim.log" 2>/dev/null || true; } | wc -l | tr -d ' '; }
 installed_only() { [ "$(omc_installs "$1")" = 1 ] && logged "$1" "npm i -g oh-my-claude-sisyphus@$2" && [ "$(omc_version "$1")" = "$2" ]; }
 
-echo "[1/9] fresh install"
+echo "[1/11] fresh install"
 H="$TMP/home-fresh"; mkdir -p "$H"
 run_install "$H" "$OMC_PIN $OMC_NEWER" "$FAKE_REPO"
 check "gstack runtime checked out at the pin"             "$(yes_if [ "$(runtime_head "$H")" = "$GSTACK_PIN_SHA" ])"
@@ -315,7 +355,7 @@ check "OMC CLI installed at the pin"                      "$(yes_if [ "$(omc_ver
 check "OMC plugin not refreshed or reinstalled"           "$(yes_if no_plugin_refresh "$H")"
 check "checkouts at the recorded commits: no sync warning" "$(yes_if not in_log "$H" "is checked out at")"
 
-echo "[2/9] update over an older install (runtime on upstream main, auto_upgrade on, newer OMC)"
+echo "[2/11] update over an older install (runtime on upstream main, auto_upgrade on, newer OMC)"
 H="$TMP/home-update"; mkdir -p "$H/.gstack"
 seed_runtime "$H"
 mkdir -p "$H/.gstack/runtime/browse/dist"
@@ -336,7 +376,7 @@ check "OMC CLI now at the pin"                            "$(yes_if [ "$(omc_ver
 check "OMC plugin not refreshed or reinstalled"           "$(yes_if no_plugin_refresh "$H")"
 check "user-owned global gstack install keeps its files"  "$(yes_if user_gstack_intact "$H")"
 
-echo "[3/9] user-set auto_upgrade values and an install already at the pins"
+echo "[3/11] user-set auto_upgrade values and an install already at the pins"
 H="$TMP/home-user"; mkdir -p "$H/.gstack"
 seed_runtime "$H"
 printf '{"auto_upgrade": false, "note": "mine"}\n' > "$H/.gstack/config.json"
@@ -351,7 +391,7 @@ check "no auto_upgrade line printed"                      "$(yes_if [ "$(grep -c
 check "OMC already at the pin: npm installs nothing for it" "$(yes_if not logged "$H" "oh-my-claude-sisyphus@")"
 check "gstack runtime at the pin"                         "$(yes_if [ "$(runtime_head "$H")" = "$GSTACK_PIN_SHA" ])"
 
-echo "[4/9] OMC version: the pin, or the newest published version below it"
+echo "[4/11] OMC version: the pin, or the newest published version below it"
 omc_case() {  # omc_case <name> <pin> <published versions> [installed version]
   H="$TMP/home-omc-$1"; mkdir -p "$H"
   set_omc_pin "$2"
@@ -387,7 +427,7 @@ check "nothing published at or below the pin: no npm i"   "$(yes_if [ "$(omc_ins
 check "nothing published at or below the pin: one WARNING" "$(yes_if [ "$(omc_warnings "$H")" = 1 ])"
 set_omc_pin "$OMC_PIN"
 
-echo "[5/9] submodule init fails; this checkout records the commits"
+echo "[5/11] submodule init fails; this checkout records the commits"
 H="$TMP/home-fallback"; mkdir -p "$H"
 run_install "$H" "$OMC_PIN $OMC_NEWER" "$UNINIT_REPO"
 check "gstack skills fetched at the recorded commit, not upstream's default branch" "$(yes_if grep -qx pinned "$H/.claude/skills/gstack/SKILL.md")"
@@ -396,11 +436,12 @@ check "OMC fetch fails: no OMC agents copied"             "$(yes_if [ ! -e "$H/.
 check "gstack ./setup never ran"                          "$(yes_if [ ! -e "$H/gstack-setup.log" ])"
 check "runtime warning says no runtime is left"           "$(yes_if in_log "$H" "no runtime checkout in")"
 
-echo "[6/9] not a git checkout: no recorded commits (upstream HEAD reachable)"
+echo "[6/11] not a git checkout: no recorded commits (upstream HEAD reachable)"
 H="$TMP/home-nopin"; mkdir -p "$H/.gstack"
 seed_runtime "$H"
 run_install "$H" "$OMC_PIN $OMC_NEWER" "$NOPIN_REPO"
-check "default-branch copy announced as unpinned and unscanned" "$(yes_if in_log "$H" "not pinned and was not covered by the upstream scan")"
+check "gstack skipped with a warning, not cloned from its default branch" "$(yes_if in_log "$H" "WARNING: no commit is recorded for upstream/gstack here, so gstack is skipped")"
+check "no default-branch gstack skills copied"            "$(yes_if [ ! -e "$H/.claude/skills/gstack/SKILL.md" ])"
 check "gstack ./setup never ran"                          "$(yes_if [ ! -e "$H/gstack-setup.log" ])"
 check "existing runtime left where it was"                "$(yes_if [ "$(runtime_head "$H")" = "$GSTACK_HEAD_SHA" ])"
 check "warning says the runtime was not updated"          "$(yes_if in_log "$H" "upstream/gstack is not checked out")"
@@ -408,7 +449,18 @@ check "warning names the runtime commit left in place"    "$(yes_if in_log "$H" 
 check "npm never asked for oh-my-claude-sisyphus"         "$(yes_if not logged "$H" "oh-my-claude-sisyphus@")"
 check "warning says the OMC pin is unknown"               "$(yes_if in_log "$H" "pinned OMC version is unknown")"
 
-echo "[7/9] submodule checkouts that differ from the recorded commits"
+echo "[7/11] submodule clone stopped at upstream's tip (the recorded commit is gone upstream)"
+H="$TMP/home-tipclone"; mkdir -p "$H"
+GSTACK_REMOTE="$GSTACK_TIP_ONLY" run_install "$H" "$OMC_PIN $OMC_NEWER" "$TIPCLONE_REPO" --skip-omc
+check "fixture: upstream/gstack/.git was left at upstream's tip" "$(yes_if [ "$(tgit -C "$TIPCLONE_REPO/upstream/gstack" rev-parse HEAD 2>/dev/null)" = "$GSTACK_TIP_SHA" ])"
+check "gstack ./setup never ran"                          "$(yes_if [ ! -e "$H/gstack-setup.log" ])"
+check "runtime not checked out at upstream's tip"         "$(yes_if [ "$(runtime_head "$H")" != "$GSTACK_TIP_SHA" ] && [ ! -e "$H/.gstack/runtime/MARKER" ])"
+check "no gstack skills copied"                           "$(yes_if [ ! -e "$H/.claude/skills/gstack/SKILL.md" ])"
+check "warning names the recorded commit and the runtime state" "$(yes_if in_log "$H" "could not check the runtime out at the pinned ${GSTACK_PIN_SHA:0:12} — setup skipped; no runtime checkout in")"
+
+echo "[8/11] submodule checkouts that differ from the recorded commits"
+# Behind: the superproject records newer commits than the checkouts hold (a
+# git pull without the submodule update).
 record "$FAKE_REPO" "$GSTACK_HEAD_SHA" upstream/gstack
 record "$FAKE_REPO" "$OMC_HEAD_SHA" upstream/omc
 H="$TMP/home-unsynced"; mkdir -p "$H"
@@ -417,9 +469,17 @@ record "$FAKE_REPO" "$GSTACK_PIN_SHA" upstream/gstack
 record "$FAKE_REPO" "$OMC_PIN_SHA" upstream/omc
 check "gstack: one warning with both commits and the sync command" "$(yes_if [ "$(grep -c "upstream/gstack is checked out at ${GSTACK_PIN_SHA:0:12}, not the recorded ${GSTACK_HEAD_SHA:0:12}.*git submodule update --init --depth 1" "$H/install.log")" = 1 ])"
 check "omc: one warning with both commits and the sync command"    "$(yes_if [ "$(grep -c "upstream/omc is checked out at ${OMC_PIN_SHA:0:12}, not the recorded ${OMC_HEAD_SHA:0:12}.*git submodule update --init --depth 1" "$H/install.log")" = 1 ])"
-check "the install still uses the checkout"               "$(yes_if [ "$(runtime_head "$H")" = "$GSTACK_PIN_SHA" ])"
+check "behind: gstack skills still come from the checkout" "$(yes_if grep -qx pinned "$H/.claude/skills/gstack/SKILL.md")"
+check "behind: runtime not built from the checkout, ./setup never ran" "$(yes_if [ ! -e "$H/gstack-setup.log" ])"
+check "behind: warning names the recorded commit the checkout lacks" "$(yes_if in_log "$H" "could not check the runtime out at the pinned ${GSTACK_HEAD_SHA:0:12} — setup skipped")"
+# Ahead: the checkout moved past the recorded commit and still holds it.
+H="$TMP/home-ahead"; mkdir -p "$H"
+run_install "$H" "$OMC_PIN $OMC_NEWER" "$AHEAD_REPO" --skip-omc
+check "ahead: one warning with both commits"              "$(yes_if [ "$(grep -c "upstream/gstack is checked out at ${GSTACK_HEAD_SHA:0:12}, not the recorded ${GSTACK_PIN_SHA:0:12}" "$H/install.log")" = 1 ])"
+check "ahead: runtime at the recorded commit, not the checkout" "$(yes_if [ "$(runtime_head "$H")" = "$GSTACK_PIN_SHA" ])"
+check "ahead: ./setup ran once, from the recorded commit" "$(yes_if [ "$(setup_runs "$H")" = "pinned --host claude" ])"
 
-echo "[8/9] broken runtime checkout inside a HOME kept under git"
+echo "[9/11] broken runtime checkout inside a HOME kept under git"
 H="$TMP/home-gitrepo"; mkdir -p "$H"
 tgit init -q "$H"
 echo "# mine" > "$H/.dotfile"
@@ -432,7 +492,33 @@ check "the HOME repository keeps its commit and files"    "$(yes_if [ "$(tgit -C
 check "gstack ./setup never ran"                          "$(yes_if [ ! -e "$H/gstack-setup.log" ])"
 check "warning says what is left in the runtime"          "$(yes_if in_log "$H" "could not check the runtime out at the pinned ${GSTACK_PIN_SHA:0:12} — setup skipped; no runtime checkout in")"
 
-echo "[9/9] session-start hook with omc missing"
+echo "[10/11] git pointed at another work tree (exported GIT_WORK_TREE, core.worktree)"
+# A directory holding one file of the user's, and checks on it and the runtime.
+other_tree() { mkdir -p "$1/other"; echo mine > "$1/other/mine"; }
+other_tree_intact() { [ "$(ls -A "$1/other")" = mine ] && [ "$(cat "$1/other/mine")" = mine ]; }
+runtime_at_pin() { [ "$(runtime_head "$1")" = "$GSTACK_PIN_SHA" ] && [ "$(cat "$1/.gstack/runtime/MARKER" 2>/dev/null)" = pinned ]; }
+H="$TMP/home-worktree-env"; mkdir -p "$H/.gstack"; other_tree "$H"
+seed_runtime "$H"
+GIT_WORK_TREE_EXPORT="$H/other" run_install "$H" "$OMC_PIN $OMC_NEWER" "$FAKE_REPO"
+check "GIT_WORK_TREE: that directory is untouched"        "$(yes_if other_tree_intact "$H")"
+check "GIT_WORK_TREE: runtime files checked out at the pin" "$(yes_if runtime_at_pin "$H")"
+check "GIT_WORK_TREE: ./setup ran once, from the pinned files" "$(yes_if [ "$(setup_runs "$H")" = "pinned --host claude" ])"
+H="$TMP/home-worktree-config"; mkdir -p "$H/.gstack"; other_tree "$H"
+seed_runtime "$H"
+tgit -C "$H/.gstack/runtime" config core.worktree "$H/other"
+run_install "$H" "$OMC_PIN $OMC_NEWER" "$FAKE_REPO"
+check "core.worktree in the runtime: that directory is untouched" "$(yes_if other_tree_intact "$H")"
+check "core.worktree in the runtime: runtime files checked out at the pin" "$(yes_if runtime_at_pin "$H")"
+H="$TMP/home-worktree-fresh"; mkdir -p "$H"; other_tree "$H"
+GIT_WORK_TREE_EXPORT="$H/other" run_install "$H" "$OMC_PIN $OMC_NEWER" "$FAKE_REPO"
+check "GIT_WORK_TREE, no runtime yet: that directory is untouched" "$(yes_if other_tree_intact "$H")"
+check "GIT_WORK_TREE, no runtime yet: runtime created at the pin" "$(yes_if runtime_at_pin "$H")"
+H="$TMP/home-worktree-fallback"; mkdir -p "$H"; other_tree "$H"
+GIT_WORK_TREE_EXPORT="$H/other" run_install "$H" "$OMC_PIN $OMC_NEWER" "$UNINIT_REPO"
+check "GIT_WORK_TREE, clone fallback: that directory is untouched" "$(yes_if other_tree_intact "$H")"
+check "GIT_WORK_TREE, clone fallback: gstack skills fetched at the recorded commit" "$(yes_if grep -qx pinned "$H/.claude/skills/gstack/SKILL.md")"
+
+echo "[11/11] session-start hook with omc missing"
 H="$TMP/home-hook"; mkdir -p "$H" "$TMP/project"
 ( cd "$TMP/project" && run_env "$H" "$OMC_PIN $OMC_NEWER" "$BASH" "$REPO/hooks/session-start.sh" ) \
   > "$H/hook.out" 2>&1 < /dev/null
