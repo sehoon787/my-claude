@@ -198,11 +198,13 @@ Phase 1: Design (conversation)  →  Phase 2: Execute (autonomous)  →  Phase 3
       User decides                    Autonomous execution                User confirms
 ```
 
-**Phase 1: Design (conversation/interaction)**
-- `/office-hours` or `/plan-ceo-review` (Boss chooses based on situation)
-- `/plan-eng-review` (mandatory)
-- Confirm all key decisions via AskUserQuestion
-- Transition to Phase 2 once user confirms design is complete
+**Phase 1: Design (interactive — one approval gate)**
+- Recall: search `.briefing/decisions/`, `.briefing/learnings/` and `.briefing/plans/` for related notes.
+- Clarify only when the request is ambiguous: `metis`, then at most two questions in one AskUserQuestion.
+- Plan: `writing-plans` saves a task plan to `.briefing/plans/YYYY-MM-DD-<topic>.md`.
+- Plan review: `momus`, at most two rounds; the verdict is appended to the plan.
+- Approval gate: exactly one AskUserQuestion (approve / revise / stop); Phase 2 starts only on approve.
+- `/plan-ceo-review`, `/plan-eng-review` and `/autoplan` are optional extra reviews, run only on request.
 
 **Phase 2: Execute (autonomous/automated)**
 - Always execute via `oh-my-claudecode:ralph` (ralph automatically selects strategy based on scale internally)
@@ -211,7 +213,7 @@ Phase 1: Design (conversation)  →  Phase 2: Execute (autonomous)  →  Phase 3
 - On failure at any step, fix and retry
 
 **Phase 3: Review (conversation/improvement)**
-- Reload design doc from disk (`~/.gstack/projects/` path)
+- Reload the plan from disk (`.briefing/plans/`), falling back to the gstack design doc (`~/.gstack/projects/` path)
 - Compare implementation results against the design document
 - AskUserQuestion for improvement/approval decision
 - Improvement needed → re-enter Phase 2
@@ -224,7 +226,7 @@ Phase 1: Design (conversation)  →  Phase 2: Execute (autonomous)  →  Phase 3
 
 | Phase | Skill | Description |
 |------|------|------|
-| Plan | `/plan-ceo-review` → `/plan-eng-review` | CEO + engineering review. Can be automated with `/autoplan` |
+| Plan | `writing-plans` → `momus` | Task plan in `.briefing/plans/`, reviewed by momus. Optional extra reviews: `/plan-ceo-review`, `/plan-eng-review`, `/autoplan` |
 | Review | `/review` | Code review — scope-drift detection, adversarial review, plan-item completion check |
 | QA | `/qa https://...` | Browser QA + auto-fix loop |
 | Ship | `/ship` | Test→commit→PR. Includes review-readiness dashboard |

@@ -329,7 +329,7 @@ engineering-multi-agent-systems-architect (vendored, model inherited)
 
 | # | Input | Expected Route | Verify | Phase |
 |---|-------|---------------|--------|-------|
-| 181 | "이 기능 만들어줘" (end-to-end feature request) | Boss → 3-Phase Sprint: Phase 1 (/plan-ceo-review → /plan-eng-review) → Phase 2 (ralph with Step 7a gstack /review + Step 7b architect) → Phase 3 (design doc 대조 + AskUserQuestion) | All 3 phases execute in order; Phase transitions are explicit | Phase 1→2→3 |
+| 181 | "이 기능 만들어줘" (end-to-end feature request) | Boss → 3-Phase Sprint: Phase 1 (recall → writing-plans saves the plan to .briefing/plans/ → momus review → one approval gate) → Phase 2 (ralph with Step 7a gstack /review + Step 7b architect) → Phase 3 (design doc comparison + AskUserQuestion) | All 3 phases execute in order; Phase transitions are explicit | Phase 1→2→3 |
 | 182 | "코드 리뷰해줘" (standalone code review) | Boss → P0 → gstack `/review` directly (NOT 3-Phase Sprint) | Single skill invocation, no Sprint workflow triggered | N/A (direct P0) |
 | 183 | gstack not installed + "배포해줘" | Boss → P1-P4 fallback (ralph with architect/critic only, no gstack skills) | ralph Step 7a skipped silently; Step 7b architect runs normally | Fallback |
 | 184 | ralph Step 7a: /review returns findings | ralph logs /review findings → proceeds to Step 7b architect verification → both results reported | Both 7a and 7b run; neither blocks the other | Phase 2 |
@@ -403,7 +403,7 @@ engineering-multi-agent-systems-architect (vendored, model inherited)
 ### Scenario 186: gstack-sprint 트리거 — end-to-end 기능 구현
 - **Input**: "사용자 프로필 페이지를 추가해줘"
 - **Expected**: Boss → Intent Gate (Build) → Counter-Proposal: gstack-sprint → Skill(skill: "gstack-sprint") 호출
-- **Verify**: gstack-sprint Phase 1(설계/대화)으로 진입, AskUserQuestion 발생
+- **Verify**: gstack-sprint enters Phase 1: `writing-plans` saves the plan to `.briefing/plans/`, `momus` reviews it, and Phase 2 waits for an approve answer at the one AskUserQuestion approval gate
 - **Not Expected**: 바로 executor로 위임하거나 ralph 직접 호출
 
 ### Scenario 187: gstack-sprint 미트리거 — 순수 설계/기획
@@ -432,8 +432,8 @@ engineering-multi-agent-systems-architect (vendored, model inherited)
 
 ### Scenario 191: gstack 미설치 환경에서 end-to-end 요청
 - **Input**: "이 기능 만들어줘" (gstack 미설치 상태)
-- **Expected**: Boss → gstack-sprint 호출 시도 → gstack-sprint 내부에서 폴백 → OMC planner → ralph → Boss 직접 검수
-- **Verify**: Phase 1은 planner 에이전트로, Phase 3는 Boss 직접 파일 읽고 검수
+- **Expected**: Boss → invokes gstack-sprint → Phase 1 runs without gstack: `writing-plans` (or the `prometheus` agent when `writing-plans` is not installed) writes the plan → `momus` review → one approval gate → ralph → Boss reviews directly
+- **Verify**: Phase 1 still saves a momus-reviewed plan to `.briefing/plans/`; Phase 3: Boss reads the implemented files directly and reviews them
 - **Not Expected**: 에러로 중단
 
 ### Scenario 192: Phase 3 검수 거부 → Phase 2 재진입
