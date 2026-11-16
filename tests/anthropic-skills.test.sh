@@ -11,7 +11,7 @@
 # the skills were never loaded.
 #
 # Sources scripts/anthropic-skills.sh (the guard install.sh calls) and checks it
-# against throwaway HOMEs. The fallback's own `cp -r` line is pulled out of
+# against throwaway HOMEs. The `cp -r` line that copies the clone is pulled out of
 # install.sh and replayed against a fake anthropics/skills clone. Nothing outside
 # the temp dir is written and nothing touches the network.
 #
@@ -77,7 +77,7 @@ echo "# pdf" > "$H/.claude/skills/pdf/SKILL.md"
 echo "# docx" > "$H/.claude/skills/docx/SKILL.md"
 check "SKILL.md in pdf/ and docx/: installed" "$(installed "$H")"
 
-echo "[2/4] the fallback copy repairs a husk"
+echo "[2/4] the clone copy repairs a husk"
 # install.sh clones into $_tmp_skills/skills, and the skills live in its skills/.
 CLONE="$TMP/clone"
 for skill in pdf docx; do
@@ -109,6 +109,9 @@ check "install.sh sources the guard from scripts/" \
   "$(grep -qF '. "$SCRIPT_DIR/scripts/anthropic-skills.sh"' "$REPO/install.sh" && echo 1 || echo 0)"
 check "install.sh [5a] branches on the guard" \
   "$(grep -q '^if anthropic_skills_installed; then$' "$REPO/install.sh" && echo 1 || echo 0)"
+# Not a Claude Code command (2.1.325: "unknown command 'add'"): [5a] goes straight to the clone.
+check "install.sh [5a] no longer tries claude plugin add anthropics/skills" \
+  "$(grep -qF 'claude plugin add anthropics/skills' "$REPO/install.sh" && echo 0 || echo 1)"
 
 echo "[4/4] hooks/session-start.sh"
 # Evaluate the hook's own condition under every HOME built in [1/4].

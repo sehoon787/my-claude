@@ -203,7 +203,7 @@ Every rule file under `rules/common` is injected into every session, so that dir
 
 | Tool | What It Is | Why |
 |------|-----------|-----|
-| **Anthropic Official Skills** | Official document and design skills (pdf, docx, pptx, xlsx, canvas-design, mcp-builder) | Cannot be bundled in the plugin; installed via `claude plugin add anthropics/skills`. Deliberately not manifest-tracked, so upgrades never delete them |
+| **Anthropic Official Skills** | Official document and design skills (pdf, docx, pptx, xlsx, canvas-design, mcp-builder) | Cannot be bundled in the plugin; `install.sh` clones github.com/anthropics/skills into `~/.claude/skills`. Deliberately not manifest-tracked, so upgrades never delete them |
 | **omc** (`oh-my-claude-sisyphus`) | npm CLI for OMC team orchestration | Enables `omc team` multi-agent split-pane sessions |
 | **omo** (`oh-my-opencode`) | npm CLI bridging Claude Code and OpenCode | Optional — only needed for OpenCode TUI workflows |
 | **ast-grep** | Structural code search and rewrite tool | Used by several skills for code analysis |

@@ -8,9 +8,10 @@
 # loaded, and installs from before 6bc7841 left exactly such "husks": the manifest
 # cleanup deleted a skill's SKILL.md but not the rest of its directory.
 #
-# Only ~/.claude/skills is checked, on purpose. `claude plugin add` is not a Claude
-# Code command (2.1.325: "unknown command 'add'"), so step 5a always ends up on its
-# git clone fallback, whose only product is ~/.claude/skills/<skill>/.
+# Only ~/.claude/skills is checked, on purpose: step 5a clones
+# github.com/anthropics/skills straight into it. There is no plugin install to look
+# for, since `claude plugin add` is not a Claude Code command (2.1.325: "unknown
+# command 'add'").
 #
 # hooks/session-start.sh repeats this condition inline, because an installed hook
 # cannot source this file; tests/anthropic-skills.test.sh keeps the two in step.
