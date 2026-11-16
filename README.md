@@ -337,7 +337,7 @@ Per-agent models are in [Model Routing](#model-routing); where each source comes
 
 **Quiet plugin hooks.** `merge-settings.js` sets `env.OMC_QUIET=2` unless you already set it. OMC's own plugin hooks otherwise append an advisory line ("Use parallel execution…", "Background operation detected…") to nearly every Bash, Edit, and Read call, and every one of those lines is re-sent as context on every later request. Level 2 drops the advisories and the "Completed: N" agent summaries; real failures are still reported.
 
-**Earlier auto-compaction.** `merge-settings.js` also sets `env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=75` unless you already set it, so a long session compacts before the tail of its transcript gets expensive. The variable can only lower the trigger. See the [environment variable reference](https://code.claude.com/docs/en/env-vars).
+**Auto-compaction.** my-claude leaves auto-compaction to Claude Code's per-model `auto` window and sets no `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`. An upgrade (re-running `install.sh`) removes the `75` that earlier installs wrote and keeps any other value you set. A fixed 75% is the wrong default on a ~200k-window model, where it triggers at about the size a long session's context already has right after compacting, so Claude Code stops with "Autocompact is thrashing". See the [environment variable reference](https://code.claude.com/docs/en/env-vars).
 
 </details>
 

@@ -29,16 +29,14 @@ if (!settings.env.OMC_QUIET) {
   settings.env.OMC_QUIET = '2';
 }
 
-// Auto-compact earlier than the default. Every request re-sends the whole
-// transcript, so the tail of a long session is where cached-token cost
-// concentrates; compacting sooner cuts that and loses less than the /clear people
-// reach for instead. The variable only lowers the trigger — values above the
-// default are ignored — and a value the user set already wins.
-// Documented at https://code.claude.com/docs/en/env-vars
-// (CLAUDE_AUTOCOMPACT_PCT_OVERRIDE: percentage 1-100 of the auto-compact window
-// at which auto-compaction triggers).
-if (!settings.env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE) {
-  settings.env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = '75';
+// No CLAUDE_AUTOCOMPACT_PCT_OVERRIDE default. Claude Code's `autoCompactWindow: auto`
+// picks the window per model, and a fixed 75% of a ~200k window is about where the
+// context already sits right after a compaction (summary, re-attached skills,
+// CLAUDE.md, rules), so Claude Code stops with "Autocompact is thrashing". Earlier
+// installs wrote '75'; that exact value is removed, any other value is the user's.
+if (settings.env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE === '75') {
+  delete settings.env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE;
+  console.log("  CLAUDE_AUTOCOMPACT_PCT_OVERRIDE: 75 -> removed (Claude Code's autoCompactWindow: auto now decides)");
 }
 settings.agent = settings.agent || 'boss';
 // Earlier installs wrote teammateMode 'tmux'; normalise it back to in-process unless the
