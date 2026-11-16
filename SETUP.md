@@ -349,7 +349,7 @@ cd /path/to/my-claude && git pull && git submodule update --init --depth 1 && ba
 cd /path/to/my-claude && git submodule update --remote && bash install.sh
 ```
 
-This moves every submodule to its upstream HEAD, including the gstack skills and the OMC version `install.sh` installs. It skips the upstream-diff scan and review that the sync PRs get. gstack's browser runtime stays at the commit this checkout records, and `install.sh` warns that the submodule checkouts differ from the recorded commits.
+This moves every submodule to its upstream HEAD, including the gstack skills and the OMC version `install.sh` installs. It skips the upstream-diff scan and review that the sync PRs get. gstack's browser runtime stays at the commit this checkout records, and `install.sh` warns that the gstack and OMC submodule checkouts differ from the recorded commits.
 
 The manifest system removes stale files on upgrade without touching user-added content.
 

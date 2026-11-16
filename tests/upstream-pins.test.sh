@@ -222,7 +222,6 @@ if [ -n "${NPM_SHIM_REGISTRY_DOWN:-}" ]; then
 fi
 if [ "$1" = view ]; then
   case "${3:-}" in
-    version) echo "${NPM_SHIM_PUBLISHED##* }" ;;
     versions)
       out="["; sep=""
       for v in $NPM_SHIM_PUBLISHED; do out="$out$sep\"$v\""; sep=","; done
