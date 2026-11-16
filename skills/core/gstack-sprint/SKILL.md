@@ -57,7 +57,7 @@ gstack-sprint enforces the three-phase contract: user-confirmed design → autom
 
 6. **Skip condition**: if the user's original message already says the design is done ("design is done, just build it"), skip steps 2 and 5 and ask nothing. Steps 3 and 4 still run on the design the user gave, so that Phase 2 and Phase 3 have a reviewed plan file. If the user gave a finished task plan file, copy it to `.briefing/plans/YYYY-MM-DD-<topic>.md`, use the copy as the plan, and skip step 3 as well. If `momus` still reports a blocking issue after its two rounds, do not skip step 5.
 
-7. **Fallback** (`writing-plans` is not installed): delegate the plan to the `prometheus` agent. Give it the request and any step 2 answers, and tell it to skip its interview, its own Momus loop and its plan presentation, to save the plan to the same path, and to return only that path. Steps 4 and 5 still apply. If `momus` is not available, say so at the approval gate in place of its verdict.
+7. **Fallback** (`writing-plans` is not installed): delegate the plan to the `prometheus` agent. Give it the request and any step 2 answers, and tell it to skip its interview, its own Momus loop and its plan presentation and to return the whole plan as markdown. Save that plan to the same path yourself. Steps 4 and 5 still apply (step 6 can still skip step 5). If `momus` is not available, say so at the approval gate in place of its verdict.
 
 ---
 

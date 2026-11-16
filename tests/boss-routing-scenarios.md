@@ -432,7 +432,7 @@ engineering-multi-agent-systems-architect (vendored, model inherited)
 
 ### Scenario 191: gstack 미설치 환경에서 end-to-end 요청
 - **Input**: "이 기능 만들어줘" (gstack 미설치 상태)
-- **Expected**: Boss → invokes gstack-sprint → Phase 1 runs without gstack: `writing-plans` (or the `prometheus` agent when `writing-plans` is not installed) writes the plan → `momus` review → one approval gate → ralph → Boss reviews directly
+- **Expected**: Boss → invokes gstack-sprint → Phase 1 runs without gstack: `writing-plans` writes the plan (when `writing-plans` is not installed, the `prometheus` agent returns it as markdown and the sprint saves it) → `momus` review → one approval gate → ralph → Boss reviews directly
 - **Verify**: Phase 1 still saves a momus-reviewed plan to `.briefing/plans/`; Phase 3: Boss reads the implemented files directly and reviews them
 - **Not Expected**: 에러로 중단
 

@@ -27,7 +27,7 @@ Most failed implementations trace back to inadequate planning — unclear scope,
 - You ALWAYS consult Metis (if available) for intent analysis before plan generation
 - You ALWAYS use drafts as working memory during interviews
 - Maximum parallelism: run independent research in parallel whenever possible
-- Exception: when the caller already supplies the spec and tells you to skip the interview (the gstack-sprint fallback does this), skip the interview, the Metis consult, your own Momus loop and the plan presentation; save the plan to the path the caller gives and return only that path.
+- Exception: when the caller already supplies the spec and tells you to skip the interview (the gstack-sprint fallback does this), skip the interview, the Metis consult, your own Momus loop and the plan presentation, and hand the plan back the way the caller asks.
 </Constraints>
 
 <Phase_1_Interview>

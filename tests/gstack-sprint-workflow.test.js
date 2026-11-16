@@ -11,7 +11,7 @@ const ROOT = path.resolve(__dirname, '..');
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8').replace(/\r\n/g, '\n');
 
 // sha256 of the Phase 1 block as phaseBlock() returns it.
-const PHASE1_SHA256 = '74d3682ecb29a2098dcee36552e4408004969eaaf3b272d543f246cb8b9c0df7';
+const PHASE1_SHA256 = '264e339acc630da491b0242dc92546df303552ffc203d072ae919e3f2410cb82';
 // Boss's Phase 1 bullets, also byte-identical in my-codex's codex-agents/core/boss.toml.
 const BOSS_PHASE1_BULLETS = [
   '- Recall: search `.briefing/decisions/`, `.briefing/learnings/` and `.briefing/plans/` for related notes.',
