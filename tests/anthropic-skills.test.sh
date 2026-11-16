@@ -14,6 +14,10 @@
 # against throwaway HOMEs. The fallback's own `cp -r` line is pulled out of
 # install.sh and replayed against a fake anthropics/skills clone. Nothing outside
 # the temp dir is written and nothing touches the network.
+#
+# hooks/session-start.sh installs the same skills but cannot source that script,
+# so it repeats the condition inline. Its `if` is pulled out of the hook and held
+# to the guard's verdict (running the hook would also run its OMC/npm steps).
 set -uo pipefail
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
@@ -48,7 +52,7 @@ make_husk() {  # make_husk <home> <skill>
   echo "# mine"      > "$dir/notes.md"   # in the husk only, never shipped upstream
 }
 
-echo "[1/3] guard"
+echo "[1/4] guard"
 H="$TMP/fresh"
 mkdir -p "$H"
 check "no skills at all: not installed" "$(not_installed "$H")"
@@ -73,7 +77,7 @@ echo "# pdf" > "$H/.claude/skills/pdf/SKILL.md"
 echo "# docx" > "$H/.claude/skills/docx/SKILL.md"
 check "SKILL.md in pdf/ and docx/: installed" "$(installed "$H")"
 
-echo "[2/3] the fallback copy repairs a husk"
+echo "[2/4] the fallback copy repairs a husk"
 # install.sh clones into $_tmp_skills/skills, and the skills live in its skills/.
 CLONE="$TMP/clone"
 for skill in pdf docx; do
@@ -100,11 +104,21 @@ check "copied into the husk, not nested inside it (no pdf/pdf)" \
   "$([ ! -e "$S/pdf/pdf" ] && [ ! -e "$S/docx/docx" ] && echo 1 || echo 0)"
 check "guard reports installed after the repair" "$(installed "$H")"
 
-echo "[3/3] install.sh wiring"
+echo "[3/4] install.sh wiring"
 check "install.sh sources the guard from scripts/" \
   "$(grep -qF '. "$SCRIPT_DIR/scripts/anthropic-skills.sh"' "$REPO/install.sh" && echo 1 || echo 0)"
 check "install.sh [5a] branches on the guard" \
   "$(grep -q '^if anthropic_skills_installed; then$' "$REPO/install.sh" && echo 1 || echo 0)"
+
+echo "[4/4] hooks/session-start.sh"
+# Evaluate the hook's own condition under every HOME built in [1/4].
+HOOK_COND="$(sed -n 's/^if \(.*skills\/pdf.*\); then$/\1/p' "$REPO/hooks/session-start.sh")"
+check "hook still has its Anthropic skills condition" "$([ -n "$HOOK_COND" ] && echo 1 || echo 0)"
+hook_installs() { ( HOME="$1"; eval "$HOOK_COND" ) && echo 1 || echo 0; }
+for scenario in fresh husks half-repaired skillmd-is-a-directory installed; do
+  check "hook installs exactly when the guard says not installed ($scenario)" \
+    "$([ "$(hook_installs "$TMP/$scenario")" = "$(not_installed "$TMP/$scenario")" ] && echo 1 || echo 0)"
+done
 
 if [ "$fail" -eq 0 ]; then
   echo "ALL PASSED"

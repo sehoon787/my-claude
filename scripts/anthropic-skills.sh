@@ -11,6 +11,9 @@
 # Only ~/.claude/skills is checked, on purpose. `claude plugin add` is not a Claude
 # Code command (2.1.325: "unknown command 'add'"), so step 5a always ends up on its
 # git clone fallback, whose only product is ~/.claude/skills/<skill>/.
+#
+# hooks/session-start.sh repeats this condition inline, because an installed hook
+# cannot source this file; tests/anthropic-skills.test.sh keeps the two in step.
 anthropic_skills_installed() {
   [ -f "$HOME/.claude/skills/pdf/SKILL.md" ] && [ -f "$HOME/.claude/skills/docx/SKILL.md" ]
 }

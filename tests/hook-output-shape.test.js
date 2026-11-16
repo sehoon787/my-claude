@@ -13,7 +13,8 @@
 //
 // hooks/session-start.sh does network installs (git clone, npm i -g) when a
 // companion tool is missing, so it runs here only with every such tool
-// stubbed on PATH and the anthropic-skills marker present in the fake $HOME.
+// stubbed on PATH and the anthropic-skills marker (a SKILL.md in pdf/ and docx/)
+// present in the fake $HOME.
 'use strict';
 const fs = require('fs'), os = require('os'), path = require('path'), cp = require('child_process');
 
@@ -144,7 +145,11 @@ function assertShape(label, event, result) {
     fs.writeFileSync(path.join(stubBin, tool), '#!/bin/sh\nexit 0\n', { mode: 0o755 });
   }
   fs.writeFileSync(path.join(stubBin, 'npm'), '#!/bin/sh\nexit 1\n', { mode: 0o755 });
-  fs.mkdirSync(path.join(FAKE_HOME, '.claude', 'skills', 'pdf'), { recursive: true });
+  // The hook installs the Anthropic skills unless pdf and docx each have a SKILL.md.
+  for (const skill of ['pdf', 'docx']) {
+    fs.mkdirSync(path.join(FAKE_HOME, '.claude', 'skills', skill), { recursive: true });
+    fs.writeFileSync(path.join(FAKE_HOME, '.claude', 'skills', skill, 'SKILL.md'), `# ${skill}\n`);
+  }
   fs.mkdirSync(path.join(FAKE_HOME, '.claude', 'agents'), { recursive: true });
   fs.writeFileSync(path.join(FAKE_HOME, '.claude', 'agents', 'oracle.md'), '---\nname: oracle\ndescription: advisor\n---\n');
   const cmd = findCommand('SessionStart', 'session-start.sh');
