@@ -391,7 +391,7 @@ Liées via des sous-modules git. Les commits épinglés sont suivis nativement p
 |--------|-----|------|------|
 | [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `d2ef268` | 2026-11-13 | [comparer](https://github.com/affaan-m/everything-claude-code/compare/d2ef268...HEAD) |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `dec7e41` | 2026-11-13 | [comparer](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/dec7e41...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | `1d3c63c` | 2026-11-13 | [comparer](https://github.com/garrytan/gstack/compare/1d3c63c...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `5dcd76b` | 2026-11-16 | [comparer](https://github.com/garrytan/gstack/compare/5dcd76b...HEAD) |
 | [superpowers](https://github.com/obra/superpowers) | `22f0b46` | 2026-11-13 | [comparer](https://github.com/obra/superpowers/compare/22f0b46...HEAD) |
 | [archify](https://github.com/tt-a1i/archify) | `2ab3cae` (`v3.0.1`) | 2026-09-28 | [comparer](https://github.com/tt-a1i/archify/compare/2ab3cae...HEAD) |
 
