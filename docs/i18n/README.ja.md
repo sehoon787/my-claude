@@ -152,7 +152,7 @@ Boss はすべてのリクエストを優先チェーンにカスケードし、
 
 | フェーズ | モード | 動作 |
 |---------|--------|------|
-| **1 · DESIGN** | interactive | ユーザーがスコープを決定 · エンジニアリングレビュー · 「design done」を確認 |
+| **1 · DESIGN** | interactive | 計画を `.briefing/plans/` に保存 · Momus によるレビュー · 承認確認は 1 回のみ |
 | **2 · EXECUTE** | autonomous | ralph が実行を担当 · 自動コードレビュー · architect による検証 |
 | **3 · REVIEW** | interactive | 設計書と比較 · 比較テーブルを提示 · ユーザーが承認または改善を要求 |
 

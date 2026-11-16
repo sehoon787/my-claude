@@ -97,7 +97,7 @@ Phase 2 runs as an independent skill invocation, not nested within gstack-sprint
    DESIGN_DOC=$(ls -t ~/.gstack/projects/${ORG}-${REPO}/*-design-*.md 2>/dev/null | head -1)
    ```
 
-2. **Read the design doc** in full, then read all files implemented during Phase 2
+2. **Read what step 1 loaded** in full (the plan file, or the gstack design doc when there is no plan file), then read all files implemented during Phase 2
 
 3. **Compare implementation against design**: For each item in the design doc, determine whether it was implemented, partially implemented, or skipped. Note any implementation that was added beyond the design scope.
 
@@ -122,7 +122,7 @@ Phase 2 runs as an independent skill invocation, not nested within gstack-sprint
 8. **Optional follow-up chain** (present as options, do not auto-invoke):
    - /land-and-deploy → /canary → /document-release → /retro
 
-9. **Fallback** (gstack not installed): Read the implemented files directly, compare against the original user request and Phase 1 notes, and present the comparison to the user for their review.
+9. **Fallback** (gstack not installed): Read the implemented files directly, compare them against what step 1 loaded (the plan file, or the original request when there is no plan file), and present the comparison to the user for their review.
 
 </Steps>
 

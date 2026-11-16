@@ -152,7 +152,7 @@ Pour l'implémentation de fonctionnalités de bout en bout, Boss orchestre un sp
 
 | Phase | Mode | Ce qui se passe |
 |-------|------|-----------------|
-| **1 · DESIGN** | interactif | l'utilisateur définit la portée · révision technique · confirmer « conception terminée » |
+| **1 · DESIGN** | interactif | plan enregistré dans `.briefing/plans/` · revue par Momus · une seule demande d'approbation |
 | **2 · EXECUTE** | autonome | ralph exécute · révision de code automatique · vérification architect |
 | **3 · REVIEW** | interactif | comparer avec le doc de conception · présenter le tableau comparatif · l'utilisateur approuve ou demande une amélioration |
 

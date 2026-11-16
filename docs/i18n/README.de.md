@@ -152,7 +152,7 @@ Für die Ende-zu-Ende-Funktionsimplementierung orchestriert Boss einen strukturi
 
 | Phase | Modus | Was passiert |
 |-------|-------|--------------|
-| **1 · DESIGN** | interaktiv | Nutzer legt den Umfang fest · Engineering-Review · „design done“ bestätigen |
+| **1 · DESIGN** | interaktiv | Plan in `.briefing/plans/` speichern · Momus-Review · eine einzige Freigabe-Abfrage |
 | **2 · EXECUTE** | autonom | ralph führt die Umsetzung aus · automatischer Code-Review · Architekt-Verifikation |
 | **3 · REVIEW** | interaktiv | Abgleich mit dem Design-Dokument · Vergleichstabelle präsentieren · Nutzer genehmigt oder fordert Verbesserung |
 

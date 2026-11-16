@@ -341,7 +341,7 @@ engineering-multi-agent-systems-architect (vendored, model inherited)
 2. **Phase 1 is always interactive** — AskUserQuestion must be used for design decisions. No silent assumptions.
 3. **Phase 2 always uses ralph** — Boss never calls execute directly in Sprint mode. ralph handles internal routing.
 4. **Step 7a is non-blocking** — gstack /review failure must not prevent Step 7b from running.
-5. **Phase 3 re-reads design doc** — Context recovery from `~/.gstack/projects/` path, not from memory.
+5. **Phase 3 re-reads the plan from disk** — Context recovery follows the Phase 3 step 1 order: the Phase 1 plan file in `.briefing/plans/`, then the gstack design doc (`~/.gstack/projects/` path), then the original request — never from memory.
 
 ---
 

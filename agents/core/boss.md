@@ -214,7 +214,7 @@ Phase 1: Design (conversation)  →  Phase 2: Execute (autonomous)  →  Phase 3
 
 **Phase 3: Review (conversation/improvement)**
 - Reload the plan from disk (`.briefing/plans/`), falling back to the gstack design doc (`~/.gstack/projects/` path)
-- Compare implementation results against the design document
+- Compare implementation results against the reloaded plan (the plan file, or the gstack design doc when there is no plan file)
 - AskUserQuestion for improvement/approval decision
 - Improvement needed → re-enter Phase 2
 - Approved → `/ship` or manual commit

@@ -152,7 +152,7 @@ Skills 同样可以声明 effort —— `boss-briefing` 为 `medium`，`briefing
 
 | 阶段 | 模式 | 执行内容 |
 |------|------|----------|
-| **1 · DESIGN** | interactive | 用户决定范围 · 工程评审 · 确认 "design done" |
+| **1 · DESIGN** | interactive | 计划保存到 `.briefing/plans/` · Momus 评审 · 仅一次审批确认 |
 | **2 · EXECUTE** | autonomous | ralph 执行实现 · 自动代码审查 · 架构师验证 |
 | **3 · REVIEW** | interactive | 与设计文档对比 · 呈现对比表格 · 用户批准或要求改进 |
 

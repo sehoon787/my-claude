@@ -153,7 +153,7 @@ For end-to-end feature implementation, Boss orchestrates a structured sprint:
 
 | Phase | Mode | What Happens |
 |-------|------|--------------|
-| **1 · Design** | interactive | User decides scope · engineering review · confirm "design done" |
+| **1 · Design** | interactive | Plan saved to `.briefing/plans/` · Momus review · one approval gate |
 | **2 · Execute** | autonomous | ralph runs execution · auto code review · architect verification |
 | **3 · Review** | interactive | Compare against the design doc · present comparison table · user approves or asks for improvement |
 
