@@ -8,32 +8,35 @@
 # bump those pins (scripts/scan-upstream-diff.sh + review). Guards:
 #   1. The gstack runtime (~/.gstack/runtime) is checked out at the pinned
 #      commit and gstack's ./setup runs once, from it: on a fresh install, and
-#      over a runtime an older install cloned from upstream main (ahead of the
-#      pin).
+#      over a runtime an older install cloned from upstream main.
 #   2. gstack auto_upgrade is never turned on. A true that an older install
 #      left in ~/.gstack/config.json is turned off with one line; a value the
 #      user set, and gstack's own config.yaml, stay byte-identical.
-#   3. The OMC CLI is installed as oh-my-claude-sisyphus@<upstream/omc
-#      package.json version>, never @latest, replacing a newer install; nothing
-#      is installed when that version is already there; a pinned version npm
-#      does not have warns instead of aborting the install.
+#   3. The OMC CLI is the version upstream/omc's package.json pins when npm has
+#      it, otherwise the newest published version below it (compared per
+#      numeric field, prereleases ignored unless they are the pin). Never
+#      @latest or anything above the pin; nothing is installed when npm cannot
+#      be read or the resolved version is already there.
 #   4. The OMC plugin is never refreshed: no `claude plugin update`, `install`
 #      or `marketplace update|add|remove`.
-#   5. With upstream/gstack and upstream/omc not checked out (submodule init
-#      failed, upstream HEAD reachable), gstack's ./setup never runs, the runtime
-#      is left alone and npm is never asked for OMC.
-#   6. hooks/session-start.sh reports a missing omc instead of installing it
+#   5. When submodule init fails, the fallback fetches the commit this checkout
+#      records, not the upstream default branch; without a recorded commit the
+#      default-branch copy is announced as unpinned. gstack's ./setup never runs
+#      from either, and the warnings say what is left in ~/.gstack/runtime.
+#   6. A submodule checkout that differs from the recorded commit is reported.
+#   7. A broken ~/.gstack/runtime/.git never resolves to an enclosing repository
+#      (here a HOME kept under git).
+#   8. hooks/session-start.sh reports a missing omc instead of installing it
 #      from npm @latest.
 #
 # install.sh runs from a symlink copy of this checkout whose upstream/gstack and
-# upstream/omc are small local git repos (a .git file, like a submodule). A
-# local repo one commit ahead of the gstack pin stands in for
-# github.com/garrytan/gstack (git insteadOf), git may only use local paths
-# (GIT_ALLOW_PROTOCOL=file), and npm, claude, bun, curl and the other installers
-# are shims. Every run gets `env -i`, a throwaway HOME and a TMPDIR inside it,
-# so the real HOME is never read or written. (install.sh replaces its own EXIT
-# trap before it removes its mktemp dir, so where `mktemp -d` ignores TMPDIR,
-# as on macOS, each run still leaves one small tmp.* dir behind.)
+# upstream/omc are small local git repos (a .git file, like a submodule), with
+# the commits recorded in the copy's index. A local repo one commit ahead of the
+# gstack pin stands in for github.com/garrytan/gstack (git insteadOf), git may
+# only use local paths (GIT_ALLOW_PROTOCOL=file), and npm, claude, bun, curl,
+# mktemp and the other installers are shims. Every run gets `env -i`, a
+# throwaway HOME and a TMPDIR inside the test's temp dir, so nothing is left
+# behind and the real HOME is never read or written.
 set -uo pipefail
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
@@ -41,7 +44,7 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 OMC_PIN="1.2.3"      # version in the fake upstream/omc/package.json
-OMC_NEWER="9.9.9"    # what the npm shim resolves @latest to
+OMC_NEWER="9.9.9"    # a release above the pin
 GSTACK_URL="https://github.com/garrytan/gstack"   # init_upstream's clone fallback
 GSTACK_GIT_URL="$GSTACK_URL.git"                   # older installs' runtime clone
 
@@ -52,6 +55,8 @@ tgit() {
   GIT_COMMITTER_NAME=test GIT_COMMITTER_EMAIL=test@example.invalid \
     git -c init.defaultBranch=main -c commit.gpgsign=false "$@"
 }
+# Record <sha> as the commit <repo> pins for submodule <path>.
+record() { tgit -C "$1" update-index --add --cacheinfo "160000,$2,$3"; }
 
 # A symlink copy of this checkout with an empty upstream/ of its own.
 make_repo() {  # make_repo <dir>
@@ -63,19 +68,20 @@ make_repo() {  # make_repo <dir>
   done
 }
 
-# ── The repo under test, with fake pinned submodules ──
+# ── Fixtures ──
+mkdir -p "$TMP/modules"
 FAKE_REPO="$TMP/repo"
 make_repo "$FAKE_REPO"
 
 # upstream/gstack: its ./setup records which tree it ran from.
 GSTACK_PIN_REPO="$FAKE_REPO/upstream/gstack"
-mkdir -p "$GSTACK_PIN_REPO" "$TMP/modules"
+mkdir -p "$GSTACK_PIN_REPO"
 cat > "$GSTACK_PIN_REPO/setup" <<'EOF'
 #!/usr/bin/env bash
 printf '%s %s\n' "$(cat MARKER)" "$*" >> "$HOME/gstack-setup.log"
 EOF
 chmod +x "$GSTACK_PIN_REPO/setup"
-printf -- '---\nname: gstack\n---\n' > "$GSTACK_PIN_REPO/SKILL.md"
+printf -- '---\nname: gstack\n---\npinned\n' > "$GSTACK_PIN_REPO/SKILL.md"
 echo pinned > "$GSTACK_PIN_REPO/MARKER"
 tgit init -q --separate-git-dir "$TMP/modules/gstack" "$GSTACK_PIN_REPO"
 tgit -C "$GSTACK_PIN_REPO" add -A
@@ -86,6 +92,7 @@ GSTACK_PIN_SHA="$(tgit -C "$GSTACK_PIN_REPO" rev-parse HEAD)"
 GSTACK_UPSTREAM="$TMP/gstack-upstream"
 tgit clone -q "$GSTACK_PIN_REPO" "$GSTACK_UPSTREAM"
 echo upstream-head > "$GSTACK_UPSTREAM/MARKER"
+printf -- '---\nname: gstack\n---\nupstream-head\n' > "$GSTACK_UPSTREAM/SKILL.md"
 tgit -C "$GSTACK_UPSTREAM" commit -qam "upstream main, past the pin"
 GSTACK_HEAD_SHA="$(tgit -C "$GSTACK_UPSTREAM" rev-parse HEAD)"
 
@@ -97,8 +104,30 @@ printf -- '---\nname: omc-test-agent\n---\n' > "$OMC_PIN_REPO/agents/omc-test-ag
 tgit init -q --separate-git-dir "$TMP/modules/omc" "$OMC_PIN_REPO"
 tgit -C "$OMC_PIN_REPO" add -A
 tgit -C "$OMC_PIN_REPO" commit -qm "omc at the pin"
+OMC_PIN_SHA="$(tgit -C "$OMC_PIN_REPO" rev-parse HEAD)"
+# A later OMC commit, for a superproject that has moved past its checkout.
+OMC_UPSTREAM="$TMP/omc-upstream"
+tgit clone -q "$OMC_PIN_REPO" "$OMC_UPSTREAM"
+echo "# later" >> "$OMC_UPSTREAM/agents/omc-test-agent.md"
+tgit -C "$OMC_UPSTREAM" commit -qam "omc past the pin"
+OMC_HEAD_SHA="$(tgit -C "$OMC_UPSTREAM" rev-parse HEAD)"
 
-# The same checkout with upstream/gstack and upstream/omc never initialized.
+# The copy is a git checkout that records both pins, as this repo does.
+tgit init -q "$FAKE_REPO"
+record "$FAKE_REPO" "$GSTACK_PIN_SHA" upstream/gstack
+record "$FAKE_REPO" "$OMC_PIN_SHA" upstream/omc
+
+# Recorded pins, submodules never initialized and no .gitmodules: submodule
+# init fails ("No url found"), so init_upstream takes its clone fallback.
+UNINIT_REPO="$TMP/repo-uninit"
+make_repo "$UNINIT_REPO"
+rm -f "$UNINIT_REPO/.gitmodules"
+mkdir -p "$UNINIT_REPO/upstream/gstack" "$UNINIT_REPO/upstream/omc"
+tgit init -q "$UNINIT_REPO"
+record "$UNINIT_REPO" "$GSTACK_PIN_SHA" upstream/gstack
+record "$UNINIT_REPO" "$OMC_PIN_SHA" upstream/omc
+
+# Not a git checkout at all (an extracted archive): no recorded commits.
 NOPIN_REPO="$TMP/repo-nopin"
 make_repo "$NOPIN_REPO"
 mkdir -p "$NOPIN_REPO/upstream/gstack" "$NOPIN_REPO/upstream/omc"
@@ -106,7 +135,9 @@ mkdir -p "$NOPIN_REPO/upstream/gstack" "$NOPIN_REPO/upstream/omc"
 # Every check below compares against these, so a broken fixture must stop here
 # rather than let two empty strings compare equal.
 if [ -z "$GSTACK_PIN_SHA" ] || [ -z "$GSTACK_HEAD_SHA" ] || [ "$GSTACK_PIN_SHA" = "$GSTACK_HEAD_SHA" ] \
-   || [ ! -f "$GSTACK_PIN_REPO/.git" ] || [ ! -f "$OMC_PIN_REPO/.git" ]; then
+   || [ -z "$OMC_PIN_SHA" ] || [ -z "$OMC_HEAD_SHA" ] \
+   || [ ! -f "$GSTACK_PIN_REPO/.git" ] || [ ! -f "$OMC_PIN_REPO/.git" ] \
+   || [ "$(tgit -C "$FAKE_REPO" rev-parse -q --verify :upstream/gstack)" != "$GSTACK_PIN_SHA" ]; then
   echo "FAIL  fixture setup (pin '$GSTACK_PIN_SHA', upstream head '$GSTACK_HEAD_SHA')"
   exit 1
 fi
@@ -120,22 +151,54 @@ mkdir -p "$SHIM" "$TOOLS"
 ln -s "$(node -p process.execPath)" "$TOOLS/node"
 ln -s "$(command -v git)" "$TOOLS/git"
 
-# npm: the global prefix lives at $NPM_SHIM_ROOT. `npm i -g` of
-# oh-my-claude-sisyphus installs a version only if $NPM_SHIM_PUBLISHED lists
-# it (@latest is $NPM_SHIM_LATEST); every other package is a no-op.
+# mktemp: install.sh calls it bare; macOS then ignores TMPDIR, and install.sh's
+# own cleanup trap is replaced before it runs. A template inside TMPDIR keeps
+# those directories under this test's temp dir.
+cat > "$SHIM/mktemp" <<EOF
+#!/usr/bin/env bash
+for arg in "\$@"; do
+  case "\$arg" in -*) ;; *) exec "$(command -v mktemp)" "\$@" ;; esac
+done
+exec "$(command -v mktemp)" "\$@" "\${TMPDIR:-/tmp}/tmp.XXXXXXXXXX"
+EOF
+
+# npm: the global prefix lives at $NPM_SHIM_ROOT. `npm view … versions --json`
+# lists $NPM_SHIM_PUBLISHED; `npm i -g oh-my-claude-sisyphus@<v>` installs <v>
+# only if it is listed (@latest is the last one listed); every other package is
+# a no-op. NPM_SHIM_REGISTRY_DOWN=1 makes every oh-my-claude-sisyphus view and
+# install fail like an unreachable registry; other packages keep working, so
+# only step [5b] sees the outage.
 cat > "$SHIM/npm" <<'EOF'
 #!/usr/bin/env bash
 echo "npm $*" >> "$SHIM_LOG"
+omc=""
+for arg in "$@"; do
+  case "$arg" in oh-my-claude-sisyphus|oh-my-claude-sisyphus@*) omc=1 ;; esac
+done
 case "${1:-}" in
   root) echo "$NPM_SHIM_ROOT/lib/node_modules"; exit 0 ;;
-  view) [ "${2:-}" = oh-my-claude-sisyphus ] && [ "${3:-}" = version ] && echo "$NPM_SHIM_LATEST"; exit 0 ;;
-  i|install) ;;
+  view|i|install) [ -n "$omc" ] || exit 0 ;;
   *) exit 0 ;;
 esac
+if [ -n "${NPM_SHIM_REGISTRY_DOWN:-}" ]; then
+  echo '{"error":{"code":"ENOTFOUND","summary":"request to https://registry.npmjs.org failed"}}'
+  echo "npm error code ENOTFOUND" >&2
+  exit 1
+fi
+if [ "$1" = view ]; then
+  case "${3:-}" in
+    version) echo "${NPM_SHIM_PUBLISHED##* }" ;;
+    versions)
+      out="["; sep=""
+      for v in $NPM_SHIM_PUBLISHED; do out="$out$sep\"$v\""; sep=","; done
+      echo "$out]" ;;
+  esac
+  exit 0
+fi
 for spec in "$@"; do
   case "$spec" in oh-my-claude-sisyphus@*) ;; *) continue ;; esac
   ver="${spec#oh-my-claude-sisyphus@}"
-  [ "$ver" = latest ] && ver="$NPM_SHIM_LATEST"
+  [ "$ver" = latest ] && ver="${NPM_SHIM_PUBLISHED##* }"
   case " $NPM_SHIM_PUBLISHED " in
     *" $ver "*) ;;
     *) echo "npm error notarget No matching version found for $spec." >&2; exit 1 ;;
@@ -154,7 +217,7 @@ cat > "$SHIM/claude" <<'EOF'
 #!/usr/bin/env bash
 echo "claude $*" >> "$SHIM_LOG"
 if [ "${1:-}" = plugin ] && [ "${2:-}" = list ]; then
-  printf 'Installed plugins:\n\n  > oh-my-claudecode@omc\n    Version: %s\n    Scope: user\n    Status: enabled\n' "$NPM_SHIM_LATEST"
+  printf 'Installed plugins:\n\n  > oh-my-claudecode@omc\n    Version: %s\n    Scope: user\n    Status: enabled\n' "${NPM_SHIM_PUBLISHED##* }"
 fi
 exit 0
 EOF
@@ -166,15 +229,16 @@ for tool in curl uv brew sudo; do printf '#!/usr/bin/env bash\nexit 1\n' > "$SHI
 chmod +x "$SHIM"/*
 
 # Environment for a run against throwaway HOME $1, with npm offering the
-# versions in $2. Both gstack URLs lead to the local "upstream" repo (git uses
-# the longest matching insteadOf).
+# versions in $2 (NPM_DOWN=1 makes the registry unreachable). Both gstack URLs
+# lead to the local "upstream" repo (git uses the longest matching insteadOf).
+NPM_DOWN=""
 run_env() {
   local home="$1" published="$2"
   mkdir -p "$home/tmp"
   env -i HOME="$home" TMPDIR="$home/tmp" \
     PATH="$SHIM:$home/npm-global/bin:$TOOLS:/usr/bin:/bin:/usr/sbin:/sbin" \
     SHIM_LOG="$home/shim.log" NPM_SHIM_ROOT="$home/npm-global" \
-    NPM_SHIM_PUBLISHED="$published" NPM_SHIM_LATEST="$OMC_NEWER" \
+    NPM_SHIM_PUBLISHED="$published" NPM_SHIM_REGISTRY_DOWN="$NPM_DOWN" \
     AGENT_HARNESS_SERVICES_SKIP=1 \
     GIT_CONFIG_NOSYSTEM=1 GIT_ALLOW_PROTOCOL=file \
     GIT_CONFIG_COUNT=2 \
@@ -182,20 +246,32 @@ run_env() {
     GIT_CONFIG_KEY_1="url.$GSTACK_UPSTREAM.insteadOf" GIT_CONFIG_VALUE_1="$GSTACK_URL" \
     "${@:3}"
 }
-run_install() {  # run_install <home> <published versions> [repo]
-  ( cd "${3:-$FAKE_REPO}" && run_env "$1" "$2" "$BASH" install.sh \
-      --skip-ecc --skip-superpowers --skip-archify --skip-tools ) \
-    > "$1/install.log" 2>&1 < /dev/null
+INSTALL_RC=0
+run_install() {  # run_install <home> <published versions> <repo> [install.sh flags...]
+  local home="$1" published="$2" repo="$3"
+  shift 3
+  ( cd "$repo" && run_env "$home" "$published" "$BASH" install.sh \
+      --skip-ecc --skip-superpowers --skip-archify --skip-tools "$@" ) \
+    > "$home/install.log" 2>&1 < /dev/null
+  INSTALL_RC=$?
+  if [ "$INSTALL_RC" -ne 0 ]; then
+    echo "FAIL  install.sh exited $INSTALL_RC ($home)"
+    tail -20 "$home/install.log"
+    fail=1
+  fi
 }
 # Put OMC <version> into <home>'s npm prefix, as an earlier install left it.
 seed_omc() {  # seed_omc <home> <version>
-  run_env "$1" "$2" "$SHIM/npm" i -g "oh-my-claude-sisyphus@$2" > /dev/null 2>&1
+  NPM_DOWN="" run_env "$1" "$2" "$SHIM/npm" i -g "oh-my-claude-sisyphus@$2" > /dev/null 2>&1
   : > "$1/shim.log"
 }
 # A runtime as older installs left it: a clone of upstream main, ahead of the pin.
 seed_runtime() {  # seed_runtime <home>
   tgit clone -q "$GSTACK_UPSTREAM" "$1/.gstack/runtime"
   tgit -C "$1/.gstack/runtime" remote set-url origin "$GSTACK_GIT_URL"
+}
+set_omc_pin() {  # set_omc_pin <version>
+  printf '{ "name": "oh-my-claude-sisyphus", "version": "%s" }\n' "$1" > "$OMC_PIN_REPO/package.json"
 }
 
 fail=0
@@ -214,23 +290,22 @@ setup_runs() { cat "$1/gstack-setup.log" 2>/dev/null; }
 omc_version() { node -p "require(process.argv[1]).version" "$1/npm-global/lib/node_modules/oh-my-claude-sisyphus/package.json" 2>/dev/null; }
 auto_upgrade() { node -p "JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')).auto_upgrade" "$1/.gstack/config.json" 2>/dev/null; }
 logged() { grep -qF -- "$2" "$1/shim.log" 2>/dev/null; }
+in_log() { grep -qF -- "$2" "$1/install.log"; }
 no_plugin_refresh() {
   not grep -Eq '^claude plugin (update|install|marketplace (update|add|remove))' "$1/shim.log"
 }
 user_gstack_intact() {
   [ "$(cat "$1/.claude/skills/gstack/VERSION" 2>/dev/null)" = user-owned ] && [ -d "$1/.claude/skills/gstack/.git" ]
 }
-install_ok() {
-  if [ "$2" -ne 0 ]; then
-    echo "FAIL  install.sh exited $2 ($3)"
-    tail -20 "$1/install.log"
-    fail=1
-  fi
-}
+# Step [5b] of install.log: from "[5b] OMC CLI" up to the next step.
+omc_step() { awk '/\[5b\] OMC CLI/ { on = 1 } /\[5c\]/ { on = 0 } on' "$1/install.log"; }
+omc_warnings() { omc_step "$1" | grep -c 'WARNING'; }
+omc_installs() { { grep -E '^npm (i|install) .*oh-my-claude-sisyphus@' "$1/shim.log" 2>/dev/null || true; } | wc -l | tr -d ' '; }
+installed_only() { [ "$(omc_installs "$1")" = 1 ] && logged "$1" "npm i -g oh-my-claude-sisyphus@$2" && [ "$(omc_version "$1")" = "$2" ]; }
 
-echo "[1/6] fresh install"
+echo "[1/9] fresh install"
 H="$TMP/home-fresh"; mkdir -p "$H"
-run_install "$H" "$OMC_PIN $OMC_NEWER"; install_ok "$H" $? "fresh install"
+run_install "$H" "$OMC_PIN $OMC_NEWER" "$FAKE_REPO"
 check "gstack runtime checked out at the pin"             "$(yes_if [ "$(runtime_head "$H")" = "$GSTACK_PIN_SHA" ])"
 check "gstack ./setup ran once, from the pinned tree"     "$(yes_if [ "$(setup_runs "$H")" = "pinned --host claude" ])"
 check "no gstack config.json written (auto_upgrade off)"  "$(yes_if [ ! -e "$H/.gstack/config.json" ])"
@@ -238,8 +313,9 @@ check "npm installs oh-my-claude-sisyphus@$OMC_PIN"       "$(yes_if logged "$H" 
 check "npm never asked for oh-my-claude-sisyphus@latest"  "$(yes_if not logged "$H" "oh-my-claude-sisyphus@latest")"
 check "OMC CLI installed at the pin"                      "$(yes_if [ "$(omc_version "$H")" = "$OMC_PIN" ])"
 check "OMC plugin not refreshed or reinstalled"           "$(yes_if no_plugin_refresh "$H")"
+check "checkouts at the recorded commits: no sync warning" "$(yes_if not in_log "$H" "is checked out at")"
 
-echo "[2/6] update over an older install (runtime on upstream main, auto_upgrade on, newer OMC)"
+echo "[2/9] update over an older install (runtime on upstream main, auto_upgrade on, newer OMC)"
 H="$TMP/home-update"; mkdir -p "$H/.gstack"
 seed_runtime "$H"
 mkdir -p "$H/.gstack/runtime/browse/dist"
@@ -249,7 +325,7 @@ seed_omc "$H" "$OMC_NEWER"
 # A global gstack install the user owns.
 mkdir -p "$H/.claude/skills/gstack/.git"
 echo user-owned > "$H/.claude/skills/gstack/VERSION"
-run_install "$H" "$OMC_PIN $OMC_NEWER"; install_ok "$H" $? "update"
+run_install "$H" "$OMC_PIN $OMC_NEWER" "$FAKE_REPO"
 check "gstack runtime moved back from upstream main to the pin" "$(yes_if [ "$(runtime_head "$H")" = "$GSTACK_PIN_SHA" ])"
 check "gstack ./setup ran once, from the pinned tree"     "$(yes_if [ "$(setup_runs "$H")" = "pinned --host claude" ])"
 check "runtime build output kept (browse/dist)"           "$(yes_if [ -f "$H/.gstack/runtime/browse/dist/browse" ])"
@@ -260,7 +336,7 @@ check "OMC CLI now at the pin"                            "$(yes_if [ "$(omc_ver
 check "OMC plugin not refreshed or reinstalled"           "$(yes_if no_plugin_refresh "$H")"
 check "user-owned global gstack install keeps its files"  "$(yes_if user_gstack_intact "$H")"
 
-echo "[3/6] user-set auto_upgrade values and an install already at the pins"
+echo "[3/9] user-set auto_upgrade values and an install already at the pins"
 H="$TMP/home-user"; mkdir -p "$H/.gstack"
 seed_runtime "$H"
 printf '{"auto_upgrade": false, "note": "mine"}\n' > "$H/.gstack/config.json"
@@ -268,32 +344,95 @@ printf 'auto_upgrade: true\n' > "$H/.gstack/config.yaml"
 cp "$H/.gstack/config.json" "$TMP/user-config.json"
 cp "$H/.gstack/config.yaml" "$TMP/user-config.yaml"
 seed_omc "$H" "$OMC_PIN"
-run_install "$H" "$OMC_PIN $OMC_NEWER"; install_ok "$H" $? "user values"
+run_install "$H" "$OMC_PIN $OMC_NEWER" "$FAKE_REPO"
 check "user's config.json left byte-identical"           "$(yes_if cmp -s "$H/.gstack/config.json" "$TMP/user-config.json")"
 check "gstack's own config.yaml left byte-identical"      "$(yes_if cmp -s "$H/.gstack/config.yaml" "$TMP/user-config.yaml")"
 check "no auto_upgrade line printed"                      "$(yes_if [ "$(grep -c 'auto_upgrade' "$H/install.log")" = "0" ])"
 check "OMC already at the pin: npm installs nothing for it" "$(yes_if not logged "$H" "oh-my-claude-sisyphus@")"
 check "gstack runtime at the pin"                         "$(yes_if [ "$(runtime_head "$H")" = "$GSTACK_PIN_SHA" ])"
 
-echo "[4/6] pinned OMC version not on npm"
-H="$TMP/home-unpublished"; mkdir -p "$H"
-run_install "$H" "$OMC_NEWER"; install_ok "$H" $? "unpublished pin"
-check "install.sh carries on past the npm failure"        "$(yes_if grep -q 'Install complete' "$H/install.log")"
-check "warning names oh-my-claude-sisyphus@$OMC_PIN"      "$(yes_if grep -q "WARNING: npm could not install oh-my-claude-sisyphus@$OMC_PIN" "$H/install.log")"
-check "no fallback to oh-my-claude-sisyphus@latest"       "$(yes_if not logged "$H" "oh-my-claude-sisyphus@latest")"
-check "no OMC CLI past the pin installed"                 "$(yes_if [ -z "$(omc_version "$H")" ])"
+echo "[4/9] OMC version: the pin, or the newest published version below it"
+omc_case() {  # omc_case <name> <pin> <published versions> [installed version]
+  H="$TMP/home-omc-$1"; mkdir -p "$H"
+  set_omc_pin "$2"
+  if [ -n "${4:-}" ]; then seed_omc "$H" "$4"; fi
+  run_install "$H" "$3" "$FAKE_REPO" --skip-gstack
+}
+omc_case published 5.8.10 "5.8.2 5.8.9 5.8.10 5.9.0"
+check "pin on npm: installs exactly 5.8.10"               "$(yes_if installed_only "$H" 5.8.10)"
+check "pin on npm: no info or WARNING line"               "$(yes_if [ "$(omc_step "$H" | grep -cE 'WARNING|not on npm yet')" = 0 ])"
+omc_case unpublished 5.8.10 "5.8.2 5.8.9 5.9.0"
+check "pin not on npm: newest version below it (5.8.9, not 5.8.2)" "$(yes_if installed_only "$H" 5.8.9)"
+check "never above the pin, even when it is latest (5.9.0)" "$(yes_if not logged "$H" "oh-my-claude-sisyphus@5.9.0")"
+check "never @latest"                                     "$(yes_if not logged "$H" "oh-my-claude-sisyphus@latest")"
+check "one info line names the pin and the version used"  "$(yes_if [ "$(omc_step "$H" | grep -c 'OMC 5.8.10 (pinned) is not on npm yet; using 5.8.9, the newest published version not above the pin')" = 1 ])"
+check "no WARNING for a pin npm does not have yet"        "$(yes_if [ "$(omc_warnings "$H")" = 0 ])"
+check "plugin cache synced for the version installed"    "$(yes_if [ -d "$H/.claude/plugins/cache/omc/oh-my-claudecode/5.8.9/dist" ])"
+omc_case order 5.9.0 "5.8.9 5.8.10 5.8.11-beta.1 5.9.1 5.10.0"
+check "numeric order: 5.8.10 over 5.8.9, 5.10.0 above 5.9.0, prerelease ignored" "$(yes_if installed_only "$H" 5.8.10)"
+omc_case prerelease-pin 5.9.0-rc.1 "5.8.10 5.9.0-rc.1 5.9.0"
+check "a prerelease that is the pin itself is used"       "$(yes_if installed_only "$H" 5.9.0-rc.1)"
+omc_case installed 5.8.10 "5.8.2 5.8.9 5.9.0" 5.8.9
+check "resolved version already installed: no npm i"      "$(yes_if [ "$(omc_installs "$H")" = 0 ])"
+check "resolved version already installed: no WARNING"   "$(yes_if [ "$(omc_warnings "$H")" = 0 ])"
+NPM_DOWN=1
+omc_case registry-down 5.8.10 "5.8.2 5.8.9" 5.8.2
+NPM_DOWN=""
+check "registry unreadable: no npm i"                     "$(yes_if [ "$(omc_installs "$H")" = 0 ])"
+check "registry unreadable: exactly one WARNING line"     "$(yes_if [ "$(omc_warnings "$H")" = 1 ])"
+check "registry unreadable: exit code unchanged (0)"      "$(yes_if [ "$INSTALL_RC" = 0 ] && in_log "$H" "Install complete")"
+check "registry unreadable: CLI left at 5.8.2"            "$(yes_if [ "$(omc_version "$H")" = 5.8.2 ])"
+omc_case none-at-or-below 1.2.3 "9.9.9"
+check "nothing published at or below the pin: no npm i"   "$(yes_if [ "$(omc_installs "$H")" = 0 ])"
+check "nothing published at or below the pin: one WARNING" "$(yes_if [ "$(omc_warnings "$H")" = 1 ])"
+set_omc_pin "$OMC_PIN"
 
-echo "[5/6] upstream/gstack and upstream/omc not checked out (upstream HEAD reachable)"
+echo "[5/9] submodule init fails; this checkout records the commits"
+H="$TMP/home-fallback"; mkdir -p "$H"
+run_install "$H" "$OMC_PIN $OMC_NEWER" "$UNINIT_REPO"
+check "gstack skills fetched at the recorded commit, not upstream's default branch" "$(yes_if grep -qx pinned "$H/.claude/skills/gstack/SKILL.md")"
+check "OMC fetch fails: OMC skipped with a warning"       "$(yes_if in_log "$H" "WARNING: OMC install failed")"
+check "OMC fetch fails: no OMC agents copied"             "$(yes_if [ ! -e "$H/.claude/agents/omc-test-agent.md" ])"
+check "gstack ./setup never ran"                          "$(yes_if [ ! -e "$H/gstack-setup.log" ])"
+check "runtime warning says no runtime is left"           "$(yes_if in_log "$H" "no runtime checkout in")"
+
+echo "[6/9] not a git checkout: no recorded commits (upstream HEAD reachable)"
 H="$TMP/home-nopin"; mkdir -p "$H/.gstack"
 seed_runtime "$H"
-run_install "$H" "$OMC_PIN $OMC_NEWER" "$NOPIN_REPO"; install_ok "$H" $? "no pins"
+run_install "$H" "$OMC_PIN $OMC_NEWER" "$NOPIN_REPO"
+check "default-branch copy announced as unpinned and unscanned" "$(yes_if in_log "$H" "not pinned and was not covered by the upstream scan")"
 check "gstack ./setup never ran"                          "$(yes_if [ ! -e "$H/gstack-setup.log" ])"
 check "existing runtime left where it was"                "$(yes_if [ "$(runtime_head "$H")" = "$GSTACK_HEAD_SHA" ])"
-check "warning says the runtime was not updated"          "$(yes_if grep -q 'upstream/gstack is not checked out' "$H/install.log")"
+check "warning says the runtime was not updated"          "$(yes_if in_log "$H" "upstream/gstack is not checked out")"
+check "warning names the runtime commit left in place"    "$(yes_if in_log "$H" "left at ${GSTACK_HEAD_SHA:0:12}")"
 check "npm never asked for oh-my-claude-sisyphus"         "$(yes_if not logged "$H" "oh-my-claude-sisyphus@")"
-check "warning says the OMC pin is unknown"               "$(yes_if grep -q 'pinned OMC version is unknown' "$H/install.log")"
+check "warning says the OMC pin is unknown"               "$(yes_if in_log "$H" "pinned OMC version is unknown")"
 
-echo "[6/6] session-start hook with omc missing"
+echo "[7/9] submodule checkouts that differ from the recorded commits"
+record "$FAKE_REPO" "$GSTACK_HEAD_SHA" upstream/gstack
+record "$FAKE_REPO" "$OMC_HEAD_SHA" upstream/omc
+H="$TMP/home-unsynced"; mkdir -p "$H"
+run_install "$H" "$OMC_PIN $OMC_NEWER" "$FAKE_REPO"
+record "$FAKE_REPO" "$GSTACK_PIN_SHA" upstream/gstack
+record "$FAKE_REPO" "$OMC_PIN_SHA" upstream/omc
+check "gstack: one warning with both commits and the sync command" "$(yes_if [ "$(grep -c "upstream/gstack is checked out at ${GSTACK_PIN_SHA:0:12}, not the recorded ${GSTACK_HEAD_SHA:0:12}.*git submodule update --init --depth 1" "$H/install.log")" = 1 ])"
+check "omc: one warning with both commits and the sync command"    "$(yes_if [ "$(grep -c "upstream/omc is checked out at ${OMC_PIN_SHA:0:12}, not the recorded ${OMC_HEAD_SHA:0:12}.*git submodule update --init --depth 1" "$H/install.log")" = 1 ])"
+check "the install still uses the checkout"               "$(yes_if [ "$(runtime_head "$H")" = "$GSTACK_PIN_SHA" ])"
+
+echo "[8/9] broken runtime checkout inside a HOME kept under git"
+H="$TMP/home-gitrepo"; mkdir -p "$H"
+tgit init -q "$H"
+echo "# mine" > "$H/.dotfile"
+tgit -C "$H" add .dotfile
+tgit -C "$H" commit -qm "a HOME under version control"
+HOME_REPO_SHA="$(tgit -C "$H" rev-parse HEAD)"
+mkdir -p "$H/.gstack/runtime/.git"
+run_install "$H" "$OMC_PIN $OMC_NEWER" "$FAKE_REPO"
+check "the HOME repository keeps its commit and files"    "$(yes_if [ "$(tgit -C "$H" rev-parse HEAD)" = "$HOME_REPO_SHA" ] && [ -f "$H/.dotfile" ] && [ ! -e "$H/MARKER" ])"
+check "gstack ./setup never ran"                          "$(yes_if [ ! -e "$H/gstack-setup.log" ])"
+check "warning says what is left in the runtime"          "$(yes_if in_log "$H" "could not check the runtime out at the pinned ${GSTACK_PIN_SHA:0:12} — setup skipped; no runtime checkout in")"
+
+echo "[9/9] session-start hook with omc missing"
 H="$TMP/home-hook"; mkdir -p "$H" "$TMP/project"
 ( cd "$TMP/project" && run_env "$H" "$OMC_PIN $OMC_NEWER" "$BASH" "$REPO/hooks/session-start.sh" ) \
   > "$H/hook.out" 2>&1 < /dev/null

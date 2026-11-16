@@ -371,9 +371,9 @@ rm -rf /tmp/my-claude
 
 ### install.sh fails on submodule init
 
-If submodule init is slow or times out, `install.sh` automatically falls back to `git clone --depth 1` for each upstream. You will see a `WARNING: submodule init failed, falling back to git clone` message — this is expected and safe.
+If submodule init fails for an upstream (slow network, a timeout), `install.sh` prints `WARNING: submodule init failed for <name>, falling back to git clone...`. It then fetches the commit this checkout records for that submodule, the same one the upstream scan covered. archify is cloned at its pinned tag instead. If that fetch fails too, the upstream is skipped with a warning. Re-run `git submodule update --init --depth 1` once the network is back, then run `install.sh` again.
 
-If both fail (no network), download the repo with submodules as a zip from GitHub and run install from the extracted directory.
+Only a directory that is not a git checkout, such as an extracted zip download, records no commits. `install.sh` then clones each upstream's default branch and warns that the copy is not pinned and was not covered by the upstream scan. Install from a `git clone` of this repository to avoid that.
 
 ### MCP servers not showing up
 
@@ -399,7 +399,7 @@ npm i -g oh-my-opencode@3.12.3 && oh-my-opencode install --no-tui --claude=yes -
 
 If `npm i -g` fails with a permissions error, set a user-local npm prefix: `npm config set prefix ~/.npm-global` and add `~/.npm-global/bin` to your `PATH`.
 
-If npm reports `No matching version found` for `oh-my-claude-sisyphus`, upstream has not published the pinned version to npm yet. `install.sh` prints a warning and leaves OMC as it is in that case; it installs the pinned version on the first run after npm has it.
+If npm reports `No matching version found` for `oh-my-claude-sisyphus`, upstream has not published the pinned version to npm yet. `install.sh` handles that case by installing the newest published version below the pin, so re-running it is the simplest fix. It switches to the pinned version on the first run after npm has it.
 
 ### Agent not recognized by Boss
 

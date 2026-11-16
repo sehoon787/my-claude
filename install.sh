@@ -451,7 +451,7 @@ manifest_dir() {
 
 UPSTREAM_DIR=""
 init_upstream() {
-  local name="$1" url="$2" pinned_ref="${3:-}"
+  local name="$1" url="$2" pinned_ref="${3:-}" recorded_sha
   local submod_path="$SCRIPT_DIR/upstream/$name"
   if [ -d "$submod_path/.git" ] || [ -f "$submod_path/.git" ]; then
     # Use the checked-out (pinned) submodule SHA as-is. Upstream updates land
@@ -470,8 +470,37 @@ init_upstream() {
   # branch here would quietly install a different release than the submodule.
   if [ -n "$pinned_ref" ]; then
     git clone --depth 1 --branch "$pinned_ref" "$url" "$UPSTREAM_DIR" 2>/dev/null || return 1
-  else
-    git clone --depth 1 "$url" "$UPSTREAM_DIR" 2>/dev/null || return 1
+    return 0
+  fi
+  # Otherwise fetch exactly the commit this checkout records for the submodule,
+  # the one the upstream scan covered; if that fails, the upstream is skipped.
+  recorded_sha="$(git -C "$SCRIPT_DIR" rev-parse -q --verify ":upstream/$name" 2>/dev/null || true)"
+  if [ -n "$recorded_sha" ]; then
+    if mkdir -p "$UPSTREAM_DIR" && git init -q "$UPSTREAM_DIR" 2>/dev/null \
+      && git -C "$UPSTREAM_DIR" --git-dir=.git fetch -q --depth 1 "$url" "$recorded_sha" 2>/dev/null \
+      && git -C "$UPSTREAM_DIR" --git-dir=.git checkout -q --detach FETCH_HEAD 2>/dev/null; then
+      return 0
+    fi
+    echo "  WARNING: could not fetch $name at its recorded commit ${recorded_sha:0:12}"
+    return 1
+  fi
+  # No recorded commit (this directory is not a git checkout): the default
+  # branch is all that is left, and it says so.
+  echo "  WARNING: no commit is recorded for upstream/$name here, so $name is cloned from its default branch: this copy is not pinned and was not covered by the upstream scan"
+  git clone --depth 1 "$url" "$UPSTREAM_DIR" 2>/dev/null || return 1
+}
+
+# Warn when an upstream submodule is checked out at another commit than the one
+# this checkout records for it: `git pull` without a submodule update leaves it
+# behind, `git submodule update --remote` moves it past the scanned commit. The
+# install still uses the checkout.
+warn_unsynced_submodule() {  # warn_unsynced_submodule <name>
+  local recorded checked_out
+  [ -e "$SCRIPT_DIR/upstream/$1/.git" ] || return 0
+  recorded="$(git -C "$SCRIPT_DIR" rev-parse -q --verify ":upstream/$1" 2>/dev/null || true)"
+  checked_out="$(git -C "$SCRIPT_DIR/upstream/$1" rev-parse -q --verify 'HEAD^{commit}' 2>/dev/null || true)"
+  if [ -n "$recorded" ] && [ -n "$checked_out" ] && [ "$recorded" != "$checked_out" ]; then
+    echo "  WARNING: upstream/$1 is checked out at ${checked_out:0:12}, not the recorded ${recorded:0:12}; installing from the checkout (to sync: cd \"$SCRIPT_DIR\" && git submodule update --init --depth 1)"
   fi
 }
 
@@ -706,26 +735,39 @@ if [ "$SKIP_GSTACK" = "0" ]; then
   # the pin. A runtime an older install cloned from upstream main is moved to
   # the pin the same way. The checkout is forced, so local edits to tracked
   # files in this installer-owned directory are discarded; untracked build
-  # output (node_modules, dist/) stays.
+  # output (node_modules, dist/) stays. Every git call on the runtime names its
+  # own .git, so a broken one fails here instead of resolving to a repository
+  # further up (a HOME kept under git, for one).
   GSTACK_PIN_DIR="$SCRIPT_DIR/upstream/gstack"
   GSTACK_PIN_SHA=""
   if [ -e "$GSTACK_PIN_DIR/.git" ]; then
     GSTACK_PIN_SHA="$(git -C "$GSTACK_PIN_DIR" rev-parse --verify -q 'HEAD^{commit}' 2>/dev/null || true)"
   fi
+  # What a failed update leaves in the runtime directory, for the warnings.
+  gstack_runtime_state() {
+    local head
+    head="$(git -C "$GSTACK_RUNTIME" --git-dir=.git rev-parse -q --verify --short=12 'HEAD^{commit}' 2>/dev/null || true)"
+    if [ -n "$head" ]; then
+      echo "$GSTACK_RUNTIME is left at $head"
+    else
+      echo "no runtime checkout in $GSTACK_RUNTIME"
+    fi
+  }
   GSTACK_RUNTIME_PINNED=0
   if [ -z "$GSTACK_PIN_SHA" ]; then
-    echo "  [gstack] WARNING: upstream/gstack is not checked out — runtime not updated, setup skipped"
+    echo "  [gstack] WARNING: upstream/gstack is not checked out — runtime not updated, setup skipped; $(gstack_runtime_state)"
   else
+    warn_unsynced_submodule gstack
     if [ ! -d "$GSTACK_RUNTIME/.git" ]; then
       rm -rf "$GSTACK_RUNTIME"
       mkdir -p "$GSTACK_RUNTIME"
       git init -q "$GSTACK_RUNTIME" 2>/dev/null || true
     fi
-    if git -C "$GSTACK_RUNTIME" fetch -q --depth 1 "$GSTACK_PIN_DIR" "$GSTACK_PIN_SHA" 2>/dev/null \
-      && git -C "$GSTACK_RUNTIME" checkout -q -f --detach "$GSTACK_PIN_SHA" 2>/dev/null; then
+    if git -C "$GSTACK_RUNTIME" --git-dir=.git -c protocol.file.allow=always fetch -q --depth 1 "$GSTACK_PIN_DIR" "$GSTACK_PIN_SHA" 2>/dev/null \
+      && git -C "$GSTACK_RUNTIME" --git-dir=.git checkout -q -f --detach "$GSTACK_PIN_SHA" 2>/dev/null; then
       GSTACK_RUNTIME_PINNED=1
     else
-      echo "  [gstack] WARNING: could not check the runtime out at the pinned ${GSTACK_PIN_SHA:0:12} — setup skipped"
+      echo "  [gstack] WARNING: could not check the runtime out at the pinned ${GSTACK_PIN_SHA:0:12} — setup skipped; $(gstack_runtime_state)"
     fi
   fi
 
@@ -972,38 +1014,76 @@ else
 fi
 
 # 5b. OMC CLI (npm package)
-# Installed at the version upstream/omc pins (its package.json), the pin the
-# HUD wrapper and agents come from, never npm @latest: a newer release reaches
-# this machine only through the sync PR that bumps the submodule. npm failures
-# (including a pinned version npm does not have yet) never fail the install.
+# The version upstream/omc pins (its package.json) when npm has it, otherwise
+# the newest published version below it: upstream tags a release in git before
+# it publishes it to npm. Never npm @latest and never anything above the pin,
+# so a newer release reaches this machine only through the sync PR that bumps
+# the submodule. One `npm view` per run; when it cannot be read, the CLI is
+# left as it is. npm failures never fail the install.
 echo "  [5b] OMC CLI..."
 _OMC_PIN_VER="$(node -e 'console.log(require(process.argv[1]).version || "")' "$SCRIPT_DIR/upstream/omc/package.json" 2>/dev/null || true)"
 _OMC_HUD_OK=false
 _OMC_PKG_DIR="$(npm root -g 2>/dev/null)/oh-my-claude-sisyphus"
 _OMC_PKG_HUD="$_OMC_PKG_DIR/dist/hud/index.js"
 [ -f "$_OMC_PKG_HUD" ] && _OMC_HUD_OK=true
+_OMC_USE_VER=""
 if [ -z "$_OMC_PIN_VER" ]; then
   echo "    WARNING: upstream/omc is not checked out, so the pinned OMC version is unknown — OMC CLI left as it is"
-elif command -v omc >/dev/null 2>&1 && [ "$_OMC_HUD_OK" = "true" ]; then
-  # The version npm manages, not whichever omc comes first on PATH.
-  _OMC_INSTALLED_VER="$(node -e 'console.log(require(process.argv[1]).version || "")' "$_OMC_PKG_DIR/package.json" 2>/dev/null || true)"
-  echo "    OMC already installed (${_OMC_INSTALLED_VER:-unknown}; pinned $_OMC_PIN_VER)"
-  if [ "$_OMC_INSTALLED_VER" != "$_OMC_PIN_VER" ]; then
-    if npm i -g "oh-my-claude-sisyphus@$_OMC_PIN_VER"; then
-      echo "    OMC set to the pinned $_OMC_PIN_VER"
-    else
-      echo "    WARNING: npm could not install oh-my-claude-sisyphus@$_OMC_PIN_VER (continuing with ${_OMC_INSTALLED_VER:-unknown})"
-    fi
-  fi
 else
-  if command -v omc >/dev/null 2>&1 && [ "$_OMC_HUD_OK" = "false" ]; then
-    echo "    OMC found but HUD missing (broken install), reinstalling..."
+  warn_unsynced_submodule omc
+  # Prints the pin if npm lists it, else the highest listed version below it
+  # (compared per numeric field; a prerelease counts only when it is the pin),
+  # else nothing.
+  _OMC_USE_VER="$(npm view oh-my-claude-sisyphus versions --json 2>/dev/null | node -e '
+    const pin = process.argv[1];
+    let raw = "";
+    process.stdin.on("data", (chunk) => { raw += chunk; }).on("end", () => {
+      let list;
+      try { list = JSON.parse(raw); } catch (e) { return; }
+      if (typeof list === "string") list = [list];
+      if (!Array.isArray(list)) return;
+      if (list.includes(pin)) { console.log(pin); return; }
+      const fields = (v) => (typeof v === "string" && /^\d+(\.\d+)*$/.test(v) ? v.split(".").map(Number) : null);
+      const compare = (a, b) => {
+        for (let i = 0; i < Math.max(a.length, b.length); i++) {
+          if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) - (b[i] || 0);
+        }
+        return 0;
+      };
+      const core = fields(pin.split(/[-+]/)[0]);
+      if (!core) return;
+      const below = list.filter((v) => fields(v) && compare(fields(v), core) < 0);
+      if (below.length) console.log(below.reduce((a, b) => (compare(fields(b), fields(a)) > 0 ? b : a)));
+    });
+  ' "$_OMC_PIN_VER" 2>/dev/null || true)"
+  if [ -z "$_OMC_USE_VER" ]; then
+    echo "    WARNING: npm listed no oh-my-claude-sisyphus version at or below the pinned $_OMC_PIN_VER (or could not be read) — OMC CLI left as it is"
+  elif [ "$_OMC_USE_VER" != "$_OMC_PIN_VER" ]; then
+    echo "    OMC $_OMC_PIN_VER (pinned) is not on npm yet; using $_OMC_USE_VER, the newest published version not above the pin"
   fi
-  if npm i -g "oh-my-claude-sisyphus@$_OMC_PIN_VER"; then
-    omc setup 2>/dev/null || true
-    echo "    OMC $_OMC_PIN_VER installed"
+fi
+if [ -n "$_OMC_USE_VER" ]; then
+  if command -v omc >/dev/null 2>&1 && [ "$_OMC_HUD_OK" = "true" ]; then
+    # The version npm manages, not whichever omc comes first on PATH.
+    _OMC_INSTALLED_VER="$(node -e 'console.log(require(process.argv[1]).version || "")' "$_OMC_PKG_DIR/package.json" 2>/dev/null || true)"
+    echo "    OMC already installed (${_OMC_INSTALLED_VER:-unknown}; pinned $_OMC_PIN_VER)"
+    if [ "$_OMC_INSTALLED_VER" != "$_OMC_USE_VER" ]; then
+      if npm i -g "oh-my-claude-sisyphus@$_OMC_USE_VER"; then
+        echo "    OMC set to $_OMC_USE_VER"
+      else
+        echo "    WARNING: npm could not install oh-my-claude-sisyphus@$_OMC_USE_VER (continuing with ${_OMC_INSTALLED_VER:-unknown})"
+      fi
+    fi
   else
-    echo "    WARNING: npm could not install oh-my-claude-sisyphus@$_OMC_PIN_VER, the pinned version"
+    if command -v omc >/dev/null 2>&1 && [ "$_OMC_HUD_OK" = "false" ]; then
+      echo "    OMC found but HUD missing (broken install), reinstalling..."
+    fi
+    if npm i -g "oh-my-claude-sisyphus@$_OMC_USE_VER"; then
+      omc setup 2>/dev/null || true
+      echo "    OMC $_OMC_USE_VER installed"
+    else
+      echo "    WARNING: npm could not install oh-my-claude-sisyphus@$_OMC_USE_VER"
+    fi
   fi
 fi
 
