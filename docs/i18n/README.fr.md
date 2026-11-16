@@ -371,7 +371,7 @@ Fonctionnalités construites spécifiquement pour ce projet, au-delà de ce que 
 | Fonctionnalité | Description |
 |---------|-------------|
 | **Boss Méta-Orchestrateur** | Découverte dynamique des capacités → classification d'intention → routage à 5 priorités → délégation → vérification |
-| **Sprint 3 phases** | Conception (interactive) → Exécution (autonome via ralph) → Révision (interactive vs doc de conception) |
+| **Sprint 3 phases** | Conception (interactive) → Exécution (autonome via ralph) → Révision (interactive vs le plan) |
 | **Priorité par niveau d'agent** | core > omo > omc > déduplication vendored. L'agent le plus spécialisé l'emporte. |
 | **Répartition des voies** | Orchestration → OMC, processus de dev → superpowers, livraison/QA/déploiement/sécurité → gstack (Boss P0), connaissance langages et stack → ECC, IA et domaine → agents vendorisés |
 | **Listes d'autorisation curées** | `scripts/skill-allowlists.sh` fait autorité — sur des milliers d'entrées upstream, 106 skills et 9 jeux de règles survivent ; rien de non listé n'atteint le contexte de session |

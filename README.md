@@ -448,7 +448,7 @@ Features built specifically for this project, beyond what upstream sources provi
 | Feature | Description |
 |---------|-------------|
 | **Boss Meta-Orchestrator** | Dynamic capability discovery → intent classification → 5-priority routing → delegation → verification |
-| **3-Phase Sprint** | Design (interactive) → Execute (autonomous via ralph) → Review (interactive vs design doc) |
+| **3-Phase Sprint** | Design (interactive) → Execute (autonomous via ralph) → Review (interactive vs the plan) |
 | **Agent Tier Priority** | core > omo > omc > vendored deduplication. Most specialized agent wins. |
 | **Lane Ownership** | Orchestration → OMC, dev process → superpowers, ship/QA/deploy/security → gstack (Boss P0), language and stack knowledge → ECC, AI and domain work → vendored agents |
 | **Curated Allowlists** | `scripts/skill-allowlists.sh` is the single source of truth — 106 skills, 3 always-on common rules and 8 path-scoped language rule sets survive from thousands upstream, so nothing unlisted ever reaches a session's context |

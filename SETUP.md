@@ -252,7 +252,7 @@ Phase 2: EXECUTE       (autonomous)
   Auto code review via gstack /review
 
 Phase 3: REVIEW        (interactive)
-  Output compared against design doc
+  Output compared against the plan
   User approves or requests iteration
 ```
 
