@@ -99,7 +99,7 @@ Phase 2 runs as an independent skill invocation, not nested within gstack-sprint
 
 2. **Read what step 1 loaded** in full (the plan file, or the gstack design doc when there is no plan file), then read all files implemented during Phase 2
 
-3. **Compare implementation against design**: For each item in the design doc, determine whether it was implemented, partially implemented, or skipped. Note any implementation that was added beyond the design scope.
+3. **Compare implementation against design**: For each item in what step 1 loaded, determine whether it was implemented, partially implemented, or skipped. Note any implementation that was added beyond the design scope.
 
 4. **Present a comparison table** to the user:
 
