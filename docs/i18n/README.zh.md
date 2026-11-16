@@ -154,7 +154,7 @@ Skills 同样可以声明 effort —— `boss-briefing` 为 `medium`，`briefing
 |------|------|----------|
 | **1 · DESIGN** | interactive | 计划保存到 `.briefing/plans/` · Momus 评审 · 仅一次审批确认 |
 | **2 · EXECUTE** | autonomous | ralph 执行实现 · 自动代码审查 · 架构师验证 |
-| **3 · REVIEW** | interactive | 与设计文档对比 · 呈现对比表格 · 用户批准或要求改进 |
+| **3 · REVIEW** | interactive | 与计划对比 · 呈现对比表格 · 用户批准或要求改进 |
 
 ### 结构化最终报告
 

@@ -245,7 +245,7 @@ Boss gives gstack skills highest priority (P0) when routing:
 
 ```
 Phase 1: DESIGN        (interactive)
-  User confirms scope and design doc
+  Plan in .briefing/plans/, momus review, one approval gate
 
 Phase 2: EXECUTE       (autonomous)
   ralph agent runs the implementation

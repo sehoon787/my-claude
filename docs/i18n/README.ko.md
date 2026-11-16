@@ -154,7 +154,7 @@ Boss는 가장 적합한 매칭을 찾을 때까지 모든 요청을 우선순�
 |------|------|------|
 | **1 · DESIGN** | interactive | 계획을 `.briefing/plans/`에 저장 · Momus 리뷰 · 승인은 한 번만 |
 | **2 · EXECUTE** | autonomous | ralph가 실행을 수행 · 자동 코드 리뷰 · 아키텍트 검증 |
-| **3 · REVIEW** | interactive | 설계 문서와 대조 · 비교표 제시 · 사용자가 승인하거나 개선 요청 |
+| **3 · REVIEW** | interactive | 계획과 대조 · 비교표 제시 · 사용자가 승인하거나 개선 요청 |
 
 ### 정형화된 최종 보고
 
