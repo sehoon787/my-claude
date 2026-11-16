@@ -47,8 +47,8 @@
     "installCommand": "git clone --depth 1",
     "updateCommand": "git pull --ff-only",
     "syncFrequency": "on-install",
-    "pinned_sha": "1d3c63c53d17faf0456c564bc5950f18b370d0ef",
-    "pinned_date": "2026-11-13",
+    "pinned_sha": "5dcd76b4eae6bb06f73460d3ab29cef8e33e8537",
+    "pinned_date": "2026-11-16",
     "license": "MIT"
   },
   "superpowers": {
