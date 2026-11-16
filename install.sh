@@ -924,7 +924,9 @@ fi
 # 5a. Anthropic Official Skills (proprietary — cannot be bundled)
 echo "[5/6] Installing companion tools..."
 echo "  [5a] Anthropic skills..."
-if [ -d "$HOME/.claude/skills/pdf" ] && [ -d "$HOME/.claude/skills/docx" ]; then
+# shellcheck source=scripts/anthropic-skills.sh
+. "$SCRIPT_DIR/scripts/anthropic-skills.sh"
+if anthropic_skills_installed; then
   echo "    Anthropic skills already installed"
 else
   claude plugin add anthropics/skills 2>/dev/null || {
@@ -935,10 +937,12 @@ else
     if [ -d "$_tmp_skills/skills/skills" ]; then
       mkdir -p "$HOME/.claude/skills"
       # Deliberately manifest-exempt: this fallback only runs once (the
-      # `[ -d pdf ] && [ -d docx ]` guard above skips it afterwards). Tracking
+      # anthropic_skills_installed guard above skips it afterwards). Tracking
       # it would make every update delete these skills at cleanup time and
       # re-clone the whole anthropics/skills repo. Left fully untracked rather
-      # than half-tracked.
+      # than half-tracked. The same copy repairs a husk (a skill directory
+      # whose SKILL.md was deleted): cp -r into the existing directory
+      # restores SKILL.md and keeps the other files.
       cp -r "$_tmp_skills/skills/skills/"* "$HOME/.claude/skills/"
       echo "    Anthropic skills installed via git clone"
     else

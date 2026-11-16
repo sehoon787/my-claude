@@ -296,7 +296,7 @@ echo "Agents:           $(find ~/.claude/agents -name '*.md' 2>/dev/null | wc -l
 echo "Skills (total):   $(find ~/.claude/skills -maxdepth 2 -name 'SKILL.md' 2>/dev/null | wc -l)"
 echo "Skills (my-claude): $(grep '^skills/' ~/.claude/.my-claude-manifest 2>/dev/null | cut -d/ -f2 | sort -u | wc -l)"
 echo "Rules:            $(find ~/.claude/rules -name '*.md' 2>/dev/null | wc -l)"
-echo "Anthropic skills: $(ls -d ~/.claude/skills/pdf ~/.claude/skills/docx 2>/dev/null | wc -l) key skills"
+echo "Anthropic skills: $(ls ~/.claude/skills/pdf/SKILL.md ~/.claude/skills/docx/SKILL.md 2>/dev/null | wc -l) key skills"
 echo "Manifest:         $(wc -l < ~/.claude/.my-claude-manifest 2>/dev/null || echo 'MISSING') entries"
 echo "Duplicates:       $(find ~/.claude/agents -name '*.md' -exec basename {} \; | sort | uniq -d | wc -l | tr -d ' ') (should be 0)"
 echo "gstack:           $(find ~/.claude/skills -path '*/gstack/SKILL.md' 2>/dev/null | head -1 | grep -q . && echo 'OK' || echo 'MISSING')"
