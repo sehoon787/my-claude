@@ -152,9 +152,9 @@ Für die Ende-zu-Ende-Funktionsimplementierung orchestriert Boss einen strukturi
 
 | Phase | Modus | Was passiert |
 |-------|-------|--------------|
-| **1 · DESIGN** | interaktiv | Nutzer legt den Umfang fest · Engineering-Review · „design done“ bestätigen |
+| **1 · DESIGN** | interaktiv | Plan in `.briefing/plans/` speichern · Momus-Review · eine einzige Freigabe-Abfrage |
 | **2 · EXECUTE** | autonom | ralph führt die Umsetzung aus · automatischer Code-Review · Architekt-Verifikation |
-| **3 · REVIEW** | interaktiv | Abgleich mit dem Design-Dokument · Vergleichstabelle präsentieren · Nutzer genehmigt oder fordert Verbesserung |
+| **3 · REVIEW** | interaktiv | Abgleich mit dem Plan · Vergleichstabelle präsentieren · Nutzer genehmigt oder fordert Verbesserung |
 
 ### Strukturierter Abschlussbericht
 
@@ -371,7 +371,7 @@ Funktionen, die speziell für dieses Projekt entwickelt wurden und über das hin
 | Funktion | Beschreibung |
 |----------|-------------|
 | **Boss Meta-Orchestrator** | Dynamische Fähigkeitsentdeckung → Absichtsklassifizierung → 5-Prioritäten-Routing → Delegation → Verifikation |
-| **3-Phasen-Sprint** | Design (interaktiv) → Ausführung (autonom über ralph) → Review (interaktiv vs. Design-Dokument) |
+| **3-Phasen-Sprint** | Design (interaktiv) → Ausführung (autonom über ralph) → Review (interaktiv vs. Plan) |
 | **Agenten-Tier-Priorität** | core > omo > omc > vendored-Deduplizierung. Der speziellste Agent gewinnt. |
 | **Lane-Zuständigkeit** | Orchestrierung → OMC, Entwicklungsprozess → superpowers, Release/QA/Deployment/Sicherheit → gstack (Boss P0), Sprach- und Stack-Wissen → ECC, KI und Domäne → vendored Agenten |
 | **Kuratierte Allowlists** | `scripts/skill-allowlists.sh` ist die einzige Quelle der Wahrheit — von Tausenden Upstream-Einträgen bleiben 106 Skills und 9 Regelsätze übrig; nichts Ungelistetes erreicht je den Sitzungskontext |

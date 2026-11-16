@@ -152,9 +152,9 @@ Skills 同样可以声明 effort —— `boss-briefing` 为 `medium`，`briefing
 
 | 阶段 | 模式 | 执行内容 |
 |------|------|----------|
-| **1 · DESIGN** | interactive | 用户决定范围 · 工程评审 · 确认 "design done" |
+| **1 · DESIGN** | interactive | 计划保存到 `.briefing/plans/` · Momus 评审 · 仅一次审批确认 |
 | **2 · EXECUTE** | autonomous | ralph 执行实现 · 自动代码审查 · 架构师验证 |
-| **3 · REVIEW** | interactive | 与设计文档对比 · 呈现对比表格 · 用户批准或要求改进 |
+| **3 · REVIEW** | interactive | 与计划对比 · 呈现对比表格 · 用户批准或要求改进 |
 
 ### 结构化最终报告
 
@@ -372,7 +372,7 @@ my-claude 捆绑的工具会把结果写到不同位置 —— 下表列出各�
 | 功能 | 描述 |
 |---------|-------------|
 | **Boss 元编排器** | 动态能力发现 → 意图分类 → 5 级优先路由 → 委派 → 验证 |
-| **三阶段冲刺** | 设计（交互式）→ 执行（通过 ralph 自主进行）→ 审查（交互式对比设计文档） |
+| **三阶段冲刺** | 设计（交互式）→ 执行（通过 ralph 自主进行）→ 审查（交互式对比计划） |
 | **Agent 层级优先级** | core > omo > omc > vendored 去重。最专业的 Agent 优先。 |
 | **通道归属** | 编排 → OMC，开发流程 → superpowers，发布/QA/部署/安全 → gstack（Boss P0），语言与技术栈知识 → ECC，AI 与领域 → vendored Agent |
 | **精选白名单** | `scripts/skill-allowlists.sh` 是唯一事实来源——上游数千项中只留下 106 个 Skills 和 9 个规则集，未列入的绝不进入会话上下文 |

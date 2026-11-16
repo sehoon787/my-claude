@@ -329,19 +329,19 @@ engineering-multi-agent-systems-architect (vendored, model inherited)
 
 | # | Input | Expected Route | Verify | Phase |
 |---|-------|---------------|--------|-------|
-| 181 | "이 기능 만들어줘" (end-to-end feature request) | Boss → 3-Phase Sprint: Phase 1 (/plan-ceo-review → /plan-eng-review) → Phase 2 (ralph with Step 7a gstack /review + Step 7b architect) → Phase 3 (design doc 대조 + AskUserQuestion) | All 3 phases execute in order; Phase transitions are explicit | Phase 1→2→3 |
+| 181 | "이 기능 만들어줘" (end-to-end feature request) | Boss → 3-Phase Sprint: Phase 1 (recall → writing-plans saves the plan to .briefing/plans/ → momus review → one approval gate) → Phase 2 (ralph with Step 7a gstack /review + Step 7b architect) → Phase 3 (comparison against the plan + AskUserQuestion) | All 3 phases execute in order; Phase transitions are explicit | Phase 1→2→3 |
 | 182 | "코드 리뷰해줘" (standalone code review) | Boss → P0 → gstack `/review` directly (NOT 3-Phase Sprint) | Single skill invocation, no Sprint workflow triggered | N/A (direct P0) |
 | 183 | gstack not installed + "배포해줘" | Boss → P1-P4 fallback (ralph with architect/critic only, no gstack skills) | ralph Step 7a skipped silently; Step 7b architect runs normally | Fallback |
 | 184 | ralph Step 7a: /review returns findings | ralph logs /review findings → proceeds to Step 7b architect verification → both results reported | Both 7a and 7b run; neither blocks the other | Phase 2 |
-| 185 | Phase 3: 사용자가 "개선 필요" 선택 | Boss → Phase 2 재진입 (ralph re-executes with updated scope) → Phase 3 재검수 | design doc re-read from disk; AskUserQuestion presented again | Phase 3→2→3 |
+| 185 | Phase 3: 사용자가 "개선 필요" 선택 | Boss → Phase 2 재진입 (ralph re-executes with updated scope) → Phase 3 재검수 | plan re-read from disk; AskUserQuestion presented again | Phase 3→2→3 |
 
 ### Verification Rules for Category 13
 
 1. **3-Phase trigger** — Only end-to-end requests ("만들어줘", "구현해줘", "배포해줘") trigger the full Sprint. Standalone requests ("리뷰해줘", "QA해줘") go directly to P0.
-2. **Phase 1 is always interactive** — AskUserQuestion must be used for design decisions. No silent assumptions.
+2. **Phase 1 has one approval gate** — open decisions go to the single AskUserQuestion gate at the end of Phase 1; clarifying questions are asked only when the request is ambiguous (at most two, in one AskUserQuestion). The gate is skipped only when the user already said the design is done.
 3. **Phase 2 always uses ralph** — Boss never calls execute directly in Sprint mode. ralph handles internal routing.
 4. **Step 7a is non-blocking** — gstack /review failure must not prevent Step 7b from running.
-5. **Phase 3 re-reads design doc** — Context recovery from `~/.gstack/projects/` path, not from memory.
+5. **Phase 3 re-reads the plan from disk** — Context recovery follows the Phase 3 step 1 order: the Phase 1 plan file in `.briefing/plans/`, then the gstack design doc (`~/.gstack/projects/` path), then the original request — never from memory.
 
 ---
 
@@ -403,7 +403,7 @@ engineering-multi-agent-systems-architect (vendored, model inherited)
 ### Scenario 186: gstack-sprint 트리거 — end-to-end 기능 구현
 - **Input**: "사용자 프로필 페이지를 추가해줘"
 - **Expected**: Boss → Intent Gate (Build) → Counter-Proposal: gstack-sprint → Skill(skill: "gstack-sprint") 호출
-- **Verify**: gstack-sprint Phase 1(설계/대화)으로 진입, AskUserQuestion 발생
+- **Verify**: gstack-sprint enters Phase 1: `writing-plans` saves the plan to `.briefing/plans/`, `momus` reviews it, and Phase 2 waits for an approve answer at the one AskUserQuestion approval gate
 - **Not Expected**: 바로 executor로 위임하거나 ralph 직접 호출
 
 ### Scenario 187: gstack-sprint 미트리거 — 순수 설계/기획
@@ -432,8 +432,8 @@ engineering-multi-agent-systems-architect (vendored, model inherited)
 
 ### Scenario 191: gstack 미설치 환경에서 end-to-end 요청
 - **Input**: "이 기능 만들어줘" (gstack 미설치 상태)
-- **Expected**: Boss → gstack-sprint 호출 시도 → gstack-sprint 내부에서 폴백 → OMC planner → ralph → Boss 직접 검수
-- **Verify**: Phase 1은 planner 에이전트로, Phase 3는 Boss 직접 파일 읽고 검수
+- **Expected**: Boss → invokes gstack-sprint → Phase 1 runs without gstack: `writing-plans` writes the plan (when `writing-plans` is not installed, the `prometheus` agent returns it as markdown and the sprint saves it) → `momus` review → one approval gate → ralph → Boss reviews directly
+- **Verify**: Phase 1 still saves a momus-reviewed plan to `.briefing/plans/`; Phase 3: Boss reads the implemented files directly and reviews them
 - **Not Expected**: 에러로 중단
 
 ### Scenario 192: Phase 3 검수 거부 → Phase 2 재진입

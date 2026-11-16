@@ -48,6 +48,8 @@ jobs:
           COUNT=$(find skills/core -name 'SKILL.md' 2>/dev/null | wc -l)
           [ "$COUNT" -ge 2 ] || (echo "FAIL: skills/core has $COUNT SKILL.md files (expected >= 2)" && exit 1)
           echo "OK: skills/core — $COUNT skills"
+      - name: Test gstack-sprint workflow
+        run: node tests/gstack-sprint-workflow.test.js
       - name: Validate upstream submodule file counts
         run: |
           for sub in ecc omc gstack superpowers archify; do
