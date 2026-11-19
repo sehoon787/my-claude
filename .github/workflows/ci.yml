@@ -25,12 +25,11 @@ jobs:
       - name: Validate settings
         run: |
           python3 -c "import json; json.load(open('settings.json'))"
-      - name: Test shared local service startup
-        run: bash tests/shared-local-services.test.sh
-      - name: Test gstack and OMC install at the submodule pins
-        run: bash tests/upstream-pins.test.sh
-      - name: Test upstream sync scanner
-        run: bash tests/scan-upstream-diff.test.sh
+      # Every tests/*.test.sh, tests/*.test.js and tests/validate-sync.sh, so a
+      # new test file runs here without editing this workflow. The upstream
+      # sync runs the same script before it may auto-merge.
+      - name: Run every test
+        run: bash scripts/run-tests.sh
       - name: Check agent files exist
         run: |
           test -f "agents/core/boss.md" || (echo "Missing agent: boss" && exit 1)
@@ -48,8 +47,6 @@ jobs:
           COUNT=$(find skills/core -name 'SKILL.md' 2>/dev/null | wc -l)
           [ "$COUNT" -ge 2 ] || (echo "FAIL: skills/core has $COUNT SKILL.md files (expected >= 2)" && exit 1)
           echo "OK: skills/core — $COUNT skills"
-      - name: Test gstack-sprint workflow
-        run: node tests/gstack-sprint-workflow.test.js
       - name: Validate upstream submodule file counts
         run: |
           for sub in ecc omc gstack superpowers archify; do
@@ -89,3 +86,14 @@ jobs:
                 max: 200
               truthy:
                 check-keys: false
+      - name: Shellcheck the repo's own shell scripts (errors only)
+        run: |
+          # Every tracked *.sh, plus extensionless files with a bash/sh shebang.
+          mapfile -t files < <(git ls-files | while IFS= read -r f; do
+            case "$f" in
+              *.sh) echo "$f" ;;
+              *) if [ -f "$f" ] && head -n1 "$f" | grep -qE '^#!.*[/ ](ba)?sh$'; then echo "$f"; fi ;;
+            esac
+          done)
+          shellcheck --version
+          shellcheck --severity=error "${files[@]}"
