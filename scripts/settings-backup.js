@@ -1,18 +1,23 @@
-// Backs up ~/.claude/settings.json before an installer script rewrites it.
-// Required by scripts/merge-settings.js (install.sh step [4/6]) and
-// scripts/merge-hooks.js (step [4b]); each calls backupSettings() right before
-// its write, so every rewrite is preceded by a copy of what it replaces.
+// Writes ~/.claude/settings.json for the installer scripts and backs up what it
+// replaces. Required by scripts/merge-settings.js (install.sh step [4/6]) and
+// scripts/merge-hooks.js (step [4b]); each builds the whole new file content
+// first and hands it to writeSettingsIfChanged() instead of calling
+// fs.writeFileSync.
 //
-// The copy sits next to the file as <name>.my-claude-backup-<UTC stamp>, where
-// the stamp is YYYYMMDDTHHMMSSmmmZ: fixed width, so names sort oldest to newest.
-// The file can hold credentials, so the copy is created readable by its owner
-// only (mode 600), whatever the umask and whatever mode the original has. After
-// each backup only the newest SETTINGS_BACKUP_KEEP are kept, and nothing but a
-// file with exactly that name pattern is ever deleted.
+// Content byte-identical to the file means nothing to do: no write (the mtime
+// stays), no backup, no output. Otherwise the file is copied next to itself as
+// <name>.my-claude-backup-<UTC stamp>, where the stamp is YYYYMMDDTHHMMSSmmmZ:
+// fixed width, so names sort oldest to newest. The file can hold credentials, so
+// the copy is created readable by its owner only (mode 600), whatever the umask
+// and whatever mode the original has. After each backup only the newest
+// SETTINGS_BACKUP_KEEP are kept, and nothing but a file with exactly that name
+// pattern is ever deleted. Only a change makes a backup, so an install that is
+// run again and again without changing anything cannot push the user's original
+// file out of them.
 //
-// No settings file means nothing to protect: nothing happens. A backup that
-// cannot be made is reported on stderr and the install carries on, because
-// stopping here would leave ~/.claude half installed.
+// No settings file means nothing to protect: it is created without a backup. A
+// backup that cannot be made is reported on stderr and the write carries on,
+// because stopping here would leave ~/.claude half installed.
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -98,4 +103,15 @@ function backupSettings(settingsPath) {
   return backupPath;
 }
 
-module.exports = { backupSettings, SETTINGS_BACKUP_KEEP };
+// Writes `content` (a string) to settingsPath unless the file already holds
+// exactly those bytes. Returns true when it wrote, so the caller can report the
+// change, and false when it left the file alone.
+function writeSettingsIfChanged(settingsPath, content) {
+  const next = Buffer.from(content, 'utf8');
+  if (fs.existsSync(settingsPath) && fs.readFileSync(settingsPath).equals(next)) return false;
+  backupSettings(settingsPath);
+  fs.writeFileSync(settingsPath, next);
+  return true;
+}
+
+module.exports = { writeSettingsIfChanged, backupSettings, SETTINGS_BACKUP_KEEP };

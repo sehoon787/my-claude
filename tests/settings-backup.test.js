@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 // Regression test: scripts/merge-settings.js (install.sh step [4/6]) and
 // scripts/merge-hooks.js (step [4b]) rewrite ~/.claude/settings.json, which can
-// hold credentials. Before either one writes, the existing file is copied to a
-// timestamped backup next to it (scripts/settings-backup.js), readable by the
-// owner only, and only the newest SETTINGS_BACKUP_KEEP backups are kept. With no
-// settings.json there is nothing to protect, so no backup is made.
+// hold credentials. A merge that would change the file first copies what is there
+// to a timestamped backup next to it (scripts/settings-backup.js), readable by the
+// owner only, and then writes; only the newest SETTINGS_BACKUP_KEEP backups are
+// kept. A merge that would write the very bytes already there does nothing at
+// all: no write (the mtime stays), no backup, no output, so a settled install
+// never pushes the user's original file out of the backups. With no settings.json
+// there is nothing to protect, so no backup is made.
 //
 // Root cause this guards against: an install over an existing settings.json
 // replaced it with no way back — a bad merge, or a user who wanted their old
@@ -175,17 +178,22 @@ scenario(ORIGINAL, ({ claude, file, run }) => {
   check('(e) retention: similar-looking files that are not our backups are untouched', intact);
 });
 
-// (f) Many installs in a row never leave more than KEEP behind.
+// (f) Changes that keep coming never leave more than KEEP backups behind. Before
+// each run the file is put into a layout the merge does not write (4-space JSON
+// with a new value each time), so every run changes it and backs up exactly what
+// it replaced; a run with nothing to change makes no backup at all (see (j)).
 scenario(ORIGINAL, ({ claude, file, run }) => {
-  let counts = [];
+  const counts = [];
   let beforeLast = null;
   for (let i = 0; i < KEEP + 3; i++) {
+    fs.writeFileSync(file, JSON.stringify({ ...JSON.parse(read(file).toString('utf8')), changeNumber: i }, null, 4));
     beforeLast = read(file);
     run(i % 2 === 0 ? MERGE_SETTINGS : MERGE_HOOKS, i % 2 === 0 ? [] : [HOOKS_JSON]);
     counts.push(backupsIn(claude).length);
   }
-  check(`(f) ${KEEP + 3} runs in a row: never more than ${KEEP} backups`, counts.every((c) => c <= KEEP), show(counts));
-  check(`(f) ${KEEP + 3} runs in a row: ${KEEP} backups remain`, counts[counts.length - 1] === KEEP, show(counts));
+  const expected = counts.map((_, i) => Math.min(i + 1, KEEP));
+  check(`(f) ${KEEP + 3} changing runs in a row: one backup each until ${KEEP} are kept, never more`,
+    show(counts) === show(expected), `${show(counts)} instead of ${show(expected)}`);
   const names = backupsIn(claude);
   check('(f) the newest backup is the file as it was before the last run',
     names.length > 0 && read(path.join(claude, names[names.length - 1])).equals(beforeLast));
@@ -265,6 +273,62 @@ if (helper) {
       typeof made === 'string' && fs.existsSync(made) && read(made).toString() === 'now' && backupsIn(claude).length === KEEP,
       show(backupsIn(claude)));
   });
+
+  // writeSettingsIfChanged is what the merge scripts call in place of writeFileSync.
+  const { writeSettingsIfChanged } = helper;
+  check('(h) helper: exports writeSettingsIfChanged', typeof writeSettingsIfChanged === 'function');
+  if (typeof writeSettingsIfChanged === 'function') {
+    const capture = (fn) => {
+      const logs = [];
+      const log = console.log, error = console.error;
+      console.log = (...args) => logs.push(args.join(' '));
+      console.error = (...args) => logs.push(args.join(' '));
+      try { return { value: fn(), logs }; } finally { console.log = log; console.error = error; }
+    };
+    const longAgo = new Date('2001-09-09T01:46:40Z');   // 1000000000 seconds after the epoch
+
+    scenario(null, ({ claude, file }) => {
+      fs.writeFileSync(file, 'same bytes\n');
+      fs.utimesSync(file, longAgo, longAgo);
+      const r = capture(() => writeSettingsIfChanged(file, 'same bytes\n'));
+      check('(h) helper: identical content: returns false, writes nothing, makes no backup, prints nothing',
+        r.value === false && fs.readdirSync(claude).length === 1 && r.logs.length === 0 &&
+        Math.floor(fs.statSync(file).mtimeMs / 1000) === 1000000000, show(r));
+    });
+
+    scenario(null, ({ claude, file }) => {
+      fs.writeFileSync(file, 'old bytes\n');
+      const r = capture(() => writeSettingsIfChanged(file, 'new bytes\n'));
+      const names = backupsIn(claude);
+      check('(h) helper: different content: one backup of the old bytes, then the new bytes, and the path printed',
+        r.value === true && fs.readFileSync(file, 'utf8') === 'new bytes\n' && names.length === 1 &&
+        fs.readFileSync(path.join(claude, names[0]), 'utf8') === 'old bytes\n' &&
+        r.logs.length === 1 && r.logs[0].includes(names[0]), show(r));
+    });
+
+    scenario(null, ({ claude, file }) => {
+      fs.writeFileSync(file, 'x');   // 'x\n' without its newline: one byte short
+      const r = capture(() => writeSettingsIfChanged(file, 'x\n'));
+      const names = backupsIn(claude);
+      check('(h) helper: a one-byte difference (the trailing newline) is a change, compared byte for byte',
+        r.value === true && fs.readFileSync(file, 'utf8') === 'x\n' && names.length === 1 &&
+        fs.readFileSync(path.join(claude, names[0]), 'utf8') === 'x', show(r));
+    });
+
+    scenario(null, ({ claude, file }) => {
+      const r = capture(() => writeSettingsIfChanged(file, 'first\n'));
+      check('(h) helper: no file yet: it is created, with no backup and no output',
+        r.value === true && fs.readFileSync(file, 'utf8') === 'first\n' && backupsIn(claude).length === 0 && r.logs.length === 0, show(r));
+    });
+
+    scenario(null, ({ file }) => {
+      const text = 'café ✓\n';
+      quiet(() => writeSettingsIfChanged(file, text));
+      check('(h) helper: the file holds the content as UTF-8 bytes', read(file).equals(Buffer.from(text, 'utf8')));
+      const again = capture(() => writeSettingsIfChanged(file, text));
+      check('(h) helper: the same non-ASCII content again counts as unchanged', again.value === false && again.logs.length === 0, show(again));
+    });
+  }
 }
 
 // (i) A backup that cannot be made warns and lets the install continue; the
@@ -283,6 +347,46 @@ if (posix && typeof process.getuid === 'function' && process.getuid() !== 0) {
 } else {
   console.log('SKIP  (i) unwritable directory: needs a non-root POSIX user');
 }
+
+// (j) A merge that changes nothing leaves no trace: nothing written (the mtime
+// stays), no backup, nothing printed. The first pass, in install.sh's order,
+// changes the file and backs up what it replaced; every later pass finds the
+// bytes already as the merge would write them, so the user's original stays among
+// the backups however often the installer or the SessionStart update runs.
+scenario(ORIGINAL, ({ claude, file, run }) => {
+  const original = read(file);
+  const first = [run(MERGE_SETTINGS), run(MERGE_HOOKS, [HOOKS_JSON])];
+  const settled = read(file);
+  const backups = backupsIn(claude);
+  check('(j) first pass: each step changes the file and backs up what it replaced',
+    first.every((r) => r.status === 0) && backups.length === 2 && !settled.equals(original), show(backups));
+  const longAgo = new Date('2001-09-09T01:46:40Z');   // 1000000000 seconds after the epoch
+  fs.utimesSync(file, longAgo, longAgo);
+  let output = '';
+  let allSucceeded = true;
+  for (let pass = 0; pass < 3; pass++) {
+    for (const r of [run(MERGE_SETTINGS), run(MERGE_HOOKS, [HOOKS_JSON])]) {
+      allSucceeded = allSucceeded && r.status === 0;
+      output += r.stdout + r.stderr;
+    }
+  }
+  check('(j) unchanged merges: both scripts still succeed', allSucceeded);
+  check('(j) unchanged merges: settings.json is byte-identical', read(file).equals(settled));
+  check('(j) unchanged merges: settings.json is not rewritten (its mtime stays)',
+    Math.floor(fs.statSync(file).mtimeMs / 1000) === 1000000000, String(fs.statSync(file).mtimeMs));
+  check('(j) unchanged merges: no backup is added', show(backupsIn(claude)) === show(backups), show(backupsIn(claude)));
+  check("(j) unchanged merges: the user's original is still among the backups",
+    backupsIn(claude).some((n) => read(path.join(claude, n)).equals(original)));
+  check('(j) unchanged merges: nothing is printed', output === '', show(output));
+  // The next real change is backed up again, once.
+  const edited = Buffer.from(JSON.stringify({ ...JSON.parse(settled.toString('utf8')), editedByUser: true }, null, 4));
+  fs.writeFileSync(file, edited);
+  const change = run(MERGE_SETTINGS);
+  const added = backupsIn(claude).filter((n) => !backups.includes(n));
+  check('(j) a later change makes exactly one backup, of the bytes it replaced',
+    change.status === 0 && added.length === 1 && read(path.join(claude, added[0])).equals(edited), show(added));
+  if (posix) check('(j) a later change: that backup is mode 600', added.length === 1 && modeOf(path.join(claude, added[0])) === '600');
+});
 
 const failed = results.filter((ok) => !ok).length;
 console.log(failed ? `${failed} FAILED` : 'ALL PASSED');
