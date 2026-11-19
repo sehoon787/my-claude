@@ -6,6 +6,7 @@
 // session ("<host>-<adjective>-<noun>"), which shows up as unknown sessions.
 const fs = require('fs');
 const path = require('path');
+const { backupSettings } = require('./settings-backup');
 const home = process.env.HOME || process.env.USERPROFILE;
 const settingsPath = path.join(home, '.claude', 'settings.json');
 
@@ -87,5 +88,6 @@ if (!settings.statusLine) {
   }
 }
 
+backupSettings(settingsPath);
 fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n');
 console.log('  settings.json merged');
