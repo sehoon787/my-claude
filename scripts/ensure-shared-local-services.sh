@@ -261,11 +261,19 @@ ensure_codeburn() {
   _port_status=$?
   if [ "$_port_status" = "0" ]; then
     wait_for_codeburn_identity "$_identity_deadline"
-    if [ "$?" = "0" ]; then
+    _identity_status=$?
+    if [ "$_identity_status" = "0" ]; then
       echo "codeburn web: REUSED ($CODEBURN_URL)"
       return 0
     fi
-    echo "codeburn web: FAIL (port 4747 belongs to another service; left untouched; log: $_log)"
+    if [ "$_identity_status" = "1" ]; then
+      echo "codeburn web: FAIL (port 4747 belongs to another service; left untouched; log: $_log)"
+      return 0
+    fi
+    # Status 2: no answer that identifies the listener came before the deadline
+    # (a slow dashboard, a listener that does not speak HTTP). That is not
+    # evidence of a different service, so the line does not claim one.
+    echo "codeburn web: FAIL (listener on port 4747 did not confirm CodeBurn identity before ${TIMEOUT_SECONDS}s deadline; left untouched; log: $_log)"
     return 0
   fi
   if ! command -v codeburn >/dev/null 2>&1; then
