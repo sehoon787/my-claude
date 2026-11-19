@@ -892,8 +892,27 @@ if [ "$SKIP_GSTACK" = "0" ]; then
   elif [ "$GSTACK_RUNTIME_PINNED" = "1" ]; then
     rm -f "$GSTACK_ROOT_DIR/SKILL.md"
     rmdir "$GSTACK_ROOT_DIR"
-    ln -sfn "$GSTACK_RUNTIME" "$GSTACK_ROOT_DIR"
-    echo "  [gstack] $GSTACK_ROOT_DIR -> $GSTACK_RUNTIME"
+    ln -sfn "$GSTACK_RUNTIME" "$GSTACK_ROOT_DIR" 2>/dev/null || true
+    if [ -L "$GSTACK_ROOT_DIR" ]; then
+      echo "  [gstack] $GSTACK_ROOT_DIR -> $GSTACK_RUNTIME"
+      # With the helpers linked, every skill preamble runs gstack's update check,
+      # which can offer /gstack-upgrade: that would move the runtime past the
+      # pin and re-run setup through the link. A value already in config.yaml
+      # is the user's and is left as it is.
+      if ! "$GSTACK_RUNTIME/bin/gstack-config" has update_check 2>/dev/null \
+         && "$GSTACK_RUNTIME/bin/gstack-config" set update_check false >/dev/null 2>&1; then
+        echo "  [gstack] update_check turned off: gstack updates arrive through my-claude's upstream/gstack pin (undo: gstack-config set update_check true)"
+      fi
+    else
+      # Git Bash without native symlinks copies the target instead, or fails:
+      # remove what ln just made (the path was empty before it) and keep the
+      # router copy, as before the link existed.
+      rm -rf "$GSTACK_ROOT_DIR"
+      mkdir -p "$GSTACK_ROOT_DIR"
+      cp "$UPSTREAM_DIR/SKILL.md" "$GSTACK_ROOT_DIR/" 2>/dev/null || true
+      echo "skills/gstack/SKILL.md" >> "$MANIFEST_TMP"
+      echo "  [gstack] NOTICE: ln made no symlink at $GSTACK_ROOT_DIR, so the router is copied as before and the gstack skills run without their helpers. On Git Bash, export MSYS=winsymlinks:nativestrict (SETUP.md) and re-run install.sh."
+    fi
   elif [ -f "$GSTACK_ROOT_DIR/SKILL.md" ] && [ ! -L "$GSTACK_ROOT_DIR" ]; then
     # No runtime at the pin: the copied router stays, manifest-owned as before.
     echo "skills/gstack/SKILL.md" >> "$MANIFEST_TMP"
