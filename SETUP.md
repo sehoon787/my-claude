@@ -394,7 +394,7 @@ MCP servers are registered at user scope (`--scope user`) so they are available 
 ```bash
 # OMC: the version upstream/omc pins (run from the my-claude checkout)
 v=$(node -p "require('./upstream/omc/package.json').version") && npm i -g "oh-my-claude-sisyphus@$v" && omc setup
-npm i -g oh-my-opencode@3.12.3 && oh-my-opencode install --no-tui --claude=yes --openai=no --gemini=no --copilot=no
+npm i -g oh-my-opencode@3.17.3 && oh-my-opencode install --no-tui --claude=yes --openai=no --gemini=no --copilot=no
 ```
 
 If `npm i -g` fails with a permissions error, set a user-local npm prefix: `npm config set prefix ~/.npm-global` and add `~/.npm-global/bin` to your `PATH`.

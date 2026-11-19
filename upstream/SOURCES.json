@@ -7,8 +7,7 @@
   "everything-claude-code": {
     "repo": "https://github.com/affaan-m/everything-claude-code",
     "path": "upstream/ecc",
-    "method": "submodule + plugin-add",
-    "note": "ECC plugin install attempted first, submodule as fallback",
+    "method": "submodule",
     "pinned_sha": "d2ef2680594f9a17526a6e1a2e18b3d242c5d17b",
     "pinned_date": "2026-11-13",
     "license": "MIT"
@@ -110,6 +109,14 @@
     "pinned_version": "0.8.2",
     "note": "Comment quality checker companion CLI",
     "license": "MIT"
+  },
+  "oh-my-opencode": {
+    "repo": "https://github.com/code-yeongyu/oh-my-openagent",
+    "method": "npm-cli",
+    "package": "oh-my-opencode",
+    "pinned_version": "3.17.3",
+    "note": "omo CLI bridging Claude Code and OpenCode; install.sh [5c] installs it when `oh-my-opencode` is not on PATH, then runs `oh-my-opencode install --no-tui`. Its 9 agents are adapted separately in agents/omo/.",
+    "license": "SUL-1.0"
   },
   "andrej-karpathy-skills": {
     "repo": "https://github.com/forrestchang/andrej-karpathy-skills",

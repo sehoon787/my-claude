@@ -29,6 +29,16 @@ jobs:
         run: bash tests/shared-local-services.test.sh
       - name: Test gstack and OMC install at the submodule pins
         run: bash tests/upstream-pins.test.sh
+      - name: Test install.sh ignores an exported GIT_DIR/GIT_INDEX_FILE
+        run: bash tests/install-git-env.test.sh
+      - name: Test install.sh reports an incomplete submodule clone
+        run: bash tests/install-half-clone.test.sh
+      - name: Test OMC agents stay installed without an enabled OMC plugin
+        run: bash tests/install-omc-agents.test.sh
+      - name: Test the omo CLI is installed at its pin
+        run: bash tests/install-omo-pin.test.sh
+      - name: Test ECC installs from the pinned submodule only
+        run: bash tests/install-ecc-submodule.test.sh
       - name: Test upstream sync scanner
         run: bash tests/scan-upstream-diff.test.sh
       - name: Check agent files exist
