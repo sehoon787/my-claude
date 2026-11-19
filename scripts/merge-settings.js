@@ -6,7 +6,7 @@
 // session ("<host>-<adjective>-<noun>"), which shows up as unknown sessions.
 const fs = require('fs');
 const path = require('path');
-const { backupSettings } = require('./settings-backup');
+const { writeSettingsIfChanged } = require('./settings-backup');
 const home = process.env.HOME || process.env.USERPROFILE;
 const settingsPath = path.join(home, '.claude', 'settings.json');
 
@@ -88,6 +88,9 @@ if (!settings.statusLine) {
   }
 }
 
-backupSettings(settingsPath);
-fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n');
-console.log('  settings.json merged');
+// The whole new file is built first. When it is exactly what the file already
+// holds, nothing is written, backed up or printed; otherwise the old file is
+// backed up (and the path printed) before it is replaced.
+if (writeSettingsIfChanged(settingsPath, JSON.stringify(settings, null, 2) + '\n')) {
+  console.log('  settings.json merged');
+}
