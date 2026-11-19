@@ -571,6 +571,25 @@ echo "[1/6] Installing plugin files..."
 #   ~/.claude/docs/nexus/  → reference material (never parsed as agents)
 mkdir -p "$HOME/.claude/agents" "$HOME/.claude/skills" "$HOME/.claude/rules"
 
+# ~/.claude/skills/gstack is the user's when it is a real directory this
+# installer did not create: a gstack clone (it holds a .git), or anything the
+# previous manifest never listed. Decided before the cleanup below, so neither
+# the cleanup nor step 1e writes into, deletes from, moves or links over it.
+GSTACK_ROOT_DIR="$HOME/.claude/skills/gstack"
+GSTACK_ROOT_FOREIGN=0
+if [ -d "$GSTACK_ROOT_DIR" ] && [ ! -L "$GSTACK_ROOT_DIR" ]; then
+  if [ -e "$GSTACK_ROOT_DIR/.git" ] || ! _gstack_entries="$(cd "$GSTACK_ROOT_DIR" && find . -mindepth 1)"; then
+    GSTACK_ROOT_FOREIGN=1
+  else
+    while IFS= read -r _entry; do
+      [ -z "$_entry" ] || grep -qxF "skills/gstack/${_entry#./}" "$HOME/.claude/.my-claude-manifest" 2>/dev/null \
+        || { GSTACK_ROOT_FOREIGN=1; break; }
+    done <<EOF
+$_gstack_entries
+EOF
+  fi
+fi
+
 # Manifest-based cleanup: remove only files from previous my-claude install.
 # Diff behavior: every file recorded in the OLD manifest is deleted here; the
 # copy steps below then recreate whichever of those paths are still part of
@@ -582,6 +601,14 @@ if [ -f "$HOME/.claude/.my-claude-manifest" ]; then
     # The learning loop's user-approved layer is never install-owned, even if
     # a manifest somehow listed it.
     case "$rel_path" in rules/user/*|skills/learned-*) continue ;; esac
+    # Nor is a skills/gstack this installer did not create (see above).
+    case "$rel_path" in skills/gstack/*) [ "$GSTACK_ROOT_FOREIGN" = "0" ] || continue ;; esac
+    # Never delete through a linked directory below the top level: step 1e links
+    # skills/gstack to the gstack runtime, and a manifest written before that
+    # lists skills/gstack/SKILL.md, which would now be the runtime's own file.
+    _dir="${rel_path%/*}"
+    while [ "${_dir#*/}" != "$_dir" ] && [ ! -L "$HOME/.claude/$_dir" ]; do _dir="${_dir%/*}"; done
+    [ "${_dir#*/}" != "$_dir" ] && continue
     target="$HOME/.claude/$rel_path"
     [ -f "$target" ] && rm -f "$target"
   done < "$HOME/.claude/.my-claude-manifest"
@@ -761,10 +788,13 @@ if [ "$SKIP_GSTACK" = "0" ]; then
       fi
     done
 
-    # Root gstack meta-skill
-    mkdir -p "$HOME/.claude/skills/gstack"
-    cp "$UPSTREAM_DIR/SKILL.md" "$HOME/.claude/skills/gstack/" 2>/dev/null || true
-    echo "skills/gstack/SKILL.md" >> "$MANIFEST_TMP"
+    # Root gstack meta-skill, in a real directory while ./setup runs below. The
+    # pre-clean above removed a link an earlier run left here, so this copy
+    # never writes through one. Step 3) below links the path to the runtime.
+    if [ "$GSTACK_ROOT_FOREIGN" = "0" ]; then
+      mkdir -p "$GSTACK_ROOT_DIR"
+      cp "$UPSTREAM_DIR/SKILL.md" "$GSTACK_ROOT_DIR/" 2>/dev/null || true
+    fi
 
     # Allowlisted skill subdirectories — $GSTACK_SKILL_ALLOWLIST (scripts/skill-allowlists.sh)
     for skill_name in $GSTACK_SKILL_ALLOWLIST; do
@@ -845,6 +875,28 @@ if [ "$SKIP_GSTACK" = "0" ]; then
   if [ "$GSTACK_BROWSER_OK" = "0" ]; then
     echo "  [gstack] WARNING: Browser runtime not available. /browse and /qa skills will not work."
     echo "           Text-based gstack skills (review, ship, plan-*, etc.) are installed and functional."
+  fi
+
+  # 3) Link ~/.claude/skills/gstack to the pinned runtime: the gstack skills run
+  # their helpers (bin/gstack-skill-start, ...) and read shared files through
+  # that path. The helpers are files in the checkout, so the link needs the
+  # runtime at the pin, not a finished setup (without bun, setup is skipped).
+  # It comes after setup: setup leaves a real directory there alone, but when
+  # the path is missing or links to its own tree it registers itself, linking
+  # every gstack skill past the allowlist and adding its hooks to settings.json.
+  # The next run's pre-clean removes the link, never what it points to, before
+  # setup runs again.
+  if [ "$GSTACK_ROOT_FOREIGN" = "1" ]; then
+    echo "  [gstack] NOTICE: $GSTACK_ROOT_DIR was not created by this installer (it holds a .git or files it never installed), so it is left as it is and not linked to the pinned runtime $GSTACK_RUNTIME."
+    echo "           The gstack skills look for their helpers there. To use the pinned runtime, move that directory out of ~/.claude/skills (e.g. mv \"$GSTACK_ROOT_DIR\" \"$HOME/gstack-skill-backup\"), then re-run install.sh."
+  elif [ "$GSTACK_RUNTIME_PINNED" = "1" ]; then
+    rm -f "$GSTACK_ROOT_DIR/SKILL.md"
+    rmdir "$GSTACK_ROOT_DIR"
+    ln -sfn "$GSTACK_RUNTIME" "$GSTACK_ROOT_DIR"
+    echo "  [gstack] $GSTACK_ROOT_DIR -> $GSTACK_RUNTIME"
+  elif [ -f "$GSTACK_ROOT_DIR/SKILL.md" ] && [ ! -L "$GSTACK_ROOT_DIR" ]; then
+    # No runtime at the pin: the copied router stays, manifest-owned as before.
+    echo "skills/gstack/SKILL.md" >> "$MANIFEST_TMP"
   fi
 
   # gstack auto-upgrade is never turned on: it would move gstack past the pin.
