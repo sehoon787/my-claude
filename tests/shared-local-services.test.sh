@@ -207,11 +207,13 @@ assert_contains "$TMP/reuse/output" "Headroom proxy: REUSED"
 [ ! -e "$TMP/reuse/state/headroom-calls" ] || fail "reuse started Headroom"
 
 # A foreign HTTP owner is reported and left alone. The lsof shim models the
-# listener independently from the response identity.
+# listener independently from the response identity. A foreign answer is a
+# verdict at once, whatever the budget; the larger one only keeps a busy machine
+# from running out the deadline first, which would read as "unconfirmed".
 mkdir -p "$TMP/foreign/state"
 touch "$TMP/foreign/state/codeburn-foreign" "$TMP/foreign/state/headroom-foreign" \
   "$TMP/foreign/state/codeburn-listener" "$TMP/foreign/state/headroom-listener"
-run_helper foreign env CODEBURN_SHIM_MODE=success HEADROOM_SHIM_MODE=native
+run_helper_with_timeout foreign 20 env CODEBURN_SHIM_MODE=success HEADROOM_SHIM_MODE=native
 assert_contains "$TMP/foreign/output" "codeburn web: FAIL (port 4747 belongs to another service; left untouched"
 assert_contains "$TMP/foreign/output" "Headroom proxy: FAIL (port 8787 belongs to another service; left untouched"
 [ ! -e "$TMP/foreign/state/codeburn-calls" ] || fail "foreign port owner triggered codeburn"
@@ -234,7 +236,7 @@ assert_contains "$TMP/slow-response-codeburn/output" "codeburn web: REUSED"
 # verdict is reached. Reuses the same fixture as the "foreign" case above.
 mkdir -p "$TMP/foreign-retry/state"
 touch "$TMP/foreign-retry/state/codeburn-foreign" "$TMP/foreign-retry/state/codeburn-listener"
-run_helper foreign-retry env CODEBURN_SHIM_MODE=success HEADROOM_SHIM_MODE=native
+run_helper_with_timeout foreign-retry 20 env CODEBURN_SHIM_MODE=success HEADROOM_SHIM_MODE=native
 assert_contains "$TMP/foreign-retry/output" "codeburn web: FAIL (port 4747 belongs to another service; left untouched"
 [ ! -e "$TMP/foreign-retry/state/codeburn-calls" ] || fail "foreign port owner triggered codeburn during identity retry"
 
@@ -257,11 +259,12 @@ run_helper foreign-retry-headroom env CODEBURN_SHIM_MODE=success HEADROOM_SHIM_M
 assert_contains "$TMP/foreign-retry-headroom/output" "Headroom proxy: FAIL (port 8787 belongs to another service; left untouched"
 [ ! -e "$TMP/foreign-retry-headroom/state/headroom-calls" ] || fail "foreign port owner triggered Headroom during identity retry"
 
-# Non-HTTP listeners are also detected and never touched.
+# Non-HTTP listeners are unconfirmed rather than mislabeled as foreign, and are
+# still left untouched.
 mkdir -p "$TMP/non-http/state"
 touch "$TMP/non-http/state/codeburn-listener" "$TMP/non-http/state/headroom-listener"
 run_helper non-http env CODEBURN_SHIM_MODE=success HEADROOM_SHIM_MODE=native
-assert_contains "$TMP/non-http/output" "codeburn web: FAIL (port 4747 belongs to another service; left untouched"
+assert_contains "$TMP/non-http/output" "codeburn web: FAIL (listener on port 4747 did not confirm CodeBurn identity before 1s deadline; left untouched"
 assert_contains "$TMP/non-http/output" "Headroom proxy: FAIL (port 8787 belongs to another service; left untouched"
 [ ! -e "$TMP/non-http/state/codeburn-calls" ] || fail "non-HTTP listener triggered codeburn"
 [ ! -e "$TMP/non-http/state/headroom-calls" ] || fail "non-HTTP listener triggered Headroom"
