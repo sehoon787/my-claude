@@ -3,6 +3,16 @@
 # Usage: bash install.sh
 set -euo pipefail
 
+# Every git call below names the checkout or directory it works on, so the
+# caller's environment must not choose another one. Git exports GIT_INDEX_FILE
+# to commit hooks (GIT_DIR too in a linked worktree), and a shell kept on a
+# bare dotfiles repo exports GIT_DIR and GIT_WORK_TREE; left set, they make
+# those calls read another repository's recorded commits and write into its
+# index and object store. These are the variables git(1) lists under "The Git
+# Repository" that `git rev-parse --local-env-vars` also names; config
+# variables (GIT_CONFIG_*) stay.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_COMMON_DIR
+
 # Cross-platform SHA-256 checksum
 sha256() {
   if command -v sha256sum >/dev/null 2>&1; then
@@ -450,6 +460,12 @@ manifest_dir() {
 }
 
 UPSTREAM_DIR=""
+# Whether a submodule directory holds anything besides its .git. A clone that
+# stopped before its checkout (an interrupted `git submodule update`, or one
+# whose recorded commit the remote no longer has) holds nothing else.
+submodule_has_files() {  # submodule_has_files <dir>
+  [ -n "$(find "$1" -mindepth 1 -maxdepth 1 ! -name .git 2>/dev/null)" ]
+}
 init_upstream() {
   local name="$1" url="$2" pinned_ref="${3:-}" recorded_sha
   local submod_path="$SCRIPT_DIR/upstream/$name"
@@ -457,10 +473,16 @@ init_upstream() {
     # Use the checked-out (pinned) submodule SHA as-is. Upstream updates land
     # deliberately via update-upstream.yml (PR + security review), never
     # silently at install time.
-    UPSTREAM_DIR="$submod_path"
-    return 0
+    if submodule_has_files "$submod_path"; then
+      UPSTREAM_DIR="$submod_path"
+      return 0
+    fi
+    # Copying from an incomplete clone would skip every file without a word,
+    # so it takes the init and the clone fallback below instead.
+    echo "  WARNING: upstream/$name has a .git but no checked-out files (an incomplete clone), retrying the submodule init (to repair it: cd \"$SCRIPT_DIR\" && git submodule update --init --force --depth 1 upstream/$name)"
   fi
-  if git -C "$SCRIPT_DIR" submodule update --init --depth 1 "upstream/$name" 2>/dev/null; then
+  if git -C "$SCRIPT_DIR" submodule update --init --depth 1 "upstream/$name" 2>/dev/null \
+    && submodule_has_files "$submod_path"; then
     UPSTREAM_DIR="$submod_path"
     return 0
   fi
@@ -505,6 +527,18 @@ warn_unsynced_submodule() {  # warn_unsynced_submodule <name>
   if [ -n "$recorded" ] && [ -n "$checked_out" ] && [ "$recorded" != "$checked_out" ]; then
     echo "  WARNING: upstream/$1 is checked out at ${checked_out:0:12}, not the recorded ${recorded:0:12} (to sync: cd \"$SCRIPT_DIR\" && git submodule update --init --depth 1)"
   fi
+}
+
+# Whether the user's settings enable the OMC Claude plugin, the only case in
+# which it provides the OMC agents. A version under
+# ~/.claude/plugins/cache/omc/oh-my-claudecode does not show that: step [5b]
+# syncs the OMC npm package there for the HUD whether or not the plugin is
+# installed, and Claude Code keeps the cache of a disabled plugin.
+omc_plugin_enabled() {
+  node -e '
+    const s = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+    process.exit(s && s.enabledPlugins && s.enabledPlugins["oh-my-claudecode@omc"] === true ? 0 : 1);
+  ' "$HOME/.claude/settings.json" 2>/dev/null
 }
 
 # ── 1. Plugin files (agents, skills, rules) ──
@@ -595,46 +629,47 @@ cp "$SCRIPT_DIR"/agents/vendored/*.md "$HOME/.claude/agents/"
 for f in "$SCRIPT_DIR"/agents/vendored/*.md; do [ -f "$f" ] && echo "agents/$(basename "$f")" >> "$MANIFEST_TMP"; done
 
 # ── 1c. ECC upstream ──
+# From the pinned submodule only. Claude Code has no `claude plugin add`, and a
+# plugin install would load every ECC skill and command from its marketplace at
+# upstream HEAD — past the pin and the allowlists below — and none of the rules.
 if [ "$SKIP_ECC" = "0" ]; then
   echo "  [ecc] Installing everything-claude-code..."
-  if ! claude plugin add affaan-m/everything-claude-code 2>/dev/null; then
-    if init_upstream "ecc" "https://github.com/affaan-m/everything-claude-code"; then
-      # Allowlisted skills only — $ECC_SKILL_ALLOWLIST (scripts/skill-allowlists.sh)
-      for name in $ECC_SKILL_ALLOWLIST $ECC_EXTRA_SKILLS; do
-        src="$UPSTREAM_DIR/skills/$name"
-        [ -d "$src" ] || continue
-        target="$HOME/.claude/skills/$name"
-        # Pre-clean: resolve file/symlink vs directory conflicts
-        if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
-          rm -f "$target"
-        fi
-        cp -r "$src" "$HOME/.claude/skills/"
-        manifest_dir "skills/$name"
-      done
-      # continuous-learning v1 is self-declared deprecated in favor of v2; never
-      # allowlisted — this also clears copies left by pre-allowlist installs.
-      rm -rf "$HOME/.claude/skills/continuous-learning"
-      # Allowlisted language rule dirs only — $ECC_RULES_ALLOWLIST
-      for name in $ECC_RULES_ALLOWLIST; do
-        src="$UPSTREAM_DIR/rules/$name"
-        [ -d "$src" ] || continue
-        cp -r "$src" "$HOME/.claude/rules/"
-        manifest_dir "rules/$name"
-      done
-      # rules/common is injected into every session, so it is allowlisted per
-      # file — $ECC_RULES_COMMON_ALLOWLIST — not copied wholesale. Files dropped
-      # from that list are manifest-owned and disappear on the next install.
-      if [ -d "$UPSTREAM_DIR/rules/common" ]; then
-        mkdir -p "$HOME/.claude/rules/common"
-        for rule_file in $ECC_RULES_COMMON_ALLOWLIST; do
-          [ -f "$UPSTREAM_DIR/rules/common/$rule_file" ] || continue
-          cp "$UPSTREAM_DIR/rules/common/$rule_file" "$HOME/.claude/rules/common/"
-          echo "rules/common/$rule_file" >> "$MANIFEST_TMP"
-        done
+  if init_upstream "ecc" "https://github.com/affaan-m/everything-claude-code"; then
+    # Allowlisted skills only — $ECC_SKILL_ALLOWLIST (scripts/skill-allowlists.sh)
+    for name in $ECC_SKILL_ALLOWLIST $ECC_EXTRA_SKILLS; do
+      src="$UPSTREAM_DIR/skills/$name"
+      [ -d "$src" ] || continue
+      target="$HOME/.claude/skills/$name"
+      # Pre-clean: resolve file/symlink vs directory conflicts
+      if [ -L "$target" ] || { [ -e "$target" ] && [ ! -d "$target" ]; }; then
+        rm -f "$target"
       fi
-    else
-      echo "  WARNING: ECC install failed"
+      cp -r "$src" "$HOME/.claude/skills/"
+      manifest_dir "skills/$name"
+    done
+    # continuous-learning v1 is self-declared deprecated in favor of v2; never
+    # allowlisted — this also clears copies left by pre-allowlist installs.
+    rm -rf "$HOME/.claude/skills/continuous-learning"
+    # Allowlisted language rule dirs only — $ECC_RULES_ALLOWLIST
+    for name in $ECC_RULES_ALLOWLIST; do
+      src="$UPSTREAM_DIR/rules/$name"
+      [ -d "$src" ] || continue
+      cp -r "$src" "$HOME/.claude/rules/"
+      manifest_dir "rules/$name"
+    done
+    # rules/common is injected into every session, so it is allowlisted per
+    # file — $ECC_RULES_COMMON_ALLOWLIST — not copied wholesale. Files dropped
+    # from that list are manifest-owned and disappear on the next install.
+    if [ -d "$UPSTREAM_DIR/rules/common" ]; then
+      mkdir -p "$HOME/.claude/rules/common"
+      for rule_file in $ECC_RULES_COMMON_ALLOWLIST; do
+        [ -f "$UPSTREAM_DIR/rules/common/$rule_file" ] || continue
+        cp "$UPSTREAM_DIR/rules/common/$rule_file" "$HOME/.claude/rules/common/"
+        echo "rules/common/$rule_file" >> "$MANIFEST_TMP"
+      done
     fi
+  else
+    echo "  WARNING: ECC install failed"
   fi
 fi
 
@@ -656,14 +691,14 @@ fi
 if [ "$SKIP_OMC" = "0" ]; then
   echo "  [omc] Installing oh-my-claudecode..."
   if init_upstream "omc" "https://github.com/Yeachan-Heo/oh-my-claudecode"; then
-    # Check if OMC plugin is installed (provides agents/skills natively)
+    # Check if OMC plugin is installed and enabled (provides agents/skills natively)
     _omc_plugin_active=0
     if [ -d "$HOME/.claude/plugins/cache/omc/oh-my-claudecode" ]; then
       for _pv in "$HOME/.claude/plugins/cache/omc/oh-my-claudecode"/*/; do
         [ -d "$_pv" ] && _omc_plugin_active=1 && break
       done
     fi
-    if [ "$_omc_plugin_active" = "1" ]; then
+    if [ "$_omc_plugin_active" = "1" ] && omc_plugin_enabled; then
       echo "  [omc] Plugin detected — skipping agent file copy (plugin provides agents)"
     else
       find "$UPSTREAM_DIR/agents" -maxdepth 1 -name '*.md' -exec cp {} "$HOME/.claude/agents/" \;
@@ -885,7 +920,7 @@ if [ -d "$HOME/.claude/plugins/cache/omc/oh-my-claudecode" ]; then
   for _v in "$HOME/.claude/plugins/cache/omc/oh-my-claudecode"/*/; do
     [ -d "$_v" ] && _omc_has_version=1 && break
   done
-  if [ "$_omc_has_version" = "1" ]; then
+  if [ "$_omc_has_version" = "1" ] && omc_plugin_enabled; then
     echo "  Deduplicating OMC plugin-provided files..."
     _omc_dedup_count=0
     for _agent in architect.md document-specialist.md explore.md executor.md debugger.md planner.md analyst.md critic.md verifier.md test-engineer.md designer.md writer.md qa-tester.md scientist.md security-reviewer.md code-reviewer.md git-master.md code-simplifier.md; do
@@ -1112,7 +1147,8 @@ echo "  [5c] omo CLI..."
 if command -v oh-my-opencode >/dev/null 2>&1; then
   echo "    omo already installed"
 else
-  npm i -g oh-my-opencode@latest
+  # An exact version, like the other npm CLIs; upstream/SOURCES.json carries the same pin.
+  npm i -g oh-my-opencode@3.17.3
   oh-my-opencode install --no-tui --claude=yes --openai=no --gemini=no --copilot=no 2>/dev/null || true
   echo "    omo installed"
 fi

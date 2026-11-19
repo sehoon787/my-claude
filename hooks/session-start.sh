@@ -30,12 +30,12 @@ fi
 
 # 3. omo CLI
 if ! command -v oh-my-opencode >/dev/null 2>&1; then
-  npm i -g oh-my-opencode@latest 2>/dev/null && INSTALLED+=("omo") || MISSING+=("omo")
+  npm i -g oh-my-opencode@3.17.3 2>/dev/null && INSTALLED+=("omo") || MISSING+=("omo")
 fi
 
 # 4. ast-grep
 if ! command -v ast-grep >/dev/null 2>&1; then
-  npm i -g @ast-grep/cli 2>/dev/null && INSTALLED+=("ast-grep") || MISSING+=("ast-grep")
+  npm i -g @ast-grep/cli@0.45.3 2>/dev/null && INSTALLED+=("ast-grep") || MISSING+=("ast-grep")
 fi
 
 # 5. Capability Registry (v2) + routing summary
