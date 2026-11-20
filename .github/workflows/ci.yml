@@ -27,6 +27,12 @@ jobs:
           python3 -c "import json; json.load(open('settings.json'))"
       - name: Test shared local service startup
         run: bash tests/shared-local-services.test.sh
+      - name: Test codeburn identity labels
+        run: bash tests/codeburn-identity-label.test.sh
+      - name: Test install temp-path cleanup
+        run: bash tests/temp-cleanup.test.sh
+      - name: Test settings.json backup before merge
+        run: node tests/settings-backup.test.js
       - name: Test gstack and OMC install at the submodule pins
         run: bash tests/upstream-pins.test.sh
       - name: Test upstream sync scanner

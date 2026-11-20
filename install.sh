@@ -20,6 +20,13 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=scripts/skill-allowlists.sh
 . "$SCRIPT_DIR/scripts/skill-allowlists.sh"
 
+# Temp paths are made with make_temp and all removed by this one EXIT trap — see
+# scripts/temp-cleanup.sh. Any later code that sets an EXIT trap must run
+# cleanup_temp_paths too, or put this trap back (the tools menu does).
+# shellcheck source=scripts/temp-cleanup.sh
+. "$SCRIPT_DIR/scripts/temp-cleanup.sh"
+trap cleanup_temp_paths EXIT
+
 echo "=== my-claude installer ==="
 echo ""
 
@@ -277,11 +284,15 @@ select_tools_menu() {
   _TOOLS_MENU_DRAWN=0
   _TOOLS_MENU_CHECKED=(1 1 1)
   _TOOLS_MENU_STTY=$(stty -g 2>/dev/null) || return 1
-  trap '_tools_menu_restore' EXIT
+  # The EXIT trap also runs the temp-path cleanup (an EXIT trap replaces the one
+  # set at the top), and on the way out the plain cleanup trap is put back
+  # rather than cleared.
+  trap '_tools_menu_restore; cleanup_temp_paths' EXIT
   trap '_tools_menu_restore; exit 130' INT TERM
   if ! stty -echo -icanon min 1 time 0 2>/dev/null; then
     _tools_menu_restore
-    trap - EXIT INT TERM
+    trap cleanup_temp_paths EXIT
+    trap - INT TERM
     return 1
   fi
   if command -v tput >/dev/null 2>&1; then
@@ -318,7 +329,8 @@ select_tools_menu() {
     esac
   done
   _tools_menu_restore
-  trap - EXIT INT TERM
+  trap cleanup_temp_paths EXIT
+  trap - INT TERM
   INSTALL_SERENA=${_TOOLS_MENU_CHECKED[0]}
   INSTALL_HEADROOM=${_TOOLS_MENU_CHECKED[1]}
   INSTALL_CODEBURN=${_TOOLS_MENU_CHECKED[2]}
@@ -421,8 +433,7 @@ else
 fi
 
 # ── Upstream helper ──
-CLONE_TMPDIR=$(mktemp -d)
-trap 'rm -rf "$CLONE_TMPDIR"' EXIT
+make_temp CLONE_TMPDIR -d
 
 # Provenance-tracked manifest: every path this script actually copies gets
 # appended here (relative to $HOME/.claude). The manifest is NEVER built by
@@ -1000,8 +1011,7 @@ echo "  [5a] Anthropic skills..."
 if anthropic_skills_installed; then
   echo "    Anthropic skills already installed"
 else
-  _tmp_skills=$(mktemp -d)
-  trap 'rm -rf "$_tmp_skills"' EXIT
+  make_temp _tmp_skills -d
   git clone --depth 1 https://github.com/anthropics/skills.git "$_tmp_skills/skills" 2>/dev/null || true
   if [ -d "$_tmp_skills/skills/skills" ]; then
     mkdir -p "$HOME/.claude/skills"
@@ -1190,8 +1200,7 @@ node "$SCRIPT_DIR/scripts/dedupe-karpathy.js" "$HOME/.claude/CLAUDE.md" || true
 KARPATHY_SHA="aa4467f0b33e1e80d11c7c043d4b27e7c79a73a3"
 KARPATHY_URL="https://raw.githubusercontent.com/forrestchang/andrej-karpathy-skills/${KARPATHY_SHA}/CLAUDE.md"
 KARPATHY_EXPECTED_CHECKSUM="694a2d721e41c385f3db492838c23299826df5ba9809e3b0721aac70021e196a"
-_tmp_karpathy=$(mktemp)
-trap 'rm -f "$_tmp_karpathy"' EXIT
+make_temp _tmp_karpathy
 if curl -sL "$KARPATHY_URL" -o "$_tmp_karpathy" 2>/dev/null; then
   ACTUAL_CHECKSUM=$(sha256 "$_tmp_karpathy")
   if [ "$ACTUAL_CHECKSUM" = "$KARPATHY_EXPECTED_CHECKSUM" ]; then

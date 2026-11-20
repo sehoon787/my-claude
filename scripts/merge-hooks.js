@@ -12,6 +12,7 @@
 // hookSpecificOutput). Anything else is foreign and is preserved verbatim.
 const fs = require('fs');
 const path = require('path');
+const { writeSettingsIfChanged } = require('./settings-backup');
 const home = process.env.HOME || process.env.USERPROFILE;
 const settingsPath = path.join(home, '.claude', 'settings.json');
 const hooksJsonPath = process.argv[2];
@@ -55,5 +56,9 @@ for (const event of events) {
 }
 settings.hooks = merged;
 
-fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n');
-console.log(`  hooks merged into settings.json (${preserved} third-party hook${preserved === 1 ? '' : 's'} preserved)`);
+// The whole new file is built first. When it is exactly what the file already
+// holds, nothing is written, backed up or printed; otherwise the old file is
+// backed up (and the path printed) before it is replaced.
+if (writeSettingsIfChanged(settingsPath, JSON.stringify(settings, null, 2) + '\n')) {
+  console.log(`  hooks merged into settings.json (${preserved} third-party hook${preserved === 1 ? '' : 's'} preserved)`);
+}
