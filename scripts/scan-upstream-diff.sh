@@ -82,7 +82,6 @@ done
 ECC_SKILLS=$(words "$ecc_skills")
 ECC_RULE_DIRS=$(words "${ECC_RULES_ALLOWLIST:-}")
 ECC_RULE_COMMON=$(words "${ECC_RULES_COMMON_ALLOWLIST:-}")
-GSTACK_SKILLS=$(words "${GSTACK_SKILL_ALLOWLIST:-}")
 SP_EXCLUDED=$(words "${SUPERPOWERS_SKILL_EXCLUDE:-}")
 
 # is_installed_path <upstream dir> <path inside it>: 0 if install.sh copies the
@@ -112,14 +111,21 @@ is_installed_path() {
         *) return 1 ;;
       esac ;;
     gstack)
-      # Only the root router and the allowlisted skills' SKILL.md are copied
-      # from the pinned submodule. The runtime (./setup) is built from a
-      # separate, unpinned clone, so no submodule path is installed for it.
+      # ~/.gstack/runtime is a checkout of the pinned commit: install.sh runs
+      # its ./setup there and links ~/.claude/skills/gstack to it, so the skills
+      # run its bin/ helpers and read its files. Everything counts except test
+      # trees, fixtures and CI config, which are checked out but never run or
+      # read. Two exceptions come back in:
+      #  - docs/: skills read docs/ files through the link (for example
+      #    docs/askuserquestion-split.md), and which ones is upstream's choice.
+      #  - test/helpers/: installed bin/ code imports it when it runs
+      #    (bin/gstack-model-benchmark and the provider adapters).
       case "$path" in
-        SKILL.md) return 0 ;;
-        */*/*) return 1 ;;
-        */SKILL.md) in_list "${path%/SKILL.md}" "$GSTACK_SKILLS"; return ;;
-        *) return 1 ;;
+        docs/*|test/helpers/*) return 0 ;;
+      esac
+      case "/$path" in
+        */test/*|*/tests/*|*/__tests__/*|*/fixtures/*|*.test.*|/.github/*) return 1 ;;
+        *) return 0 ;;
       esac ;;
     superpowers)
       # Every skill directory except the excluded ones, plus agents/*.md.

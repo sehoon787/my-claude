@@ -420,19 +420,57 @@ should_ignore "omc nested agents/ .md (find -maxdepth 1)" omc agents/sub/evil.md
 should_inform "omc skills are plugin-provided, never copied" omc skills/foo/run.sh
 should_inform "omc hooks script" omc hooks/run.sh
 
+# gstack: ~/.gstack/runtime is a checkout of the pinned commit; ./setup runs
+# from it and ~/.claude/skills/gstack links to it, so everything counts except
+# tests, fixtures and CI config; docs/ and test/helpers/ come back in.
 should_flag "gstack root SKILL.md" gstack SKILL.md
 should_flag "gstack allowlisted <skill>/SKILL.md" gstack "$GSTACK_SKILL/SKILL.md"
-should_ignore "gstack allowlisted skill's other doc" gstack "$GSTACK_SKILL/notes.md"
-should_ignore "gstack skill outside the allowlist" gstack zz-not-allowlisted/SKILL.md
-should_inform "gstack allowlisted skill's other files" gstack "$GSTACK_SKILL/run.sh"
-should_inform "gstack test/" gstack test/helpers/run.ts
-should_inform "gstack browse/ (runtime comes from an unpinned clone)" gstack browse/src/cli.ts
+should_flag "gstack allowlisted skill's other files" gstack "$GSTACK_SKILL/run.sh"
+should_flag "gstack allowlisted skill's other doc (read through the link)" gstack "$GSTACK_SKILL/notes.md"
+should_flag "gstack skill outside the allowlist (in the linked runtime)" gstack zz-not-allowlisted/SKILL.md
+should_flag "gstack setup (no extension, executed)" gstack setup
+should_flag "gstack bin/ script" gstack bin/gstack-thing
+should_flag "gstack non-ASCII name under bin/" gstack "bin/$NON_ASCII_NAME"
+should_flag "gstack browse/src (built by ./setup)" gstack browse/src/cli.ts
+should_flag "gstack nested crew/docs .md" gstack crew/docs/captain.md
+# Skills read docs/ files through the link; installed bin/ code imports
+# test/helpers.
+should_flag "gstack docs/ .md" gstack docs/guide.md
+should_flag "gstack docs/ nested fixtures" gstack docs/fixtures/page.sh
+should_flag "gstack test/helpers (imported by bin/)" gstack test/helpers/run.ts
+should_inform "gstack test/ beyond helpers" gstack test/e2e/run.ts
+should_inform "gstack nested tests/" gstack lib/tests/run.sh
+should_inform "gstack __tests__/" gstack lib/__tests__/run.ts
+should_inform "gstack fixtures/" gstack lib/fixtures/page.html
+should_inform "gstack *.test.*" gstack lib/thing.test.ts
+should_inform "gstack .github/" gstack .github/workflows/ci.yml
+# What the 5dcd76b4..f13dbb0d bump adds, and what scanned clean while only
+# SKILL.md files counted: a new bin/ executable, a password literal in lib/,
+# and an eval in lib/.
+case_new gstack; case_add bin/gstack-ship-phase 'echo phase' x; case_scan
+expect "gstack new bin/ executable: flagged=true" flagged_is true
+expect "gstack new bin/ executable: FLAG line" \
+  gating_has "- FLAG **new executable file**: \`bin/gstack-ship-phase\` (mode 100755)"
+case_new gstack; case_add lib/redact-patterns.ts ' * PASSWORD="form.section.fieldName" in a config file still reports.'; case_scan
+expect "gstack lib/ password literal: flagged=true" flagged_is true
+expect "gstack lib/ password literal: FLAG line" \
+  gating_has "$(flag_line 'Token/secret assignment or read' lib/redact-patterns.ts)"
+case_new gstack; case_add lib/ship-phase.ts '( eval "$GSTACK_SHIP_PHASE_CMD" ) >"$LOG" 2>&1'; case_scan
+expect "gstack lib/ eval: flagged=true" flagged_is true
+expect "gstack lib/ eval: FLAG line" gating_has "$(flag_line 'Dynamic shell eval' lib/ship-phase.ts)"
 # An allowlisted skill directory turned into a link to a fixtures directory:
 # install.sh would copy the fixture's SKILL.md through it.
 case_new gstack; case_add test/fixtures/review/SKILL.md "$PAYLOAD"; case_link "$GSTACK_SKILL" test/fixtures/review; case_scan
 expect "gstack skill dir linked to fixtures: flagged=true" flagged_is true
 expect "gstack skill dir linked to fixtures: FLAG line" \
   gating_has "- FLAG **new or changed symlink**: \`$GSTACK_SKILL\` (to \`test/fixtures/review\`)"
+# The same link, approved earlier: a later edit to the fixture is judged at the
+# skill directory the link exposes it at, so it gates.
+case_new gstack; case_add test/fixtures/review/run.sh 'echo ok'; case_link "$GSTACK_SKILL" test/fixtures/review; case_old
+case_add test/fixtures/review/run.sh "$PAYLOAD"; case_scan
+expect "gstack edit behind an approved skill-dir link: flagged=true" flagged_is true
+expect "gstack edit behind an approved skill-dir link: FLAG line" \
+  gating_has "$(flag_line "$PAYLOAD_LABEL" test/fixtures/review/run.sh)"
 
 should_flag "superpowers skill SKILL.md" superpowers skills/brainstorming/SKILL.md
 should_flag "superpowers agents/*.md" superpowers agents/reviewer.md
