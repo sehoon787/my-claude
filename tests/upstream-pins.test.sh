@@ -226,6 +226,7 @@ if [ "$1" = view ]; then
       out="["; sep=""
       for v in $NPM_SHIM_PUBLISHED; do out="$out$sep\"$v\""; sep=","; done
       echo "$out]" ;;
+    *) echo "unhandled npm $*" >&2; exit 1 ;;
   esac
   exit 0
 fi
@@ -424,6 +425,10 @@ check "registry unreadable: CLI left at 5.8.2"            "$(yes_if [ "$(omc_ver
 omc_case none-at-or-below 1.2.3 "9.9.9"
 check "nothing published at or below the pin: no npm i"   "$(yes_if [ "$(omc_installs "$H")" = 0 ])"
 check "nothing published at or below the pin: one WARNING" "$(yes_if [ "$(omc_warnings "$H")" = 1 ])"
+# The npm shim answers only `view … versions --json` and install.sh discards its
+# stderr, so a stray view shows up only in the shim logs.
+stray_npm_views() { cat "$TMP"/home-*/shim.log 2>/dev/null | grep '^npm view ' | grep -vxF 'npm view oh-my-claude-sisyphus versions --json'; }
+check "npm is only asked for the published versions"      "$(yes_if not stray_npm_views)"
 set_omc_pin "$OMC_PIN"
 
 echo "[5/11] submodule init fails; this checkout records the commits"
