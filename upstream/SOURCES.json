@@ -9,8 +9,8 @@
     "path": "upstream/ecc",
     "method": "submodule + plugin-add",
     "note": "ECC plugin install attempted first, submodule as fallback",
-    "pinned_sha": "3f14a103a8694e51c1df9a806217a6d0b5f7a6f7",
-    "pinned_date": "2026-11-19",
+    "pinned_sha": "4adeee6732a12d1540f49a4d50a38ce8c97f9a53",
+    "pinned_date": "2026-11-22",
     "license": "MIT"
   },
   "oh-my-claudecode": {
@@ -47,8 +47,8 @@
     "installCommand": "git clone --depth 1",
     "updateCommand": "git pull --ff-only",
     "syncFrequency": "on-install",
-    "pinned_sha": "2714e9f7f3eadf886dc974908aeca78ccfdf48a3",
-    "pinned_date": "2026-11-19",
+    "pinned_sha": "5962f0d4f3296ce77a7bef51b53fed021559e21c",
+    "pinned_date": "2026-11-22",
     "license": "MIT"
   },
   "superpowers": {
