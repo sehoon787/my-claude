@@ -420,19 +420,129 @@ should_ignore "omc nested agents/ .md (find -maxdepth 1)" omc agents/sub/evil.md
 should_inform "omc skills are plugin-provided, never copied" omc skills/foo/run.sh
 should_inform "omc hooks script" omc hooks/run.sh
 
+# gstack: ~/.gstack/runtime is a checkout of the pinned commit; ./setup runs
+# from it and ~/.claude/skills/gstack links to it, so everything counts except
+# tests, fixtures and CI config; docs/ and test/helpers/ come back in.
 should_flag "gstack root SKILL.md" gstack SKILL.md
 should_flag "gstack allowlisted <skill>/SKILL.md" gstack "$GSTACK_SKILL/SKILL.md"
-should_ignore "gstack allowlisted skill's other doc" gstack "$GSTACK_SKILL/notes.md"
-should_ignore "gstack skill outside the allowlist" gstack zz-not-allowlisted/SKILL.md
-should_inform "gstack allowlisted skill's other files" gstack "$GSTACK_SKILL/run.sh"
-should_inform "gstack test/" gstack test/helpers/run.ts
-should_inform "gstack browse/ (runtime comes from an unpinned clone)" gstack browse/src/cli.ts
+should_flag "gstack allowlisted skill's other files" gstack "$GSTACK_SKILL/run.sh"
+should_flag "gstack allowlisted skill's other doc (read through the link)" gstack "$GSTACK_SKILL/notes.md"
+should_flag "gstack skill outside the allowlist (in the linked runtime)" gstack zz-not-allowlisted/SKILL.md
+should_flag "gstack setup (no extension, executed)" gstack setup
+should_flag "gstack bin/ script" gstack bin/gstack-thing
+should_flag "gstack non-ASCII name under bin/" gstack "bin/$NON_ASCII_NAME"
+should_flag "gstack browse/src (built by ./setup)" gstack browse/src/cli.ts
+should_flag "gstack nested crew/docs .md" gstack crew/docs/captain.md
+# Skills read docs/ files through the link; installed bin/ code imports
+# test/helpers.
+should_flag "gstack docs/ .md" gstack docs/guide.md
+should_flag "gstack docs/ nested fixtures" gstack docs/fixtures/page.sh
+should_flag "gstack test/helpers (imported by bin/)" gstack test/helpers/run.ts
+should_inform "gstack test/ beyond helpers" gstack test/e2e/run.ts
+should_inform "gstack nested tests/" gstack lib/tests/run.sh
+should_inform "gstack __tests__/" gstack lib/__tests__/run.ts
+should_inform "gstack fixtures/" gstack lib/fixtures/page.html
+should_inform "gstack *.test.*" gstack lib/thing.test.ts
+should_inform "gstack .github/" gstack .github/workflows/ci.yml
+# What the 5dcd76b4..f13dbb0d bump adds, and what scanned clean while only
+# SKILL.md files counted: a new bin/ executable, a password literal in lib/,
+# and an eval in lib/.
+case_new gstack; case_add bin/gstack-ship-phase 'echo phase' x; case_scan
+expect "gstack new bin/ executable: flagged=true" flagged_is true
+expect "gstack new bin/ executable: FLAG line" \
+  gating_has "- FLAG **new executable file**: \`bin/gstack-ship-phase\` (mode 100755)"
+case_new gstack; case_add lib/redact-patterns.ts ' * PASSWORD="form.section.fieldName" in a config file still reports.'; case_scan
+expect "gstack lib/ password literal: flagged=true" flagged_is true
+expect "gstack lib/ password literal: FLAG line" \
+  gating_has "$(flag_line 'Token/secret assignment or read' lib/redact-patterns.ts)"
+case_new gstack; case_add lib/ship-phase.ts '( eval "$GSTACK_SHIP_PHASE_CMD" ) >"$LOG" 2>&1'; case_scan
+expect "gstack lib/ eval: flagged=true" flagged_is true
+expect "gstack lib/ eval: FLAG line" gating_has "$(flag_line 'Dynamic shell eval' lib/ship-phase.ts)"
 # An allowlisted skill directory turned into a link to a fixtures directory:
 # install.sh would copy the fixture's SKILL.md through it.
 case_new gstack; case_add test/fixtures/review/SKILL.md "$PAYLOAD"; case_link "$GSTACK_SKILL" test/fixtures/review; case_scan
 expect "gstack skill dir linked to fixtures: flagged=true" flagged_is true
 expect "gstack skill dir linked to fixtures: FLAG line" \
   gating_has "- FLAG **new or changed symlink**: \`$GSTACK_SKILL\` (to \`test/fixtures/review\`)"
+# The same link, approved earlier: a later edit to the fixture is judged at the
+# skill directory the link exposes it at, so it gates.
+case_new gstack; case_add test/fixtures/review/run.sh 'echo ok'; case_link "$GSTACK_SKILL" test/fixtures/review; case_old
+case_add test/fixtures/review/run.sh "$PAYLOAD"; case_scan
+expect "gstack edit behind an approved skill-dir link: flagged=true" flagged_is true
+expect "gstack edit behind an approved skill-dir link: FLAG line" \
+  gating_has "$(flag_line "$PAYLOAD_LABEL" test/fixtures/review/run.sh)"
+# A counted file that names a test or fixture path can run what the scope
+# leaves out; test/helpers/ is counted, so naming it alone is no hit.
+REF_LABEL='Names a test or fixture path the scan leaves out'
+case_new gstack; case_add bin/gstack-run 'bun "$ROOT/test/e2e/x.ts"'; case_scan
+expect "gstack bin/ naming test/e2e: flagged=true" flagged_is true
+expect "gstack bin/ naming test/e2e: FLAG line" gating_has "$(flag_line "$REF_LABEL" bin/gstack-run)"
+case_new gstack; case_add SKILL.md 'Run `node lib/thing.test.ts` before you start.'; case_scan
+expect "gstack SKILL.md naming a *.test.* file: flagged=true" flagged_is true
+expect "gstack SKILL.md naming a *.test.* file: FLAG line" gating_has "$(flag_line "$REF_LABEL" SKILL.md)"
+case_new gstack; case_add test/helpers/run.ts "import { payload } from '../fixtures/payload'"; case_scan
+expect "gstack test/helpers naming fixtures/: flagged=true" flagged_is true
+case_new gstack; case_add lib/run.ts "import { run } from '../test/helpers/run'"; case_scan
+expect "gstack counted file naming only test/helpers/: flagged=false" flagged_is false
+case_new gstack; case_add lib/paths.ts 'const dir = "dist/latest/e2e-test/out"'; case_scan
+expect "gstack latest/ and e2e-test/ are no test paths: flagged=false" flagged_is false
+case_new gstack; case_add test/e2e/run.ts 'bun "$ROOT/test/fixtures/x.ts"'; case_scan
+expect "gstack excluded file naming test paths: flagged=false" flagged_is false
+case_new ecc; case_add "skills/$ECC_SKILL/run.sh" 'bash tests/run.sh'; case_scan
+expect "ecc installed file naming tests/: flagged=false (gstack rule only)" flagged_is false
+# Only files that run, or tell an agent what to run, are read for these names:
+# code, SKILL.md and agent prompts. Other prose names test paths all the time.
+RUN_E2E='bun "$ROOT/test/e2e/x.ts"'
+for f in scripts/run.sh lib/run.mjs hosts/claude/hooks/x-hook review/sections/run.md review/specialists/run.md; do
+  case_new gstack; case_add "$f" "$RUN_E2E"; case_scan
+  expect "gstack $f naming test/e2e/x.ts: FLAG line" gating_has "$(flag_line "$REF_LABEL" "$f")"
+done
+for f in README.md docs/guide.md CHANGELOG.md notes.md bin/data.json; do
+  case_new gstack; case_add "$f" "$RUN_E2E"; case_scan
+  expect "gstack $f naming test/e2e/x.ts: flagged=false (prose or data)" flagged_is false
+done
+# Files that run without a code extension count too. The shape of a review's
+# fake bump: a hook under autoplan/bin/ and a package.json script, each running
+# a payload parked in an excluded tree.
+case_new gstack
+case_add test/e2e/x.ts "$PAYLOAD"; case_add test/fixtures/y.ts "$PAYLOAD"
+case_add autoplan/bin/phase-publication-hook "$RUN_E2E"
+case_add package.json '{ "name": "x", "scripts": { "build": "bash scripts/build.sh", "postinstall": "bun test/fixtures/y.ts" } }'
+case_scan
+expect "fake bump: flagged=true" flagged_is true
+expect "fake bump: the autoplan/bin/ hook gates" gating_has "$(flag_line "$REF_LABEL" autoplan/bin/phase-publication-hook)"
+expect "fake bump: package.json gates" gating_has "$(flag_line "$REF_LABEL" package.json)"
+expect "fake bump: no safe-for-auto-merge verdict" report_lacks 'Safe for auto-merge'
+for f in review/SKILL.md.tmpl careful/bin/rules.awk patches/fix.patch; do
+  case_new gstack; case_add "$f" "$RUN_E2E"; case_scan
+  expect "gstack $f naming test/e2e/x.ts: FLAG line" gating_has "$(flag_line "$REF_LABEL" "$f")"
+done
+case_new gstack; case_add scripts/app/gstack-tool.rb "$RUN_E2E" x; case_scan
+expect "gstack mode-100755 file without a code extension: FLAG line" gating_has "$(flag_line "$REF_LABEL" scripts/app/gstack-tool.rb)"
+# A .md file a SKILL.md tells the agent to read is read; one no prompt names is not.
+case_new gstack
+case_add review/SKILL.md 'Read `~/.claude/skills/gstack/review/checklist.md`.'
+case_add review/checklist.md "$RUN_E2E"; case_scan
+expect "gstack .md a SKILL.md tells the agent to read: FLAG line" gating_has "$(flag_line "$REF_LABEL" review/checklist.md)"
+case_new gstack; case_add review/notes.md "$RUN_E2E"; case_scan
+expect "gstack .md that no prompt names: flagged=false" flagged_is false
+# setup rebuilds SKILL.md from its templates, so their references count too.
+case_new gstack
+case_add review/SKILL.md.tmpl 'Read `~/.claude/skills/gstack/review/gate.md`.'
+case_add review/gate.md "$RUN_E2E"; case_scan
+expect "gstack .md a SKILL.md.tmpl tells the agent to read: FLAG line" gating_has "$(flag_line "$REF_LABEL" review/gate.md)"
+# Climbing out of test/helpers/, or joining the path, names the excluded tree
+# too: a `..` segment anywhere after it, with `.` and empty segments folded.
+for climb in test/helpers/.. test/helpers/sub/../.. test/helpers/./.. test/helpers//..; do
+  case_new gstack; case_add lib/a.ts "import { x } from '../$climb/e2e/x'"; case_scan
+  expect "gstack $climb climbs out: FLAG line" gating_has "$(flag_line "$REF_LABEL" lib/a.ts)"
+done
+case_new gstack; case_add lib/a.ts "import { x } from '../test/helpers/a..b/x'"; case_scan
+expect "gstack a..b under test/helpers/ is no climb: flagged=false" flagged_is false
+case_new gstack; case_add lib/b.ts 'run(join(ROOT, "test", "e2e", "x.ts"))'; case_scan
+expect "gstack join(ROOT, \"test\", ...): FLAG line" gating_has "$(flag_line "$REF_LABEL" lib/b.ts)"
+case_new gstack; case_add lib/c.ts 'if (process.env.NODE_ENV === "test") skip()'; case_scan
+expect "gstack a \"test\" string outside a path join: flagged=false" flagged_is false
 
 should_flag "superpowers skill SKILL.md" superpowers skills/brainstorming/SKILL.md
 should_flag "superpowers agents/*.md" superpowers agents/reviewer.md
