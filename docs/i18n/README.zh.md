@@ -391,8 +391,8 @@ my-claude 捆绑的工具会把结果写到不同位置 —— 下表列出各�
 | 来源 | SHA | 日期 | 差异 |
 |--------|-----|------|------|
 | [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | `4adeee6` | 2026-11-22 | [compare](https://github.com/affaan-m/everything-claude-code/compare/4adeee6...HEAD) |
-| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `6bd729e` | 2026-11-25 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/6bd729e...HEAD) |
-| [gstack](https://github.com/garrytan/gstack) | `a48df18` | 2026-11-25 | [compare](https://github.com/garrytan/gstack/compare/a48df18...HEAD) |
+| [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | `b8fe868` | 2026-11-26 | [compare](https://github.com/Yeachan-Heo/oh-my-claudecode/compare/b8fe868...HEAD) |
+| [gstack](https://github.com/garrytan/gstack) | `e6dd567` | 2026-11-26 | [compare](https://github.com/garrytan/gstack/compare/e6dd567...HEAD) |
 | [superpowers](https://github.com/obra/superpowers) | `22f0b46` | 2026-11-13 | [compare](https://github.com/obra/superpowers/compare/22f0b46...HEAD) |
 | [archify](https://github.com/tt-a1i/archify) | `2ab3cae` (`v3.0.1`) | 2026-09-28 | [compare](https://github.com/tt-a1i/archify/compare/2ab3cae...HEAD) |
 
