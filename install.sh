@@ -921,7 +921,7 @@ if [ "$SKIP_GSTACK" = "0" ]; then
     # file. Anything else makes the rmdir below fail.
     rm -f "$GSTACK_ROOT_DIR/SKILL.md" 2>/dev/null || true
     if [ -f "$GSTACK_ROOT_DIR/.DS_Store" ] && [ ! -L "$GSTACK_ROOT_DIR/.DS_Store" ]; then
-      rm -f "$GSTACK_ROOT_DIR/.DS_Store"
+      rm -f "$GSTACK_ROOT_DIR/.DS_Store" 2>/dev/null || true
     fi
     if ! rmdir "$GSTACK_ROOT_DIR" 2>/dev/null; then
       # Anything else in it is not ours: leave it, put the router copy back.

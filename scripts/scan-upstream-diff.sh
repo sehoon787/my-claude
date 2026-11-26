@@ -149,13 +149,14 @@ is_installed_path() {
 }
 
 # prompt_reads <upstream dir> <commit>: for gstack, the files that SKILL.md,
-# skill sections, /review's specialists and model overlays at <commit> tell the
-# agent to read (~/.claude/skills/gstack/<path>, through the link), as " a b ".
+# skill sections, /review's specialists, model overlays and the *.md.tmpl
+# templates setup rebuilds them from tell the agent to read at <commit>
+# (~/.claude/skills/gstack/<path>, through the link), as " a b ".
 prompt_reads() {
   [ "${1##*/}" = gstack ] || return 0
   words "$(git -C "$1" grep -I -o -E '\.claude/skills/gstack/[A-Za-z0-9_./-]+' "$2" 2>/dev/null \
     | awk '{ rest = substr($0, index($0, ":") + 1); file = substr(rest, 1, index(rest, ":") - 1)
-             if (file !~ /(^|\/)SKILL\.md$|\/sections\/[^\/]+\.md$|\/specialists\/[^\/]+\.md$|^model-overlays\//) next
+             if (file !~ /(^|\/)SKILL\.md$|\.md\.tmpl$|\/sections\/[^\/]+\.md$|\/specialists\/[^\/]+\.md$|^model-overlays\//) next
              p = substr(rest, index(rest, ":") + 1); sub(/^.*\.claude\/skills\/gstack\//, "", p); sub(/\.+$/, "", p); print p }' \
     | sort -u)"
 }
@@ -165,7 +166,8 @@ prompt_reads() {
 # upstream whose counted files can still run such a path; nothing for others.
 # gstack leaves out its test trees and fixtures, but a counted file can add
 # `bun "$ROOT/test/e2e/x.ts"` while the payload sits in the excluded tree.
-# test/helpers/ is counted, so naming it is no hit, unless `..` climbs out.
+# test/helpers/ is counted, so naming it is no hit, unless a `..` segment
+# anywhere after it climbs out (`.` and empty segments are folded first).
 # Read are the files that run or tell an agent what to run: code by extension,
 # extensionless files under any bin/ or under hosts/, any file with mode
 # 100755, setup, package.json (setup runs its scripts), *.tmpl (rebuilt into
@@ -183,7 +185,10 @@ excluded_refs() {
   [ "$reads" = 1 ] || in_list "$3" "${PROMPT_READS:-}" \
     || [ "$(git -C "$1" ls-tree "$2" -- "$3" 2>/dev/null | awk '{ print $1 }')" = 100755 ] \
     || return 0
-  for n in $(printf '%s\n' "$4" | sed -e 's#test/helpers/\.\.#test/..#g' -e 's#test/helpers/##g' \
+  for n in $(printf '%s\n' "$4" \
+      | sed -E -e ':a' -e 's#/\./#/#g' -e 'ta' -e 's#/{2,}#/#g' \
+          -e 's#test/helpers/(([^/[:space:]"'"'"'`]+/)*\.\.([/[:space:]"'"'"'`)]|$))#test/\1#g' \
+          -e 's#test/helpers/##g' \
       | grep -nE '(^|[/"'"'"'`[:space:]=(:])(test|tests|__tests__|fixtures)/|\.test\.|(join|resolve)[[:space:]]*\([^)]*["'"'"'`](test|tests|__tests__|fixtures)["'"'"'`]' \
       | head -3 | cut -d: -f1); do
     printf '%s:%s\n' "$n" "$(printf '%s\n' "$4" | sed -n "${n}p")"

@@ -526,9 +526,19 @@ case_add review/checklist.md "$RUN_E2E"; case_scan
 expect "gstack .md a SKILL.md tells the agent to read: FLAG line" gating_has "$(flag_line "$REF_LABEL" review/checklist.md)"
 case_new gstack; case_add review/notes.md "$RUN_E2E"; case_scan
 expect "gstack .md that no prompt names: flagged=false" flagged_is false
-# Climbing out of test/helpers/, or joining the path, names the excluded tree too.
-case_new gstack; case_add lib/a.ts "import { x } from '../test/helpers/../e2e/x'"; case_scan
-expect "gstack test/helpers/../ climbs out: FLAG line" gating_has "$(flag_line "$REF_LABEL" lib/a.ts)"
+# setup rebuilds SKILL.md from its templates, so their references count too.
+case_new gstack
+case_add review/SKILL.md.tmpl 'Read `~/.claude/skills/gstack/review/gate.md`.'
+case_add review/gate.md "$RUN_E2E"; case_scan
+expect "gstack .md a SKILL.md.tmpl tells the agent to read: FLAG line" gating_has "$(flag_line "$REF_LABEL" review/gate.md)"
+# Climbing out of test/helpers/, or joining the path, names the excluded tree
+# too: a `..` segment anywhere after it, with `.` and empty segments folded.
+for climb in test/helpers/.. test/helpers/sub/../.. test/helpers/./.. test/helpers//..; do
+  case_new gstack; case_add lib/a.ts "import { x } from '../$climb/e2e/x'"; case_scan
+  expect "gstack $climb climbs out: FLAG line" gating_has "$(flag_line "$REF_LABEL" lib/a.ts)"
+done
+case_new gstack; case_add lib/a.ts "import { x } from '../test/helpers/a..b/x'"; case_scan
+expect "gstack a..b under test/helpers/ is no climb: flagged=false" flagged_is false
 case_new gstack; case_add lib/b.ts 'run(join(ROOT, "test", "e2e", "x.ts"))'; case_scan
 expect "gstack join(ROOT, \"test\", ...): FLAG line" gating_has "$(flag_line "$REF_LABEL" lib/b.ts)"
 case_new gstack; case_add lib/c.ts 'if (process.env.NODE_ENV === "test") skip()'; case_scan
