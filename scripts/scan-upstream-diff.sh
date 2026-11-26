@@ -147,6 +147,22 @@ is_installed_path() {
     *) return 0 ;;
   esac
 }
+
+# excluded_refs <upstream dir> <added lines>: up to three added lines, as
+# "n:line", that name a path is_installed_path leaves out, for an upstream
+# whose counted files can still run such a path; nothing for the others.
+# gstack leaves out its test trees and fixtures, but a counted file can add
+# `bun "$ROOT/test/e2e/x.ts"` while the payload sits in the excluded tree.
+# test/helpers/ is counted, so naming it is no hit.
+excluded_refs() {
+  local n
+  [ "${1##*/}" = gstack ] || return 0
+  for n in $(printf '%s\n' "$2" | sed 's#test/helpers/##g' \
+      | grep -nE '(^|[/"'"'"'`[:space:]=(:])(test|tests|__tests__|fixtures)/|\.test\.' \
+      | head -3 | cut -d: -f1); do
+    printf '%s:%s\n' "$n" "$(printf '%s\n' "$2" | sed -n "${n}p")"
+  done
+}
 # ── end per-repo ────────────────────────────────────────────────────────────
 
 # resolve_link <link path> <link target>: where the link points, as a path from
@@ -375,6 +391,15 @@ for sub in "${subs[@]}"; do
       done <<< "$hits"
       sub_flag=1
     done
+    # An installed file that names a path the scope leaves out can run it.
+    [ "$installed" -eq 1 ] || continue
+    hits=$(excluded_refs "$sub" "$added")
+    [ -n "$hits" ] || continue
+    emit "- FLAG **Names a test or fixture path the scan leaves out** in \`$f\`:"
+    while IFS= read -r line; do
+      emit "    - \`$(printf '%s' "$line" | cut -c1-160)\`"
+    done <<< "$hits"
+    sub_flag=1
   done
 
   if [ "$sub_flag" -eq 0 ]; then

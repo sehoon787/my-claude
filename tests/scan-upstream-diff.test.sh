@@ -471,6 +471,25 @@ case_add test/fixtures/review/run.sh "$PAYLOAD"; case_scan
 expect "gstack edit behind an approved skill-dir link: flagged=true" flagged_is true
 expect "gstack edit behind an approved skill-dir link: FLAG line" \
   gating_has "$(flag_line "$PAYLOAD_LABEL" test/fixtures/review/run.sh)"
+# A counted file that names a test or fixture path can run what the scope
+# leaves out; test/helpers/ is counted, so naming it alone is no hit.
+REF_LABEL='Names a test or fixture path the scan leaves out'
+case_new gstack; case_add bin/gstack-run 'bun "$ROOT/test/e2e/x.ts"'; case_scan
+expect "gstack bin/ naming test/e2e: flagged=true" flagged_is true
+expect "gstack bin/ naming test/e2e: FLAG line" gating_has "$(flag_line "$REF_LABEL" bin/gstack-run)"
+case_new gstack; case_add SKILL.md 'Run `node lib/thing.test.ts` before you start.'; case_scan
+expect "gstack SKILL.md naming a *.test.* file: flagged=true" flagged_is true
+expect "gstack SKILL.md naming a *.test.* file: FLAG line" gating_has "$(flag_line "$REF_LABEL" SKILL.md)"
+case_new gstack; case_add test/helpers/run.ts "import { payload } from '../fixtures/payload'"; case_scan
+expect "gstack test/helpers naming fixtures/: flagged=true" flagged_is true
+case_new gstack; case_add lib/run.ts "import { run } from '../test/helpers/run'"; case_scan
+expect "gstack counted file naming only test/helpers/: flagged=false" flagged_is false
+case_new gstack; case_add lib/paths.ts 'const dir = "dist/latest/e2e-test/out"'; case_scan
+expect "gstack latest/ and e2e-test/ are no test paths: flagged=false" flagged_is false
+case_new gstack; case_add test/e2e/run.ts 'bun "$ROOT/test/fixtures/x.ts"'; case_scan
+expect "gstack excluded file naming test paths: flagged=false" flagged_is false
+case_new ecc; case_add "skills/$ECC_SKILL/run.sh" 'bash tests/run.sh'; case_scan
+expect "ecc installed file naming tests/: flagged=false (gstack rule only)" flagged_is false
 
 should_flag "superpowers skill SKILL.md" superpowers skills/brainstorming/SKILL.md
 should_flag "superpowers agents/*.md" superpowers agents/reviewer.md
