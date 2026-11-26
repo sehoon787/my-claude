@@ -3,14 +3,17 @@
 # run-tests.sh — run every test in tests/, the one test list CI and the
 # upstream sync share.
 #
-# The validate job in .github/workflows/ci.yml and the update job in
-# .github/workflows/update-upstream.yml (before it may auto-merge) both call
-# this script, so a test file added under tests/ runs in both without editing
-# either workflow.
+# The validate job in .github/workflows/ci.yml and the test job in
+# .github/workflows/update-upstream.yml (before the sync may auto-merge) both
+# call this script, so a test file added under tests/ runs in both without
+# editing either workflow.
 #
 # Runs tests/*.test.sh, tests/*.test.js and tests/validate-sync.sh, keeps
-# going past a failure, and names every failed test at the end. Under GitHub
-# Actions it also writes failed=<space-separated test paths> to $GITHUB_OUTPUT.
+# going past a failure, and names every failed test at the end. Each test
+# gets its own throwaway HOME, XDG_CONFIG_HOME and TMPDIR, removed when it
+# ends, so a test that forgets to isolate one cannot reach the real one.
+# Under GitHub Actions it also writes failed=<space-separated test paths> to
+# $GITHUB_OUTPUT.
 #
 # Exit 0 = every test passed; exit 1 = at least one failed, or none ran.
 # `bash scripts/run-tests.sh`
@@ -25,11 +28,16 @@ failed=""
 for t in tests/*.test.sh tests/*.test.js tests/validate-sync.sh; do
   [ -f "$t" ] || continue
   echo "==> $t"
+  sandbox="$(mktemp -d "${TMPDIR:-/tmp}/run-tests.XXXXXX")" || { echo "mktemp failed"; exit 1; }
+  mkdir -p "$sandbox/home" "$sandbox/config" "$sandbox/tmp"
   case "$t" in
-    *.js) node "$t" </dev/null ;;
-    *) bash "$t" </dev/null ;;
+    *.js) interpreter=node ;;
+    *) interpreter=bash ;;
   esac
+  HOME="$sandbox/home" XDG_CONFIG_HOME="$sandbox/config" TMPDIR="$sandbox/tmp" \
+    "$interpreter" "$t" </dev/null
   rc=$?
+  rm -rf "${sandbox:?}"
   if [ "$rc" -eq 0 ]; then
     passed=$((passed + 1))
   else
