@@ -115,7 +115,7 @@ Boss is the meta-orchestrator at the core of my-claude. It never writes code —
 
 | Priority | Match Type | When | Example |
 |:--------:|-----------|------|---------|
-| **P0** | gstack skill | Ship / QA / deploy / security workflow | `"ship this"` → gstack `/ship` |
+| **P0** | gstack skill | Ship / QA / deploy / security workflow | `"ship this"` → gstack `/gstack-ship` |
 | **P1** | Skill match | Task maps to a self-contained skill | `"merge PDFs"` → pdf skill |
 | **P2** | Specialist agent | Domain-specific agent exists | `"security audit"` → security-reviewer |
 | **P3a** | Boss direct | 2-4 independent agents | `"fix 3 bugs"` → parallel spawn |
@@ -299,7 +299,7 @@ Per-agent models are in [Model Routing](#model-routing); where each source comes
 | Source | Count | Key Skills |
 |--------|------:|------------|
 | [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 61 | coding-standards, fastapi-patterns, agent-architecture-audit, springboot-patterns, kubernetes-patterns |
-| [gstack](https://github.com/garrytan/gstack) | 26 | /qa, /review, /ship, /cso, /office-hours |
+| [gstack](https://github.com/garrytan/gstack) | 26 | /qa, /review, /gstack-ship, /cso, /office-hours |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming, systematic-debugging, test-driven-development, writing-plans |
 | [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced, boss-briefing, briefing-vault, gstack-sprint |
 | [archify](https://github.com/tt-a1i/archify) | 1 | archify |

@@ -130,7 +130,7 @@
     },
     {
       "name": "Ship",
-      "members": ["ship", "land-and-deploy", "canary", "finishing-a-development-branch", "git-master"],
+      "members": ["gstack-ship", "land-and-deploy", "canary", "finishing-a-development-branch", "git-master"],
       "description_keywords": ["deploy", "release"],
       "prompt_keywords": ["ship it", "ship this", "deploy", "release", "open a pr", "create a pr", "merge it", "merge this", "merge the pr", "merge the branch", "배포", "릴리스", "출시"]
     }
