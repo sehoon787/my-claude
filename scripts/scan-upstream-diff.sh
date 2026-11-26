@@ -148,29 +148,45 @@ is_installed_path() {
   esac
 }
 
-# excluded_refs <upstream dir> <path> <added lines>: up to three added lines, as
-# "n:line", that name a path is_installed_path leaves out, for an upstream
-# whose counted files can still run such a path; nothing for the others.
+# prompt_reads <upstream dir> <commit>: for gstack, the files that SKILL.md,
+# skill sections, /review's specialists and model overlays at <commit> tell the
+# agent to read (~/.claude/skills/gstack/<path>, through the link), as " a b ".
+prompt_reads() {
+  [ "${1##*/}" = gstack ] || return 0
+  words "$(git -C "$1" grep -I -o -E '\.claude/skills/gstack/[A-Za-z0-9_./-]+' "$2" 2>/dev/null \
+    | awk '{ rest = substr($0, index($0, ":") + 1); file = substr(rest, 1, index(rest, ":") - 1)
+             if (file !~ /(^|\/)SKILL\.md$|\/sections\/[^\/]+\.md$|\/specialists\/[^\/]+\.md$|^model-overlays\//) next
+             p = substr(rest, index(rest, ":") + 1); sub(/^.*\.claude\/skills\/gstack\//, "", p); sub(/\.+$/, "", p); print p }' \
+    | sort -u)"
+}
+
+# excluded_refs <upstream dir> <commit> <path> <added lines>: up to three added
+# lines, as "n:line", that name a path is_installed_path leaves out, for an
+# upstream whose counted files can still run such a path; nothing for others.
 # gstack leaves out its test trees and fixtures, but a counted file can add
 # `bun "$ROOT/test/e2e/x.ts"` while the payload sits in the excluded tree.
-# test/helpers/ is counted, so naming it is no hit. Only files that run, or
-# tell an agent what to run, are read: code (by extension, or extensionless
-# under bin/ and hosts/, and the root setup), SKILL.md, and the prompts gstack
-# hands an agent (skill sections, /review's specialists, model overlays).
-# README*, CHANGELOG*, docs/ and other prose name test paths all the time.
+# test/helpers/ is counted, so naming it is no hit, unless `..` climbs out.
+# Read are the files that run or tell an agent what to run: code by extension,
+# extensionless files under any bin/ or under hosts/, any file with mode
+# 100755, setup, package.json (setup runs its scripts), *.tmpl (rebuilt into
+# SKILL.md), *.patch, *.awk, SKILL.md, the agent prompts, and the files they
+# tell the agent to read ($PROMPT_READS). README*, CHANGELOG*, docs/ and other
+# prose name test paths all the time and run nothing.
 excluded_refs() {
-  local n
+  local n reads=0
   [ "${1##*/}" = gstack ] || return 0
-  case "$2" in
-    *.sh|*.bash|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.py) ;;
-    setup|SKILL.md|*/SKILL.md|*/sections/*.md|*/specialists/*.md|model-overlays/*.md) ;;
-    bin/*|hosts/*) case "${2##*/}" in *.*) return 0 ;; esac ;;
-    *) return 0 ;;
+  case "$3" in
+    *.sh|*.bash|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.py|*.awk|*.tmpl|*.patch) reads=1 ;;
+    setup|package.json|*/package.json|SKILL.md|*/SKILL.md|*/sections/*.md|*/specialists/*.md|model-overlays/*.md) reads=1 ;;
   esac
-  for n in $(printf '%s\n' "$3" | sed 's#test/helpers/##g' \
-      | grep -nE '(^|[/"'"'"'`[:space:]=(:])(test|tests|__tests__|fixtures)/|\.test\.' \
+  case "/$3" in */bin/*|/hosts/*) case "${3##*/}" in *.*) ;; *) reads=1 ;; esac ;; esac
+  [ "$reads" = 1 ] || in_list "$3" "${PROMPT_READS:-}" \
+    || [ "$(git -C "$1" ls-tree "$2" -- "$3" 2>/dev/null | awk '{ print $1 }')" = 100755 ] \
+    || return 0
+  for n in $(printf '%s\n' "$4" | sed -e 's#test/helpers/\.\.#test/..#g' -e 's#test/helpers/##g' \
+      | grep -nE '(^|[/"'"'"'`[:space:]=(:])(test|tests|__tests__|fixtures)/|\.test\.|(join|resolve)[[:space:]]*\([^)]*["'"'"'`](test|tests|__tests__|fixtures)["'"'"'`]' \
       | head -3 | cut -d: -f1); do
-    printf '%s:%s\n' "$n" "$(printf '%s\n' "$3" | sed -n "${n}p")"
+    printf '%s:%s\n' "$n" "$(printf '%s\n' "$4" | sed -n "${n}p")"
   done
 }
 # ── end per-repo ────────────────────────────────────────────────────────────
@@ -305,6 +321,8 @@ for sub in "${subs[@]}"; do
 
   sub_flag=0
   installed_count=0
+  # The files this upstream's prompts tell the agent to read, for excluded_refs.
+  PROMPT_READS=$(prompt_reads "$sub" "$new")
 
   # Every symlink in the new tree and where it points, read by is_installed.
   link_paths=(); link_dests=()
@@ -403,7 +421,7 @@ for sub in "${subs[@]}"; do
     done
     # An installed file that names a path the scope leaves out can run it.
     [ "$installed" -eq 1 ] || continue
-    hits=$(excluded_refs "$sub" "$f" "$added")
+    hits=$(excluded_refs "$sub" "$new" "$f" "$added")
     [ -n "$hits" ] || continue
     emit "- FLAG **Names a test or fixture path the scan leaves out** in \`$f\`:"
     while IFS= read -r line; do

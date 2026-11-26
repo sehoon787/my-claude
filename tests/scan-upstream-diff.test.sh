@@ -501,6 +501,38 @@ for f in README.md docs/guide.md CHANGELOG.md notes.md bin/data.json; do
   case_new gstack; case_add "$f" "$RUN_E2E"; case_scan
   expect "gstack $f naming test/e2e/x.ts: flagged=false (prose or data)" flagged_is false
 done
+# Files that run without a code extension count too. The shape of a review's
+# fake bump: a hook under autoplan/bin/ and a package.json script, each running
+# a payload parked in an excluded tree.
+case_new gstack
+case_add test/e2e/x.ts "$PAYLOAD"; case_add test/fixtures/y.ts "$PAYLOAD"
+case_add autoplan/bin/phase-publication-hook "$RUN_E2E"
+case_add package.json '{ "name": "x", "scripts": { "build": "bash scripts/build.sh", "postinstall": "bun test/fixtures/y.ts" } }'
+case_scan
+expect "fake bump: flagged=true" flagged_is true
+expect "fake bump: the autoplan/bin/ hook gates" gating_has "$(flag_line "$REF_LABEL" autoplan/bin/phase-publication-hook)"
+expect "fake bump: package.json gates" gating_has "$(flag_line "$REF_LABEL" package.json)"
+expect "fake bump: no safe-for-auto-merge verdict" report_lacks 'Safe for auto-merge'
+for f in review/SKILL.md.tmpl careful/bin/rules.awk patches/fix.patch; do
+  case_new gstack; case_add "$f" "$RUN_E2E"; case_scan
+  expect "gstack $f naming test/e2e/x.ts: FLAG line" gating_has "$(flag_line "$REF_LABEL" "$f")"
+done
+case_new gstack; case_add scripts/app/gstack-tool.rb "$RUN_E2E" x; case_scan
+expect "gstack mode-100755 file without a code extension: FLAG line" gating_has "$(flag_line "$REF_LABEL" scripts/app/gstack-tool.rb)"
+# A .md file a SKILL.md tells the agent to read is read; one no prompt names is not.
+case_new gstack
+case_add review/SKILL.md 'Read `~/.claude/skills/gstack/review/checklist.md`.'
+case_add review/checklist.md "$RUN_E2E"; case_scan
+expect "gstack .md a SKILL.md tells the agent to read: FLAG line" gating_has "$(flag_line "$REF_LABEL" review/checklist.md)"
+case_new gstack; case_add review/notes.md "$RUN_E2E"; case_scan
+expect "gstack .md that no prompt names: flagged=false" flagged_is false
+# Climbing out of test/helpers/, or joining the path, names the excluded tree too.
+case_new gstack; case_add lib/a.ts "import { x } from '../test/helpers/../e2e/x'"; case_scan
+expect "gstack test/helpers/../ climbs out: FLAG line" gating_has "$(flag_line "$REF_LABEL" lib/a.ts)"
+case_new gstack; case_add lib/b.ts 'run(join(ROOT, "test", "e2e", "x.ts"))'; case_scan
+expect "gstack join(ROOT, \"test\", ...): FLAG line" gating_has "$(flag_line "$REF_LABEL" lib/b.ts)"
+case_new gstack; case_add lib/c.ts 'if (process.env.NODE_ENV === "test") skip()'; case_scan
+expect "gstack a \"test\" string outside a path join: flagged=false" flagged_is false
 
 should_flag "superpowers skill SKILL.md" superpowers skills/brainstorming/SKILL.md
 should_flag "superpowers agents/*.md" superpowers agents/reviewer.md
