@@ -23,14 +23,14 @@ omo_requests() { { grep -E '^npm (i|install) .*oh-my-opencode' "$1/shim.log" 2>/
 
 echo "[1/3] the pin"
 check "SOURCES.json pins an exact oh-my-opencode version: $PIN" "$(yes_if grep -Eqx '[0-9]+\.[0-9]+\.[0-9]+' <<< "$PIN")"
-check "install.sh installs exactly that version"         "$(yes_if grep -qF "npm i -g oh-my-opencode@$PIN" "$REPO/install.sh")"
+check "install.sh installs exactly that version"         "$(yes_if grep -qwF "npm i -g oh-my-opencode@$PIN" "$REPO/install.sh")"
 
 C="$SANDBOX/repo"; make_repo "$C"
 H="$SANDBOX/home"; mkdir -p "$H"
 
 echo "[2/3] omo missing"
 run_install "$H" "$C" --self-only --skip-tools
-check "npm asked for oh-my-opencode@$PIN"                 "$(yes_if logged "$H" "npm i -g oh-my-opencode@$PIN")"
+check "npm asked for oh-my-opencode@$PIN"                 "$(yes_if grep -qxF "npm i -g oh-my-opencode@$PIN" "$H/shim.log")"
 check "npm never asked for oh-my-opencode@latest"         "$(yes_if not logged "$H" "oh-my-opencode@latest")"
 check "npm asked for oh-my-opencode once"                 "$(yes_if [ "$(omo_requests "$H")" = 1 ])"
 check "oh-my-opencode install ran with its flags"         "$(yes_if logged "$H" "oh-my-opencode install --no-tui --claude=yes --openai=no --gemini=no --copilot=no")"
