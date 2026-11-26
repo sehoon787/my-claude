@@ -37,6 +37,9 @@
 # it makes, so a run against a broken install.sh leaks into the test's own temp
 # dir, never into the machine's.
 set -uo pipefail
+# install.sh calls claude, omc and codeburn, which follow CLAUDE_CONFIG_DIR
+# (Codex tools: CODEX_HOME) past the throwaway HOME: pass on neither.
+unset CLAUDE_CONFIG_DIR CODEX_HOME
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 TMP="$(mktemp -d)"

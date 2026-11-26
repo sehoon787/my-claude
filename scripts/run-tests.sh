@@ -11,9 +11,9 @@
 # Runs tests/*.test.sh, tests/*.test.js and tests/validate-sync.sh, keeps
 # going past a failure, and names every failed test at the end. Each test
 # gets its own throwaway HOME, XDG_CONFIG_HOME and TMPDIR, removed when it
-# ends, so a test that forgets to isolate one cannot reach the real one.
-# Under GitHub Actions it also writes failed=<space-separated test paths> to
-# $GITHUB_OUTPUT.
+# ends, and no CLAUDE_CONFIG_DIR or CODEX_HOME, so a test that forgets to
+# isolate one cannot reach the real one. Under GitHub Actions it also writes
+# failed=<space-separated test paths> to $GITHUB_OUTPUT.
 #
 # Exit 0 = every test passed; exit 1 = at least one failed, or none ran.
 # `bash scripts/run-tests.sh`
@@ -22,6 +22,12 @@ set -uo pipefail
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$repo_root"
+
+# A session can point CLAUDE_CONFIG_DIR at a real config dir that a throwaway
+# HOME does not cover: the claude CLI, `npx skills`, omc and gstack's setup
+# follow it. CODEX_HOME does the same for Codex tools. A test that wants one
+# sets its own.
+unset CLAUDE_CONFIG_DIR CODEX_HOME
 
 passed=0
 failed=""
