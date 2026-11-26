@@ -15,6 +15,16 @@
 // run again and again without changing anything cannot push the user's original
 // file out of them.
 //
+// The very first backup ever made is also kept under its own name,
+// <name>.my-claude-original, created only when absent and never pruned: it is
+// the file as it was before my-claude first touched it, which the rotating pool
+// would otherwise push out after a few changes.
+//
+// The new content is written to a sibling temp file (fsynced, same mode as the
+// file, 0600 for a new one) and renamed over the real path, so an interrupted
+// write cannot leave a truncated settings.json and a symlinked settings.json
+// stays a symlink.
+//
 // No settings file means nothing to protect: it is created without a backup. A
 // backup that cannot be made is reported on stderr and the write carries on,
 // because stopping here would leave ~/.claude half installed.
@@ -25,6 +35,8 @@ const path = require('path');
 const SETTINGS_BACKUP_KEEP = 5;
 const BACKUP_MODE = 0o600;
 const BACKUP_INFIX = '.my-claude-backup-';
+const ORIGINAL_SUFFIX = '.my-claude-original';
+const NEW_FILE_MODE = 0o600;
 const STAMP_PATTERN = /^\d{8}T\d{9}Z$/;
 // The two merge steps run back to back, so two backups can land in one
 // millisecond; each retry moves the stamp on by one millisecond.
@@ -63,6 +75,25 @@ function writeNewBackup(dir, base, bytes) {
   throw new Error(`no free backup name after ${MAX_NAME_ATTEMPTS} tries`);
 }
 
+// Creates <base>.my-claude-original from `bytes` unless it already exists. The
+// exclusive create means the first copy ever made is the one that stays.
+function keepOriginal(dir, base, bytes) {
+  const originalPath = path.join(dir, base + ORIGINAL_SUFFIX);
+  try {
+    const fd = fs.openSync(originalPath, 'wx', BACKUP_MODE);
+    try {
+      fs.writeFileSync(fd, bytes);
+      if (process.platform !== 'win32') fs.fchmodSync(fd, BACKUP_MODE);
+    } finally {
+      fs.closeSync(fd);
+    }
+  } catch (err) {
+    if (err.code !== 'EEXIST') {
+      console.error(`  WARNING: could not keep ${base}${ORIGINAL_SUFFIX} (${err.message})`);
+    }
+  }
+}
+
 // Deletes the oldest backups so that SETTINGS_BACKUP_KEEP remain. The backup
 // just made is never a candidate, even if a clock that went backwards makes it
 // sort oldest.
@@ -95,6 +126,7 @@ function backupSettings(settingsPath) {
     return null;
   }
   console.log(`  ${base} backup: ${backupPath}`);
+  keepOriginal(dir, base, fs.readFileSync(backupPath));
   try {
     pruneBackups(dir, base, path.basename(backupPath));
   } catch (err) {
@@ -103,14 +135,48 @@ function backupSettings(settingsPath) {
   return backupPath;
 }
 
+// Replaces `target` with `bytes` through a sibling temp file and a rename.
+function writeAtomically(target, bytes, mode) {
+  const tmp = `${target}.${process.pid}.tmp`;
+  let fd;
+  try {
+    fd = fs.openSync(tmp, 'wx', mode);
+  } catch (err) {
+    // A directory that cannot take a new file but whose settings.json is
+    // writable: write in place, as before, rather than fail the install.
+    if (err.code === 'EACCES' || err.code === 'EPERM' || err.code === 'EROFS') {
+      fs.writeFileSync(target, bytes);
+      return;
+    }
+    throw err;
+  }
+  try {
+    try {
+      fs.writeFileSync(fd, bytes);
+      if (process.platform !== 'win32') fs.fchmodSync(fd, mode);
+      fs.fsyncSync(fd);
+    } finally {
+      fs.closeSync(fd);
+    }
+    fs.renameSync(tmp, target);
+  } catch (err) {
+    fs.rmSync(tmp, { force: true });
+    throw err;
+  }
+}
+
 // Writes `content` (a string) to settingsPath unless the file already holds
 // exactly those bytes. Returns true when it wrote, so the caller can report the
 // change, and false when it left the file alone.
 function writeSettingsIfChanged(settingsPath, content) {
   const next = Buffer.from(content, 'utf8');
-  if (fs.existsSync(settingsPath) && fs.readFileSync(settingsPath).equals(next)) return false;
-  backupSettings(settingsPath);
-  fs.writeFileSync(settingsPath, next);
+  const exists = fs.existsSync(settingsPath);
+  // A symlinked settings.json is followed, so the link itself survives.
+  const target = exists ? fs.realpathSync(settingsPath) : settingsPath;
+  if (exists && fs.readFileSync(target).equals(next)) return false;
+  const mode = exists ? fs.statSync(target).mode & 0o777 : NEW_FILE_MODE;
+  backupSettings(target);
+  writeAtomically(target, next, mode);
   return true;
 }
 

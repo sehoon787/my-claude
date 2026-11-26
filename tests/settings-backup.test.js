@@ -388,6 +388,45 @@ scenario(ORIGINAL, ({ claude, file, run }) => {
   if (posix) check('(j) a later change: that backup is mode 600', added.length === 1 && modeOf(path.join(claude, added[0])) === '600');
 });
 
+// (k) The write is atomic and symlink-safe, a new file is private, and the very
+// first backup is kept for good.
+scenario(null, ({ claude, file, run }) => {
+  const r = run(MERGE_SETTINGS);
+  check('(k) a new settings.json is created', r.status === 0 && fs.existsSync(file), r.stderr);
+  if (posix) check('(k) a new settings.json is mode 600', modeOf(file) === '600', modeOf(file));
+});
+scenario(ORIGINAL, ({ claude, file, run }) => {
+  if (posix) fs.chmodSync(file, 0o640);
+  run(MERGE_SETTINGS);
+  check('(k) no temp file is left behind', fs.readdirSync(claude).every((n) => !n.endsWith('.tmp')), show(fs.readdirSync(claude)));
+  if (posix) check('(k) an existing settings.json keeps its mode', modeOf(file) === '640', modeOf(file));
+});
+if (posix) {
+  scenario(ORIGINAL, ({ home, claude, file, run }) => {
+    const real = path.join(home, 'dotfiles-settings.json');
+    fs.renameSync(file, real);
+    fs.symlinkSync(real, file);
+    const before = read(real);
+    const r = run(MERGE_SETTINGS);
+    check('(k) a symlinked settings.json stays a symlink', r.status === 0 && fs.lstatSync(file).isSymbolicLink(), r.stderr);
+    check('(k) the merge went into the link target', !read(real).equals(before) && JSON.parse(read(real).toString()).env.SOME_API_TOKEN === 'fake-token-for-test-only');
+  });
+}
+scenario(ORIGINAL, ({ claude, file, run }) => {
+  const original = read(file);
+  const orig = path.join(claude, 'settings.json.my-claude-original');
+  run(MERGE_SETTINGS);
+  check('(k) the first backup is also kept as settings.json.my-claude-original',
+    fs.existsSync(orig) && read(orig).equals(original));
+  if (posix) check('(k) settings.json.my-claude-original is mode 600', modeOf(orig) === '600', modeOf(orig));
+  for (let i = 0; i < KEEP + 3; i++) {
+    fs.writeFileSync(file, JSON.stringify({ ...JSON.parse(read(file).toString('utf8')), changeNumber: i }, null, 4));
+    run(i % 2 === 0 ? MERGE_SETTINGS : MERGE_HOOKS, i % 2 === 0 ? [] : [HOOKS_JSON]);
+  }
+  check('(k) after many changes the original is still there, unchanged', fs.existsSync(orig) && read(orig).equals(original));
+  check('(k) the rotating pool still caps at the constant', backupsIn(claude).length === KEEP, String(backupsIn(claude).length));
+});
+
 const failed = results.filter((ok) => !ok).length;
 console.log(failed ? `${failed} FAILED` : 'ALL PASSED');
 process.exit(failed ? 1 : 0);
