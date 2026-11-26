@@ -478,7 +478,7 @@ submodule_has_files() {  # submodule_has_files <dir>
   [ -n "$(find "$1" -mindepth 1 -maxdepth 1 ! -name .git 2>/dev/null)" ]
 }
 init_upstream() {
-  local name="$1" url="$2" pinned_ref="${3:-}" recorded_sha
+  local name="$1" url="$2" pinned_ref="${3:-}" recorded_sha force=""
   local submod_path="$SCRIPT_DIR/upstream/$name"
   if [ -d "$submod_path/.git" ] || [ -f "$submod_path/.git" ]; then
     # Use the checked-out (pinned) submodule SHA as-is. Upstream updates land
@@ -489,10 +489,15 @@ init_upstream() {
       return 0
     fi
     # Copying from an incomplete clone would skip every file without a word,
-    # so it takes the init and the clone fallback below instead.
-    echo "  WARNING: upstream/$name has a .git but no checked-out files (an incomplete clone), retrying the submodule init (to repair it: cd \"$SCRIPT_DIR\" && git submodule update --init --force --depth 1 upstream/$name)"
+    # so it takes the init and the clone fallback below instead. --force
+    # --checkout checks the recorded commit out even when the clone's HEAD is
+    # already at it, which a plain update leaves as it is; nothing is here to
+    # overwrite.
+    echo "  WARNING: upstream/$name has a .git but no checked-out files (an incomplete clone), retrying the submodule init (to repair it: cd \"$SCRIPT_DIR\" && git submodule update --init --force --checkout --depth 1 upstream/$name)"
+    force="--force --checkout"
   fi
-  if git -C "$SCRIPT_DIR" submodule update --init --depth 1 "upstream/$name" 2>/dev/null \
+  # shellcheck disable=SC2086 # $force is empty or the two flags above
+  if git -C "$SCRIPT_DIR" submodule update --init $force --depth 1 "upstream/$name" 2>/dev/null \
     && submodule_has_files "$submod_path"; then
     UPSTREAM_DIR="$submod_path"
     return 0
