@@ -114,7 +114,7 @@ Boss はすべてのリクエストを優先チェーンにカスケードし、
 
 | 優先度 | マッチタイプ | 条件 | 例 |
 |:--------:|-----------|------|---------|
-| **P0** | gstack スキル | リリース / QA / デプロイ / セキュリティのワークフロー | `"ship this"` → gstack `/ship` |
+| **P0** | gstack スキル | リリース / QA / デプロイ / セキュリティのワークフロー | `"ship this"` → gstack `/gstack-ship` |
 | **P1** | スキルマッチ | タスクが自己完結型スキルに対応する場合 | `"merge PDFs"` → pdf スキル |
 | **P2** | スペシャリストエージェント | ドメイン固有のエージェントが存在する場合 | `"security audit"` → security-reviewer |
 | **P3a** | Boss ダイレクト | 2〜4 個の独立エージェント | `"fix 3 bugs"` → 並列スポーン |
@@ -247,7 +247,7 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 | ソース | 数 | 主要スキル |
 |--------|------:|------------|
 | [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 61 | coding-standards、fastapi-patterns、agent-architecture-audit、springboot-patterns、kubernetes-patterns |
-| [gstack](https://github.com/garrytan/gstack) | 26 | /qa、/review、/ship、/cso、/office-hours |
+| [gstack](https://github.com/garrytan/gstack) | 26 | /qa、/review、/gstack-ship、/cso、/office-hours |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 13（プラグイン） | autopilot、ralph、team、execute、ralplan、verify |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming、systematic-debugging、test-driven-development、writing-plans |
 | [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced、boss-briefing、briefing-vault、gstack-sprint |

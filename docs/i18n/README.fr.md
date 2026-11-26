@@ -114,7 +114,7 @@ Boss cascade chaque requête dans une chaîne de priorités jusqu'à trouver la 
 
 | Priorité | Type de correspondance | Quand | Exemple |
 |:--------:|-----------|------|---------|
-| **P0** | Skill gstack | Workflow livraison / QA / déploiement / sécurité | `"ship this"` → gstack `/ship` |
+| **P0** | Skill gstack | Workflow livraison / QA / déploiement / sécurité | `"ship this"` → gstack `/gstack-ship` |
 | **P1** | Correspondance de skill | La tâche correspond à un skill autonome | `"fusionner des PDFs"` → skill pdf |
 | **P2** | Agent spécialiste | Un agent spécifique au domaine existe | `"audit de sécurité"` → security-reviewer |
 | **P3a** | Boss direct | 2-4 agents indépendants | `"corriger 3 bugs"` → lancement parallèle |
@@ -247,7 +247,7 @@ Chaque source est pilotée par la liste d'autorisation de [`scripts/skill-allowl
 | Source | Nombre | Skills clés |
 |--------|------:|------------|
 | [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 61 | coding-standards, fastapi-patterns, agent-architecture-audit, springboot-patterns, kubernetes-patterns |
-| [gstack](https://github.com/garrytan/gstack) | 26 | /qa, /review, /ship, /cso, /office-hours |
+| [gstack](https://github.com/garrytan/gstack) | 26 | /qa, /review, /gstack-ship, /cso, /office-hours |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 13 (plugin) | autopilot, ralph, team, execute, ralplan, verify |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming, systematic-debugging, test-driven-development, writing-plans |
 | [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced, boss-briefing, briefing-vault, gstack-sprint |

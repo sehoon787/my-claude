@@ -114,7 +114,7 @@ Boss leitet jede Anfrage durch eine Prioritätskette, bis die beste Übereinstim
 
 | Priorität | Übereinstimmungstyp | Wann | Beispiel |
 |:---------:|---------------------|------|----------|
-| **P0** | gstack-Skill | Release-, QA-, Deployment- oder Sicherheits-Workflow | `"ship this"` → gstack `/ship` |
+| **P0** | gstack-Skill | Release-, QA-, Deployment- oder Sicherheits-Workflow | `"ship this"` → gstack `/gstack-ship` |
 | **P1** | Skill-Treffer | Aufgabe entspricht einer eigenständigen Skill | `"merge PDFs"` → pdf skill |
 | **P2** | Spezialist-Agent | Domänenspezifischer Agent vorhanden | `"security audit"` → security-reviewer |
 | **P3a** | Boss direkt | 2–4 unabhängige Agenten | `"fix 3 bugs"` → parallel spawn |
@@ -247,7 +247,7 @@ Jede Quelle wird über die Allowlist in [`scripts/skill-allowlists.sh`](../../sc
 | Quelle | Anzahl | Wichtige Skills |
 |--------|-------:|-----------------|
 | [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 61 | coding-standards, fastapi-patterns, agent-architecture-audit, springboot-patterns, kubernetes-patterns |
-| [gstack](https://github.com/garrytan/gstack) | 26 | /qa, /review, /ship, /cso, /office-hours |
+| [gstack](https://github.com/garrytan/gstack) | 26 | /qa, /review, /gstack-ship, /cso, /office-hours |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 13 (Plugin) | autopilot, ralph, team, execute, ralplan, verify |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming, systematic-debugging, test-driven-development, writing-plans |
 | [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced, boss-briefing, briefing-vault, gstack-sprint |

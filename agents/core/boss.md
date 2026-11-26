@@ -137,7 +137,7 @@ Also recommend gstack skills first in Counter-Proposals.
 | QA/testing | /qa, /qa-only | Web app QA |
 | Benchmark | /benchmark | Performance measurement |
 | Security audit | /cso | Security audit/threat modeling |
-| Deployment | /ship, /land-and-deploy | Test→PR→deploy |
+| Deployment | /gstack-ship, /land-and-deploy | Test→PR→deploy |
 | Monitoring | /canary | Post-deploy canary |
 | Safety guard | /guard, /careful, /freeze | Block destructive commands |
 | Design | /design-review, /design-consultation | Visual QA/design system |
@@ -154,7 +154,7 @@ Scan all discovered skill `description` fields from Phase 0. If a skill's descri
 
 OMC skills are provided by the OMC plugin, so they are routed by their plugin-qualified name (`oh-my-claudecode:<name>`); a bare `ralph` or `team` will not resolve.
 
-**Common keyword → skill mappings**: "tdd"/"TDD" → `test-driven-development`, "autopilot" → `oh-my-claudecode:autopilot`, "ralph" → `oh-my-claudecode:ralph`, "ulw"/"ultrawork" (retired in OMC 5.0) → `oh-my-claudecode:execute` (or `oh-my-claudecode:team` for coordinated parallel workers), "deslop" → `oh-my-claudecode:ai-slop-cleaner`, "review"/"code review" → gstack `/review`, "QA"/"qa" → gstack `/qa` or `/qa-only` (`oh-my-claudecode:verify` is omc-mode-only — route there only inside an active execute/autopilot mode session, not as a standalone default), "deploy"/"ship" → gstack `/ship`, "security audit"/"정기 감사" → gstack `/cso`, "pre-commit security"/"커밋 전 점검" → `security-scan`, "debug"/"investigate" → `systematic-debugging`, "sprint"/"end-to-end"/"e2e implementation" → `gstack-sprint`, "research"/"리서치" → `deep-research` (multi-source, cited report) or `exa-search` (targeted neural web/code search), "plan"/"기획" → `autoplan` (gstack plan-review automation) or `oh-my-claudecode:ralplan` (omc interview-driven planning), "deep interview" → `oh-my-claudecode:deep-interview`, "omc plan" → `oh-my-claudecode:plan`
+**Common keyword → skill mappings**: "tdd"/"TDD" → `test-driven-development`, "autopilot" → `oh-my-claudecode:autopilot`, "ralph" → `oh-my-claudecode:ralph`, "ulw"/"ultrawork" (retired in OMC 5.0) → `oh-my-claudecode:execute` (or `oh-my-claudecode:team` for coordinated parallel workers), "deslop" → `oh-my-claudecode:ai-slop-cleaner`, "review"/"code review" → gstack `/review`, "QA"/"qa" → gstack `/qa` or `/qa-only` (`oh-my-claudecode:verify` is omc-mode-only — route there only inside an active execute/autopilot mode session, not as a standalone default), "deploy"/"ship" → gstack `/gstack-ship`, "security audit"/"정기 감사" → gstack `/cso`, "pre-commit security"/"커밋 전 점검" → `security-scan`, "debug"/"investigate" → `systematic-debugging`, "sprint"/"end-to-end"/"e2e implementation" → `gstack-sprint`, "research"/"리서치" → `deep-research` (multi-source, cited report) or `exa-search` (targeted neural web/code search), "plan"/"기획" → `autoplan` (gstack plan-review automation) or `oh-my-claudecode:ralplan` (omc interview-driven planning), "deep interview" → `oh-my-claudecode:deep-interview`, "omc plan" → `oh-my-claudecode:plan`
 
 ### Priority 2: Specialist Agent Match
 
@@ -217,7 +217,7 @@ Phase 1: Design (conversation)  →  Phase 2: Execute (autonomous)  →  Phase 3
 - Compare implementation results against what was reloaded (the plan file, else the gstack design doc, else the original request)
 - AskUserQuestion for improvement/approval decision
 - Improvement needed → re-enter Phase 2
-- Approved → `/ship` or manual commit
+- Approved → `/gstack-ship` or manual commit
 - Optional follow-up: `/land-and-deploy` → `/canary` → `/document-release` → `/retro`
 
 **Boss rule:** For end-to-end requests, invoke `Skill(skill: "gstack-sprint")`. The gstack-sprint skill manages this 3-Phase workflow. When gstack-sprint is not installed, follow the prompt instructions above directly.
@@ -229,7 +229,7 @@ Phase 1: Design (conversation)  →  Phase 2: Execute (autonomous)  →  Phase 3
 | Plan | `writing-plans` → `momus` | Task plan in `.briefing/plans/`, reviewed by momus. Optional extra reviews: `/plan-ceo-review`, `/plan-eng-review`, `/autoplan` |
 | Review | `/review` | Code review — scope-drift detection, adversarial review, plan-item completion check |
 | QA | `/qa https://...` | Browser QA + auto-fix loop |
-| Ship | `/ship` | Test→commit→PR. Includes review-readiness dashboard |
+| Ship | `/gstack-ship` | Test→commit→PR. Includes review-readiness dashboard |
 
 ### Priority 4: General-Purpose Fallback
 
