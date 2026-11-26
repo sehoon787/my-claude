@@ -478,7 +478,7 @@ submodule_has_files() {  # submodule_has_files <dir>
   [ -n "$(find "$1" -mindepth 1 -maxdepth 1 ! -name .git 2>/dev/null)" ]
 }
 init_upstream() {
-  local name="$1" url="$2" pinned_ref="${3:-}" recorded_sha force=""
+  local name="$1" url="$2" pinned_ref="${3:-}" recorded_sha cloned_sha force=""
   local submod_path="$SCRIPT_DIR/upstream/$name"
   if [ -d "$submod_path/.git" ] || [ -f "$submod_path/.git" ]; then
     # Use the checked-out (pinned) submodule SHA as-is. Upstream updates land
@@ -504,17 +504,24 @@ init_upstream() {
   fi
   echo "  WARNING: submodule init failed for $name, falling back to git clone..."
   UPSTREAM_DIR="$CLONE_TMPDIR/$name"
+  recorded_sha="$(git -C "$SCRIPT_DIR" rev-parse -q --verify ":upstream/$name" 2>/dev/null || true)"
   # A tag-pinned upstream keeps its pin on this path too: cloning the default
   # branch here would quietly install a different release than the submodule.
+  # A tag can be moved upstream, so when this checkout records a commit the
+  # clone has to be at it.
   if [ -n "$pinned_ref" ]; then
     git clone --depth 1 --branch "$pinned_ref" "$url" "$UPSTREAM_DIR" 2>/dev/null || return 1
+    cloned_sha="$(git -C "$UPSTREAM_DIR" --git-dir=.git rev-parse -q --verify 'HEAD^{commit}' 2>/dev/null || true)"
+    if [ -n "$recorded_sha" ] && [ "$cloned_sha" != "$recorded_sha" ]; then
+      echo "  WARNING: $name tag $pinned_ref is at ${cloned_sha:0:12}, not the recorded commit ${recorded_sha:0:12}, so $name is skipped"
+      return 1
+    fi
     return 0
   fi
   # Otherwise fetch exactly the commit this checkout records for the submodule,
   # the one the upstream scan covered; if that fails, the upstream is skipped.
   # The git calls name this directory's own .git and work tree, so an exported
   # GIT_DIR or GIT_WORK_TREE cannot send them to another one.
-  recorded_sha="$(git -C "$SCRIPT_DIR" rev-parse -q --verify ":upstream/$name" 2>/dev/null || true)"
   if [ -n "$recorded_sha" ]; then
     if mkdir -p "$UPSTREAM_DIR" && git -C "$UPSTREAM_DIR" --git-dir=.git --work-tree=. init -q 2>/dev/null \
       && git -C "$UPSTREAM_DIR" --git-dir=.git fetch -q --depth 1 "$url" "$recorded_sha" 2>/dev/null \
