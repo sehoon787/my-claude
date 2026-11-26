@@ -234,7 +234,7 @@ Expected:
 - Skills (my-claude): 107
 - Rules: 48
 - Anthropic skills: 2 key skills (pdf, docx)
-- Manifest: 605 entries
+- Manifest: 608 entries
 - Duplicates: 0 (should be 0)
 - gstack: OK
 - omc: OK
@@ -246,6 +246,6 @@ Expected:
   doesn't match after a reinstall, see "Updating or reinstalling the plugin" above)
 - Boss model: matches the current model in the published `agents/core/boss.md` on GitHub
 
-Note: the 84 OMC skills in `Skills (total)` are written by `omc setup`, which `install.sh` runs on a clean machine, so they count there but not in `Skills (my-claude)`. If the OMC plugin is already installed, `install.sh` skips copying the 19 OMC agent files ("Plugin detected — skipping agent file copy"), so `Agents` reads 13 and `Manifest` 586 (605 − 19); the plugin serves the OMC skills instead (a machine with the plugin showed only 2 OMC-named directories under `~/.claude/skills`), so `Skills (total)` reads lower. Any personal skills or rules already in `~/.claude` raise the totals above. All of these are expected. `Skills (total)` does not count the gstack router: `~/.claude/skills/gstack` is a link to the gstack runtime, which `find` does not follow.
+Note: the 84 OMC skills in `Skills (total)` are written by `omc setup`, which `install.sh` runs on a clean machine, so they count there but not in `Skills (my-claude)`. If the OMC plugin is already installed, `install.sh` skips copying the 19 OMC agent files ("Plugin detected — skipping agent file copy"), so `Agents` reads 14 and `Manifest` 589 (608 − 19); the plugin serves the OMC skills instead (a machine with the plugin showed only 2 OMC-named directories under `~/.claude/skills`), so `Skills (total)` reads lower. Any personal skills or rules already in `~/.claude` raise the totals above. All of these are expected. `Skills (total)` does not count the gstack router: `~/.claude/skills/gstack` is a link to the gstack runtime, which `find` does not follow.
 
 Setup complete. Boss orchestrator is ready.
