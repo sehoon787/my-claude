@@ -20,10 +20,14 @@ set -uo pipefail
 PIN="$(node -p 'require(process.argv[1])["oh-my-opencode"].pinned_version' "$REPO/upstream/SOURCES.json" 2>/dev/null)"
 case "$PIN" in ""|undefined) PIN="(none in SOURCES.json)" ;; esac
 omo_requests() { { grep -E '^npm (i|install) .*oh-my-opencode' "$1/shim.log" 2>/dev/null || true; } | wc -l | tr -d ' '; }
+# Whether some line of <file>, leading blanks aside, is exactly <text>.
+has_exact_line() {  # has_exact_line <file> <text>
+  awk -v want="$2" '{ sub(/^[[:space:]]+/, "") } $0 == want { found = 1; exit } END { exit !found }' "$1"
+}
 
 echo "[1/3] the pin"
 check "SOURCES.json pins an exact oh-my-opencode version: $PIN" "$(yes_if grep -Eqx '[0-9]+\.[0-9]+\.[0-9]+' <<< "$PIN")"
-check "install.sh installs exactly that version"         "$(yes_if grep -qwF "npm i -g oh-my-opencode@$PIN" "$REPO/install.sh")"
+check "install.sh installs exactly that version"         "$(yes_if has_exact_line "$REPO/install.sh" "npm i -g oh-my-opencode@$PIN")"
 
 C="$SANDBOX/repo"; make_repo "$C"
 H="$SANDBOX/home"; mkdir -p "$H"
