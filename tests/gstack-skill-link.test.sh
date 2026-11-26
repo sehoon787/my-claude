@@ -11,15 +11,18 @@
 #      to itself it would link every gstack skill and register its hooks. The
 #      link is made after setup, on a fresh install, over the link an earlier
 #      run left and over the real directory older installs left.
-#   2. Nothing under a linked skills/gstack is written to the manifest, and the
-#      manifest cleanup never deletes through the link: a manifest that lists
-#      skills/gstack/... leaves the runtime's files alone.
+#   2. The router copy stays manifest-owned while skills/gstack is a link, and
+#      the manifest cleanup and its prune never act through the link: a
+#      manifest that lists skills/gstack/... leaves the runtime's files and
+#      directories alone. A run that stopped before linking, or Finder's
+#      .DS_Store, does not make the installer's directory look like the user's.
 #   3. A real ~/.claude/skills/gstack the installer did not create (a gstack
 #      clone, or files no manifest listed) is left byte-identical, with a
 #      notice naming the path and the manual fix, even when an older manifest
 #      lists skills/gstack/SKILL.md.
 #   4. The root SKILL.md copy never writes through a link: a link to another
-#      directory is removed, never followed, before the copy.
+#      directory is removed, never followed, before the copy, and a link to the
+#      user's own gstack checkout is named in a notice.
 #   5. Without bun, setup is skipped and the link is still made (the helpers are
 #      files in the checkout). Without a runtime at the pin, the root SKILL.md
 #      is a real, manifest-owned copy as before and nothing is linked.
@@ -28,7 +31,9 @@
 #      it (that value is the user's and stays byte-identical).
 #   7. When ln makes no symlink (Git Bash without native symlinks copies the
 #      target), the copy is removed and the router copy installs as before,
-#      with a notice.
+#      with a notice. When something else appears in the router directory
+#      before the link is made, it is left alone, the router copy stays, a
+#      notice says so, and the install runs to the end.
 #
 # install.sh runs from a symlink copy of this checkout whose upstream/gstack is
 # a small local git repo (a .git file, like a submodule), with its commit
@@ -40,7 +45,7 @@ set -uo pipefail
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 TMP="$(mktemp -d)"
-trap 'rm -rf "$TMP"' EXIT
+trap 'rm -rf "${TMP:?}"' EXIT
 
 # git for building fixtures and reading results: no system or user config.
 tgit() {
@@ -63,7 +68,8 @@ for entry in "$REPO"/* "$REPO"/.[!.]*; do
 done
 
 # upstream/gstack: the root router, one allowlisted skill, a bin/ helper, and a
-# ./setup that records what ~/.claude/skills/gstack was while it ran.
+# ./setup that records what ~/.claude/skills/gstack was while it ran. With
+# ~/setup-writes-a-file present it also leaves a file of its own in there.
 GSTACK_PIN_REPO="$FAKE_REPO/upstream/gstack"
 mkdir -p "$GSTACK_PIN_REPO/bin" "$GSTACK_PIN_REPO/review"
 cat > "$GSTACK_PIN_REPO/setup" <<'EOF'
@@ -73,6 +79,7 @@ if [ -L "$d" ]; then echo "link" >> "$HOME/gstack-setup.log"
 elif [ -d "$d" ]; then echo "dir: $(ls -A "$d" | tr '\n' ' ')" >> "$HOME/gstack-setup.log"
 else echo "absent" >> "$HOME/gstack-setup.log"
 fi
+if [ -e "$HOME/setup-writes-a-file" ] && [ -d "$d" ] && [ ! -L "$d" ]; then echo "not the installer's" > "$d/extra.md"; fi
 EOF
 printf '#!/usr/bin/env bash\necho "SKILL_START_PROTO: 1"\n' > "$GSTACK_PIN_REPO/bin/gstack-skill-start"
 # bin/gstack-config answers `has` and `set` the way the real one does (has: the
@@ -187,6 +194,10 @@ real_dir() { [ -d "$(skill_dir "$1")" ] && [ ! -L "$(skill_dir "$1")" ]; }
 helper_resolves() { [ "$("$(skill_dir "$1")/bin/gstack-skill-start" 2>/dev/null)" = "SKILL_START_PROTO: 1" ]; }
 setup_saw() { cat "$1/gstack-setup.log" 2>/dev/null; }
 manifest_has_gstack_root() { grep -q '^skills/gstack/' "$1/.claude/.my-claude-manifest"; }
+# The router copy is manifest-owned even while skills/gstack is a link: the
+# cleanup never deletes through the link, and a run that stops before linking
+# still owns its copy.
+manifest_lists_router_only() { [ "$(grep '^skills/gstack/' "$1/.claude/.my-claude-manifest")" = skills/gstack/SKILL.md ]; }
 review_owned() { grep -qx 'pinned review' "$1/.claude/skills/review/SKILL.md" && grep -qx 'skills/review/SKILL.md' "$1/.claude/.my-claude-manifest"; }
 router_copy_owned() { real_dir "$1" && grep -qx 'pinned router' "$(skill_dir "$1")/SKILL.md" && grep -qx 'skills/gstack/SKILL.md' "$1/.claude/.my-claude-manifest"; }
 router_copy_only() { router_copy_owned "$1" && [ "$(ls -A "$(skill_dir "$1")")" = SKILL.md ]; }
@@ -227,19 +238,20 @@ seed_foreign() {  # seed_foreign <home> <git|plain>
   echo "skills/gstack/SKILL.md" > "$1/.claude/.my-claude-manifest"
 }
 
-echo "[1/9] fresh install"
+echo "[1/12] fresh install"
 H="$TMP/home-fresh"; mkdir -p "$H"
 run_install "$H" bun
 check "setup ran once, while skills/gstack was the real directory holding only the router copy" "$(yes_if [ "$(setup_saw "$H")" = "dir: SKILL.md " ])"
 check "then skills/gstack was linked to the runtime"     "$(yes_if linked_to_runtime "$H")"
 check "a gstack bin/ helper resolves through the link"   "$(yes_if helper_resolves "$H")"
 check "the root router is the pinned runtime's"          "$(yes_if grep -qx 'pinned router' "$(skill_dir "$H")/SKILL.md")"
-check "manifest lists nothing under the link"            "$(yes_if not manifest_has_gstack_root "$H")"
+check "manifest lists the router and nothing else under the link" "$(yes_if manifest_lists_router_only "$H")"
 check "allowlisted gstack skill still copied and manifest-owned" "$(yes_if review_owned "$H")"
 check "install log names the link"                       "$(yes_if in_log "$H" "$(skill_dir "$H") -> $H/.gstack/runtime")"
 check "update_check turned off once, through the runtime's gstack-config, with one line" "$(yes_if update_check_off_once "$H")"
+check "the undo hint names the runtime's gstack-config"  "$(yes_if in_log "$H" "(undo: $H/.gstack/runtime/bin/gstack-config set update_check true)")"
 
-echo "[2/9] reinstall over the link, with a manifest that lists files under it"
+echo "[2/12] reinstall over the link, with a manifest that lists files under it"
 mkdir -p "$H/.gstack/runtime/browse/dist"
 echo built > "$H/.gstack/runtime/browse/dist/browse"
 printf 'skills/gstack/SKILL.md\nskills/gstack/browse/dist/browse\n' >> "$H/.claude/.my-claude-manifest"
@@ -247,17 +259,19 @@ run_install "$H" bun
 check "setup ran again while skills/gstack was a real directory, not the link" "$(yes_if [ "$(setup_saw "$H")" = "$(printf 'dir: SKILL.md \ndir: SKILL.md ')" ])"
 check "untracked runtime file listed in the manifest is not deleted through the link" "$(yes_if [ -f "$H/.gstack/runtime/browse/dist/browse" ])"
 check "skills/gstack is linked to the runtime again"     "$(yes_if linked_to_runtime "$H")"
-check "manifest lists nothing under the link"            "$(yes_if not manifest_has_gstack_root "$H")"
+check "manifest lists the router and nothing else under the link" "$(yes_if manifest_lists_router_only "$H")"
 check "update_check already set: not set again, no line" "$(yes_if update_check_left "$H" 1)"
 
-echo "[3/9] cleanup with an old manifest over the link, gstack step skipped"
+echo "[3/12] cleanup and prune with a manifest over the link, gstack step skipped"
 cp "$H/.gstack/runtime/SKILL.md" "$TMP/runtime-router.before"
-echo "skills/gstack/SKILL.md" >> "$H/.claude/.my-claude-manifest"
+mkdir -p "$H/.gstack/runtime/empty-dir"
+echo "skills/gstack/empty-dir/gone.md" >> "$H/.claude/.my-claude-manifest"
 run_install "$H" bun --skip-gstack
 check "the runtime's SKILL.md is not deleted through the link" "$(yes_if cmp -s "$H/.gstack/runtime/SKILL.md" "$TMP/runtime-router.before")"
+check "an empty runtime directory above a manifest entry is not pruned through the link" "$(yes_if [ -d "$H/.gstack/runtime/empty-dir" ])"
 check "the link is left in place"                        "$(yes_if linked_to_runtime "$H")"
 
-echo "[4/9] upgrade from the real directory older installs made, update_check set by the user"
+echo "[4/12] upgrade from the real directory older installs made, update_check set by the user"
 H="$TMP/home-upgrade"; mkdir -p "$(skill_dir "$H")" "$H/.gstack"
 printf -- '---\nname: gstack\n---\nan older copy\n' > "$(skill_dir "$H")/SKILL.md"
 echo "skills/gstack/SKILL.md" > "$H/.claude/.my-claude-manifest"
@@ -266,11 +280,11 @@ cp "$H/.gstack/config.yaml" "$TMP/user-config.yaml"
 run_install "$H" bun
 check "setup saw the real directory with only the router copy" "$(yes_if [ "$(setup_saw "$H")" = "dir: SKILL.md " ])"
 check "the installer-owned directory became the link"    "$(yes_if linked_to_runtime "$H")"
-check "manifest lists nothing under the link"            "$(yes_if not manifest_has_gstack_root "$H")"
+check "manifest lists the router and nothing else under the link" "$(yes_if manifest_lists_router_only "$H")"
 check "update_check the user set is byte-identical"      "$(yes_if cmp -s "$H/.gstack/config.yaml" "$TMP/user-config.yaml")"
 check "update_check the user set: not set, no line"      "$(yes_if update_check_left "$H" 0)"
 
-echo "[5/9] a gstack clone the user put at skills/gstack"
+echo "[5/12] a gstack clone the user put at skills/gstack"
 H="$TMP/home-clone"; mkdir -p "$H"
 seed_foreign "$H" git
 snapshot "$(skill_dir "$H")" > "$TMP/clone.before"
@@ -282,7 +296,7 @@ check "manifest lists nothing under it"                  "$(yes_if not manifest_
 check "allowlisted gstack skill still copied"            "$(yes_if review_owned "$H")"
 check "update_check untouched for a gstack install the user owns" "$(yes_if [ ! -e "$H/.gstack/config.yaml" ])"
 
-echo "[6/9] files of the user's at skills/gstack (no .git), one of them in an old manifest"
+echo "[6/12] files of the user's at skills/gstack (no .git), one of them in an old manifest"
 H="$TMP/home-plain"; mkdir -p "$H"
 seed_foreign "$H" plain
 snapshot "$(skill_dir "$H")" > "$TMP/plain.before"
@@ -291,18 +305,21 @@ check "the directory is byte-identical"                  "$(yes_if cmp -s "$TMP/
 check "a notice names the path and the manual fix"       "$(yes_if notice_logged "$H")"
 check "manifest lists nothing under it"                  "$(yes_if not manifest_has_gstack_root "$H")"
 
-echo "[7/9] skills/gstack links to another directory: removed, never written through"
+echo "[7/12] skills/gstack links to the user's own gstack checkout: removed, never written through"
 H="$TMP/home-otherlink"; mkdir -p "$H/elsewhere" "$H/.claude/skills"
 printf -- '---\nname: gstack\n---\nelsewhere\n' > "$H/elsewhere/SKILL.md"
+printf '#!/usr/bin/env bash\n' > "$H/elsewhere/setup"
+echo 9.9.9.9 > "$H/elsewhere/VERSION"
 ln -s "$H/elsewhere" "$(skill_dir "$H")"
 echo "skills/gstack/SKILL.md" > "$H/.claude/.my-claude-manifest"
 snapshot "$H/elsewhere" > "$TMP/elsewhere.before"
 run_install "$H" bun
-check "the other directory is untouched"                 "$(yes_if cmp -s "$TMP/elsewhere.before" <(snapshot "$H/elsewhere"))"
+check "the checkout is untouched"                        "$(yes_if cmp -s "$TMP/elsewhere.before" <(snapshot "$H/elsewhere"))"
+check "a notice names the checkout the link pointed to"  "$(yes_if in_log "$H" "NOTICE: $(skill_dir "$H") linked to $H/elsewhere, a gstack checkout")"
 check "setup saw a real directory, not the old link"     "$(yes_if [ "$(setup_saw "$H")" = "dir: SKILL.md " ])"
 check "skills/gstack now links to the runtime"           "$(yes_if linked_to_runtime "$H")"
 
-echo "[8/9] fallbacks: no bun, and no runtime at the pin"
+echo "[8/12] fallbacks: no bun, and no runtime at the pin"
 H="$TMP/home-nobun"; mkdir -p "$H"
 run_install "$H" no-bun
 check "no bun: setup skipped"                            "$(yes_if [ ! -e "$H/gstack-setup.log" ])"
@@ -321,7 +338,7 @@ check "no pin: the runtime left at the old pin keeps its files" "$(yes_if runtim
 check "no pin: allowlisted gstack skill still copied"    "$(yes_if review_owned "$H")"
 check "no pin: update_check not set again, no line"      "$(yes_if update_check_left "$H" 1)"
 
-echo "[9/9] no symlinks (Git Bash without native symlinks): ln copies the runtime"
+echo "[9/12] no symlinks (Git Bash without native symlinks): ln copies the runtime"
 H="$TMP/home-nosymlink"; mkdir -p "$H"
 run_install "$H" no-symlinks
 check "no symlinks: setup ran while skills/gstack was the real directory" "$(yes_if [ "$(setup_saw "$H")" = "dir: SKILL.md " ])"
@@ -329,6 +346,36 @@ check "no symlinks: the copy ln made is removed, the router copy is back and man
 check "no symlinks: a notice says no symlink was made"   "$(yes_if in_log "$H" "NOTICE: ln made no symlink at $(skill_dir "$H")")"
 check "no symlinks: the runtime keeps its files"         "$(yes_if runtime_intact "$H")"
 check "no symlinks: update_check left alone (no helpers to run)" "$(yes_if [ ! -e "$H/.gstack/config.yaml" ])"
+
+echo "[10/12] a run that stopped after step 1e: the router copy it left is still the installer's"
+H="$TMP/home-stopped"; mkdir -p "$H"
+run_install "$H" bun
+rm -f "${H:?}/.claude/skills/gstack"
+mkdir -p "$(skill_dir "$H")"
+cp "$GSTACK_PIN_REPO/SKILL.md" "$(skill_dir "$H")/SKILL.md"
+run_install "$H" bun
+check "stopped run: the copy it left is not taken for the user's" "$(yes_if not in_log "$H" "was not created by this installer")"
+check "stopped run: skills/gstack is linked again"       "$(yes_if linked_to_runtime "$H")"
+
+echo "[11/12] Finder's .DS_Store in the installer's router directory"
+H="$TMP/home-dsstore"; mkdir -p "$(skill_dir "$H")"
+cp "$GSTACK_PIN_REPO/SKILL.md" "$(skill_dir "$H")/SKILL.md"
+echo finder > "$(skill_dir "$H")/.DS_Store"
+echo "skills/gstack/SKILL.md" > "$H/.claude/.my-claude-manifest"
+run_install "$H" bun
+check ".DS_Store: the directory is not taken for the user's" "$(yes_if not in_log "$H" "was not created by this installer")"
+check ".DS_Store: skills/gstack is linked"               "$(yes_if linked_to_runtime "$H")"
+check ".DS_Store: it does not end up in the runtime"     "$(yes_if [ ! -e "$H/.gstack/runtime/.DS_Store" ])"
+
+echo "[12/12] a file appears in the router directory while setup runs"
+H="$TMP/home-extra"; mkdir -p "$H"
+: > "$H/setup-writes-a-file"
+run_install "$H" bun
+check "extra file: install.sh runs to the end"           "$(yes_if in_log "$H" "Install complete")"
+check "extra file: the file is left as it is"            "$(yes_if grep -qx "not the installer's" "$(skill_dir "$H")/extra.md")"
+check "extra file: the router copy is back and manifest-owned" "$(yes_if router_copy_owned "$H")"
+check "extra file: a notice says the directory was not linked" "$(yes_if in_log "$H" "NOTICE: $(skill_dir "$H") holds files this installer did not put there")"
+check "extra file: update_check left alone (nothing linked)" "$(yes_if [ ! -e "$H/.gstack/config.yaml" ])"
 
 if [ "$fail" -eq 0 ]; then
   echo "ALL PASSED"

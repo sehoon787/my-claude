@@ -312,11 +312,11 @@ echo "Version:          $(cat ~/.claude/.my-claude-version 2>/dev/null || echo '
 
 ```
 Agents:           32
-Skills (total):   208 (105 + Anthropic's 19 document/design skills + OMC's 84)
-Skills (my-claude): 105
+Skills (total):   208 (106 + Anthropic's 19 document/design skills + OMC's 84, less the gstack router)
+Skills (my-claude): 106
 Rules:            48
 Anthropic skills: 2 key skills (pdf, docx)
-Manifest:         604 entries
+Manifest:         605 entries
 Duplicates:       0 (should be 0)
 gstack:           OK
 omc:              OK
@@ -327,7 +327,7 @@ LSP (python):     OK
 Version:          <latest release tag>
 ```
 
-Note: the 84 OMC skills in `Skills (total)` are written by `omc setup`, which `install.sh` runs on a clean machine, so they count there but not in `Skills (my-claude)`. If the OMC plugin is already installed, `install.sh` skips copying the 19 OMC agent files ("Plugin detected — skipping agent file copy"), so `Agents` reads 13 and `Manifest` 585 (604 − 19); the plugin serves the OMC skills instead (a machine with the plugin showed only 2 OMC-named directories under `~/.claude/skills`), so `Skills (total)` reads lower. Any personal skills or rules already in `~/.claude` raise the totals above. All of these are expected. Neither `Skills` count includes the gstack router, the 106th skill: `~/.claude/skills/gstack` is a link to the gstack runtime, which `find` does not follow and the manifest does not list.
+Note: the 84 OMC skills in `Skills (total)` are written by `omc setup`, which `install.sh` runs on a clean machine, so they count there but not in `Skills (my-claude)`. If the OMC plugin is already installed, `install.sh` skips copying the 19 OMC agent files ("Plugin detected — skipping agent file copy"), so `Agents` reads 13 and `Manifest` 586 (605 − 19); the plugin serves the OMC skills instead (a machine with the plugin showed only 2 OMC-named directories under `~/.claude/skills`), so `Skills (total)` reads lower. Any personal skills or rules already in `~/.claude` raise the totals above. All of these are expected. `Skills (total)` does not count the gstack router: `~/.claude/skills/gstack` is a link to the gstack runtime, which `find` does not follow.
 
 Non-zero duplicates: re-run `install.sh` (deduplicates automatically). gstack MISSING: install `bun` and re-run `install.sh`. LSP MISSING: install the binary yourself (`npm i -g typescript-language-server typescript` or `npm i -g pyright`) — the rest of the stack is unaffected.
 
