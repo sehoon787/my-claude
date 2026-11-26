@@ -9,8 +9,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-106-purple)
+![Agents](https://img.shields.io/badge/agents-33-blue)
+![Skills](https://img.shields.io/badge/skills-107-purple)
 ![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-13-red)
@@ -18,7 +18,7 @@
 ![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
 **All-in-one Agent-Harness für Claude Code.**
-**Ein Plugin, 32 kuratierte Agenten bereit.**
+**Ein Plugin, 33 kuratierte Agenten bereit.**
 
 Boss entdeckt automatisch zur Laufzeit jeden Agenten, jede Skill und jedes MCP-Tool,<br>
 und leitet Ihre Aufgabe an den richtigen Spezialisten weiter. Keine Konfigurationsdateien. Kein Boilerplate.
@@ -128,6 +128,7 @@ Boss leitet jede Anfrage durch eine Prioritätskette, bis die beste Übereinstim
 |-------------|--------|---------------|
 | Orchestrierung auf oberster Ebene | `claude-opus-5-5` | Boss |
 | Beratergruppe (schreibgeschützte Zweitmeinungen) | `claude-fable-5-1` | Oracle, Metis, Momus |
+| Wissenschaftliches Schreiben: Review und Feinschliff | `claude-fable-5-1` | academic-english-editor |
 | Tiefgehende Analyse, Architektur | `claude-opus-5-5` | Sisyphus, Atlas, Hephaestus, Prometheus |
 | Standardimplementierung | `claude-sonnet-5` | Librarian, Multimodal-Looker, OMC-Spezialisten |
 | Schnelle Suche, Erkundung | `claude-haiku-4-5` | Leichtgewichtige OMC-Agenten, einfache Beratung |
@@ -138,11 +139,11 @@ Die Modellwahl bestimmt, *welches* Gehirn eine Aufgabe übernimmt; das Frontmatt
 
 | Effort | Agenten |
 |--------|---------|
-| `xhigh` | Boss, Oracle, Prometheus, Multi-Agent Systems Architect |
+| `xhigh` | Boss, Oracle, Prometheus, Multi-Agent Systems Architect, Academic English Editor |
 | `high` | Sisyphus, Hephaestus, Atlas, Metis, Momus |
 | `medium` | Librarian, Multimodal-Looker, AI Engineer, DevOps Automator |
 
-Auch Skills deklarieren Effort — `boss-briefing` läuft auf `medium`, `briefing-vault` auf `low`. `boss-advanced` und `gstack-sprint` deklarieren bewusst keinen: Der Effort eines Skills überschreibt während des Aufrufs die Sitzungsstufe und würde Boss mitten in der Arbeit unbemerkt herabstufen.
+Auch Skills deklarieren Effort — `boss-briefing` läuft auf `medium`, `briefing-vault` auf `low`. `boss-advanced`, `gstack-sprint` und `academic-english-polish` deklarieren bewusst keinen: Der Effort eines Skills überschreibt während des Aufrufs die Sitzungsstufe und würde Boss mitten in der Arbeit unbemerkt herabstufen.
 
 Vorrang gilt in dieser Reihenfolge: `CLAUDE_CODE_EFFORT_LEVEL` (Umgebungsvariable) > Frontmatter > Effort-Stufe der Sitzung. `xhigh` ist die von Fable unterstützte Obergrenze; `max` ist ausschließlich Opus-Klasse und fällt anderswo stillschweigend zurück.
 
@@ -185,8 +186,8 @@ Deterministische Multi-Agenten-Workflows. `install.sh` kopiert sie nach `~/.clau
 
 | Kategorie | Anzahl | Quelle |
 |-----------|-------:|--------|
-| **Agenten** (immer geladen) | 32 | Boss 1 + OMO 9 + OMC 19 + Vendored 3 |
-| **Skills** | 106 | ECC 61 · gstack 26 · Superpowers 14 · Core 4 · Archify 1 |
+| **Agenten** (immer geladen) | 33 | Core 2 + OMO 9 + OMC 19 + Vendored 3 |
+| **Skills** | 107 | ECC 61 · gstack 26 · Superpowers 14 · Core 5 · Archify 1 |
 | **Regeln** | 48 Dateien / 9 Regelsätze | ECC 46 (common + 8 Sprachverzeichnisse) + Core 2 |
 | **MCP-Server** | 3 | Context7, Exa, grep.app |
 | **Hooks** | 13 Dateien / 7 Events | Delegationswächter, Telemetrie, Verifikation, Vault |
@@ -198,13 +199,14 @@ Deterministische Multi-Agenten-Workflows. `install.sh` kopiert sie nach `~/.clau
 Alle oben genannten Agenten, Skills und Regeln stehen auf der Allowlist in [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) und werden im Installationsmanifest verfolgt. Anthropics offizielle Dokument-Skills (pdf, docx usw.) werden separat von github.com/anthropics/skills nach `~/.claude/skills` geklont und bewusst nicht im Manifest verfolgt.
 
 <details>
-<summary><strong>Spezialisten-Agenten — 32 in 4 Tiers</strong></summary>
+<summary><strong>Spezialisten-Agenten — 33 in 4 Tiers</strong></summary>
 
 Das Modell je Agent steht in der Tabelle **Modell-Routing** weiter oben; woher die jeweilige Quelle stammt, steht unter [Verwendete Open-Source-Tools](#open-source-tools-used).
 
 | Agent | Tier | Rolle | Quelle |
 |-------|------|-------|--------|
 | Boss | `core` | Dynamische Laufzeitentdeckung → Fähigkeitsabgleich → optimales Routing. Schreibt niemals Code. | my-claude |
+| academic-english-editor | `core` | Zweistufiges Review und Feinschliff englischer wissenschaftlicher Texte; umsetzbare Vorschläge, bearbeitet nie selbst. | my-claude |
 | Sisyphus | `omo` | Absichtsklassifizierung → Spezialistendelegation → Verifikation | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
 | Hephaestus | `omo` | Autonom erkunden → planen → ausführen → verifizieren | oh-my-openagent |
 | Atlas | `omo` | Aufgabenzerlegung + 4-stufige QA-Verifikation | oh-my-openagent |
@@ -240,7 +242,7 @@ Das Modell je Agent steht in der Tabelle **Modell-Routing** weiter oben; woher d
 </details>
 
 <details>
-<summary><strong>Skills — 106 aus 5 Quellen</strong></summary>
+<summary><strong>Skills — 107 aus 5 Quellen</strong></summary>
 
 Jede Quelle wird über die Allowlist in [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) gesteuert — was dort nicht steht, wird nie installiert.
 
@@ -250,7 +252,7 @@ Jede Quelle wird über die Allowlist in [`scripts/skill-allowlists.sh`](../../sc
 | [gstack](https://github.com/garrytan/gstack) | 26 | /qa, /review, /gstack-ship, /cso, /office-hours |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 13 (Plugin) | autopilot, ralph, team, execute, ralplan, verify |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming, systematic-debugging, test-driven-development, writing-plans |
-| [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced, boss-briefing, briefing-vault, gstack-sprint |
+| [my-claude Core](https://github.com/sehoon787/my-claude) | 5 | academic-english-polish, boss-advanced, boss-briefing, briefing-vault, gstack-sprint |
 | [archify](https://github.com/tt-a1i/archify) | 1 | archify |
 
 </details>
@@ -374,7 +376,7 @@ Funktionen, die speziell für dieses Projekt entwickelt wurden und über das hin
 | **3-Phasen-Sprint** | Design (interaktiv) → Ausführung (autonom über ralph) → Review (interaktiv vs. Plan) |
 | **Agenten-Tier-Priorität** | core > omo > omc > vendored-Deduplizierung. Der speziellste Agent gewinnt. |
 | **Lane-Zuständigkeit** | Orchestrierung → OMC, Entwicklungsprozess → superpowers, Release/QA/Deployment/Sicherheit → gstack (Boss P0), Sprach- und Stack-Wissen → ECC, KI und Domäne → vendored Agenten |
-| **Kuratierte Allowlists** | `scripts/skill-allowlists.sh` ist die einzige Quelle der Wahrheit — von Tausenden Upstream-Einträgen bleiben 106 Skills und 9 Regelsätze übrig; nichts Ungelistetes erreicht je den Sitzungskontext |
+| **Kuratierte Allowlists** | `scripts/skill-allowlists.sh` ist die einzige Quelle der Wahrheit — von Tausenden Upstream-Einträgen bleiben 107 Skills und 9 Regelsätze übrig; nichts Ungelistetes erreicht je den Sitzungskontext |
 | **Briefing Vault** | Obsidian-kompatibles `.briefing/`-Verzeichnis mit Sitzungen, Entscheidungen, Lernnotizen und Referenzen |
 | **Agenten-Telemetrie** | PostToolUse-Hook protokolliert Agentennutzung in `agent-usage.jsonl` |
 | **Smart Packs** | Projekttypenerkennung empfiehlt relevante Agenten-Packs beim Sitzungsstart |

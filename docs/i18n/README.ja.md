@@ -9,8 +9,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-106-purple)
+![Agents](https://img.shields.io/badge/agents-33-blue)
+![Skills](https://img.shields.io/badge/skills-107-purple)
 ![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-13-red)
@@ -18,7 +18,7 @@
 ![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
 **Claude Code 向けオールインワン・エージェントハーネス。**
-**プラグイン一つで、厳選された 32 のエージェントがすぐに使えます。**
+**プラグイン一つで、厳選された 33 のエージェントがすぐに使えます。**
 
 Boss はランタイムですべてのエージェント、スキル、MCP ツールを自動検出し、<br>
 適切なスペシャリストにタスクをルーティングします。設定ファイルも、ボイラープレートも不要です。
@@ -128,6 +128,7 @@ Boss はすべてのリクエストを優先チェーンにカスケードし、
 |-----------|-------|----------|
 | トップレベルのオーケストレーション | `claude-opus-5-5` | Boss |
 | アドバイザーグループ（読み取り専用のセカンドオピニオン） | `claude-fable-5-1` | Oracle、Metis、Momus |
+| 学術文章のレビューと推敲 | `claude-fable-5-1` | academic-english-editor |
 | 深い分析、アーキテクチャ | `claude-opus-5-5` | Sisyphus、Atlas、Hephaestus、Prometheus |
 | 標準的な実装 | `claude-sonnet-5` | Librarian、Multimodal-Looker、OMC スペシャリスト |
 | 簡単な検索、調査 | `claude-haiku-4-5` | 軽量な OMC エージェント、簡易アドバイザリー |
@@ -138,11 +139,11 @@ Boss はすべてのリクエストを優先チェーンにカスケードし、
 
 | Effort | エージェント |
 |--------|--------|
-| `xhigh` | Boss、Oracle、Prometheus、Multi-Agent Systems Architect |
+| `xhigh` | Boss、Oracle、Prometheus、Multi-Agent Systems Architect、Academic English Editor |
 | `high` | Sisyphus、Hephaestus、Atlas、Metis、Momus |
 | `medium` | Librarian、Multimodal-Looker、AI Engineer、DevOps Automator |
 
-スキルも effort を宣言できます — `boss-briefing` は `medium`、`briefing-vault` は `low` です。`boss-advanced` と `gstack-sprint` は意図的に宣言していません。スキルの effort は呼び出し中セッションレベルを上書きするため、宣言するとタスクの途中で Boss の effort が静かに下がってしまいます。
+スキルも effort を宣言できます — `boss-briefing` は `medium`、`briefing-vault` は `low` です。`boss-advanced`、`gstack-sprint`、`academic-english-polish` は意図的に宣言していません。スキルの effort は呼び出し中セッションレベルを上書きするため、宣言するとタスクの途中で Boss の effort が静かに下がってしまいます。
 
 優先順位は `CLAUDE_CODE_EFFORT_LEVEL`（環境変数）> フロントマター > セッションの effort レベルです。`xhigh` は Fable がサポートする上限で、`max` は opus クラス専用のため、それ以外のモデルでは静かにフォールバックします。
 
@@ -185,8 +186,8 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 
 | カテゴリ | 数 | ソース |
 |----------|------:|--------|
-| **エージェント**（常時ロード） | 32 | Boss 1 + OMO 9 + OMC 19 + Vendored 3 |
-| **スキル** | 106 | ECC 61 · gstack 26 · Superpowers 14 · Core 4 · Archify 1 |
+| **エージェント**（常時ロード） | 33 | Core 2 + OMO 9 + OMC 19 + Vendored 3 |
+| **スキル** | 107 | ECC 61 · gstack 26 · Superpowers 14 · Core 5 · Archify 1 |
 | **ルール** | 48 ファイル / 9 ルールセット | ECC 46（common + 8 言語ディレクトリ）+ Core 2 |
 | **MCP サーバー** | 3 | Context7、Exa、grep.app |
 | **フック** | 13 ファイル / 7 イベント | 委任ガード、テレメトリー、検証、ナレッジ Vault |
@@ -198,13 +199,14 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 上記のエージェント・スキル・ルールはすべて [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) の許可リストに登録され、インストールマニフェストで追跡されます。Anthropic 公式のドキュメントスキル（pdf、docx など）は github.com/anthropics/skills から `~/.claude/skills` へ別途クローンされ、意図的にマニフェスト追跡の対象外です。
 
 <details>
-<summary><strong>スペシャリストエージェント — 4 ティアで 32</strong></summary>
+<summary><strong>スペシャリストエージェント — 4 ティアで 33</strong></summary>
 
 エージェントごとのモデルは上の「モデルルーティング」テーブルに記載されています。各ソースの出どころは [使用しているオープンソースツール](#open-source-tools-used) にあります。
 
 | エージェント | ティア | 役割 | ソース |
 |-------|------|------|--------|
 | Boss | core | ダイナミックランタイム検出 → ケイパビリティマッチング → 最適ルーティング。コードは書かない。 | my-claude |
+| academic-english-editor | core | 英語学術文章の 2 パスのレビューと推敲。適用可能な提案のみを出し、直接は編集しない。 | my-claude |
 | Sisyphus | omo | インテント分類 → スペシャリスト委任 → 検証 | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
 | Hephaestus | omo | 自律的な調査 → 計画 → 実行 → 検証 | oh-my-openagent |
 | Atlas | omo | タスク分解 + 4 ステージ QA 検証 | oh-my-openagent |
@@ -240,7 +242,7 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 </details>
 
 <details>
-<summary><strong>スキル — 5 つのソースから 106</strong></summary>
+<summary><strong>スキル — 5 つのソースから 107</strong></summary>
 
 各ソースは [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) の許可リストで管理され、リストにないスキルはインストールされません。
 
@@ -250,7 +252,7 @@ Boss は作業が発生したすべてのターン — ファイルの編集・�
 | [gstack](https://github.com/garrytan/gstack) | 26 | /qa、/review、/gstack-ship、/cso、/office-hours |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 13（プラグイン） | autopilot、ralph、team、execute、ralplan、verify |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming、systematic-debugging、test-driven-development、writing-plans |
-| [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced、boss-briefing、briefing-vault、gstack-sprint |
+| [my-claude Core](https://github.com/sehoon787/my-claude) | 5 | academic-english-polish、boss-advanced、boss-briefing、briefing-vault、gstack-sprint |
 | [archify](https://github.com/tt-a1i/archify) | 1 | archify |
 
 </details>
@@ -374,7 +376,7 @@ BriefingVault v2 は 3 つの知識管理手法を統合しています：
 | **3 フェーズスプリント** | 設計（インタラクティブ）→ 実行（ralph による自律）→ レビュー（計画との比較インタラクティブ） |
 | **エージェント層優先度** | core > omo > omc > vendored 重複排除。最も特化したエージェントが優先。 |
 | **レーン所有権** | オーケストレーション → OMC、開発プロセス → superpowers、リリース/QA/デプロイ/セキュリティ → gstack（Boss P0）、言語・スタック知識 → ECC、AI・ドメイン → vendored エージェント |
-| **厳選された許可リスト** | `scripts/skill-allowlists.sh` が唯一の正 — アップストリームの数千から 106 スキルと 9 ルールセットだけが残り、リストにないものはセッションのコンテキストに入りません |
+| **厳選された許可リスト** | `scripts/skill-allowlists.sh` が唯一の正 — アップストリームの数千から 107 スキルと 9 ルールセットだけが残り、リストにないものはセッションのコンテキストに入りません |
 | **Briefing Vault** | セッション、決定、学習、参照を含む Obsidian 互換の `.briefing/` ディレクトリ |
 | **エージェントテレメトリー** | PostToolUse フックがエージェント使用状況を `agent-usage.jsonl` に記録 |
 | **スマートパック** | プロジェクトタイプ検出がセッション開始時に関連エージェントパックを推奨 |

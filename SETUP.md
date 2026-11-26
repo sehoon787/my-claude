@@ -164,8 +164,8 @@ This installs skills to `~/.agents/skills/` and auto-symlinks them to `~/.claude
 
 | Category | Count | Details |
 |----------|------:|---------|
-| **Agents** (always loaded) | 32 | Boss (1) + OMO sub-orchestrators (9) + OMC specialists (19) + vendored engineering agents (3) |
-| **Skills** | 106 | ECC (61) + gstack (26) + Superpowers (14) + Core (4) + Archify (1). ECC's `web` lane (18) is opt-in; OMC's 13 come from the OMC plugin and are not copied |
+| **Agents** (always loaded) | 33 | Core (2) + OMO sub-orchestrators (9) + OMC specialists (19) + vendored engineering agents (3) |
+| **Skills** | 107 | ECC (61) + gstack (26) + Superpowers (14) + Core (5) + Archify (1). ECC's `web` lane (18) is opt-in; OMC's 13 come from the OMC plugin and are not copied |
 | **Rules** | 48 files / 9 sets | ECC (46) + Core (2) |
 | **Hooks** | 13 scripts / 7 events | SessionStart, PreToolUse, PostToolUse, SubagentStop, Stop, SessionEnd, UserPromptSubmit |
 | **MCP Servers** | 3 | Context7, Exa, grep.app (registered globally) |
@@ -185,8 +185,8 @@ Every rule file under `rules/common` is injected into every session, so that dir
 
 ```
 ~/.claude/
-├── agents/          ← 32 agents (always loaded by Claude Code)
-├── skills/          ← 106 skill directories
+├── agents/          ← 33 agents (always loaded by Claude Code)
+├── skills/          ← 107 skill directories
 ├── rules/           ← 48 rule files in 9 rule sets
 ├── hooks/           ← hooks.json + routing-map.json + 13 hook scripts + 7 helper modules
 ├── workflows/       ← 2 named workflows (code-review-fanout.js, upstream-audit.js)
@@ -218,11 +218,11 @@ Every rule file under `rules/common` is injected into every session, so that dir
 
 ## 5. Agents
 
-All 32 agents load on every session — there are no on-demand packs to activate.
+All 33 agents load on every session — there are no on-demand packs to activate.
 
 | Group | Count | Path | Models | Effort |
 |-------|------:|------|--------|--------|
-| Boss meta-orchestrator | 1 | `~/.claude/agents/boss.md` | `claude-opus-5-5` | `xhigh` |
+| Core agents (boss, academic-english-editor) | 2 | `~/.claude/agents/` | `claude-opus-5-5`, `claude-fable-5-1` | 2× `xhigh` |
 | OMO sub-orchestrators and specialists | 9 | `~/.claude/agents/` | 4× `claude-opus-5-5`, 3× `claude-fable-5-1`, 2× `claude-sonnet-5` | 2× `xhigh`, 5× `high`, 2× `medium` |
 | OMC specialists | 19 | `~/.claude/agents/` | opus / sonnet / haiku per agent | not set (upstream defaults) |
 | Vendored engineering agents | 3 | `~/.claude/agents/` | inherited from the caller | 1× `xhigh`, 2× `medium` |
@@ -311,9 +311,9 @@ echo "Version:          $(cat ~/.claude/.my-claude-version 2>/dev/null || echo '
 ### Expected output
 
 ```
-Agents:           32
-Skills (total):   208 (106 + Anthropic's 19 document/design skills + OMC's 84, less the gstack router)
-Skills (my-claude): 106
+Agents:           33
+Skills (total):   209 (107 + Anthropic's 19 document/design skills + OMC's 84, less the gstack router)
+Skills (my-claude): 107
 Rules:            48
 Anthropic skills: 2 key skills (pdf, docx)
 Manifest:         605 entries

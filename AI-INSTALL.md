@@ -1,7 +1,7 @@
 # my-claude AI Installation Guide
 
 You are an AI agent setting up a Claude Code multi-agent orchestration environment.
-The plugin bundles 32 curated agents, 106 curated skills (plus an opt-in 18-skill `web` lane), 48 rule files (9 rule sets), 13 hooks, 3 MCP servers, and 2 LSP servers.
+The plugin bundles 33 curated agents, 107 curated skills (plus an opt-in 18-skill `web` lane), 48 rule files (9 rule sets), 13 hooks, 3 MCP servers, and 2 LSP servers.
 `install.sh` additionally copies 2 named workflows to `~/.claude/workflows/` and installs the LSP binaries.
 Only 2-3 steps are needed.
 
@@ -92,8 +92,8 @@ A stale marketplace cache (path 1) is only the cause when you have **no** user-l
 `~/.claude/agents/boss.md`; if that file exists, path 2 above is the real fix.
 
 This installs:
-- 32 agents in ~/.claude/agents/ (always loaded): Boss 1 + OMO 9 + OMC 19 + vendored 3
-- 106 skills (61 ECC + 26 gstack + 14 Superpowers + 4 Core + 1 Archify). ECC's 18-skill `web` lane is opt-in via `--skills=web`; OMC's 13 skills come from the OMC plugin and are not copied
+- 33 agents in ~/.claude/agents/ (always loaded): Core 2 + OMO 9 + OMC 19 + vendored 3
+- 107 skills (61 ECC + 26 gstack + 14 Superpowers + 5 Core + 1 Archify). ECC's 18-skill `web` lane is opt-in via `--skills=web`; OMC's 13 skills come from the OMC plugin and are not copied
   Note: gstack skills are installed separately — run Step 1b (`install.sh`) for those.
 - 48 rule files across 9 rule sets
 - 13 behavioral hooks across 7 events (SessionStart, PreToolUse, PostToolUse, SubagentStop, Stop, SessionEnd, UserPromptSubmit)
@@ -150,8 +150,8 @@ rm -rf /tmp/my-claude
 ```
 
 This installs everything in one step:
-- 32 agents (Boss + OMO + OMC + vendored)
-- 106 skills (ECC + gstack + Superpowers + Core + Archify)
+- 33 agents (Boss + OMO + OMC + vendored)
+- 107 skills (ECC + gstack + Superpowers + Core + Archify)
 - 48 rule files (9 rule sets), 13 hooks
 - 3 MCP servers (Context7, Exa, grep.app)
 - 2 named workflows in `~/.claude/workflows/` (code-review-fanout, upstream-audit) — usable from any project via the Workflow tool
@@ -165,7 +165,7 @@ This installs everything in one step:
 
 ### No agent packs
 
-Earlier releases shipped on-demand domain agent-packs from the `agency-agents` submodule. That submodule was removed on 2026-07-27; 3 engineering agents (ai-engineer, devops-automator, multi-agent-systems-architect) were vendored into `agents/vendored/` and are now installed as part of the always-loaded 32. There is no `--with-packs` flag and no `my-claude:agency:*` namespace — everything installed is listed in `scripts/skill-allowlists.sh` and the install manifest.
+Earlier releases shipped on-demand domain agent-packs from the `agency-agents` submodule. That submodule was removed on 2026-07-27; 3 engineering agents (ai-engineer, devops-automator, multi-agent-systems-architect) were vendored into `agents/vendored/` and are now installed as part of the always-loaded 33. There is no `--with-packs` flag and no `my-claude:agency:*` namespace — everything installed is listed in `scripts/skill-allowlists.sh` and the install manifest.
 
 ## Step 3 (Optional): Fix OpenCode TUI crash
 
@@ -229,9 +229,9 @@ echo "Boss model:       $(grep '^model:' ~/.claude/agents/boss.md 2>/dev/null ||
 ```
 
 Expected:
-- Agents: 32
-- Skills (total): 208 (106 + Anthropic's 19 document/design skills + OMC's 84, less the gstack router)
-- Skills (my-claude): 106
+- Agents: 33
+- Skills (total): 209 (107 + Anthropic's 19 document/design skills + OMC's 84, less the gstack router)
+- Skills (my-claude): 107
 - Rules: 48
 - Anthropic skills: 2 key skills (pdf, docx)
 - Manifest: 605 entries
