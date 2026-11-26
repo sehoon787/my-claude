@@ -1408,21 +1408,26 @@ probe() {  # probe <binary> <command...>
 }
 
 # archify ships as a skill, not a binary: render its own bundled example into a
-# temp file and require a non-empty result, then drop the file.
+# registered temp directory and require a non-empty result. The verdict goes to
+# ARCHIFY_PROBE_RESULT, and the function is called directly rather than inside
+# $(...): a subshell would lose the temp-path registration.
+ARCHIFY_PROBE_RESULT=""
 probe_archify() {
-  _ar_dir="$HOME/.claude/skills/archify"
-  [ -f "$_ar_dir/SKILL.md" ] || { echo "MISSING (skill not installed)"; return 0; }
-  if [ ! -f "$_ar_dir/bin/archify.mjs" ] || [ ! -f "$_ar_dir/examples/agent-run.lifecycle.json" ]; then
-    echo "SKIPPED (SKILL.md present, renderer or example missing)"
+  local _ar_dir="$HOME/.claude/skills/archify" _ar_tmp
+  if [ ! -f "$_ar_dir/SKILL.md" ]; then
+    ARCHIFY_PROBE_RESULT="MISSING (skill not installed)"
     return 0
   fi
-  _ar_out="${TMPDIR:-/tmp}/my-claude-archify-probe.$$.html"
-  if ( cd "$_ar_dir" && node bin/archify.mjs render lifecycle examples/agent-run.lifecycle.json "$_ar_out" ) >/dev/null 2>&1 && [ -s "$_ar_out" ]; then
-    echo "OK (rendered examples/agent-run.lifecycle.json, $(wc -c < "$_ar_out" | tr -d ' ') bytes)"
-  else
-    echo "FAIL (bin/archify.mjs render produced no output)"
+  if [ ! -f "$_ar_dir/bin/archify.mjs" ] || [ ! -f "$_ar_dir/examples/agent-run.lifecycle.json" ]; then
+    ARCHIFY_PROBE_RESULT="SKIPPED (SKILL.md present, renderer or example missing)"
+    return 0
   fi
-  rm -f "$_ar_out"
+  make_temp _ar_tmp -d || { ARCHIFY_PROBE_RESULT="FAIL (no temp directory)"; return 0; }
+  if ( cd "$_ar_dir" && node bin/archify.mjs render lifecycle examples/agent-run.lifecycle.json "$_ar_tmp/probe.html" ) >/dev/null 2>&1 && [ -s "$_ar_tmp/probe.html" ]; then
+    ARCHIFY_PROBE_RESULT="OK (rendered examples/agent-run.lifecycle.json, $(wc -c < "$_ar_tmp/probe.html" | tr -d ' ') bytes)"
+  else
+    ARCHIFY_PROBE_RESULT="FAIL (bin/archify.mjs render produced no output)"
+  fi
 }
 
 echo ""
@@ -1456,7 +1461,8 @@ if [ "$INSTALL_HEADROOM" = "1" ]; then
 else
   echo "  headroom (MCP):   SKIPPED (not selected)"
 fi
-echo "  archify (skill):  $(probe_archify)"
+probe_archify
+echo "  archify (skill):  $ARCHIFY_PROBE_RESULT"
 echo "  tmux:             $(command -v tmux >/dev/null 2>&1 && echo "OK ($(tmux -V))" || echo 'NOT INSTALLED (optional)')"
 echo "  hud:              $(test -f "$HOME/.claude/hud/omc-hud.mjs" && echo 'OK' || echo 'MISSING')"
 echo "  my-claude plugin: $PLUGIN_REFRESH_STATUS"

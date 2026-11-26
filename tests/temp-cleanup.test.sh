@@ -198,6 +198,49 @@ EOF
   done
 fi
 
+# A caller may name its variable like make_temp's own locals: the path must land
+# in the caller's variable, whatever its name.
+for name in _var _dir _made _path; do
+  new_case "unit-collide-$name"
+  cat > "$CASE/snippet.sh" <<EOF
+set -euo pipefail
+. "$HELPER"
+trap cleanup_temp_paths EXIT
+make_temp $name -d
+printf '%s\n' "\$$name" > "$CASE/paths"
+EOF
+  in_case bash "$CASE/snippet.sh" > "$CASE/out" 2>&1 < /dev/null
+  d="$(sed -n 1p "$CASE/paths" 2>/dev/null)"
+  check "variable named $name receives the path, which is under TMPDIR and removed on exit" \
+    "$(under "$d" "$CASE/tmp" && [ ! -e "$d" ] && echo 1 || echo 0)"
+done
+
+# probe_archify (the function cut out of install.sh) renders into a registered
+# temp directory, not a predictable file in TMPDIR, and leaves nothing behind.
+new_case unit-probe-archify
+PROBE_FN="$CASE/probe-fn.sh"
+awk '/^ARCHIFY_PROBE_RESULT=""$/ { on = 1 } on { print } on && /^}$/ { exit }' "$REPO/install.sh" > "$PROBE_FN"
+check "probe_archify can be cut out of install.sh" "$(yes_if grep -q '^probe_archify() {' "$PROBE_FN")"
+mkdir -p "$CASE/home/.claude/skills/archify/bin" "$CASE/home/.claude/skills/archify/examples"
+echo "# archify" > "$CASE/home/.claude/skills/archify/SKILL.md"
+echo '{}' > "$CASE/home/.claude/skills/archify/examples/agent-run.lifecycle.json"
+echo 'import { writeFileSync } from "node:fs"; writeFileSync(process.argv[5], "<html>probe</html>")' > "$CASE/home/.claude/skills/archify/bin/archify.mjs"
+cat > "$CASE/snippet.sh" <<EOF
+set -euo pipefail
+. "$HELPER"
+trap cleanup_temp_paths EXIT
+. "$PROBE_FN"
+probe_archify
+printf '%s\n' "\$ARCHIFY_PROBE_RESULT" > "$CASE/result"
+EOF
+in_case bash "$CASE/snippet.sh" > "$CASE/out" 2>&1 < /dev/null
+check "probe_archify: reports OK" "$(yes_if grep -q '^OK (rendered' "$CASE/result")"
+check "probe_archify: its temp path was made by mktemp under TMPDIR" \
+  "$(under "$(sed -n 1p "$CASE/mktemp.log")" "$CASE/tmp" && echo 1 || echo 0)"
+check "probe_archify: nothing is left in TMPDIR" "$([ -z "$(ls -A "$CASE/tmp")" ] && echo 1 || echo 0)"
+check "install.sh has no predictable temp name left" \
+  "$(grep -qE 'TMPDIR:-/tmp|my-claude-archify-probe' "$REPO/install.sh" && echo 0 || echo 1)"
+
 # ---------------------------------------------------------------------------
 echo "[2/5] install.sh wiring"
 # Every `trap ... EXIT` runs the cleanup (a later one would otherwise replace it).

@@ -281,12 +281,12 @@ if [ "$_vc_today" != "$_vc_last" ]; then
 
         # Merge hooks into settings.json
         if [ -f "$_repo_dir/scripts/merge-hooks.js" ]; then
-          node "$_repo_dir/scripts/merge-hooks.js" "$HOME/.claude/hooks/hooks.json" 2>/dev/null || true
+          node "$_repo_dir/scripts/merge-hooks.js" "$HOME/.claude/hooks/hooks.json" >/dev/null 2>&1 || true
         fi
 
         # Refresh settings (boss default, statusLine, MCP)
         if [ -f "$_repo_dir/scripts/merge-settings.js" ]; then
-          node "$_repo_dir/scripts/merge-settings.js" 2>/dev/null || true
+          node "$_repo_dir/scripts/merge-settings.js" >/dev/null 2>&1 || true
         fi
 
         # Update installed SHA

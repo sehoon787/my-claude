@@ -99,10 +99,10 @@ lacks()    { grep -Fq -- "$2" "$1" && echo 0 || echo 1; }
 # <marker> says, with the helper's overall deadline set to <deadline-seconds>.
 # Leaves the helper's output in $CASE_OUT.
 run_case() {
-  local name="$1" marker="$2" deadline="$3" root="$TMP/$1"
+  local name="$1" marker="$2" deadline="$3" root="$TMP/$1" extra_path="${4:-}"
   mkdir -p "$root/state" "$root/shared"
   touch "$root/state/listener" "$root/state/$marker"
-  env PATH="$SHIM:$PATH" SHIM_STATE="$root/state" \
+  env PATH="${extra_path:+$extra_path:}$SHIM:$PATH" SHIM_STATE="$root/state" \
     AGENT_HARNESS_STATE_DIR="$root/shared" \
     AGENT_HARNESS_SERVICE_TIMEOUT_SECONDS="$deadline" \
     bash "$REPO/scripts/ensure-shared-local-services.sh" codeburn \
@@ -114,23 +114,44 @@ run_case() {
 DEADLINE_LINE="codeburn web: FAIL (listener on port 4747 did not confirm CodeBurn identity before ${DEADLINE_SECONDS}s deadline; left untouched"
 FOREIGN_LINE="codeburn web: FAIL (port 4747 belongs to another service; left untouched"
 
-echo "[1/3] a stalled listener never answers: the deadline passes"
+echo "[1/4] a stalled listener never answers: the deadline passes"
 run_case stalled stalled "$DEADLINE_SECONDS"
 check "reported as unconfirmed at the ${DEADLINE_SECONDS}s deadline" "$(contains "$CASE_OUT" "$DEADLINE_LINE")"
 check "not reported as another service"                        "$(lacks "$CASE_OUT" "belongs to another service")"
 check "codeburn is not started over the listener"              "$([ ! -e "$CASE_CALLS" ] && echo 1 || echo 0)"
 
-echo "[2/3] a listener that does not speak HTTP: the deadline passes"
+echo "[2/4] a listener that does not speak HTTP: the deadline passes"
 run_case not-http not-http "$DEADLINE_SECONDS"
 check "reported as unconfirmed at the ${DEADLINE_SECONDS}s deadline" "$(contains "$CASE_OUT" "$DEADLINE_LINE")"
 check "not reported as another service"                        "$(lacks "$CASE_OUT" "belongs to another service")"
 check "codeburn is not started over the listener"              "$([ ! -e "$CASE_CALLS" ] && echo 1 || echo 0)"
 
-echo "[3/3] a listener that answers as a different service"
+echo "[3/4] a listener that answers as a different service"
 run_case foreign foreign "$FOREIGN_DEADLINE_SECONDS"
 check "reported as another service"                            "$(contains "$CASE_OUT" "$FOREIGN_LINE")"
 check "not reported as an unconfirmed listener"                "$(lacks "$CASE_OUT" "did not confirm CodeBurn identity")"
 check "codeburn is not started over the listener"              "$([ ! -e "$CASE_CALLS" ] && echo 1 || echo 0)"
+
+echo "[4/4] the identity probe itself crashes"
+# A python3 whose subprocess.run raises makes the probe die with a traceback
+# instead of answering. That says nothing about the listener, so it must not be
+# reported as another service. (Only scripts read from stdin are touched, which
+# is how the probe runs; the lock supervisor uses Popen and is unaffected.)
+REAL_PYTHON3="$(command -v python3)"
+mkdir -p "$TMP/crash-shim"
+cat > "$TMP/crash-shim/python3" <<EOF2
+#!/usr/bin/env bash
+if [ "\${1:-}" = "-" ]; then
+  { printf 'import subprocess\ndef _boom(*a, **k):\n    raise RuntimeError("probe crash")\nsubprocess.run = _boom\n'; cat; } | exec "$REAL_PYTHON3" - "\${@:2}"
+  exit \$?
+fi
+exec "$REAL_PYTHON3" "\$@"
+EOF2
+chmod +x "$TMP/crash-shim/python3"
+run_case probe-crash not-http "$DEADLINE_SECONDS" "$TMP/crash-shim"
+check "a probe crash is reported as unconfirmed" "$(contains "$CASE_OUT" "did not confirm CodeBurn identity")"
+check "a probe crash is not reported as another service" "$(lacks "$CASE_OUT" "belongs to another service")"
+check "codeburn is not started over the listener" "$([ ! -e "$CASE_CALLS" ] && echo 1 || echo 0)"
 
 echo ""
 if [ "$fail" -eq 1 ]; then
