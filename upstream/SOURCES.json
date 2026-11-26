@@ -17,8 +17,8 @@
     "path": "upstream/omc",
     "method": "submodule + npm-cli",
     "package": "oh-my-claude-sisyphus",
-    "pinned_sha": "6bd729e0b6a8ebd9275eb03a7ec22c8c408e0948",
-    "pinned_date": "2026-11-25",
+    "pinned_sha": "b8fe8682ae5b3696d96ef43225c06b7461327a26",
+    "pinned_date": "2026-11-26",
     "license": "MIT"
   },
   "gstack": {
@@ -46,8 +46,8 @@
     "installCommand": "git clone --depth 1",
     "updateCommand": "git pull --ff-only",
     "syncFrequency": "on-install",
-    "pinned_sha": "a48df18f516c69e0e142d286e60082a55d568230",
-    "pinned_date": "2026-11-25",
+    "pinned_sha": "e6dd567349e85506127c2f4cf69a0392923c032c",
+    "pinned_date": "2026-11-26",
     "license": "MIT"
   },
   "superpowers": {
