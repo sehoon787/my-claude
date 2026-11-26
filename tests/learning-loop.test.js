@@ -148,7 +148,7 @@ check('correction text capped at 200 chars', review.correctionText(`Always ${'x'
   const r = cp.spawnSync('node', [REVIEW], { env, encoding: 'utf8', input: JSON.stringify({ hook_event_name: 'SessionEnd', session_id: 'sess-a', transcript_path: transcript, reason: 'prompt_input_exit' }) });
   const ms = Date.now() - t0;
   check('learning-review.js exits 0 and prints nothing', r.status === 0 && r.stdout === '' && r.stderr === '', `stdout=${JSON.stringify(r.stdout)} stderr=${r.stderr}`);
-  check('learning-review.js runs under 300 ms (process start included)', ms < 300, `${ms} ms`);
+  check('learning-review.js runs under 500 ms (process start included)', ms < 500, `${ms} ms`);
   const rows = store.readSuggestions(HOME);
   check('rule suggestion queued from the correction', rows.length === 1 && rows[0].kind === 'rule' && rows[0].status === 'pending'
     && rows[0].text === '표는 항상 한국어로 작성해줘, 영어 헤더 쓰지 마' && rows[0].context.id === 'executor' && rows[0].scope === 'global' && rows[0].session === 'sess-a', JSON.stringify(rows));

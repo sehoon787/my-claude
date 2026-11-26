@@ -80,7 +80,9 @@ run_install() {  # run_install <fake-home> <log-file> [extra install.sh args...]
   local home="$1" log="$2"
   shift 2
   mkdir -p "$home"
-  ( cd "$REPO" && PATH="$SHIM:$PATH" HOME="$home" SHIM_STATE="$home" \
+  # XDG_CONFIG_HOME as well: codeburn-guard-policy.js prefers it to
+  # $HOME/.config, and GitHub's ubuntu runners set it.
+  ( cd "$REPO" && PATH="$SHIM:$PATH" HOME="$home" XDG_CONFIG_HOME="$home/.config" SHIM_STATE="$home" \
       AGENT_HARNESS_SERVICES_SKIP=1 bash install.sh --self-only "$@" ) \
     > "$log" 2>&1
 }
