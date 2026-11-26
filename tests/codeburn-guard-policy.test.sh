@@ -16,6 +16,9 @@
 # --global`, so nothing outside the temp dir is read or written and no real
 # network or npm install happens.
 set -uo pipefail
+# install.sh calls claude, omc and codeburn, which follow CLAUDE_CONFIG_DIR
+# (Codex tools: CODEX_HOME) past the throwaway HOME: pass on neither.
+unset CLAUDE_CONFIG_DIR CODEX_HOME
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 TMP="$(mktemp -d)"
