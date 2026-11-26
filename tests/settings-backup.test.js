@@ -427,6 +427,27 @@ scenario(ORIGINAL, ({ claude, file, run }) => {
   check('(k) the rotating pool still caps at the constant', backupsIn(claude).length === KEEP, String(backupsIn(claude).length));
 });
 
+// (l) A stale temp file from a killed run (same pid-style name) does not break the write.
+scenario(ORIGINAL, ({ claude, file, run }) => {
+  fs.writeFileSync(path.join(claude, 'settings.json.12345.tmp'), 'stale');
+  fs.writeFileSync(path.join(claude, `settings.json.${process.pid}.tmp`), 'stale');
+  const r = run(MERGE_SETTINGS);
+  check('(l) a stale settings.json.<pid>.tmp does not make the merge fail', r.status === 0 && JSON.parse(read(file).toString()).agent === 'boss', r.stderr);
+  check('(l) the stale files are left alone', read(path.join(claude, 'settings.json.12345.tmp')).toString() === 'stale');
+});
+
+// (l2) In this very process, so the pid is known: a stale <pid>.tmp must not matter.
+if (helper) {
+  scenario(null, ({ claude, file }) => {
+    fs.writeFileSync(file, 'old\n');
+    fs.writeFileSync(`${file}.${process.pid}.tmp`, 'stale');
+    let threw = null;
+    try { helper.writeSettingsIfChanged(file, 'new\n'); } catch (err) { threw = err; }
+    check('(l) a stale <this pid>.tmp does not make the write throw, and the write lands',
+      threw === null && fs.readFileSync(file, 'utf8') === 'new\n', String(threw));
+  });
+}
+
 const failed = results.filter((ok) => !ok).length;
 console.log(failed ? `${failed} FAILED` : 'ALL PASSED');
 process.exit(failed ? 1 : 0);

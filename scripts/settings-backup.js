@@ -20,6 +20,11 @@
 // the file as it was before my-claude first touched it, which the rotating pool
 // would otherwise push out after a few changes.
 //
+// Limits worth knowing: .my-claude-original holds the file as it was at the first
+// backup taken by this version, so on an install that already went through
+// my-claude it is not the pre-my-claude file. A dangling settings.json symlink
+// (its target missing) is not followed and is replaced by a regular file.
+//
 // The new content is written to a sibling temp file (fsynced, same mode as the
 // file, 0600 for a new one) and renamed over the real path, so an interrupted
 // write cannot leave a truncated settings.json and a symlinked settings.json
@@ -31,6 +36,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const SETTINGS_BACKUP_KEEP = 5;
 const BACKUP_MODE = 0o600;
@@ -137,7 +143,9 @@ function backupSettings(settingsPath) {
 
 // Replaces `target` with `bytes` through a sibling temp file and a rename.
 function writeAtomically(target, bytes, mode) {
-  const tmp = `${target}.${process.pid}.tmp`;
+  // A random suffix, so a stale temp file left by a killed run (and a reused pid)
+  // can never make the exclusive create fail.
+  const tmp = `${target}.${process.pid}.${crypto.randomBytes(6).toString('hex')}.tmp`;
   let fd;
   try {
     fd = fs.openSync(tmp, 'wx', mode);
