@@ -94,7 +94,7 @@ codeburn_healthy() {
 # that port misreported as belonging to another service. Exits 0 once the
 # CodeBurn title is confirmed, 1 once a different title is confirmed (a
 # genuinely foreign listener), or 2 if neither is confirmed before the
-# deadline.
+# deadline or the probe itself fails.
 wait_for_codeburn_identity() {
   python3 - "$1" "$CODEBURN_URL" <<'PY'
 import re
@@ -102,33 +102,38 @@ import subprocess
 import sys
 import time
 
-deadline = float(sys.argv[1])
-url = sys.argv[2]
 expected = b"<title>CodeBurn - Local Dashboard</title>"
 
-while True:
-    remaining = deadline - time.monotonic()
-    if remaining <= 0:
-        raise SystemExit(2)
-    try:
-        result = subprocess.run(
-            ["curl", "--silent", "--show-error", "--fail", "--max-time", f"{remaining:.3f}", url],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            timeout=remaining,
-            check=False,
-        )
-    except subprocess.TimeoutExpired:
-        raise SystemExit(2)
-    if result.returncode == 0:
-        if expected in result.stdout:
-            raise SystemExit(0)
-        if re.search(br"<title>[^<]+</title>", result.stdout, re.IGNORECASE):
-            raise SystemExit(1)
-    remaining = deadline - time.monotonic()
-    if remaining <= 0:
-        raise SystemExit(2)
-    time.sleep(min(0.1, remaining))
+try:
+    deadline = float(sys.argv[1])
+    url = sys.argv[2]
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise SystemExit(2)
+        try:
+            result = subprocess.run(
+                ["curl", "--silent", "--show-error", "--fail", "--max-time", f"{remaining:.3f}", url],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                timeout=remaining,
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            raise SystemExit(2)
+        if result.returncode == 0:
+            if expected in result.stdout:
+                raise SystemExit(0)
+            if re.search(br"<title>[^<]+</title>", result.stdout, re.IGNORECASE):
+                raise SystemExit(1)
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise SystemExit(2)
+        time.sleep(min(0.1, remaining))
+except Exception:
+    # A crash of the probe itself proves nothing about the listener: report it
+    # as unconfirmed (2), never as a foreign service (1).
+    raise SystemExit(2)
 PY
 }
 
@@ -261,11 +266,19 @@ ensure_codeburn() {
   _port_status=$?
   if [ "$_port_status" = "0" ]; then
     wait_for_codeburn_identity "$_identity_deadline"
-    if [ "$?" = "0" ]; then
+    _identity_status=$?
+    if [ "$_identity_status" = "0" ]; then
       echo "codeburn web: REUSED ($CODEBURN_URL)"
       return 0
     fi
-    echo "codeburn web: FAIL (port 4747 belongs to another service; left untouched; log: $_log)"
+    if [ "$_identity_status" = "1" ]; then
+      echo "codeburn web: FAIL (port 4747 belongs to another service; left untouched; log: $_log)"
+      return 0
+    fi
+    # Status 2: no answer that identifies the listener came before the deadline
+    # (a slow dashboard, a listener that does not speak HTTP). That is not
+    # evidence of a different service, so the line does not claim one.
+    echo "codeburn web: FAIL (listener on port 4747 did not confirm CodeBurn identity before ${TIMEOUT_SECONDS}s deadline; left untouched; log: $_log)"
     return 0
   fi
   if ! command -v codeburn >/dev/null 2>&1; then

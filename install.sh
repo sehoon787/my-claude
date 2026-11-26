@@ -20,6 +20,13 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=scripts/skill-allowlists.sh
 . "$SCRIPT_DIR/scripts/skill-allowlists.sh"
 
+# Temp paths are made with make_temp and all removed by this one EXIT trap — see
+# scripts/temp-cleanup.sh. Any later code that sets an EXIT trap must run
+# cleanup_temp_paths too, or put this trap back (the tools menu does).
+# shellcheck source=scripts/temp-cleanup.sh
+. "$SCRIPT_DIR/scripts/temp-cleanup.sh"
+trap cleanup_temp_paths EXIT
+
 echo "=== my-claude installer ==="
 echo ""
 
@@ -277,11 +284,15 @@ select_tools_menu() {
   _TOOLS_MENU_DRAWN=0
   _TOOLS_MENU_CHECKED=(1 1 1)
   _TOOLS_MENU_STTY=$(stty -g 2>/dev/null) || return 1
-  trap '_tools_menu_restore' EXIT
+  # The EXIT trap also runs the temp-path cleanup (an EXIT trap replaces the one
+  # set at the top), and on the way out the plain cleanup trap is put back
+  # rather than cleared.
+  trap '_tools_menu_restore; cleanup_temp_paths' EXIT
   trap '_tools_menu_restore; exit 130' INT TERM
   if ! stty -echo -icanon min 1 time 0 2>/dev/null; then
     _tools_menu_restore
-    trap - EXIT INT TERM
+    trap cleanup_temp_paths EXIT
+    trap - INT TERM
     return 1
   fi
   if command -v tput >/dev/null 2>&1; then
@@ -318,7 +329,8 @@ select_tools_menu() {
     esac
   done
   _tools_menu_restore
-  trap - EXIT INT TERM
+  trap cleanup_temp_paths EXIT
+  trap - INT TERM
   INSTALL_SERENA=${_TOOLS_MENU_CHECKED[0]}
   INSTALL_HEADROOM=${_TOOLS_MENU_CHECKED[1]}
   INSTALL_CODEBURN=${_TOOLS_MENU_CHECKED[2]}
@@ -421,8 +433,7 @@ else
 fi
 
 # ── Upstream helper ──
-CLONE_TMPDIR=$(mktemp -d)
-trap 'rm -rf "$CLONE_TMPDIR"' EXIT
+make_temp CLONE_TMPDIR -d
 
 # Provenance-tracked manifest: every path this script actually copies gets
 # appended here (relative to $HOME/.claude). The manifest is NEVER built by
@@ -1000,8 +1011,7 @@ echo "  [5a] Anthropic skills..."
 if anthropic_skills_installed; then
   echo "    Anthropic skills already installed"
 else
-  _tmp_skills=$(mktemp -d)
-  trap 'rm -rf "$_tmp_skills"' EXIT
+  make_temp _tmp_skills -d
   git clone --depth 1 https://github.com/anthropics/skills.git "$_tmp_skills/skills" 2>/dev/null || true
   if [ -d "$_tmp_skills/skills/skills" ]; then
     mkdir -p "$HOME/.claude/skills"
@@ -1190,8 +1200,7 @@ node "$SCRIPT_DIR/scripts/dedupe-karpathy.js" "$HOME/.claude/CLAUDE.md" || true
 KARPATHY_SHA="aa4467f0b33e1e80d11c7c043d4b27e7c79a73a3"
 KARPATHY_URL="https://raw.githubusercontent.com/forrestchang/andrej-karpathy-skills/${KARPATHY_SHA}/CLAUDE.md"
 KARPATHY_EXPECTED_CHECKSUM="694a2d721e41c385f3db492838c23299826df5ba9809e3b0721aac70021e196a"
-_tmp_karpathy=$(mktemp)
-trap 'rm -f "$_tmp_karpathy"' EXIT
+make_temp _tmp_karpathy
 if curl -sL "$KARPATHY_URL" -o "$_tmp_karpathy" 2>/dev/null; then
   ACTUAL_CHECKSUM=$(sha256 "$_tmp_karpathy")
   if [ "$ACTUAL_CHECKSUM" = "$KARPATHY_EXPECTED_CHECKSUM" ]; then
@@ -1399,21 +1408,26 @@ probe() {  # probe <binary> <command...>
 }
 
 # archify ships as a skill, not a binary: render its own bundled example into a
-# temp file and require a non-empty result, then drop the file.
+# registered temp directory and require a non-empty result. The verdict goes to
+# ARCHIFY_PROBE_RESULT, and the function is called directly rather than inside
+# $(...): a subshell would lose the temp-path registration.
+ARCHIFY_PROBE_RESULT=""
 probe_archify() {
-  _ar_dir="$HOME/.claude/skills/archify"
-  [ -f "$_ar_dir/SKILL.md" ] || { echo "MISSING (skill not installed)"; return 0; }
-  if [ ! -f "$_ar_dir/bin/archify.mjs" ] || [ ! -f "$_ar_dir/examples/agent-run.lifecycle.json" ]; then
-    echo "SKIPPED (SKILL.md present, renderer or example missing)"
+  local _ar_dir="$HOME/.claude/skills/archify" _ar_tmp
+  if [ ! -f "$_ar_dir/SKILL.md" ]; then
+    ARCHIFY_PROBE_RESULT="MISSING (skill not installed)"
     return 0
   fi
-  _ar_out="${TMPDIR:-/tmp}/my-claude-archify-probe.$$.html"
-  if ( cd "$_ar_dir" && node bin/archify.mjs render lifecycle examples/agent-run.lifecycle.json "$_ar_out" ) >/dev/null 2>&1 && [ -s "$_ar_out" ]; then
-    echo "OK (rendered examples/agent-run.lifecycle.json, $(wc -c < "$_ar_out" | tr -d ' ') bytes)"
-  else
-    echo "FAIL (bin/archify.mjs render produced no output)"
+  if [ ! -f "$_ar_dir/bin/archify.mjs" ] || [ ! -f "$_ar_dir/examples/agent-run.lifecycle.json" ]; then
+    ARCHIFY_PROBE_RESULT="SKIPPED (SKILL.md present, renderer or example missing)"
+    return 0
   fi
-  rm -f "$_ar_out"
+  make_temp _ar_tmp -d || { ARCHIFY_PROBE_RESULT="FAIL (no temp directory)"; return 0; }
+  if ( cd "$_ar_dir" && node bin/archify.mjs render lifecycle examples/agent-run.lifecycle.json "$_ar_tmp/probe.html" ) >/dev/null 2>&1 && [ -s "$_ar_tmp/probe.html" ]; then
+    ARCHIFY_PROBE_RESULT="OK (rendered examples/agent-run.lifecycle.json, $(wc -c < "$_ar_tmp/probe.html" | tr -d ' ') bytes)"
+  else
+    ARCHIFY_PROBE_RESULT="FAIL (bin/archify.mjs render produced no output)"
+  fi
 }
 
 echo ""
@@ -1447,7 +1461,8 @@ if [ "$INSTALL_HEADROOM" = "1" ]; then
 else
   echo "  headroom (MCP):   SKIPPED (not selected)"
 fi
-echo "  archify (skill):  $(probe_archify)"
+probe_archify
+echo "  archify (skill):  $ARCHIFY_PROBE_RESULT"
 echo "  tmux:             $(command -v tmux >/dev/null 2>&1 && echo "OK ($(tmux -V))" || echo 'NOT INSTALLED (optional)')"
 echo "  hud:              $(test -f "$HOME/.claude/hud/omc-hud.mjs" && echo 'OK' || echo 'MISSING')"
 echo "  my-claude plugin: $PLUGIN_REFRESH_STATUS"
