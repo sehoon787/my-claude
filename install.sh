@@ -582,10 +582,16 @@ if [ -d "$GSTACK_ROOT_DIR" ] && [ ! -L "$GSTACK_ROOT_DIR" ]; then
     GSTACK_ROOT_FOREIGN=1
   else
     while IFS= read -r _entry; do
-      # Finder's .DS_Store is nobody's content.
-      case "${_entry##*/}" in ''|.DS_Store) continue ;; esac
-      grep -qxF "skills/gstack/${_entry#./}" "$HOME/.claude/.my-claude-manifest" 2>/dev/null \
-        || { GSTACK_ROOT_FOREIGN=1; break; }
+      [ -n "$_entry" ] || continue
+      _path="$GSTACK_ROOT_DIR/${_entry#./}"
+      # Finder's .DS_Store file is nobody's content.
+      [ "${_entry##*/}" = .DS_Store ] && [ -f "$_path" ] && [ ! -L "$_path" ] && continue
+      grep -qxF "skills/gstack/${_entry#./}" "$HOME/.claude/.my-claude-manifest" 2>/dev/null && continue
+      # A router copy with gstack's generated banner is one a first install
+      # left before it wrote any manifest.
+      [ "$_entry" = ./SKILL.md ] && [ -f "$_path" ] && [ ! -L "$_path" ] \
+        && grep -q 'AUTO-GENERATED from' "$_path" 2>/dev/null && continue
+      GSTACK_ROOT_FOREIGN=1; break
     done <<EOF
 $_gstack_entries
 EOF
@@ -911,8 +917,12 @@ if [ "$SKIP_GSTACK" = "0" ]; then
     echo "  [gstack] NOTICE: $GSTACK_ROOT_DIR was not created by this installer (it holds a .git or files it never installed), so it is left as it is and not linked to the pinned runtime $GSTACK_RUNTIME."
     echo "           The gstack skills look for their helpers there. To use the pinned runtime, move that directory out of ~/.claude/skills (e.g. mv \"$GSTACK_ROOT_DIR\" \"$HOME/gstack-skill-backup\"), then re-run install.sh."
   elif [ "$GSTACK_RUNTIME_PINNED" = "1" ]; then
-    # Step 1e's directory holds the router copy, and maybe Finder's .DS_Store.
-    rm -f "$GSTACK_ROOT_DIR/SKILL.md" "$GSTACK_ROOT_DIR/.DS_Store"
+    # Step 1e's directory holds the router copy, and maybe Finder's .DS_Store
+    # file. Anything else makes the rmdir below fail.
+    rm -f "$GSTACK_ROOT_DIR/SKILL.md" 2>/dev/null || true
+    if [ -f "$GSTACK_ROOT_DIR/.DS_Store" ] && [ ! -L "$GSTACK_ROOT_DIR/.DS_Store" ]; then
+      rm -f "$GSTACK_ROOT_DIR/.DS_Store"
+    fi
     if ! rmdir "$GSTACK_ROOT_DIR" 2>/dev/null; then
       # Anything else in it is not ours: leave it, put the router copy back.
       cp "$UPSTREAM_DIR/SKILL.md" "$GSTACK_ROOT_DIR/" 2>/dev/null || true
