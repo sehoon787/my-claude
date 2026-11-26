@@ -11,11 +11,12 @@ agents/
   core/                   # Self-owned (boss.md, agent-teams-reference.md)
   omo/                    # Self-owned OMO agents — always loaded
   vendored/               # Snapshotted third-party agents (attribution in-file)
-upstream/                 # Git submodules (4 upstream sources)
+upstream/                 # Git submodules (5 upstream sources)
   ecc/                    # everything-claude-code (skills + rules)
   omc/                    # oh-my-claudecode (agents + skills)
   gstack/                 # gstack (sprint-process skills)
   superpowers/            # superpowers (dev-process skills)
+  archify/                # archify (diagram skill)
 skills/
   core/                   # Self-owned skills
 workflows/                # Named workflows (code-review-fanout, upstream-audit)

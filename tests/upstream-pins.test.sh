@@ -199,8 +199,9 @@ EOF
 
 # npm: the global prefix lives at $NPM_SHIM_ROOT. `npm view … versions --json`
 # lists $NPM_SHIM_PUBLISHED; `npm i -g oh-my-claude-sisyphus@<v>` installs <v>
-# only if it is listed (@latest is the last one listed); every other package is
-# a no-op. NPM_SHIM_REGISTRY_DOWN=1 makes every oh-my-claude-sisyphus view and
+# only if it is listed (@latest is the last one listed); any other
+# oh-my-claude-sisyphus `view` exits 1 with "unhandled npm ..."; every other
+# package is a no-op. NPM_SHIM_REGISTRY_DOWN=1 makes every oh-my-claude-sisyphus view and
 # install fail like an unreachable registry; other packages keep working, so
 # only step [5b] sees the outage.
 cat > "$SHIM/npm" <<'EOF'
@@ -226,6 +227,7 @@ if [ "$1" = view ]; then
       out="["; sep=""
       for v in $NPM_SHIM_PUBLISHED; do out="$out$sep\"$v\""; sep=","; done
       echo "$out]" ;;
+    *) echo "unhandled npm $*" >&2; exit 1 ;;
   esac
   exit 0
 fi
@@ -424,6 +426,10 @@ check "registry unreadable: CLI left at 5.8.2"            "$(yes_if [ "$(omc_ver
 omc_case none-at-or-below 1.2.3 "9.9.9"
 check "nothing published at or below the pin: no npm i"   "$(yes_if [ "$(omc_installs "$H")" = 0 ])"
 check "nothing published at or below the pin: one WARNING" "$(yes_if [ "$(omc_warnings "$H")" = 1 ])"
+# The npm shim answers only `view … versions --json` and install.sh discards its
+# stderr, so a stray view shows up only in the shim logs.
+stray_npm_views() { cat "$TMP"/home-*/shim.log 2>/dev/null | grep '^npm view ' | grep -vxF 'npm view oh-my-claude-sisyphus versions --json' >&2; }
+check "npm is only asked for the published versions"      "$(yes_if not stray_npm_views)"
 set_omc_pin "$OMC_PIN"
 
 echo "[5/11] submodule init fails; this checkout records the commits"
