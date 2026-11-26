@@ -148,19 +148,29 @@ is_installed_path() {
   esac
 }
 
-# excluded_refs <upstream dir> <added lines>: up to three added lines, as
+# excluded_refs <upstream dir> <path> <added lines>: up to three added lines, as
 # "n:line", that name a path is_installed_path leaves out, for an upstream
 # whose counted files can still run such a path; nothing for the others.
 # gstack leaves out its test trees and fixtures, but a counted file can add
 # `bun "$ROOT/test/e2e/x.ts"` while the payload sits in the excluded tree.
-# test/helpers/ is counted, so naming it is no hit.
+# test/helpers/ is counted, so naming it is no hit. Only files that run, or
+# tell an agent what to run, are read: code (by extension, or extensionless
+# under bin/ and hosts/, and the root setup), SKILL.md, and the prompts gstack
+# hands an agent (skill sections, /review's specialists, model overlays).
+# README*, CHANGELOG*, docs/ and other prose name test paths all the time.
 excluded_refs() {
   local n
   [ "${1##*/}" = gstack ] || return 0
-  for n in $(printf '%s\n' "$2" | sed 's#test/helpers/##g' \
+  case "$2" in
+    *.sh|*.bash|*.js|*.mjs|*.cjs|*.ts|*.tsx|*.py) ;;
+    setup|SKILL.md|*/SKILL.md|*/sections/*.md|*/specialists/*.md|model-overlays/*.md) ;;
+    bin/*|hosts/*) case "${2##*/}" in *.*) return 0 ;; esac ;;
+    *) return 0 ;;
+  esac
+  for n in $(printf '%s\n' "$3" | sed 's#test/helpers/##g' \
       | grep -nE '(^|[/"'"'"'`[:space:]=(:])(test|tests|__tests__|fixtures)/|\.test\.' \
       | head -3 | cut -d: -f1); do
-    printf '%s:%s\n' "$n" "$(printf '%s\n' "$2" | sed -n "${n}p")"
+    printf '%s:%s\n' "$n" "$(printf '%s\n' "$3" | sed -n "${n}p")"
   done
 }
 # ── end per-repo ────────────────────────────────────────────────────────────
@@ -393,7 +403,7 @@ for sub in "${subs[@]}"; do
     done
     # An installed file that names a path the scope leaves out can run it.
     [ "$installed" -eq 1 ] || continue
-    hits=$(excluded_refs "$sub" "$added")
+    hits=$(excluded_refs "$sub" "$f" "$added")
     [ -n "$hits" ] || continue
     emit "- FLAG **Names a test or fixture path the scan leaves out** in \`$f\`:"
     while IFS= read -r line; do

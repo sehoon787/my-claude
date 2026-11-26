@@ -490,6 +490,17 @@ case_new gstack; case_add test/e2e/run.ts 'bun "$ROOT/test/fixtures/x.ts"'; case
 expect "gstack excluded file naming test paths: flagged=false" flagged_is false
 case_new ecc; case_add "skills/$ECC_SKILL/run.sh" 'bash tests/run.sh'; case_scan
 expect "ecc installed file naming tests/: flagged=false (gstack rule only)" flagged_is false
+# Only files that run, or tell an agent what to run, are read for these names:
+# code, SKILL.md and agent prompts. Other prose names test paths all the time.
+RUN_E2E='bun "$ROOT/test/e2e/x.ts"'
+for f in scripts/run.sh lib/run.mjs hosts/claude/hooks/x-hook review/sections/run.md review/specialists/run.md; do
+  case_new gstack; case_add "$f" "$RUN_E2E"; case_scan
+  expect "gstack $f naming test/e2e/x.ts: FLAG line" gating_has "$(flag_line "$REF_LABEL" "$f")"
+done
+for f in README.md docs/guide.md CHANGELOG.md notes.md bin/data.json; do
+  case_new gstack; case_add "$f" "$RUN_E2E"; case_scan
+  expect "gstack $f naming test/e2e/x.ts: flagged=false (prose or data)" flagged_is false
+done
 
 should_flag "superpowers skill SKILL.md" superpowers skills/brainstorming/SKILL.md
 should_flag "superpowers agents/*.md" superpowers agents/reviewer.md
