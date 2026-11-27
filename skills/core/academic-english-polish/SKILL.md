@@ -88,9 +88,9 @@ Defined by the agent: `review.md` (findings table and keep list), `report.md` (h
 <Verification_Checklist>
 Run after every editor round. check_apply.py automates items 1–5 and 8.
 1. **Anchors**: every Current block, primary or alternative, matches exactly once in its file (or once after its Depends on item is applied), and the primary Current blocks of one file do not overlap.
-2. **Numbers**: per item, the multiset of numbers in Replacement equals the one in Current, except values the item lists on its Numbers: line as a deletion (the value stays elsewhere) or as a name (for example a model name).
+2. **Numbers**: per item, the multiset of numbers in Replacement equals the one in Current, except values the item lists, in backticks, on its Numbers: line as a deletion (the value stays elsewhere) or as a name (for example a model name).
 3. **No new formatting**: no Replacement adds a formatting, spacing or template command. Any other new command (\ref, \textsc) is explained in the item.
-4. **References**: \ref, \cref, \eqref, \cite and \label keys, math and comment lines are kept, except what the item lists on its Removed: line.
+4. **References**: \ref, \cref, \eqref, \cite and \label keys, math and comment lines are kept, except what the item copies verbatim (or, for a key, names) on its Removed: line.
 5. **Banned variants**: no rejected term variant and no banned phrase appears in any Replacement or Alternative block. Banned-phrase lines for banned.txt (delete a line where the document uses the word as a defined term):
 
        re:(?i)\bdelve
