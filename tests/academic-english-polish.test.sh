@@ -590,15 +590,15 @@ new_case items-block
   item R5a required 'each request increase by 4.2~ms' 'each request increases by 4.2~ms'
   item R5b required 'We evaluate on 1,200 utterances' 'We evaluate on 1,200 crucial utterances'
 } >"$C/apply.md"
-out="$(run "$C/apply.md" "A=$A" --banned "$BANNED" --apply-into "$SRC=$C/o1" --items R5a)"; rc=$?
-has "$out" "wrote $C/o1/chapters/a.tex" && grep -qF 'increases by 4.2~ms' "$C/o1/chapters/a.tex" \
-  && grep -qF 'We evaluate on 1,200 utterances' "$C/o1/chapters/a.tex"
+out="$(run "$C/apply.md" "A=$A" --banned "$BANNED" --apply-into "$SRC=$C/copy_one" --items R5a)"; rc=$?
+has "$out" "wrote $C/copy_one/chapters/a.tex" && grep -qF 'increases by 4.2~ms' "$C/copy_one/chapters/a.tex" \
+  && grep -qF 'We evaluate on 1,200 utterances' "$C/copy_one/chapters/a.tex"
 check "--items R5a writes although the unpicked R5b fails a banned check" "$?"
 [ "$rc" = "1" ] && has "$out" "FAIL R5b:"; check "--items: the unpicked FAIL is still reported and exits 1" "$?"
 out="$(run "$C/apply.md" "A=$A" --banned "$BANNED" --apply-into "$SRC=$C/o2" --items R5b)"
 lacks "$out" "wrote" && [ ! -e "$C/o2" ]; check "--items R5b (a failing picked item) writes nothing" "$?"
-out="$(run "$C/apply.md" "A=$A" --banned "$BANNED" --apply-into "$SRC=$C/o3")"
-lacks "$out" "wrote" && [ ! -e "$C/o3" ]; check "class mode still writes nothing while any item fails" "$?"
+out="$(run "$C/apply.md" "A=$A" --banned "$BANNED" --apply-into "$SRC=$C/copy_three")"
+lacks "$out" "wrote" && [ ! -e "$C/copy_three" ]; check "class mode still writes nothing while any item fails" "$?"
 out="$(run "$C/apply.md" "A=$A" --banned "$BANNED" --apply-into "$SRC=$C/o4" --items R5a,NOPE)"
 lacks "$out" "wrote" && [ ! -e "$C/o4" ]; check "--items: a file-level FAIL (unknown id) blocks the write" "$?"
 sources_unchanged; check "--items block: sources unchanged" "$?"
