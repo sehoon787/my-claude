@@ -102,14 +102,17 @@ def maths(s):
     return Counter(unshield(m.group(0)) for m in MATH.finditer(shield(s)))
 
 
-def comments(s):
+def comments(s, markdown=False):
+    if markdown:
+        return Counter()
     return Counter(x.strip() for x in s.splitlines() if x.lstrip().startswith("%"))
 
 
-def visible(s):
-    """The prose of a block: no url arguments, comments, reference keys, math or command names."""
+def visible(s, markdown=False):
+    """The prose of a block: no url arguments, comments (LaTeX only), reference keys, math or command names."""
     s = re.sub(r"\\(?:url|href)\{[^}]*\}", " ", s)
-    s = "\n".join(TRAILING_COMMENT.sub(r"\1", x) for x in s.splitlines())
+    if not markdown:
+        s = "\n".join(TRAILING_COMMENT.sub(r"\1", x) for x in s.splitlines())
     s = MATH.sub(" ", shield(KEYS.sub(" ", s))).replace("\x00", " ").replace("\x01", " ")
     return CMD.sub(" ", s)
 
@@ -260,7 +263,8 @@ def key_names(key):
 
 
 def check_pair(item, kind, cur, rep, banned):
-    listed_numbers = set(re.findall(NUM, " ".join(re.findall(r"`([^`]*)`", note_text(item, "Numbers:")))))
+    markdown = item["markdown"]
+    listed_numbers = set(numbers(" ".join(re.findall(r"`([^`]*)`", note_text(item, "Numbers:")))))
     lost, extra = numbers(cur) - numbers(rep), numbers(rep) - numbers(cur)
     bad_lost = [v for v in lost.elements() if v not in listed_numbers]
     bad_extra = [v for v in extra.elements() if v not in listed_numbers]
@@ -271,6 +275,7 @@ def check_pair(item, kind, cur, rep, banned):
     if ok_lost or ok_extra:
         say("REVIEW", item, f"{kind}: numbers removed {sorted(ok_lost)}, added {sorted(ok_extra)} (listed)")
     removed_note = note_text(item, "Removed:")
+    removed_flat = " ".join(removed_note.split())
 
     def key_listed(key):
         names = key_names(key)
@@ -279,8 +284,8 @@ def check_pair(item, kind, cur, rep, banned):
 
     for name, count, is_listed in (
             ("ref/cite/label", keys, key_listed),
-            ("math", maths, lambda v: v in removed_note),
-            ("comment line", comments, lambda v: v in removed_note)):
+            ("math", maths, lambda v: " ".join(v.split()) in removed_flat),
+            ("comment line", lambda t: comments(t, markdown), lambda v: " ".join(v.split()) in removed_flat)):
         lost, extra = count(cur) - count(rep), count(rep) - count(cur)
         bad = sorted(v for v in lost if not is_listed(v))
         ok = sorted(v for v in lost if is_listed(v))
@@ -303,7 +308,7 @@ def check_pair(item, kind, cur, rep, banned):
         say("FAIL", item, f"{kind}: formatting command removed {sorted(gone & FORMAT)}")
     if new - FORMAT:
         say("REVIEW", item, f"{kind}: new command {sorted(new - FORMAT)}")
-    prose = visible(rep)
+    prose = visible(rep, markdown)
     for term in banned:
         if term.startswith("re:"):
             hit = re.search(term[3:], prose)
@@ -516,6 +521,7 @@ def main():
     items = parse(decode(read_bytes(args.apply_md), args.apply_md))
     by_id = {item["id"]: item for item in items}
     for item in items:
+        item["markdown"] = paths.get(item["key"], "").lower().endswith((".md", ".markdown"))
         item["pairs"] = pairs(item)
     check_items(items, by_id, text, banned)
     check_simulation(items, by_id, text)

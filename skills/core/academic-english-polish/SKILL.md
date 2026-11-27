@@ -77,7 +77,7 @@ When the report or the user states a page or line effect ("saves half a page", "
 
 ## After approval (a separate step, only on the user's request)
 
-Apply only the items the user picks: write applied copies with `--apply-into`, naming the picked ids with `--items R3,E2` (the checker adds the items they depend on, whatever their class; without `--items`, `--classes` selects whole classes), show `diff -u` against the sources, and copy the files over the sources only after the user agrees. Then run Verification_Checklist items 6 and 7 again.
+Apply only the items the user picks: write applied copies with `--apply-into`, naming the picked ids with `--items R3,E2` (the checker adds the items they depend on, whatever their class; without `--items`, `--classes` selects whole classes; with `--items` the copies of the picked items are written but the exit status stays 1 while an unpicked item still FAILs, so do not stop on the exit status there), show `diff -u` against the sources, and copy the files over the sources only after the user agrees. Then run Verification_Checklist items 6 and 7 again.
 
 </Steps>
 

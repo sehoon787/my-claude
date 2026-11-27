@@ -81,6 +81,10 @@ As shown by \cite[p.~5]{smith2024} here.
 Also \citep{lee,kim} there.
 Also \citep{wu,xu} there too.
 alpha \\$a$ and beta $b$ end.
+\begin{equation}
+L = a + b
+\end{equation}
+The corpus has 1{,}200 clips.
 TEX
 cat >"$PRISTINE/src/chapters/b.tex" <<'TEX'
 \section{Results}
@@ -667,6 +671,29 @@ out="$(run "$C/apply.md" "A=$C/latin1.tex")"; rc=$?
 printf '# comment\npretrained\nre:(unclosed\n' >"$C/bad-banned.txt"
 out="$(run "$C/apply.md" "A=$A" --banned "$C/bad-banned.txt")"; rc=$?
 [ "$rc" = "2" ] && has "$out" "bad-banned.txt line 3: bad regular expression" && lacks "$out" "Traceback"; check "a bad re: line in the banned file is named, exit 2" "$?"
+
+# ---- third round ----
+
+# 1. in Markdown a % is a literal percent, not a comment
+new_case markdown-percent
+printf 'Accuracy improves by 5%% and the gain is solid\n' >"$C/c.md"
+{ item MD1 required 'by 5% and the gain is solid' 'by 5% and the gain is crucial'; } >"$C/apply.md"
+out="$(run "$C/apply.md" "A=$C/c.md" --banned "$BANNED")"; rc=$?
+[ "$rc" = "1" ] && has "$out" "FAIL MD1: primary: banned variant '"; check "a banned word after a literal % in a .md file fails" "$?"
+
+# 2. whitespace is collapsed before the verbatim Removed: comparison
+new_case removed-whitespace
+{ item W1 required '\begin{equation}
+L = a + b
+\end{equation}' '' 'Removed: \begin{equation} L = a + b \end{equation} (stays in §2)'; } >"$C/apply.md"
+out="$(run "$C/apply.md" "A=$A")"; rc=$?
+[ "$rc" = "0" ] && has "$out" "REVIEW W1: primary: math removed" && lacks "$out" "FAIL W1:"; check "a math listed on one line covers the same math over three lines" "$?"
+
+# 3. Numbers: values are read with numbers(), so 1{,}200 is 1,200
+new_case numbers-thousands
+{ item N3 required 'The corpus has 1{,}200 clips.' 'The corpus has clips.' 'Numbers: removed `1{,}200` (stays in Table 2)'; } >"$C/apply.md"
+out="$(run "$C/apply.md" "A=$A")"; rc=$?
+[ "$rc" = "0" ] && has "$out" "REVIEW N3: primary: numbers removed ['1,200']" && lacks "$out" "FAIL N3:"; check "a backticked 1{,}200 lists the number 1,200" "$?"
 
 # ---- refusals: each starts from pristine sources ----
 new_case symlink-folder

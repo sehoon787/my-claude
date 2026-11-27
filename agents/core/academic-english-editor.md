@@ -104,7 +104,7 @@ Propose changes only inside the scope; list out-of-scope occurrences in the term
     <new source; an empty block deletes Current>
     ~~~
 
-- Optional lines after the blocks: `Depends on: <id>` (this Current exists only after that item is applied); `Numbers: <each value removed or added, in backticks, then why>`; `Removed: <each \ref or \cite key, math or comment line removed, copied exactly as it appears in Current, then why>`; `Note: <layout effect to check after typesetting>`.
+- Optional lines after the blocks: `Depends on: <id>` (this Current exists only after that item is applied); `Numbers: <each value removed or added, in backticks, then why>`; `Removed: <each \ref or \cite key, math or comment line removed, copied exactly as it appears in Current, then why>`; for example `Numbers: removed `92.1` (stays in Table 3)` and `Removed: \cite{smith2024} (moved to E4)`; `Note: <layout effect to check after typesetting>`.
 - Alternatives follow the primary pair as labelled pairs, `Alternative A current:` and `Alternative A replacement:`, never mixed into the primary blocks.
 - For a deletion, extend Current to the adjoining space, or to neighbouring words that the Replacement keeps, so that no double space or empty line is left.
 - Current blocks in one file never overlap, except through a Depends on line.
