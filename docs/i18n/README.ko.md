@@ -9,8 +9,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-106-purple)
+![Agents](https://img.shields.io/badge/agents-33-blue)
+![Skills](https://img.shields.io/badge/skills-107-purple)
 ![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-13-red)
@@ -18,7 +18,7 @@
 ![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
 **Claude Code를 위한 올인원 에이전트 하네스.**
-**플러그인 하나로 엄선된 32개 에이전트가 준비됩니다.**
+**플러그인 하나로 엄선된 33개 에이전트가 준비됩니다.**
 
 Boss가 런타임에 모든 에이전트, 스킬, MCP 도구를 자동으로 탐색하고,<br>
 작업을 적합한 전문가에게 라우팅합니다. 설정 파일도, 보일러플레이트도 없습니다.
@@ -128,6 +128,7 @@ Boss는 가장 적합한 매칭을 찾을 때까지 모든 요청을 우선순�
 |-----------|-------|----------|
 | 최상위 오케스트레이션 | `claude-opus-5-5` | Boss |
 | 어드바이저 그룹 (읽기 전용 세컨드 오피니언) | `claude-fable-5-1` | Oracle, Metis, Momus |
+| 학술 영문 교정 및 윤문 | `claude-fable-5-1` | academic-english-editor |
 | 심층 분석, 아키텍처 | `claude-opus-5-5` | Sisyphus, Atlas, Hephaestus, Prometheus |
 | 표준 구현 | `claude-sonnet-5` | Librarian, Multimodal-Looker, OMC 전문가 |
 | 빠른 조회, 탐색 | `claude-haiku-4-5` | 경량 OMC 에이전트, 간단한 자문 |
@@ -138,11 +139,11 @@ Boss는 가장 적합한 매칭을 찾을 때까지 모든 요청을 우선순�
 
 | Effort | 에이전트 |
 |--------|--------|
-| `xhigh` | Boss, Oracle, Prometheus, Multi-Agent Systems Architect |
+| `xhigh` | Boss, Oracle, Prometheus, Multi-Agent Systems Architect, Academic English Editor |
 | `high` | Sisyphus, Hephaestus, Atlas, Metis, Momus |
 | `medium` | Librarian, Multimodal-Looker, AI Engineer, DevOps Automator |
 
-스킬도 effort를 선언합니다 — `boss-briefing`은 `medium`, `briefing-vault`는 `low`입니다. `boss-advanced`와 `gstack-sprint`는 의도적으로 선언하지 않습니다. 스킬의 effort는 실행되는 동안 세션 레벨을 덮어쓰기 때문에, 선언하면 작업 도중 Boss의 effort가 조용히 낮아집니다.
+스킬도 effort를 선언합니다 — `boss-briefing`은 `medium`, `briefing-vault`는 `low`입니다. `boss-advanced`, `gstack-sprint`, `academic-english-polish`는 의도적으로 선언하지 않습니다. 스킬의 effort는 실행되는 동안 세션 레벨을 덮어쓰기 때문에, 선언하면 작업 도중 Boss의 effort가 조용히 낮아집니다.
 
 우선순위는 `CLAUDE_CODE_EFFORT_LEVEL`(환경 변수) > 프론트매터 > 세션 effort 레벨 순입니다. `xhigh`는 Fable이 지원하는 상한이며, `max`는 opus 계열 전용이라 그 외 모델에서는 조용히 하위 값으로 대체됩니다.
 
@@ -185,8 +186,8 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 
 | 카테고리 | 수량 | 출처 |
 |----------|------:|--------|
-| **에이전트** (항상 로드됨) | 32 | Boss 1 + OMO 9 + OMC 19 + 벤더링 3 |
-| **스킬** | 106 | ECC 61 · gstack 26 · Superpowers 14 · Core 4 · Archify 1 |
+| **에이전트** (항상 로드됨) | 33 | Core 2 + OMO 9 + OMC 19 + 벤더링 3 |
+| **스킬** | 107 | ECC 61 · gstack 26 · Superpowers 14 · Core 5 · Archify 1 |
 | **규칙** | 48개 파일 / 9개 룰셋 | ECC 46 (common + 8개 언어 디렉터리) + Core 2 |
 | **MCP 서버** | 3 | Context7, Exa, grep.app |
 | **훅** | 13개 파일 / 7개 이벤트 | 위임 가드, 텔레메트리, 검증, 지식 금고 |
@@ -198,13 +199,14 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 위의 에이전트·스킬·룰은 모두 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh)의 허용목록에 등재되어 설치 매니페스트로 추적됩니다. Anthropic 공식 문서 스킬(pdf, docx 등)은 github.com/anthropics/skills에서 `~/.claude/skills`로 별도 클론되며 의도적으로 매니페스트에서 제외됩니다.
 
 <details>
-<summary><strong>전문가 에이전트 — 4개 티어, 32개</strong></summary>
+<summary><strong>전문가 에이전트 — 4개 티어, 33개</strong></summary>
 
-에이전트별 모델은 위의 모델 라우팅 표에 정리되어 있습니다. 32개 전부가 `~/.claude/agents/`에 항상 로드되며, 온디맨드 에이전트 팩과 `--with-packs` 플래그는 더 이상 제공되지 않습니다. 각 출처가 어디에서 왔는지는 [사용하는 오픈소스 도구](#open-source-tools-used)에 있습니다.
+에이전트별 모델은 위의 모델 라우팅 표에 정리되어 있습니다. 33개 전부가 `~/.claude/agents/`에 항상 로드되며, 온디맨드 에이전트 팩과 `--with-packs` 플래그는 더 이상 제공되지 않습니다. 각 출처가 어디에서 왔는지는 [사용하는 오픈소스 도구](#open-source-tools-used)에 있습니다.
 
 | 에이전트 | 티어 | 역할 | 출처 |
 |-------|------|------|--------|
 | Boss | core | 동적 런타임 탐색 → 역량 매칭 → 최적 라우팅. 코드를 직접 작성하지 않습니다. | my-claude |
+| academic-english-editor | core | 영문 학술 글쓰기 2단계 검토·윤문. 바로 적용할 수 있는 제안만 내며 직접 수정하지 않습니다. | my-claude |
 | Sisyphus | omo | 의도 분류 → 전문가 위임 → 검증 | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
 | Hephaestus | omo | 자율적 탐색 → 계획 → 실행 → 검증 | oh-my-openagent |
 | Atlas | omo | 작업 분해 + 4단계 QA 검증 | oh-my-openagent |
@@ -240,7 +242,7 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 </details>
 
 <details>
-<summary><strong>스킬 — 5개 출처에서 106개</strong></summary>
+<summary><strong>스킬 — 5개 출처에서 107개</strong></summary>
 
 각 출처는 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh)의 허용목록으로 관리되며, 목록에 없는 스킬은 설치되지 않습니다.
 
@@ -250,7 +252,7 @@ Boss는 작업이 있던 모든 턴 — 파일 편집·생성, 커밋/PR/머지,
 | [gstack](https://github.com/garrytan/gstack) | 26 | /qa, /review, /gstack-ship, /cso, /office-hours |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 13 (플러그인) | autopilot, ralph, team, execute, ralplan, verify |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming, systematic-debugging, test-driven-development, writing-plans |
-| [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced, boss-briefing, briefing-vault, gstack-sprint |
+| [my-claude Core](https://github.com/sehoon787/my-claude) | 5 | academic-english-polish, boss-advanced, boss-briefing, briefing-vault, gstack-sprint |
 | [archify](https://github.com/tt-a1i/archify) | 1 | archify |
 
 </details>
@@ -374,7 +376,7 @@ BriefingVault v2는 세 가지 지식 관리 방법론을 통합합니다:
 | **3단계 스프린트** | 설계 (대화형) → 실행 (ralph를 통한 자율) → 리뷰 (계획과 대화형 비교) |
 | **에이전트 티어 우선순위** | core > omo > omc > vendored 중복 제거. 가장 특화된 에이전트가 선택됩니다. |
 | **레인 소유권** | 오케스트레이션 → OMC, 개발 프로세스 → superpowers, 배포·QA·보안 → gstack (Boss P0), 언어·스택 지식 → ECC, AI·도메인 → 벤더링 에이전트 |
-| **큐레이션 허용목록** | `scripts/skill-allowlists.sh`가 단일 진실 공급원 — 업스트림 수천 개 중 스킬 106개와 룰셋 9개만 살아남아, 목록에 없는 것은 세션 컨텍스트에 절대 올라오지 않습니다 |
+| **큐레이션 허용목록** | `scripts/skill-allowlists.sh`가 단일 진실 공급원 — 업스트림 수천 개 중 스킬 107개와 룰셋 9개만 살아남아, 목록에 없는 것은 세션 컨텍스트에 절대 올라오지 않습니다 |
 | **Briefing Vault** | 세션, 의사결정, 학습, 참조를 포함하는 Obsidian 호환 `.briefing/` 디렉터리 |
 | **에이전트 텔레메트리** | PostToolUse 훅이 에이전트 사용량을 `agent-usage.jsonl`에 기록 |
 | **무변경 동기화 스킵** | 업스트림 동기화는 서브모듈 범프와 `SOURCES.json` 핀을 스테이징한 뒤, 그 diff가 비어 있지 않을 때만 PR을 생성 |

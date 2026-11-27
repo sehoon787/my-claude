@@ -7,7 +7,7 @@ teammate communication patterns, and Known Limitations & Workarounds referenced 
 
 ## 1. Agent Capability Matrix
 
-### CORE (10)
+### CORE (11)
 
 | Agent | Model | Write/Edit | teammate | Recommended Role | Notes |
 |----------|------|:----------:|:--------:|-----------|----------|
@@ -21,6 +21,7 @@ teammate communication patterns, and Known Limitations & Workarounds referenced 
 | oracle | Fable | ❌ | ⚠️ | Advisory only | Read-only |
 | librarian | Sonnet | ❌ | ⚠️ | Doc search only | Read-only |
 | multimodal-looker | Sonnet | ❌ | ❌ | — | Bash also blocked, unsuitable as teammate |
+| academic-english-editor | Fable | Reports only | ⚠️ | Writing review and polish | Edit blocked; Write used only for its review/report/apply files |
 
 ### OMC (19)
 

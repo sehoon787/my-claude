@@ -8,7 +8,7 @@ Thank you for contributing. This guide covers how to author agents and skills, m
 
 ```
 agents/
-  core/                   # Self-owned (boss.md, agent-teams-reference.md)
+  core/                   # Self-owned (boss.md, academic-english-editor.md, agent-teams-reference.md)
   omo/                    # Self-owned OMO agents — always loaded
   vendored/               # Snapshotted third-party agents (attribution in-file)
 upstream/                 # Git submodules (5 upstream sources)
@@ -27,15 +27,15 @@ scripts/
 
 **Load Model**
 
-Every agent is always loaded — there are no on-demand packs. 32 agents install in total.
+Every agent is always loaded — there are no on-demand packs. 33 agents install in total.
 
 | Source | Paths | Count |
 |--------|-------|------:|
-| Self-owned | `agents/core/boss.md`, `agents/omo/` | 10 |
+| Self-owned | `agents/core/` (boss, academic-english-editor), `agents/omo/` | 11 |
 | Upstream | `upstream/omc/agents/` | 19 |
 | Vendored | `agents/vendored/` | 3 |
 
-Skills and rules are not loaded wholesale from upstream: only names listed in `scripts/skill-allowlists.sh` are copied (106 skills, 9 rule sets). Adding a skill to the stack means adding its name there.
+Skills and rules are not loaded wholesale from upstream: only names listed in `scripts/skill-allowlists.sh` are copied (107 skills, 9 rule sets). Adding a skill to the stack means adding its name there.
 
 ---
 

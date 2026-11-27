@@ -9,8 +9,8 @@
 # my-claude
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Agents](https://img.shields.io/badge/agents-32-blue)
-![Skills](https://img.shields.io/badge/skills-106-purple)
+![Agents](https://img.shields.io/badge/agents-33-blue)
+![Skills](https://img.shields.io/badge/skills-107-purple)
 ![Rules](https://img.shields.io/badge/rules-48-orange)
 ![MCP Servers](https://img.shields.io/badge/MCP-3-green)
 ![Hooks](https://img.shields.io/badge/hooks-13-red)
@@ -18,7 +18,7 @@
 ![Workflows](https://img.shields.io/badge/workflows-2-blueviolet)
 
 **Claude Code 的一体化 Agent 框架。**
-**一个插件，32 个精选 Agent 随时待命。**
+**一个插件，33 个精选 Agent 随时待命。**
 
 Boss 在运行时自动发现所有 Agent、Skill 和 MCP 工具，<br>
 并将任务路由到最合适的专家。无需配置文件，无需样板代码。
@@ -128,6 +128,7 @@ Boss 对每个请求按优先级链逐级匹配，直到找到最佳方案：
 |-----------|-------|----------|
 | 顶层编排 | `claude-opus-5-5` | Boss |
 | 顾问组（只读的第二意见） | `claude-fable-5-1` | Oracle、Metis、Momus |
+| 学术写作审校与润色 | `claude-fable-5-1` | academic-english-editor |
 | 深度分析、架构 | `claude-opus-5-5` | Sisyphus、Atlas、Hephaestus、Prometheus |
 | 标准实现 | `claude-sonnet-5` | Librarian、Multimodal-Looker、OMC 专家 Agent |
 | 快速查询、探索 | `claude-haiku-4-5` | 轻量 OMC Agent、简单咨询 |
@@ -138,11 +139,11 @@ Boss 对每个请求按优先级链逐级匹配，直到找到最佳方案：
 
 | Effort | Agent |
 |--------|--------|
-| `xhigh` | Boss、Oracle、Prometheus、Multi-Agent Systems Architect |
+| `xhigh` | Boss、Oracle、Prometheus、Multi-Agent Systems Architect、Academic English Editor |
 | `high` | Sisyphus、Hephaestus、Atlas、Metis、Momus |
 | `medium` | Librarian、Multimodal-Looker、AI Engineer、DevOps Automator |
 
-Skills 同样可以声明 effort —— `boss-briefing` 为 `medium`，`briefing-vault` 为 `low`。`boss-advanced` 与 `gstack-sprint` 刻意不声明：Skill 的 effort 会在调用期间覆盖会话级别，一旦声明就会在任务中途悄悄降低 Boss 的 effort。
+Skills 同样可以声明 effort —— `boss-briefing` 为 `medium`，`briefing-vault` 为 `low`。`boss-advanced`、`gstack-sprint` 与 `academic-english-polish` 刻意不声明：Skill 的 effort 会在调用期间覆盖会话级别，一旦声明就会在任务中途悄悄降低 Boss 的 effort。
 
 优先级：`CLAUDE_CODE_EFFORT_LEVEL`（环境变量）> frontmatter > 会话 effort 级别。`xhigh` 是 Fable 支持的上限；`max` 仅限 opus 级模型，在其他模型上会静默回退。
 
@@ -185,8 +186,8 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 
 | 类别 | 数量 | 来源 |
 |----------|------:|--------|
-| **Agent**（始终加载） | 32 | Boss 1 + OMO 9 + OMC 19 + Vendored 3 |
-| **Skills** | 106 | ECC 61 · gstack 26 · Superpowers 14 · Core 4 · Archify 1 |
+| **Agent**（始终加载） | 33 | Core 2 + OMO 9 + OMC 19 + Vendored 3 |
+| **Skills** | 107 | ECC 61 · gstack 26 · Superpowers 14 · Core 5 · Archify 1 |
 | **规则** | 48 个文件 / 9 个规则集 | ECC 46（common + 8 个语言目录）+ Core 2 |
 | **MCP 服务器** | 3 | Context7、Exa、grep.app |
 | **Hooks** | 13 个文件 / 7 个事件 | 委派守卫、遥测、验证、知识库 |
@@ -198,13 +199,14 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 以上 Agent、Skills、规则全部登记在 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) 的白名单中，并由安装清单跟踪。Anthropic 官方文档 Skills（pdf、docx 等）从 github.com/anthropics/skills 单独克隆到 `~/.claude/skills`，有意不纳入清单跟踪。
 
 <details>
-<summary><strong>专家 Agent — 4 个层级共 32 个</strong></summary>
+<summary><strong>专家 Agent — 4 个层级共 33 个</strong></summary>
 
 各 Agent 使用的模型见上方「模型路由」表；各来源的出处见 [使用的开源工具](#open-source-tools-used)。
 
 | Agent | 层级 | 职责 | 来源 |
 |-------|------|------|--------|
 | Boss | core | 动态运行时发现 → 能力匹配 → 最优路由。从不编写代码。 | my-claude |
+| academic-english-editor | core | 英文学术写作两轮审校与润色；给出可直接应用的修改建议，从不直接编辑。 | my-claude |
 | Sisyphus | omo | 意图分类 → 专家委派 → 验证 | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) |
 | Hephaestus | omo | 自主探索 → 规划 → 执行 → 验证 | oh-my-openagent |
 | Atlas | omo | 任务分解 + 四阶段 QA 验证 | oh-my-openagent |
@@ -240,7 +242,7 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 </details>
 
 <details>
-<summary><strong>Skills — 106 个，来自 5 个来源</strong></summary>
+<summary><strong>Skills — 107 个，来自 5 个来源</strong></summary>
 
 每个来源都由 [`scripts/skill-allowlists.sh`](../../scripts/skill-allowlists.sh) 白名单管理，未列入的 Skills 一律不安装。
 
@@ -250,7 +252,7 @@ Boss 会以一份无需打开 diff 即可浏览的结构化最终报告来结束
 | [gstack](https://github.com/garrytan/gstack) | 26 | /qa、/review、/gstack-ship、/cso、/office-hours |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | 13（插件） | autopilot、ralph、team、execute、ralplan、verify |
 | [superpowers](https://github.com/obra/superpowers) | 14 | brainstorming、systematic-debugging、test-driven-development、writing-plans |
-| [my-claude Core](https://github.com/sehoon787/my-claude) | 4 | boss-advanced、boss-briefing、briefing-vault、gstack-sprint |
+| [my-claude Core](https://github.com/sehoon787/my-claude) | 5 | academic-english-polish、boss-advanced、boss-briefing、briefing-vault、gstack-sprint |
 | [archify](https://github.com/tt-a1i/archify) | 1 | archify |
 
 </details>
@@ -375,7 +377,7 @@ my-claude 捆绑的工具会把结果写到不同位置 —— 下表列出各�
 | **三阶段冲刺** | 设计（交互式）→ 执行（通过 ralph 自主进行）→ 审查（交互式对比计划） |
 | **Agent 层级优先级** | core > omo > omc > vendored 去重。最专业的 Agent 优先。 |
 | **通道归属** | 编排 → OMC，开发流程 → superpowers，发布/QA/部署/安全 → gstack（Boss P0），语言与技术栈知识 → ECC，AI 与领域 → vendored Agent |
-| **精选白名单** | `scripts/skill-allowlists.sh` 是唯一事实来源——上游数千项中只留下 106 个 Skills 和 9 个规则集，未列入的绝不进入会话上下文 |
+| **精选白名单** | `scripts/skill-allowlists.sh` 是唯一事实来源——上游数千项中只留下 107 个 Skills 和 9 个规则集，未列入的绝不进入会话上下文 |
 | **Briefing Vault** | 兼容 Obsidian 的 `.briefing/` 目录，含会话、决策、学习、参考资料 |
 | **Agent 遥测** | PostToolUse hook 将 Agent 使用情况记录到 `agent-usage.jsonl` |
 | **智能包** | 项目类型检测在会话开始时推荐相关 Agent 包 |

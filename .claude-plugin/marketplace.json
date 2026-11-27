@@ -4,13 +4,13 @@
     "name": "sehoon787"
   },
   "metadata": {
-    "description": "All-in-one agent harness for Claude Code — 32 curated agents, 106 curated skills, 9 rule sets, 13 hooks (7 events), 3 MCP servers. Links via submodules from everything-claude-code, oh-my-claudecode, gstack, and superpowers."
+    "description": "All-in-one agent harness for Claude Code — 33 curated agents, 107 curated skills, 9 rule sets, 13 hooks (7 events), 3 MCP servers. Links via submodules from everything-claude-code, oh-my-claudecode, gstack, and superpowers."
   },
   "plugins": [
     {
       "name": "my-claude",
       "source": "./",
-      "description": "32 curated agents (Boss meta-orchestrator + OMO sub-orchestrators + OMC specialists + vendored engineering agents), 106 curated skills, rules, 13 behavioral hooks (vault enforcement, agent logging, verification), and MCP servers (Context7, Exa, grep.app)",
+      "description": "33 curated agents (Boss meta-orchestrator + OMO sub-orchestrators + OMC specialists + vendored engineering agents), 107 curated skills, rules, 13 behavioral hooks (vault enforcement, agent logging, verification), and MCP servers (Context7, Exa, grep.app)",
       "author": {
         "name": "sehoon787"
       },
